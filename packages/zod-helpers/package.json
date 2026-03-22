@@ -1,0 +1,38 @@
+{
+    "name": "@snailicid3/zod-helpers",
+    "version": "0.0.0",
+    "private": false,
+    "description": "Reusable Zod schemas and schema patterns",
+    "type": "module",
+    "author": {
+        "name": "Gillian Tunney",
+        "email": "gbtunney@mac.com"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/gbtunney/snailicid3-monorepo"
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "files": ["CHANGELOG.md", "dist"],
+    "scripts": {
+        "\n========== DEVELOPMENT >> ==========": "",
+        "dev": "tsc --build --watch",
+        "\n========== TEST >> ==========": "",
+        "test:watch": "vitest watch",
+        "test:coverage": "vitest run --coverage"
+    },
+    "devDependencies": {
+        "@snailicid3/config": "catalog:",
+        "@types/node": "catalog:",
+        "typescript": "catalog:",
+        "vitest": "catalog:"
+    }
+}

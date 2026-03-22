@@ -1,0 +1,28 @@
+{
+    "name": "@snailicid3/playground",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Development playground app",
+    "type": "module",
+    "scripts": {
+        "\n========== DEVELOPMENT >> ==========": "",
+        "dev": "vite",
+        "dev:vite": "vite",
+        "\n========== BUILD >> ==========": "",
+        "build:vite": "vite build",
+        "\n========== TEST >> ==========": "",
+        "test:watch": "vitest watch"
+    },
+    "devDependencies": {
+        "@snailicid3/config": "catalog:",
+        "@snailicid3/build-config": "catalog:",
+        "@types/node": "catalog:",
+        "typescript": "catalog:",
+        "vitest": "catalog:",
+        "vite": "catalog:build",
+        "react": "catalog:react",
+        "react-dom": "catalog:react",
+        "@types/react": "catalog:react",
+        "@types/react-dom": "catalog:react"
+    }
+}

@@ -1,0 +1,46 @@
+{
+    "name": "@snailicid3/example-package",
+    "version": "0.0.0",
+    "private": false,
+    "description": "Example monorepo package",
+    "type": "module",
+    "author": {
+        "name": "Gillian Tunney",
+        "email": "gbtunney@mac.com"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/gbtunney/snailicid3-monorepo"
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "files": [
+        "CHANGELOG.md",
+        "dist"
+    ],
+    "scripts": {
+        "\n========== DEVELOPMENT >> ==========": "",
+        "dev": "tsc --build --watch",
+        "dev:rollup": "rollup --watch --config ./rollup.config.mts",
+
+        "\n========== TEST >> ==========": "",
+        "test:watch": "vitest watch",
+        "test:coverage": "vitest run --coverage"
+    },
+    "devDependencies": {
+        "@snailicid3/build-config": "catalog:",
+        "@snailicid3/config": "catalog:",
+        "@types/node": "catalog:",
+        "rollup": "catalog:build",
+        "typescript": "catalog:",
+        "vitest": "catalog:"
+    }
+}

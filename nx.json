@@ -1,0 +1,84 @@
+{
+    "namedInputs": {
+        "default": ["{projectRoot}/**/*", "sharedGlobals"],
+        "production": [
+            "default",
+            "!{projectRoot}/**/*.test.*",
+            "!{projectRoot}/**/*.spec.*",
+            "!{projectRoot}/**/*.stories.*"
+        ],
+        "sharedGlobals": [
+            "{workspaceRoot}/tsconfig.json",
+            "{workspaceRoot}/pnpm-lock.yaml",
+            "{workspaceRoot}/eslint.config.ts",
+            "{workspaceRoot}/pnpm-workspace.yaml"
+        ]
+    },
+    "targetDefaults": {
+        "build:ts": {
+            "cache": true,
+            "dependsOn": ["^build"],
+            "inputs": ["production", "^production"],
+            "outputs": ["{projectRoot}/dist"],
+            "command": "tsc --build"
+        },
+        "build:rollup": {
+            "cache": true,
+            "dependsOn": ["build:ts"],
+            "inputs": ["production", "^production"],
+            "outputs": ["{projectRoot}/dist"],
+            "command": "rollup --config ./rollup.config.mts"
+        },
+        "build:vite": {
+            "cache": true,
+            "dependsOn": ["build:ts"],
+            "inputs": ["production", "^production"],
+            "outputs": ["{projectRoot}/dist"],
+            "command": "vite build"
+        },
+        "build": {
+            "cache": true,
+            "dependsOn": ["build:ts", "build:rollup"],
+            "inputs": ["production", "^production"]
+        },
+        "test": {
+            "cache": true,
+            "dependsOn": ["build", "^test"],
+            "inputs": ["default", "^default"],
+            "command": "vitest run"
+        },
+        "lint": {
+            "cache": true,
+            "inputs": ["default", "^default"],
+            "command": "eslint --flag unstable_ts_config ."
+        },
+        "typecheck": {
+            "cache": true,
+            "inputs": ["default", "^default"],
+            "command": "tsc --noEmit"
+        },
+        "fix": {
+            "cache": false,
+            "command": "prettier --write . && eslint --flag unstable_ts_config . --fix"
+        },
+        "clean:ts": {
+            "cache": false,
+            "command": "tsc --build --clean"
+        },
+        "clean:build": {
+            "cache": false,
+            "command": "rm -rf ./dist"
+        },
+        "clean": {
+            "cache": false,
+            "dependsOn": ["clean:ts", "clean:build"]
+        },
+        "docs:build": {
+            "cache": true,
+            "dependsOn": ["build", "^docs:build"],
+            "inputs": ["production", "^production"],
+            "outputs": ["{projectRoot}/docs"],
+            "command": "typedoc"
+        }
+    }
+}

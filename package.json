@@ -1,0 +1,111 @@
+{
+    "name": "snailicid3-monorepo",
+    "version": "0.0.0",
+    "private": true,
+    "description": "snailicid3 monorepo",
+    "author": {
+        "name": "Gillian Tunney",
+        "email": "gbtunney@mac.com"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/gbtunney/snailicid3-monorepo"
+    },
+    "packageManager": "pnpm@10.30.2",
+    "engines": {
+        "node": ">=20.x",
+        "pnpm": ">=10.0.0"
+    },
+    "scripts": {
+        "\n========== COMMIT >> ==========": "",
+        "commit": "pnpm commit:before && pnpm exec git-cz",
+        "commit:before": "pnpm build:self && pnpm lint:staged",
+        "commit:direct": "git commit --no-verify -m",
+        "lint:staged": "pnpm exec lint-staged --relative",
+
+        "\n========== REPORT >> ==========": "",
+        "report": "pnpm report:all",
+        "report:all": "pnpm report:env && pnpm report:repo && pnpm report:workspace && pnpm report:prettier",
+        "report:env": "pnpm exec tsx ./scripts/report/env-diagnostics.ts",
+        "report:repo": "python3 ./scripts/report/repo_status.py",
+        "report:workspace": "pnpm exec tsx ./scripts/report/workspace-status.ts",
+        "report:prettier": "pnpm exec tsx ./scripts/report/prettier-status.ts",
+
+        "\n========== BUILD >> ==========": "",
+        "build": "pnpm build:self && pnpm nx:build",
+        "build:self": "pnpm exec tsc --build",
+        "nx:build": "pnpm exec nx run-many -t build",
+        "nx:build:all": "pnpm exec nx run-many --target=build --all",
+
+        "\n========== TEST >> ==========": "",
+        "test": "pnpm nx:test",
+        "nx:test": "pnpm exec nx run-many --target=test",
+
+        "\n========== NX >> ==========": "",
+        "nx:graph": "pnpm nx graph",
+        "nx:affected": "nx affected --target=build",
+        "nx:reset": "pnpm exec nx reset",
+
+        "\n========== INSPECT >> ==========": "",
+        "inspect:nx": "pnpm nx:graph",
+        "inspect:lint": "pnpm exec eslint-config-inspector",
+        "inspect:vitest": "pnpm exec vitest --ui",
+
+        "\n========== LIFECYCLE >> ==========": "",
+        "start": "pnpm install && pnpm build",
+        "prepare": "husky",
+        "postinstall": "echo '\n=== >> Success:: Install complete.'",
+        "prune": "pnpm store prune",
+        "workspace": "pnpm -r",
+
+        "\n========== PUBLISH >> ==========": "",
+        "release": "pnpm run prerelease && pnpm changeset",
+        "prerelease": "pnpm run build && pnpm run fix && pnpm run check && pnpm test",
+
+        "\n========== CODE STYLE >> ==========": "",
+        "prettier": "prettier {*,**/*}.{ts,tsx,cts,mts,sh,html,json,yaml,yml,md} ./.husky/* --ignore-path ./.gitignore --no-error-on-unmatched-pattern",
+        "lint": "eslint --flag unstable_ts_config .",
+        "lint:md": "pnpm exec markdownlint-cli2 '{./*,./**/*}.md' '#**/{.history,node_modules,.changeset,docs,scratch}/**'",
+
+        "\n========== CHECK >> ==========": "",
+        "check": "pnpm build:self && pnpm check:self",
+        "check:md": "pnpm run lint:md",
+        "check:self": "pnpm lint && pnpm prettier --check",
+
+        "\n========== FIX >> ==========": "",
+        "fix": "pnpm build:self && pnpm fix:self",
+        "fix:md": "pnpm run lint:md --fix",
+        "fix:self": "pnpm prettier --write && pnpm lint --fix && pnpm fix:md",
+
+        "\n========== CLEAN >> ==========": "",
+        "clean": "pnpm clean:self && pnpm clean:all",
+        "clean:self": "pnpm exec tsc --build --clean",
+        "clean:all": "pnpm workspace clean",
+
+        "\n========== UNINSTALL >> ==========": "",
+        "uninstall": "pnpm exec rm -rf node_modules packages/*/node_modules",
+        "uninstall:hard": "pnpm run uninstall && pnpm store prune",
+        "reset": "pnpm run uninstall && pnpm install"
+    },
+    "devDependencies": {
+        "@commitlint/cli": "catalog:",
+        "@commitlint/config-conventional": "catalog:",
+        "commitizen": "catalog:",
+        "cz-conventional-changelog": "catalog:",
+        "eslint": "catalog:",
+        "husky": "catalog:",
+        "jiti": "catalog:",
+        "lint-staged": "catalog:",
+        "markdownlint-cli2": "catalog:",
+        "prettier": "catalog:",
+        "tsx": "catalog:",
+        "typescript": "catalog:",
+        "typescript-eslint": "catalog:"
+    },
+    "config": {
+        "commitizen": {
+            "path": "cz-conventional-changelog"
+        }
+    }
+}
