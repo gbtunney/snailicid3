@@ -89,19 +89,19 @@
         "reset": "pnpm run uninstall && pnpm install"
     },
     "devDependencies": {
-        "@commitlint/cli": "catalog:",
-        "@commitlint/config-conventional": "catalog:",
-        "commitizen": "catalog:",
-        "cz-conventional-changelog": "catalog:",
-        "eslint": "catalog:",
-        "husky": "catalog:",
-        "jiti": "catalog:",
-        "lint-staged": "catalog:",
-        "markdownlint-cli2": "catalog:",
-        "prettier": "catalog:",
-        "tsx": "catalog:",
-        "typescript": "catalog:",
-        "typescript-eslint": "catalog:"
+        "@commitlint/cli": "^19.6.0",
+        "@commitlint/config-conventional": "^19.6.0",
+        "commitizen": "^4.3.1",
+        "cz-conventional-changelog": "^3.3.0",
+        "eslint": "^9.18.0",
+        "husky": "^9.1.7",
+        "jiti": "^2.4.2",
+        "lint-staged": "^15.3.0",
+        "markdownlint-cli2": "^0.17.0",
+        "prettier": "^3.4.0",
+        "tsx": "^4.19.0",
+        "typescript": "^5.7.0",
+        "typescript-eslint": "^8.18.0"
     },
     "config": {
         "commitizen": {

@@ -29,10 +29,15 @@
         "test:watch": "vitest watch",
         "test:coverage": "vitest run --coverage"
     },
+    "dependencies": {
+        "@snailicid3/utils": "workspace:*",
+        "@snailicid3/logger": "workspace:*"
+    },
     "devDependencies": {
-        "@snailicid3/config": "catalog:",
-        "@types/node": "catalog:",
-        "typescript": "catalog:",
-        "vitest": "catalog:"
+        "@snailicid3/config": "workspace:*",
+        "@nx/devkit": "^20.3.0",
+        "@types/node": "^22.0.0",
+        "typescript": "^5.7.0",
+        "vitest": "^2.1.0"
     }
 }
