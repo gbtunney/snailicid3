@@ -1,5 +1,5 @@
 {
-    "extends": "@snailicid3/config/tsconfig/base",
+    "extends": "@snailicid3/config/tsconfig-base",
     "compilerOptions": {
         "rootDir": "./src",
         "outDir": "./dist",

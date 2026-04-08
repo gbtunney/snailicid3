@@ -20,6 +20,7 @@
     "scripts": {
         "\n========== COMMIT >> ==========": "",
         "commit": "pnpm commit:before && pnpm exec git-cz",
+        "commit:sh":"pnpm exec git commit -m ",
         "commit:before": "pnpm build:self && pnpm lint:staged",
         "commit:direct": "git commit --no-verify -m",
         "lint:staged": "pnpm exec lint-staged --relative",
