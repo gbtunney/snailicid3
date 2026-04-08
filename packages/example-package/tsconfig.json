@@ -1,5 +1,5 @@
 {
-    "extends": "@snailicide/build-config/tsconfig-base",
+    "extends": "@snailicid3/config/tsconfig-base",
     "compilerOptions": {
         "rootDir": ".",
         "types": ["node"]

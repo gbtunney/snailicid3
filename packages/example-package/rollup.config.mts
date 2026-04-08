@@ -1,4 +1,4 @@
-import { rollup } from '@snailicide/build-config'
+import { rollup } from '@snailicid3/build-config'
 import type { RollupOptions } from 'rollup'
 
 import pkg from './package.json' with { type: 'json' }

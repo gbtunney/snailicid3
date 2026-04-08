@@ -8,13 +8,17 @@ import { JsonObject, OmitIndexSignature, SetRequired } from 'type-fest'
 import { z } from 'zod'
 import fs from 'fs'
 import path from 'path'
-import { getLogger, Logger } from './../logger/index.js'
 import { importJSON } from './../utilities.js'
 import type {
     MarkdownlintCli2ConfigurationSchema,
     MarkdownlintConfigurationSchema,
 } from './markdownlint.config.js'
 import { isPlainObject } from '../utilities.js'
+
+export type Logger = {
+    info: (...args: Array<unknown>) => void
+    error: (...args: Array<unknown>) => void
+}
 
 export type MarkdownlintConfiguration = OmitIndexSignature<
     SetRequired<MarkdownlintCli2ConfigurationSchema, 'config'>
@@ -105,5 +109,13 @@ export const parseOptionsSchema = <Schema extends z.ZodObject>(
 }
 
 export const logger = (): Logger => {
-    return getLogger({ name: 'MDLint' })
+    return {
+        error: (...args: Array<unknown>): void => {
+            console.error('[MDLint]', ...args)
+            console.trace('[MDLint]')
+        },
+        info: (...args: Array<unknown>): void => {
+            console.info('[MDLint]', ...args)
+        },
+    }
 }

@@ -1,0 +1,14 @@
+{
+    "extends": "./../tsconfig-base.json",
+    "compilerOptions": {
+        "outDir": "./../types" /* Specify an output folder for all emitted files. */,
+        // Output settings.
+        "rootDir": ".",
+        // Type declaration settings.
+        "declarationDir": "./../types",
+        "resolveJsonModule": true,
+        "esModuleInterop": true
+    },
+    //  "files":["/node_modules/markdownlint/schema/markdownlint-config-schema.json"],
+    "include": ["./**/*.ts", "./**/*.cts", "./**/*.mts"]
+}

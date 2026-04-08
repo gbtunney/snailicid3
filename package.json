@@ -20,6 +20,7 @@
     "scripts": {
         "\n========== COMMIT >> ==========": "",
         "commit": "pnpm commit:before && pnpm exec git-cz",
+        "commit:sh":"pnpm exec git commit -m ",
         "commit:before": "pnpm build:self && pnpm lint:staged",
         "commit:direct": "git commit --no-verify -m",
         "lint:staged": "pnpm exec lint-staged --relative",
@@ -72,9 +73,10 @@
         "\n========== CLEAN >> ==========": "",
         "clean": "pnpm clean:self",
         "clean:self": "pnpm exec tsc --build --clean",
-        "clean:all": "pnpm workspace clean",
+        "nx:clean": "pnpm exec nx run-many -t clean",
+        "clean:all": "pnpm nx:clean",
         "\n========== UNINSTALL >> ==========": "",
-        "uninstall": "pnpm run clean && pnpm uninstall:list && pnpm run uninstall:rm && pnpm run uninstall:lock",
+        "uninstall": "pnpm run clean && pnpm nx:reset && pnpm uninstall:list && pnpm run uninstall:rm && pnpm run uninstall:lock",
         "uninstall:list": "find . -name 'node_modules' -type d -prune",
         "uninstall:rm": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
         "uninstall:lock": "rm -f pnpm-lock.yaml && rm -f packages/**/pnpm-lock.yaml"

@@ -1,5 +1,4 @@
 {
-    /* * TODO : WIP maybe extend child package */
     "compilerOptions": {
         "target": "ESNext",
         "module": "ESNext",
@@ -13,16 +12,6 @@
         "resolveJsonModule": true,
         "isolatedModules": true,
         "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true,
-        "rootDir": ".",
-        "types": ["node"]
-    },
-    "include": [
-        "./*.ts",
-        "./*.cts",
-        "./*.mts",
-        "./.lintstagedrc.mts",
-        "./.markdownlint-cli2.mts"
-    ],
-    "exclude": ["./node_modules", "./packages"]
+        "forceConsistentCasingInFileNames": true
+    }
 }

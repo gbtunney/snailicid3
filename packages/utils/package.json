@@ -3,25 +3,6 @@
     "version": "0.0.0",
     "private": false,
     "description": "String, numeric, object, date and fmt utilities",
-    "type": "module",
-    "author": {
-        "name": "Gillian Tunney",
-        "email": "gbtunney@mac.com"
-    },
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/gbtunney/snailicid3-monorepo"
-    },
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
-    "exports": {
-        ".": {
-            "import": "./dist/index.js",
-            "types": "./dist/index.d.ts"
-        }
-    },
-    "files": ["CHANGELOG.md", "dist"],
     "scripts": {
         "\n========== DEVELOPMENT >> ==========": "",
         "dev": "tsc --build --watch",
@@ -41,5 +22,24 @@
         "@types/node": "^22.0.0",
         "typescript": "^5.7.0",
         "vitest": "^2.1.0"
-    }
+    },
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "files": ["CHANGELOG.md", "dist"],
+    "type": "module",
+    "author": {
+        "name": "Gillian Tunney",
+        "email": "gbtunney@mac.com"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/gbtunney/snailicid3-monorepo"
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts"
 }
