@@ -29,10 +29,17 @@
         "test:watch": "vitest watch",
         "test:coverage": "vitest run --coverage"
     },
+    "dependencies": {
+        "type-fest": "^4.26.0",
+        "flat": "^6.0.1",
+        "ts-deepmerge": "^7.0.0",
+        "dayjs": "^1.11.13",
+        "@snailicid3/types": "workspace:*"
+    },
     "devDependencies": {
-        "@snailicid3/config": "catalog:",
-        "@types/node": "catalog:",
-        "typescript": "catalog:",
-        "vitest": "catalog:"
+        "@snailicid3/config": "workspace:*",
+        "@types/node": "^22.0.0",
+        "typescript": "^5.7.0",
+        "vitest": "^2.1.0"
     }
 }

@@ -27,10 +27,10 @@
         "\n========== REPORT >> ==========": "",
         "report": "pnpm report:all",
         "report:all": "pnpm report:env && pnpm report:repo && pnpm report:workspace && pnpm report:prettier",
-        "report:env": "pnpm exec tsx ./scripts/report/env-diagnostics.ts",
-        "report:repo": "python3 ./scripts/report/repo_status.py",
-        "report:workspace": "pnpm exec tsx ./scripts/report/workspace-status.ts",
-        "report:prettier": "pnpm exec tsx ./scripts/report/prettier-status.ts",
+        "report:env": "python3 packages/workspace-tools/bin/python/env_diagnostics.py",
+        "report:repo": "python3 packages/workspace-tools/bin/python/repo_status.py",
+        "report:workspace": "pnpm exec tsx packages/workspace-tools/bin/node/workspace-status.ts",
+        "report:prettier": "pnpm exec tsx packages/workspace-tools/bin/node/prettier-status.ts",
 
         "\n========== BUILD >> ==========": "",
         "build": "pnpm build:self && pnpm nx:build",
@@ -89,19 +89,19 @@
         "reset": "pnpm run uninstall && pnpm install"
     },
     "devDependencies": {
-        "@commitlint/cli": "catalog:",
-        "@commitlint/config-conventional": "catalog:",
-        "commitizen": "catalog:",
-        "cz-conventional-changelog": "catalog:",
-        "eslint": "catalog:",
-        "husky": "catalog:",
-        "jiti": "catalog:",
-        "lint-staged": "catalog:",
-        "markdownlint-cli2": "catalog:",
-        "prettier": "catalog:",
-        "tsx": "catalog:",
-        "typescript": "catalog:",
-        "typescript-eslint": "catalog:"
+        "@commitlint/cli": "^19.6.0",
+        "@commitlint/config-conventional": "^19.6.0",
+        "commitizen": "^4.3.1",
+        "cz-conventional-changelog": "^3.3.0",
+        "eslint": "^9.18.0",
+        "husky": "^9.1.7",
+        "jiti": "^2.4.2",
+        "lint-staged": "^15.3.0",
+        "markdownlint-cli2": "^0.17.0",
+        "prettier": "^3.4.0",
+        "tsx": "^4.19.0",
+        "typescript": "^5.7.0",
+        "typescript-eslint": "^8.18.0"
     },
     "config": {
         "commitizen": {

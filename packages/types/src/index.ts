@@ -1,2 +1,2 @@
-// @snailicid3/types
-// TODO: implement
+export type * from './types/index.js'
+export { tg } from './typeguard/index.js'

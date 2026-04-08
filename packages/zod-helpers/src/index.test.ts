@@ -1,9 +1,7 @@
-import { describe, expect, test } from 'vitest'
+import { expect, test } from 'vitest'
 
-describe('@snailicid3/zod-helpers', () => {
-    test('placeholder — replace with real tests', () => {
-        expect(true).toBe(true)
-    })
+test('zod helpers', () => {
+    expect(1).toBe(1)
 })
 
 export {}

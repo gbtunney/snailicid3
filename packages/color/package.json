@@ -29,10 +29,14 @@
         "test:watch": "vitest watch",
         "test:coverage": "vitest run --coverage"
     },
+    "dependencies": {
+        "colorjs.io": "^0.5.0",
+        "@snailicid3/utils": "workspace:*"
+    },
     "devDependencies": {
-        "@snailicid3/config": "catalog:",
-        "@types/node": "catalog:",
-        "typescript": "catalog:",
-        "vitest": "catalog:"
+        "@snailicid3/config": "workspace:*",
+        "@types/node": "^22.0.0",
+        "typescript": "^5.7.0",
+        "vitest": "^2.1.0"
     }
 }
