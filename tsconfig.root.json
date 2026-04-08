@@ -1,4 +1,5 @@
 {
+    /* * TODO : WIP maybe extend child package */
     "compilerOptions": {
         "target": "ESNext",
         "module": "ESNext",
