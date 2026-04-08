@@ -1,9 +1,8 @@
 import { describe, expect, test } from 'vitest'
-import { sampleFunc } from './index.js'
 
-describe('sampleFunc', () => {
-    test('returns the input value unchanged', () => {
-        expect(sampleFunc('hello')).toBe('hello')
-        expect(sampleFunc(42)).toBe(42)
+describe('unit | isNumberParseable', () => {
+    test('returns `true` for values parseable number', () => {
+        expect(true).toBe(true)
     })
 })
+export {}

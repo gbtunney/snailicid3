@@ -1,6 +1,8 @@
+/* * JSON TYPES and UTILS * */
+
 export type HelloWorld = string | number
 
-export const sampleFunc = (value: HelloWorld): HelloWorld => {
-    console.log('sampleFunc:: ', value)
+/** Returns the input value unchanged. */
+export function echoHelloWorld(value: HelloWorld): HelloWorld {
     return value
 }

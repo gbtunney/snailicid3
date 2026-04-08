@@ -22,6 +22,17 @@
         }
     },
     "files": ["CHANGELOG.md", "dist"],
+     "nx": {
+    "targets": {
+      "build:ts": {},
+      "build": {},
+      "test": {},
+      "lint": {},
+      "fix": {},
+      "clean": {},
+      "docs:build": {}
+    }
+  },
     "scripts": {
         "\n========== DEVELOPMENT >> ==========": "",
         "dev": "tsc --build --watch",

@@ -1,5 +1,6 @@
-import { rollup } from '@snailicid3/build-config'
+import { rollup } from '@snailicide/build-config'
 import type { RollupOptions } from 'rollup'
+
 import pkg from './package.json' with { type: 'json' }
 
 const PRINT_EXPORTS: boolean = false
@@ -15,8 +16,8 @@ const CONFIG_OBJ = [
         [
             {
                 export_key: '*',
-                export_types: ['import', 'require', 'types'],
-                library_name: 'examplePackage',
+                export_types: ['default', 'import', 'require', 'types'],
+                library_name: 'gbtBoilerplate',
             },
         ],
         rollup.DEFAULT_PLUGINS_BUNDLED,
