@@ -1,7 +1,7 @@
 # @snailicid3 monorepo — Package Map
 
 > Fresh start reference. Maps old `@snailicide` source to new package boundaries.
-> Last updated: 2026-03-22
+> Last updated: 2026-04-08
 
 ---
 
@@ -537,78 +537,39 @@ export { isRepoClean, ensureRepoClean } from './git.js'
 
 ---
 
-## Root config — `pnpm-workspace.yaml`
+## Root config — `pnpm-workspace.yaml` + `pnpm-catalog.yaml`
 
-The catalog lives here. One place to bump shared dep versions across all packages. Requires pnpm 9.5+.
+`pnpm-workspace.yaml` declares the package globs only. The catalog has been moved to its own file (`pnpm-catalog.yaml`) — a pnpm 10.x feature.
 
 ```yaml
+# pnpm-workspace.yaml
 packages:
-  - 'packages/*'
-
-catalog:
-  # language + testing — every package uses these
-  typescript: ^5.7.0
-  vitest: ^2.1.0
-  tsx: ^4.19.0
-
-  # shared runtime deps
-  zod: ^4.0.0
-  dayjs: ^1.11.13
-  chalk: ^5.4.0
-  'type-fest': ^4.26.0
-  flat: ^6.0.1
-  'ts-deepmerge': ^7.0.0
-
-  # internal packages — workspace protocol
-  '@snailicid3/types': 'workspace:*'
-  '@snailicid3/utils': 'workspace:*'
-  '@snailicid3/color': 'workspace:*'
-  '@snailicid3/node-utils': 'workspace:*'
-  '@snailicid3/zod-helpers': 'workspace:*'
-  '@snailicid3/logger': 'workspace:*'
-  '@snailicid3/config': 'workspace:*'
-  '@snailicid3/build-config': 'workspace:*'
-
-catalogs:
-  # react tier — packages that render UI
-  react:
-    react: ^18.3.0
-    react-dom: ^18.3.0
-    '@types/react': ^18.3.0
-    '@types/react-dom': ^18.3.0
-
-  # build tooling — consumed as devDeps by publishable packages
-  build:
-    rollup: ^4.24.0
-    vite: ^5.4.0
-    typedoc: ^0.26.0
-    'rollup-plugin-esbuild': ^6.1.0
+    - 'packages/*'
+    - 'apps/*'
 ```
 
-**Usage in any `package.json`:**
+The full catalog lives in `pnpm-catalog.yaml`. It covers shared tooling deps (typescript, vitest, eslint, etc.) and internal `workspace:*` references. External runtime deps (`zod`, `dayjs`, `chalk`, etc.) are declared with **explicit versions** directly in each package's `package.json` — not via `catalog:`. Internal cross-package deps use `workspace:*`.
+
+**Dependency convention per package `package.json`:**
 ```json
 {
   "dependencies": {
-    "zod": "catalog:",
-    "dayjs": "catalog:"
+    "zod": "^4.0.0",
+    "dayjs": "^1.11.13",
+    "@snailicid3/types": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "catalog:",
-    "vitest": "catalog:",
-    "rollup": "catalog:build",
-    "@snailicid3/config": "catalog:"
-  },
-  "peerDependencies": {
-    "react": "catalog:react"
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0",
+    "@snailicid3/config": "workspace:*"
   }
 }
 ```
 
-**What goes in the catalog vs not:**
-- Goes in catalog: anything used by 3+ packages, anything where version drift would cause subtle bugs (zod, typescript, type-fest)
-- Stays hardcoded: one-off deps specific to a single package, `@types/*` that aren't shared, very package-specific plugins
-
-The scaffold generator (`generatePackageJson`) always emits `catalog:` for catalog entries — updating the catalog version propagates automatically on next `pnpm install` without touching any package's `package.json`.
+**What goes in `pnpm-catalog.yaml` vs not:**
+- In catalog: shared tooling (typescript, vitest, eslint, prettier, husky, nx, etc.)
+- Explicit versions in package.json: runtime deps specific to a package (zod, chalk, dayjs, colorjs.io, yargs, etc.)
+- `workspace:*`: all internal `@snailicid3/*` cross-package deps
 
 ---
 
@@ -617,18 +578,20 @@ The scaffold generator (`generatePackageJson`) always emits `catalog:` for catal
 Build bottom-up. Each step is independently shippable.
 
 ```
-1. config          ← everything needs lint/tsconfig to build
-2. build-config    ← everything needs rollup/vite to publish
-3. types           ← leaf dep, no internal deps
-4. utils           ← depends on types only
-5. color           ← depends on utils
-6. zod-helpers     ← depends on types + utils + color
-7. node-utils      ← depends on types + utils + zod (path schemas)
-8. logger          ← depends on color + utils
-9. cli-app         ← depends on types + utils + node-utils (rescope only)
-10. scaffold       ← depends on cli-app + node-utils
-11. workspace-tools ← greenfield, last
+✅ 1. config          ← src populated from snailicide-monorepo build-config/src/{eslint,prettier,markdownlint,commitlint,tsconfig}
+✅ 2. build-config    ← src populated from snailicide-monorepo build-config/src/{rollup,vite,vitest,typedoc,vitepress}
+✅ 3. types           ← src populated from g-library/src/{types,typeguard}
+✅ 4. utils           ← src populated from g-library/src/{string,regexp,number,object,date} + fmt.ts (universal, no util.inspect)
+✅ 5. color           ← src populated from g-library/src/color + build-config logger/utilities/color.ts
+✅ 6. zod-helpers     ← src populated from g-library/src/{zod_helpers,object/json-stringified.ts}
+✅ 7. node-utils      ← src populated from g-library/src/node/
+✅ 8. logger          ← src populated from build-config/src/logger/ (minus color.ts → color pkg, pretty.print.ts → utils)
+✅ 9. cli-app         ← src populated wholesale from snailicide-monorepo packages/cli-app/src/
+🔲 10. scaffold       ← greenfield implementation pending
+✅ 11. workspace-tools ← src from gbt-schema-form bootstrap-actions branch; bin/ scripts written
 ```
+
+**Next:** scaffold package (TypeScript-function templates, no Handlebars).
 
 ---
 
@@ -673,7 +636,7 @@ The old `@snailicide/build-config` was doing too much. For archiving purposes:
 
 ---
 
-## What stays in `boilerplatev3` scripts/ for archiving
+## What stays in `gbt-schema-form` (bootstrap-actions branch) scripts/ for archiving
 
 | Old file | New home | Notes |
 |---|---|---|
@@ -700,5 +663,10 @@ The old `@snailicide/build-config` was doing too much. For archiving purposes:
 ## Open questions
 
 - **`browser` utils** — `g-library/src/browser/` is HTML utilities. Was Shopify-era. Archive.
-- **Nx script offloading** — `nx.json` `targetDefaults` can define `build`, `test`, `lint` targets globally so per-package `package.json` scripts get shorter. Worth configuring early. See `fix` target note — `fix` should be `cache: false` since it mutates files.
-- **`workspace-utils.ts` cleanup** — the `setAllPackageKeysExcluding` function is an exact duplicate of `setAllPackageKeys`. Remove before moving. The `path` field on `WorkspacePackage` also has misaligned whitespace — fix in the same pass.
+- **`scaffold` package** — greenfield implementation still needed. See package entry above for spec.
+
+## Resolved
+
+- ~~**Nx script offloading**~~ — `nx.json` `targetDefaults` fully configured. `fix` is `cache: false`. Per-package scripts are minimal (dev, test:watch, test:coverage only).
+- ~~**`workspace-utils.ts` cleanup**~~ — `setAllPackageKeysExcluding` duplicate removed. `WorkspacePackage` type includes `version` and `private` fields. Sourced from `gbt-schema-form/bootstrap-actions`.
+- ~~**Catalog location**~~ — Catalog moved to `pnpm-catalog.yaml` (pnpm 10.x). Runtime deps use explicit versions per package, not `catalog:`. Internal deps use `workspace:*`.
