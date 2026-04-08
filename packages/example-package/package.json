@@ -1,65 +1,9 @@
 {
-    "name": "@gbt/example-package",
+    "name": "@snailicid3/example-package",
     "version": "0.0.0",
     "private": false,
     "description": "Example monorepo package",
-    "scripts": {
-        "\n========== DEVELOPMENT >> ==========": "",
-        "dev": "pnpm build:ts --watch",
-        "dev:ts": "pnpm build:ts --watch",
-        "dev:rollup": "rollup --watch --config ./rollup.config.mjs",
-        "dev:vite": "pnpm exec vite --config ./vite.config.ts",
-        "\n========== BUILD >> ==========": "",
-        "build": "pnpm build:ts && pnpm build:rollup",
-        "build:ts": "pnpm exec tsc --build",
-        "build:nx": "cross-var nx run $npm_package_name:build",
-        "build:rollup": "rollup --config ./rollup.config.mjs",
-        "build:vite": "pnpm exec vite build --config ./vite.config.ts",
-        "\n========== TEST >> ==========": "",
-        "test": "vitest run",
-        "test:watch": "vitest watch",
-        "test:nx": "cross-var nx run $npm_package_name:test",
-        "test:repo": "pnpm exec ls $(git rev-parse --show-toplevel)",
-        "\n========== CLEAN >> ==========": "",
-        "clean": "pnpm clean:ts && pnpm clean:build",
-        "clean:ts": "pnpm exec tsc --build --clean",
-        "clean:build": "pnpm exec rm -rf ./dist ./types",
-        "\n========== PUBLISH >> ==========": "",
-        "release": "pnpm run prerelease && pnpm changeset",
-        "prerelease": "pnpm run build && pnpm run fix && pnpm run check && pnpm test",
-        "\n========== CHECK >> ==========": "",
-        "check": "pnpm check:self",
-        "check:md": "pnpm run lint:md",
-        "check:self": "pnpm lint",
-        "\n========== FIX >> ==========": "",
-        "fix": "pnpm fix:self",
-        "fix:md": "pnpm run lint:md --fix",
-        "fix:self": "pnpm prettier --write && pnpm lint --fix",
-        "\n========== CODE STYLE >> ==========": "",
-        "prettier": "prettier --ignore-path ./.gitignore --no-error-on-unmatched-pattern .",
-        "lint": "pnpm exec eslint .",
-        "lint:md": "pnpm exec markdownlint-cli2 '{./*,./**/*}.md' '#**/node_modules/**' '#packages/test-package/**/*' "
-    },
-    "main": "./dist/index.js",
-    "module": "./dist/index.mjs",
-    "types": "./dist/index.d.ts",
-    "devDependencies": {
-        "@snailicide/build-config": "^1.4.4",
-        "@types/node": "^25.2.2",
-        "cross-var": "^1.1.0",
-        "rollup": "^4.57.1",
-        "typescript": "^5.9.3",
-        "vitest": "^4.0.18"
-    },
     "type": "module",
-    "exports": {
-        ".": {
-            "default": "./dist/index.js",
-            "import": "./dist/index.mjs",
-            "require": "./dist/index.cjs",
-            "types": "./dist/index.d.ts"
-        }
-    },
     "author": {
         "name": "Gillian Tunney",
         "email": "gbtunney@mac.com"
@@ -67,28 +11,45 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/gbtunney/gbt-boilerplate"
+        "url": "https://github.com/gbtunney/snailicid3-monorepo"
     },
-    "homepage": "https://github.com/gbtunney/gbt-boilerplate",
-    "files": [
-        "CHANGELOG.md",
-        "dist",
-        "types"
-    ],
-    "keywords": [
-        "boilerplate"
-    ],
-    "config": {
-        "prettier": {
-            "extensions": "ts,js,cjs,mjs,cts,mts,sh,html,json,yaml,yml,graphql,md",
-            "path": "*,**/*",
-            "config": "prettier.config.js"
-        },
-        "eslint": {
-            "extensions": "ts,js,cjs,mjs",
-            "path": "*",
-            "config": "eslint.config.js"
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "types": "./dist/index.d.ts"
         }
     },
-    "commonjs": "./dist/index.cjs"
+    "files": ["CHANGELOG.md", "dist"],
+    "nx": {
+        "targets": {
+            "build:ts": {},
+            "build:rollup": {},
+            "build": {
+                "dependsOn": ["build:ts", "build:rollup"]
+            },
+            "test": {},
+            "lint": {},
+            "fix": {},
+            "clean": {},
+            "docs:build": {}
+        }
+    },
+    "scripts": {
+        "\n========== DEVELOPMENT >> ==========": "",
+        "dev": "tsc --build --watch",
+        "dev:rollup": "rollup --watch --config ./rollup.config.mts",
+        "\n========== TEST >> ==========": "",
+        "test:watch": "vitest watch",
+        "test:coverage": "vitest run --coverage"
+    },
+    "devDependencies": {
+        "@snailicid3/build-config": "workspace:*",
+        "@snailicid3/config": "workspace:*",
+        "@types/node": "^22.0.0",
+        "rollup": "^4.24.0",
+        "typescript": "^5.7.0",
+        "vitest": "^2.1.0"
+    }
 }
