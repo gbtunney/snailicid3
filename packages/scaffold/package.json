@@ -27,7 +27,10 @@
             "types": "./dist/index.d.ts"
         }
     },
-    "files": ["CHANGELOG.md", "dist"],
+    "bin": {
+        "scaffold": "./bin/scaffold.ts"
+    },
+    "files": ["CHANGELOG.md", "dist", "bin"],
     "type": "module",
     "author": {
         "name": "Gillian Tunney",
