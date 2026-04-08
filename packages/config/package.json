@@ -2,46 +2,7 @@
     "name": "@snailicid3/config",
     "version": "0.0.0",
     "private": false,
-    "description": "Shared ESLint, Prettier, markdownlint, commitlint and TypeScript base configs",
-    "type": "module",
-    "author": {
-        "name": "Gillian Tunney",
-        "email": "gbtunney@mac.com"
-    },
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/gbtunney/snailicid3-monorepo"
-    },
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
-    "exports": {
-        ".": {
-            "import": "./dist/index.js",
-            "types": "./dist/index.d.ts"
-        },
-        "./tsconfig-base": "./tsconfig-base.json"
-    },
-    "files": [
-        "CHANGELOG.md",
-        "dist",
-        "tsconfig-base.json"
-    ],
-    "nx": {
-        "targets": {
-            "build:ts": {},
-            "build": {
-                "dependsOn": [
-                    "build:ts"
-                ]
-            },
-            "test": {},
-            "lint": {},
-            "fix": {},
-            "clean": {},
-            "docs:build": {}
-        }
-    },
+    "description": "Shared linting, formatting, and TypeScript config utilities for the snailicid3 monorepo",
     "scripts": {
         "build:ts:nx": "nx run $npm_package_name:build:ts",
         "build:nx": "nx run $npm_package_name:build",
@@ -52,15 +13,6 @@
         "\n========== TEST >> ==========": "",
         "test:watch": "vitest watch",
         "test:coverage": "vitest run --coverage"
-    },
-    "devDependencies": {
-        "@apidevtools/json-schema-ref-parser": "^15.3.5",
-        "@types/node": "^22.0.0",
-        "ajv": "^8.18.0",
-        "json-schema": "^0.4.0",
-        "json-schema-to-typescript": "^15.0.4",
-        "typescript": "^5.7.0",
-        "vitest": "^2.1.0"
     },
     "dependencies": {
         "@commitlint/types": "^20.5.0",
@@ -78,5 +30,61 @@
         "ts-deepmerge": "^7.0.3",
         "type-fest": "^4.41.0",
         "zod": "^4.3.6"
-    }
+    },
+    "devDependencies": {
+        "@apidevtools/json-schema-ref-parser": "^15.3.5",
+        "@types/node": "^22.0.0",
+        "ajv": "^8.18.0",
+        "json-schema": "^0.4.0",
+        "json-schema-to-typescript": "^15.0.4",
+        "typescript": "^5.7.0",
+        "vitest": "^2.1.0"
+    },
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        },
+        "./tsconfig-base": "./tsconfig-base.json"
+    },
+    "files": [
+        "CHANGELOG.md",
+        "dist",
+        "tsconfig-base.json"
+    ],
+    "keywords": [
+        "eslint",
+        "prettier",
+        "typescript",
+        "config"
+    ],
+    "nx": {
+        "targets": {
+            "build:ts": {},
+            "build": {
+                "dependsOn": [
+                    "build:ts"
+                ]
+            },
+            "test": {},
+            "lint": {},
+            "fix": {},
+            "clean": {},
+            "clean:ts": {},
+            "clean:build": {},
+            "docs:build": {}
+        }
+    },
+    "type": "module",
+    "author": {
+        "name": "Gillian Tunney",
+        "email": "gbtunney@mac.com"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/gbtunney/snailicid3-monorepo"
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts"
 }
