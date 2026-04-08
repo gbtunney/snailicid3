@@ -3,18 +3,22 @@
     "version": "0.0.0",
     "private": false,
     "description": "Example monorepo package",
-    "type": "module",
-    "author": {
-        "name": "Gillian Tunney",
-        "email": "gbtunney@mac.com"
+    "scripts": {
+        "\n========== DEVELOPMENT >> ==========": "",
+        "dev": "tsc --build --watch",
+        "dev:rollup": "rollup --watch --config ./rollup.config.mts",
+        "\n========== TEST >> ==========": "",
+        "test:watch": "vitest watch",
+        "test:coverage": "vitest run --coverage"
     },
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/gbtunney/snailicid3-monorepo"
+    "devDependencies": {
+        "@snailicid3/build-config": "workspace:*",
+        "@snailicid3/config": "workspace:*",
+        "@types/node": "^22.0.0",
+        "rollup": "^4.24.0",
+        "typescript": "^5.7.0",
+        "vitest": "^2.1.0"
     },
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
     "exports": {
         ".": {
             "import": "./dist/index.js",
@@ -36,20 +40,16 @@
             "docs:build": {}
         }
     },
-    "scripts": {
-        "\n========== DEVELOPMENT >> ==========": "",
-        "dev": "tsc --build --watch",
-        "dev:rollup": "rollup --watch --config ./rollup.config.mts",
-        "\n========== TEST >> ==========": "",
-        "test:watch": "vitest watch",
-        "test:coverage": "vitest run --coverage"
+    "type": "module",
+    "author": {
+        "name": "Gillian Tunney",
+        "email": "gbtunney@mac.com"
     },
-    "devDependencies": {
-        "@snailicid3/build-config": "workspace:*",
-        "@snailicid3/config": "workspace:*",
-        "@types/node": "^22.0.0",
-        "rollup": "^4.24.0",
-        "typescript": "^5.7.0",
-        "vitest": "^2.1.0"
-    }
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/gbtunney/snailicid3-monorepo"
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts"
 }
