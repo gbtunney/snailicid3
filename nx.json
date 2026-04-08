@@ -79,7 +79,7 @@
         },
         "clean:build": {
             "cache": false,
-            "command": "rm -rf ./dist",
+            "command": "rm -rf ./dist ./types",
             "options": { "cwd": "{projectRoot}" }
         },
         "clean": {
