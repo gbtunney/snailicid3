@@ -21,7 +21,14 @@
             "types": "./dist/index.d.ts"
         }
     },
-    "files": ["CHANGELOG.md", "dist"],
+    "files": ["CHANGELOG.md", "dist", "bin"],
+    "bin": {
+        "wt-nx-status": "./bin/node/nx-status.ts",
+        "wt-prettier-status": "./bin/node/prettier-status.ts",
+        "wt-workspace-status": "./bin/node/workspace-status.ts",
+        "wt-repo-status": "./bin/python/repo_status.py",
+        "wt-env-diagnostics": "./bin/python/env_diagnostics.py"
+    },
     "scripts": {
         "\n========== DEVELOPMENT >> ==========": "",
         "dev": "tsc --build --watch",
