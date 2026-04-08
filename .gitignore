@@ -151,7 +151,7 @@ dist
 #Husky
 .husky/_
 # Allowed javascript source files
-!eslint.config.js
+#!eslint.config.js
 
 # Scratch Files
 scratch

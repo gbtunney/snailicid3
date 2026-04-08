@@ -15,6 +15,9 @@
         ]
     },
     "targetDefaults": {
+        "nx:test:cmd": {
+            "command": "echo 'hi ths is an override;'"
+        },
         "build:ts": {
             "cache": true,
             "dependsOn": ["^build"],
@@ -80,5 +83,6 @@
             "outputs": ["{projectRoot}/docs"],
             "command": "typedoc"
         }
-    }
+    },
+    "analytics": true
 }
