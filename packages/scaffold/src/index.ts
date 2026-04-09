@@ -1,2 +1,9 @@
-// @snailicid3/scaffold
-// TODO: implement
+export { scaffoldInputSchema } from './input.js'
+export type { ScaffoldInput } from './input.js'
+export { scaffoldPackage } from './scaffold.js'
+export { syncPackage } from './sync.js'
+export type { SyncAction, SyncResult } from './sync.js'
+export { generatePackageJson } from './templates/package-json.js'
+export { generateTsConfig } from './templates/tsconfig.js'
+export { generateRollupConfig } from './templates/rollup-config.js'
+export { generateReadme, HEADER_START, HEADER_END } from './templates/readme.js'

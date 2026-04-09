@@ -26,7 +26,29 @@
             "types": "./dist/index.d.ts"
         }
     },
-    "files": ["CHANGELOG.md", "dist"],
+    "files": [
+        "CHANGELOG.md",
+        "dist"
+    ],
+    "nx": {
+        "targets": {
+            "build:ts": {},
+            "build:rollup": {},
+            "build:vite": {},
+            "build": {
+                "dependsOn": [
+                    "build:ts"
+                ]
+            },
+            "test": {},
+            "lint": {},
+            "fix": {},
+            "clean": {},
+            "clean:ts": {},
+            "clean:build": {},
+            "docs:build": {}
+        }
+    },
     "type": "module",
     "author": {
         "name": "Gillian Tunney",

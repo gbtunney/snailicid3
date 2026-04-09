@@ -5,4 +5,4 @@ export { keysOf, entriesOf, fromEntries, mapKeys, mapObject, mapValues } from '.
 export { prettyPrintJSON, safeSerializeJson, safeDeserializeJson } from './object/json.js'
 export { fmt, formatValue, formatArgs } from './fmt.js'
 export { flatten, unflatten } from 'flat'
-export * from './date/index.js'
+export { dateUtils, durationUtils, timestampUtils, dayjs } from './date/index.js'
