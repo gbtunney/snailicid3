@@ -30,7 +30,31 @@
     "bin": {
         "scaffold": "./bin/scaffold.ts"
     },
-    "files": ["CHANGELOG.md", "dist", "bin"],
+    "files": [
+        "CHANGELOG.md",
+        "dist",
+        "bin"
+    ],
+    "nx": {
+        "targets": {
+            "build:ts": {},
+            "build:rollup": {},
+            "build:vite": {},
+            "build": {
+                "dependsOn": [
+                    "build:ts",
+                    "build:rollup"
+                ]
+            },
+            "test": {},
+            "lint": {},
+            "fix": {},
+            "clean": {},
+            "clean:ts": {},
+            "clean:build": {},
+            "docs:build": {}
+        }
+    },
     "type": "module",
     "author": {
         "name": "Gillian Tunney",
