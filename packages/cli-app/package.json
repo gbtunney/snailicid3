@@ -4,6 +4,9 @@
     "private": false,
     "description": "Zod-backed CLI app framework",
     "scripts": {
+        "build:nx": "nx run $npm_package_name:build",
+        "test:nx": "nx run $npm_package_name:test",
+        "clean:nx": "nx run $npm_package_name:clean",
         "\n========== DEVELOPMENT >> ==========": "",
         "dev": "tsc --build --watch",
         "\n========== TEST >> ==========": "",
@@ -36,6 +39,10 @@
     ],
     "nx": {
         "targets": {
+            "dev": {},
+            "dev:ts": {},
+            "dev:rollup": {},
+            "dev:vite": {},
             "build:ts": {},
             "build:rollup": {},
             "build:vite": {},
@@ -45,6 +52,8 @@
                 ]
             },
             "test": {},
+            "test:nx": {},
+            "test:watch": {},
             "lint": {},
             "fix": {},
             "clean": {},
