@@ -6,6 +6,9 @@
 
 <!-- @snailicid3:header:end -->
 
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for the intended design of this package — the tsc-first,
+adapter-based build system it is being refactored toward.
+
 ## Installation
 
 ```sh
