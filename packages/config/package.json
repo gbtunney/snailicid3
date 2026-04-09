@@ -4,10 +4,11 @@
     "private": false,
     "description": "Shared linting, formatting, and TypeScript config utilities for the snailicid3 monorepo",
     "scripts": {
-        "build:ts:nx": "nx run $npm_package_name:build:ts",
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
+        
+        
         "\n========== DEVELOPMENT >> ==========": "",
         "dev": "tsc --build --watch",
         "\n========== TEST >> ==========": "",
@@ -60,13 +61,21 @@
     ],
     "nx": {
         "targets": {
+            "dev": {},
+            "dev:ts": {},
+            "dev:rollup": {},
+            "dev:vite": {},
             "build:ts": {},
+            "build:rollup": {},
+            "build:vite": {},
             "build": {
                 "dependsOn": [
                     "build:ts"
                 ]
             },
             "test": {},
+            "test:nx": {},
+            "test:watch": {},
             "lint": {},
             "fix": {},
             "clean": {},

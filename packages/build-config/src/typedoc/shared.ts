@@ -3,7 +3,7 @@ import { TypeDocOptions } from 'typedoc'
 import fs from 'fs'
 import path from 'path'
 
-export type TypedocConfigFunction<Type extends object = TypeDocOptions> = (
+export type wTypedocConfigFunction<Type extends object = TypeDocOptions> = (
     __dirname: string,
     _options?: TypedocOptions<Type>,
 ) => undefined | TypedocOptions<Type>

@@ -1,0 +1,25 @@
+{
+    "recommendations": [
+        "njpwerner.autodocstring",
+        "dbaeumer.vscode-eslint",
+        "donjayamanne.git-extension-pack",
+        "mhutchie.git-graph",
+        "donjayamanne.githistory",
+        "github.copilot-chat",
+        "xyz.local-history",
+        "nrwl.angular-console",
+        "christian-kohler.path-intellisense",
+        "esbenp.prettier-vscode",
+        "ms-python.python",
+        "ms-python.debugpy",
+        "plibither8.remove-comments",
+        "gruntfuggly.todo-tree",
+        "imekachi.webstorm-darcula",
+        "linbudu.pnpm-vscode-helper",
+        "alefragnani.bookmarks",
+        "adrianwilczynski.terminal-commands",
+        "keesschollaart.vscode-home-assistant",
+        "github.codespaces",
+        "github.copilot",
+        "ms-vscode.vscode-speech"   ]
+}

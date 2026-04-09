@@ -39,13 +39,15 @@ pnpm add @snailicid3/scaffold
 ```ts
 type PackageJsonSectionName =
 	| 'scripts'
+	| 'nx'
 	| 'dependencies'
 	| 'devDependencies'
+	
+|'bin'
 	| 'exports'
+	'rando entry pts'
 	| 'files'
 	| 'keywords'
-	| 'nx'
-	| 'bin'
 
 type PackageJsonStrategy = 'create' | 'merge' | 'update-sections'
 

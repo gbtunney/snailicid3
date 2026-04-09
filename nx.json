@@ -19,6 +19,26 @@
             "command": "echo 'hi ths is an override;'",
             "options": { "cwd": "{projectRoot}" }
         },
+        "dev": {
+            "cache": false,
+            "command": "tsc --build --watch",
+            "options": { "cwd": "{projectRoot}" }
+        },
+        "dev:ts": {
+            "cache": false,
+            "command": "tsc --build --watch",
+            "options": { "cwd": "{projectRoot}" }
+        },
+        "dev:rollup": {
+            "cache": false,
+            "command": "rollup --watch --config ./rollup.config.mts",
+            "options": { "cwd": "{projectRoot}" }
+        },
+        "dev:vite": {
+            "cache": false,
+            "command": "pnpm exec vite --config ./vite.config.ts",
+            "options": { "cwd": "{projectRoot}" }
+        },
         "build:ts": {
             "cache": true,
             "dependsOn": ["^build"],
@@ -53,6 +73,16 @@
             "dependsOn": ["build", "^test"],
             "inputs": ["default", "^default"],
             "command": "vitest run",
+            "options": { "cwd": "{projectRoot}" }
+        },
+        "test:nx": {
+            "cache": false,
+            "command": "nx run {projectName}:test",
+            "options": { "cwd": "{projectRoot}" }
+        },
+        "test:watch": {
+            "cache": false,
+            "command": "vitest watch",
             "options": { "cwd": "{projectRoot}" }
         },
         "lint": {
