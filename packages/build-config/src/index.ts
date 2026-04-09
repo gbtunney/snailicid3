@@ -54,3 +54,27 @@ export type { ViteUserConfig } from './vite/index.js'
 
 export { vitest, viTestConfig } from './vitest/index.js'
 export type { VitestUserConfig } from './vitest/index.js'
+
+// ── TODO: restore removed modules ─────────────────────────────────────────────
+//
+// The following were removed because they had broken imports from the old
+// snailicide-monorepo migration. Add them back once their dependencies are
+// resolved.
+//
+// TODO(typedoc): restore src/typedoc/ — needs deps: type-fest, ts-deepmerge,
+//   typedoc-plugin-markdown, typedoc-material-theme
+//   Was: config(), materialTheme(), configMarkdown(), fileSharedOptions()
+//
+// TODO(vitepress): restore src/vitepress/ — needs deps: vitepress, ts-deepmerge
+//   Was: vitepress() config factory for VitePress sidebar/theme
+//
+// TODO(utilities): file extension helpers + JSON utilities — these belong in
+//   @snailicid3/utils, not here. Once that package is wired up, consumers
+//   should import from there instead.
+//   Was: getFileExtensionList(), globFileFilter(), safeDeserializeJSON(),
+//        importJSON(), getFilePath(), prettyPrintJSON(), exportJSONFile()
+//        + type-fest re-exports (Jsonifiable, Merge, Simplify, etc.)
+//
+// TODO(logger): src/utilities.ts also imported from ./logger/index.js which
+//   was never migrated. Logger belongs in @snailicid3/logger — wire up that
+//   package first before restoring any code that used getLogger().
