@@ -75,5 +75,10 @@
         "url": "https://github.com/gbtunney/snailicid3-monorepo"
     },
     "main": "./dist/index.js",
-    "types": "./dist/index.d.ts"
+    "types": "./dist/index.d.ts",
+    "buildConfig": {
+        "runtime": "node",
+        "product": "cli",
+        "buildStrategy": "bundle"
+    }
 }

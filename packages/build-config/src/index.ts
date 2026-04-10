@@ -25,9 +25,11 @@ export {
     defineEntry,
     defineIdentity,
     definePlan,
+    identityFromPackage,
     normaliseExportKey,
     resolveEntryFilename,
 } from './build/plan.js'
+export type { PackageBuildConfig } from './build/plan.js'
 
 // ── Banner ────────────────────────────────────────────────────────────────────
 export { createBanner } from './build/banner.js'

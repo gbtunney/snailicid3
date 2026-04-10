@@ -9,8 +9,29 @@ import commonjs from '@rollup/plugin-commonjs'
 import json from '@rollup/plugin-json'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
 import terser from '@rollup/plugin-terser'
+import typescript from '@rollup/plugin-typescript'
 import type { Plugin } from 'rollup'
 import nodeExternals from 'rollup-plugin-node-externals'
+
+/**
+ * TypeScript plugin config shared across all presets.
+ *
+ * We bypass the tsconfig entirely (`tsconfig: false`) to avoid the
+ * `composite: true` restriction that prevents disabling declarations.
+ * Declarations come from `tsc --build` (Rule 4) — rollup only emits JS.
+ */
+const tsPlugin = (): Plugin =>
+    typescript({
+        tsconfig: false,
+        target: 'ESNext',
+        module: 'ESNext',
+        moduleResolution: 'bundler',
+        esModuleInterop: true,
+        strict: true,
+        declaration: false,
+        declarationMap: false,
+        sourceMap: true,
+    })
 
 export type RollupPluginPreset =
     | 'node_library'
@@ -33,6 +54,7 @@ export function getPluginsForPreset(
     switch (preset) {
         case 'node_library':
             return [
+                tsPlugin(),
                 nodeExternals(),
                 nodeResolve({ preferBuiltins: true }),
                 commonjs({ requireReturnsDefault: 'auto' }),
@@ -41,6 +63,7 @@ export function getPluginsForPreset(
 
         case 'browser_library':
             return [
+                tsPlugin(),
                 nodeResolve({ browser: true }),
                 commonjs({ requireReturnsDefault: 'auto' }),
                 json(),
@@ -48,6 +71,7 @@ export function getPluginsForPreset(
 
         case 'cli':
             return [
+                tsPlugin(),
                 nodeExternals(),
                 nodeResolve({ preferBuiltins: true }),
                 commonjs({ requireReturnsDefault: 'auto' }),
@@ -55,6 +79,7 @@ export function getPluginsForPreset(
 
         case 'iife':
             return [
+                tsPlugin(),
                 nodeResolve({ browser: true }),
                 commonjs({ requireReturnsDefault: 'auto' }),
                 json(),
