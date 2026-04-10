@@ -33,7 +33,10 @@
             "dev:ts": {},
             "dev:rollup": {},
             "dev:vite": {},
-            "build:ts": {},
+            "build:ts": {
+                "command": "echo 'playground: no TS sources'",
+                "options": { "cwd": "{projectRoot}" }
+            },
             "build:rollup": {},
             "build:vite": {},
             "build": {

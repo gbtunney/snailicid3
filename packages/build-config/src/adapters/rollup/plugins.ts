@@ -16,9 +16,13 @@ import nodeExternals from 'rollup-plugin-node-externals'
 /**
  * TypeScript plugin config shared across all presets.
  *
- * We bypass the tsconfig entirely (`tsconfig: false`) to avoid the
- * `composite: true` restriction that prevents disabling declarations.
- * Declarations come from `tsc --build` (Rule 4) — rollup only emits JS.
+ * Uses tsconfig: false (deliberate) to keep rollup's transpilation completely
+ * separate from tsc's type-checking + declaration emit. Rollup only produces
+ * JS → dist/. Declarations come from `tsc -p src/tsconfig.json` → types/.
+ *
+ * Previously this was a workaround for TS6304 (composite + declaration: false).
+ * composite is now removed from tsconfig-base.json, so this is now a clean
+ * separation of concerns rather than a workaround.
  */
 const tsPlugin = (): Plugin =>
     typescript({

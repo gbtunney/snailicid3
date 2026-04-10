@@ -7,8 +7,6 @@
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
-        
-        
         "\n========== DEVELOPMENT >> ==========": "",
         "dev": "tsc --build --watch",
         "\n========== TEST >> ==========": "",
@@ -44,13 +42,14 @@
     "exports": {
         ".": {
             "import": "./dist/index.js",
-            "types": "./dist/index.d.ts"
+            "types": "./types/index.d.ts"
         },
         "./tsconfig-base": "./tsconfig-base.json"
     },
     "files": [
         "CHANGELOG.md",
         "dist",
+        "types",
         "tsconfig-base.json"
     ],
     "keywords": [
@@ -95,5 +94,5 @@
         "url": "https://github.com/gbtunney/snailicid3-monorepo"
     },
     "main": "./dist/index.js",
-    "types": "./dist/index.d.ts"
+    "types": "./types/index.d.ts"
 }

@@ -31,12 +31,13 @@
     "exports": {
         ".": {
             "import": "./dist/index.js",
-            "types": "./dist/index.d.ts"
+            "types": "./types/index.d.ts"
         }
     },
     "files": [
         "CHANGELOG.md",
-        "dist"
+        "dist",
+        "types"
     ],
     "nx": {
         "targets": {
@@ -74,5 +75,5 @@
         "url": "https://github.com/gbtunney/snailicid3-monorepo"
     },
     "main": "./dist/index.js",
-    "types": "./dist/index.d.ts"
+    "types": "./types/index.d.ts"
 }

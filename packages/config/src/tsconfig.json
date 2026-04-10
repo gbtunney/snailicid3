@@ -1,14 +1,23 @@
 {
-    "extends": "./../tsconfig-base.json",
+    "extends": "@snailicid3/config/tsconfig-base",
     "compilerOptions": {
-        "outDir": "./../types" /* Specify an output folder for all emitted files. */,
-        // Output settings.
         "rootDir": ".",
-        // Type declaration settings.
-        "declarationDir": "./../types",
-        "resolveJsonModule": true,
-        "esModuleInterop": true
+        "outDir": "../dist",
+        "declarationDir": "../types",
+        "sourceMap": true,
+        "declaration": true,
+        "declarationMap": true,
+        "lib": ["ESNext", "DOM"],
+        "types": ["node"]
     },
-    //  "files":["/node_modules/markdownlint/schema/markdownlint-config-schema.json"],
-    "include": ["./**/*.ts", "./**/*.cts", "./**/*.mts"]
+    "include": ["**/*.ts", "**/*.cts", "**/*.mts"],
+    "exclude": [
+        "**/*.test.ts",
+        "**/*.test.mts",
+        "**/*.test.cts",
+        "**/*.spec.ts",
+        "**/*.spec.mts",
+        "**/*.spec.cts"
+    ]
 }
+

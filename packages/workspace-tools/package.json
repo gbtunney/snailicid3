@@ -27,12 +27,13 @@
     "exports": {
         ".": {
             "import": "./dist/index.js",
-            "types": "./dist/index.d.ts"
+            "types": "./types/index.d.ts"
         }
     },
     "files": [
         "CHANGELOG.md",
         "dist",
+        "types",
         "bin"
     ],
     "nx": {
@@ -71,7 +72,7 @@
         "url": "https://github.com/gbtunney/snailicid3-monorepo"
     },
     "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "types": "./types/index.d.ts",
     "bin": {
         "wt-nx-status": "./bin/node/nx-status.ts",
         "wt-prettier-status": "./bin/node/prettier-status.ts",
