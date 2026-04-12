@@ -27,7 +27,7 @@
     "exports": {
         ".": {
             "import": "./dist/index.js",
-            "types": "./dist/index.d.ts"
+            "types": "./types/index.d.ts"
         }
     },
     "bin": {
@@ -36,6 +36,7 @@
     "files": [
         "CHANGELOG.md",
         "dist",
+        "types",
         "bin"
     ],
     "nx": {
@@ -75,5 +76,10 @@
         "url": "https://github.com/gbtunney/snailicid3-monorepo"
     },
     "main": "./dist/index.js",
-    "types": "./dist/index.d.ts"
+    "types": "./types/index.d.ts",
+    "buildConfig": {
+        "runtime": "node",
+        "product": "cli",
+        "buildStrategy": "bundle"
+    }
 }

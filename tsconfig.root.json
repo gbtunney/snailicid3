@@ -4,7 +4,6 @@
         "target": "ESNext",
         "module": "ESNext",
         "moduleResolution": "bundler",
-        "composite": true,
         "declaration": true,
         "declarationMap": true,
         "sourceMap": true,

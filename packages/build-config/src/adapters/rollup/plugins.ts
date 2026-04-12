@@ -9,8 +9,33 @@ import commonjs from '@rollup/plugin-commonjs'
 import json from '@rollup/plugin-json'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
 import terser from '@rollup/plugin-terser'
+import typescript from '@rollup/plugin-typescript'
 import type { Plugin } from 'rollup'
 import nodeExternals from 'rollup-plugin-node-externals'
+
+/**
+ * TypeScript plugin config shared across all presets.
+ *
+ * Uses tsconfig: false (deliberate) to keep rollup's transpilation completely
+ * separate from tsc's type-checking + declaration emit. Rollup only produces
+ * JS → dist/. Declarations come from `tsc -p src/tsconfig.json` → types/.
+ *
+ * Previously this was a workaround for TS6304 (composite + declaration: false).
+ * composite is now removed from tsconfig-base.json, so this is now a clean
+ * separation of concerns rather than a workaround.
+ */
+const tsPlugin = (): Plugin =>
+    typescript({
+        tsconfig: false,
+        target: 'ESNext',
+        module: 'ESNext',
+        moduleResolution: 'bundler',
+        esModuleInterop: true,
+        strict: true,
+        declaration: false,
+        declarationMap: false,
+        sourceMap: true,
+    })
 
 export type RollupPluginPreset =
     | 'node_library'
@@ -33,6 +58,7 @@ export function getPluginsForPreset(
     switch (preset) {
         case 'node_library':
             return [
+                tsPlugin(),
                 nodeExternals(),
                 nodeResolve({ preferBuiltins: true }),
                 commonjs({ requireReturnsDefault: 'auto' }),
@@ -41,6 +67,7 @@ export function getPluginsForPreset(
 
         case 'browser_library':
             return [
+                tsPlugin(),
                 nodeResolve({ browser: true }),
                 commonjs({ requireReturnsDefault: 'auto' }),
                 json(),
@@ -48,6 +75,7 @@ export function getPluginsForPreset(
 
         case 'cli':
             return [
+                tsPlugin(),
                 nodeExternals(),
                 nodeResolve({ preferBuiltins: true }),
                 commonjs({ requireReturnsDefault: 'auto' }),
@@ -55,6 +83,7 @@ export function getPluginsForPreset(
 
         case 'iife':
             return [
+                tsPlugin(),
                 nodeResolve({ browser: true }),
                 commonjs({ requireReturnsDefault: 'auto' }),
                 json(),

@@ -21,12 +21,12 @@
         },
         "dev": {
             "cache": false,
-            "command": "tsc --build --watch",
+            "command": "tsc -p src/tsconfig.json --watch",
             "options": { "cwd": "{projectRoot}" }
         },
         "dev:ts": {
             "cache": false,
-            "command": "tsc --build --watch",
+            "command": "tsc -p src/tsconfig.json --watch",
             "options": { "cwd": "{projectRoot}" }
         },
         "dev:rollup": {
@@ -43,8 +43,8 @@
             "cache": true,
             "dependsOn": ["^build"],
             "inputs": ["production", "^production"],
-            "outputs": ["{projectRoot}/dist"],
-            "command": "tsc --build",
+            "outputs": ["{projectRoot}/dist", "{projectRoot}/types"],
+            "command": "tsc -p src/tsconfig.json",
             "options": { "cwd": "{projectRoot}" }
         },
         "build:rollup": {
@@ -104,7 +104,7 @@
         },
         "clean:ts": {
             "cache": false,
-            "command": "tsc --build --clean",
+            "command": "rm -f src/tsconfig.tsbuildinfo tsconfig.tsbuildinfo",
             "options": { "cwd": "{projectRoot}" }
         },
         "clean:build": {

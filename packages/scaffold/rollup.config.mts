@@ -1,28 +1,19 @@
-import { rollup } from '@snailicid3/build-config'
+import {
+    defineEntry,
+    defineIdentity,
+    definePlan,
+    identityFromPackage,
+    toRollupConfig,
+} from '@snailicid3/build-config'
 import type { RollupOptions } from 'rollup'
-
 import pkg from './package.json' with { type: 'json' }
 
-const directory_paths = {
-    output_dir: './dist/',
-    source_dir: './src/',
-}
+const plan = definePlan(
+    identityFromPackage(pkg) ?? defineIdentity('node', 'cli', 'bundle'),
+    './src',
+    './dist',
+    [defineEntry('.', ['esm'], { banner: true, sourcemap: true })],
+)
 
-const CONFIG_OBJ = [
-    ...rollup.getConfigEntries(
-        directory_paths,
-        [
-            {
-                export_key: '*',
-                export_types: ['import', 'types'],
-                library_name: 'scaffold',
-            },
-        ],
-        rollup.DEFAULT_PLUGINS_BUNDLED,
-        pkg,
-    ),
-]
-
-const CONFIG: Array<RollupOptions> = rollup.getRollupConfig(CONFIG_OBJ)
-
-export default CONFIG
+const config: RollupOptions[] = toRollupConfig(plan, 'scaffold', pkg)
+export default config

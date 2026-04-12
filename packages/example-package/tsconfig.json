@@ -1,11 +1,6 @@
 {
-    "extends": "@snailicid3/config/tsconfig-base",
-    "compilerOptions": {
-        "rootDir": ".",
-        "types": ["node"]
-    },
-    "exclude": ["./node_modules"],
-    "files": ["package.json"],
-    "include": ["./*.ts", "./*.cts", "./*.mts"],
-    "references": [{ "path": "./src" }]
+    "references": [
+        { "path": "./tsconfig.node.json" },
+        { "path": "./src" }
+    ]
 }

@@ -45,6 +45,8 @@ jspm_packages/
 # TypeScript v1 declaration files
 typings/
 types/
+# Un-ignore the @snailicid3/types source package
+!packages/types/
 
 # TypeScript cache
 *.tsbuildinfo

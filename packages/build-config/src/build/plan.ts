@@ -12,6 +12,55 @@ import type {
     Runtime,
 } from './types.js'
 
+/**
+ * The shape of the `buildConfig` field in `package.json`.
+ *
+ * Adding this field to a package's `package.json` makes its build identity
+ * explicit and machine-readable. The `identityFromPackage()` helper reads it.
+ *
+ * @example
+ * ```json
+ * {
+ *   "buildConfig": {
+ *     "runtime": "node",
+ *     "product": "library",
+ *     "buildStrategy": "bundle"
+ *   }
+ * }
+ * ```
+ */
+export interface PackageBuildConfig {
+    runtime: Runtime
+    product: Product
+    buildStrategy: BuildStrategy
+}
+
+/**
+ * Read a {@link PackageIdentity} from a `package.json` object's `buildConfig`
+ * field. Returns `undefined` if the field is absent.
+ *
+ * Intended for use in `rollup.config.mts` files so the identity is defined
+ * once in `package.json` rather than repeated in every config file.
+ *
+ * @example
+ * ```ts
+ * import pkg from './package.json' with { type: 'json' }
+ * import { identityFromPackage, defineIdentity } from '@snailicid3/build-config'
+ *
+ * const identity = identityFromPackage(pkg) ?? defineIdentity('node', 'library', 'bundle')
+ * ```
+ */
+export function identityFromPackage(
+    pkg: { buildConfig?: { runtime: string; product: string; buildStrategy: string } },
+): PackageIdentity | undefined {
+    if (!pkg.buildConfig) return undefined
+    return defineIdentity(
+        pkg.buildConfig.runtime as Runtime,
+        pkg.buildConfig.product as Product,
+        pkg.buildConfig.buildStrategy as BuildStrategy,
+    )
+}
+
 /** Create a {@link PackageIdentity}. */
 export function defineIdentity(
     runtime: Runtime,
