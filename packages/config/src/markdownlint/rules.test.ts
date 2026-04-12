@@ -25,13 +25,11 @@ describe('markdownSchema', () => {
                 useDefault: false,
             }),
         ).not.toHaveProperty('default')
-        expect(
-            await getRuleConfiguration(CONFIG, { useDefault: true }),
-        ).toHaveProperty('default')
+        expect(await getRuleConfiguration(CONFIG, { useDefault: true })).toHaveProperty('default')
 
-        expect(
-            await getRuleConfiguration(CONFIG, { useBaseConfig: false }),
-        ).not.toHaveProperty('MD014')
+        expect(await getRuleConfiguration(CONFIG, { useBaseConfig: false })).not.toHaveProperty(
+            'MD014',
+        )
         expect(
             await getRuleConfiguration(CONFIG, {
                 useBaseConfig: true,
@@ -84,8 +82,7 @@ test('invalid rule configuration fails schema validation', async () => {
     }
     expect(
         // @ts-expect-error "wrong"
-        (await processRuleConfiguration(invalidConfig, { throwOnError: false }))
-            .valid,
+        (await processRuleConfiguration(invalidConfig, { throwOnError: false })).valid,
     ).toBe(false)
 })
 

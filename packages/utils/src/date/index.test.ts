@@ -1,10 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import {
-    format_duration_basic,
-    getTimestampDuration,
-    msToIsoString,
-} from './date.js'
+import { format_duration_basic, getTimestampDuration, msToIsoString } from './date.js'
 
 describe('duration formatting | to human readable', () => {
     test('unix timestamp to duration', () => {
@@ -14,9 +10,7 @@ describe('duration formatting | to human readable', () => {
         const valIn = 17828081257708
         const valOut = 17832135208500
 
-        expect(getTimestampDuration(valIn, valOut, format_duration_basic)).toBe(
-            '00:04.05',
-        )
+        expect(getTimestampDuration(valIn, valOut, format_duration_basic)).toBe('00:04.05')
 
         //TODO: this is wrong, and is busted on the server. but not locally idk why
         //  expect(getTimestampDuration(valIn, valOut, format_duration_long)).toBe(

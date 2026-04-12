@@ -1,10 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import {
-    bigintNumber,
-    binaryNumber,
-    hexNumber,
-    scientificNumber,
-} from './dictionary.js'
+import { bigintNumber, binaryNumber, hexNumber, scientificNumber } from './dictionary.js'
 
 describe('regexp/dictionary', () => {
     describe('scientificNumber', () => {
@@ -60,17 +55,12 @@ describe('regexp/dictionary', () => {
     })
 
     describe('hexNumber', () => {
-        test.each([
-            '0x0',
-            '0xff',
-            '0xFF',
-            '+0xA',
-            '-0xAbc',
-            '0xdead_beef',
-            '0xA_B_C',
-        ])('valid: %s', (s) => {
-            expect(hexNumber.test(s)).toBe(true)
-        })
+        test.each(['0x0', '0xff', '0xFF', '+0xA', '-0xAbc', '0xdead_beef', '0xA_B_C'])(
+            'valid: %s',
+            (s) => {
+                expect(hexNumber.test(s)).toBe(true)
+            },
+        )
 
         test.each([
             '0x', // no digits
@@ -84,12 +74,9 @@ describe('regexp/dictionary', () => {
     })
 
     describe('binaryNumber', () => {
-        test.each(['0b0', '0b1', '0b1010', '+0b1_0_1', '-0b11_00'])(
-            'valid: %s',
-            (s) => {
-                expect(binaryNumber.test(s)).toBe(true)
-            },
-        )
+        test.each(['0b0', '0b1', '0b1010', '+0b1_0_1', '-0b11_00'])('valid: %s', (s) => {
+            expect(binaryNumber.test(s)).toBe(true)
+        })
 
         test.each([
             '0b', // no digits
@@ -103,18 +90,12 @@ describe('regexp/dictionary', () => {
     })
 
     describe('bigintNumber', () => {
-        test.each([
-            '0n',
-            '10101000000n',
-            '10n',
-            '+1_000n',
-            '-0n',
-            '0xFFn',
-            '-0xA_Bn',
-            '0b10_10n',
-        ])('valid: %s', (s) => {
-            expect(bigintNumber.test(s)).toBe(true)
-        })
+        test.each(['0n', '10101000000n', '10n', '+1_000n', '-0n', '0xFFn', '-0xA_Bn', '0b10_10n'])(
+            'valid: %s',
+            (s) => {
+                expect(bigintNumber.test(s)).toBe(true)
+            },
+        )
 
         test.each([
             '10', // missing n

@@ -1,9 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import {
-    isNumeric,
-    isPossibleNumeric,
-    isValidScientificNumber,
-} from './../number/validators.js'
+import { isNumeric, isPossibleNumeric, isValidScientificNumber } from './../number/validators.js'
 import { PlainObject } from './../types/utility.js'
 import { guardToAssertion, predicateToAssertion } from './assertation.js'
 import { isJsonifiableArray } from './json.typeguards.js'
@@ -19,20 +15,12 @@ const startsWithPrefix = (value: string, prefix: string): boolean =>
 type AssertString = (value: unknown) => asserts value is string
 type AssertBigInt = (value: unknown) => asserts value is bigint
 type AssertNumber = (value: unknown) => asserts value is number
-type AssertPlainObject = (
-    value: unknown,
-) => asserts value is PlainObject | Record<string, unknown>
+type AssertPlainObject = (value: unknown) => asserts value is PlainObject | Record<string, unknown>
 type AssertJsonArray = (value: unknown) => asserts value is Array<unknown>
-type AssertPossibleNumeric = (
-    value: unknown,
-    strict?: boolean,
-) => asserts value is number | string
+type AssertPossibleNumeric = (value: unknown, strict?: boolean) => asserts value is number | string
 type AssertScientific = (value: unknown) => asserts value is string
 type AssertMinLen = (value: string, min: number) => asserts value is string
-type AssertStartsWith = (
-    value: string,
-    prefix: string,
-) => asserts value is string
+type AssertStartsWith = (value: string, prefix: string) => asserts value is string
 
 // Guard-derived assertions
 const assertIsString: AssertString = guardToAssertion(isString)
@@ -47,12 +35,9 @@ const assertIsJsonArray: AssertJsonArray = guardToAssertion(isJsonifiableArray)
 
 // Predicate-based assertions
 const assertMinLen: AssertMinLen = predicateToAssertion(minLen)
-const assertStartsWithPrefix: AssertStartsWith =
-    predicateToAssertion(startsWithPrefix)
+const assertStartsWithPrefix: AssertStartsWith = predicateToAssertion(startsWithPrefix)
 const assertIsValidScientific: AssertScientific = (value) =>
-    (predicateToAssertion<string>(isValidScientificNumber as any) as any)(
-        value as any,
-    )
+    (predicateToAssertion<string>(isValidScientificNumber as any) as any)(value as any)
 
 describe('typeguards', () => {
     test('string', () => {
@@ -124,5 +109,4 @@ describe('typeguards', () => {
     })
 })
 
-const unsafeFn: (value: string, ...args: Array<unknown>) => boolean = (value) =>
-    value.length > 0
+const unsafeFn: (value: string, ...args: Array<unknown>) => boolean = (value) => value.length > 0

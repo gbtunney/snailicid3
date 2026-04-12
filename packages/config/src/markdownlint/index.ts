@@ -19,11 +19,7 @@ import {
     processRuleConfiguration,
     validateRuleConfiguration,
 } from './rules.js'
-import {
-    DEFAULT_OPTS,
-    type MarkdownlintConfiguration,
-    MarkdownlintOpts,
-} from './schema.js'
+import { DEFAULT_OPTS, type MarkdownlintConfiguration, MarkdownlintOpts } from './schema.js'
 import { isPlainObject, safeDeserializeJSON } from '../utilities.js'
 
 export type MarkdownlintAPI = {

@@ -14,12 +14,7 @@ export {
     parseToFloat,
     parseToNumeric,
 } from './parse.js'
-export {
-    numericToFloat,
-    numericToInteger,
-    toNumeric,
-    toStringNumeric,
-} from './transform.js'
+export { numericToFloat, numericToInteger, toNumeric, toStringNumeric } from './transform.js'
 
 export {
     isNumeric,

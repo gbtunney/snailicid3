@@ -1,8 +1,6 @@
 import type { PascalCase } from 'type-fest'
 
-export type Predicate<Type = unknown> = (
-    inputValue: unknown,
-) => inputValue is Type
+export type Predicate<Type = unknown> = (inputValue: unknown) => inputValue is Type
 export type BoolPredicate = (inputValue: unknown) => boolean
 
 /** Split on delimiters & camelCase transitions, then PascalCase. */
@@ -12,10 +10,7 @@ const toPascal = (rawName: string): string => {
         .trim()
         .split(' ')
         .filter(Boolean)
-        .flatMap(
-            (segment) =>
-                segment.match(/[A-Z]?[a-z0-9]+|[A-Z]+(?![a-z])/g) ?? [],
-        )
+        .flatMap((segment) => segment.match(/[A-Z]?[a-z0-9]+|[A-Z]+(?![a-z])/g) ?? [])
     return parts.map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join('')
 }
 
@@ -52,8 +47,7 @@ export function factoryValidator<ValueType, BaseName extends string>(
 
     const isFunction: (inputValue: unknown) => boolean = (inputValue) =>
         (predicateFunction as (v: unknown) => boolean)(inputValue)
-    const isNotFunction: (inputValue: unknown) => boolean = (inputValue) =>
-        !isFunction(inputValue)
+    const isNotFunction: (inputValue: unknown) => boolean = (inputValue) => !isFunction(inputValue)
 
     return {
         [isKeyName]: isFunction,

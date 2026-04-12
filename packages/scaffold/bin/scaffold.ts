@@ -9,11 +9,17 @@ const schema = scaffoldInputSchema.extend({
     sync: z
         .boolean()
         .default(false)
-        .meta({ alias: 's', description: 'Sync an existing package instead of creating a new one' }),
+        .meta({
+            alias: 's',
+            description: 'Sync an existing package instead of creating a new one',
+        }),
     dir: z
         .string()
         .optional()
-        .meta({ alias: 'd', description: '<path> Target output directory (defaults to ./packages/<name>)' }),
+        .meta({
+            alias: 'd',
+            description: '<path> Target output directory (defaults to ./packages/<name>)',
+        }),
 })
 
 await initApp(

@@ -3,11 +3,7 @@ import { isEmpty } from 'ramda'
 import { batchTrimCharacters, trimCharacters } from './trim-characters.js'
 import type { BatchBaseValue, TrimCharacters } from './type.js'
 import { TRIM_CHARS_DEFAULT } from '../../regexp/dictionary.js'
-import {
-    isArray,
-    isNotUndefined,
-    isString,
-} from '../../typeguard/utility.typeguards.js'
+import { isArray, isNotUndefined, isString } from '../../typeguard/utility.typeguards.js'
 
 /** Todo: fix these mangled chars */
 export const transformExplodeArray = function ({
@@ -38,9 +34,7 @@ export const transformExplodeArray = function ({
             value: result,
             ...trim,
         }
-        result = batchTrimCharacters(newObj).filter((_str) =>
-            _str.length > 2 ? true : false,
-        )
+        result = batchTrimCharacters(newObj).filter((_str) => (_str.length > 2 ? true : false))
     }
 
     if (isNotUndefined<string>(prefix)) {
@@ -50,9 +44,7 @@ export const transformExplodeArray = function ({
         })
         result = result.map((_str) => `${cleaned_prefix}${_str}`)
     }
-    return result.length === 1 && isNotUndefined<string>(result[0])
-        ? result[0]
-        : result
+    return result.length === 1 && isNotUndefined<string>(result[0]) ? result[0] : result
 }
 
 /** Default split by css class */

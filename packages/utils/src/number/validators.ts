@@ -1,10 +1,5 @@
 import { isFinite, isFloat, isNotNaN, isValidNumber } from 'ramda-adjunct'
-import {
-    bigintNumber,
-    binaryNumber,
-    hexNumber,
-    scientificNumber,
-} from './../regexp/dictionary.js'
+import { bigintNumber, binaryNumber, hexNumber, scientificNumber } from './../regexp/dictionary.js'
 import { Numeric, PossibleNumeric } from './numeric.js'
 import {
     isBigInt,
@@ -14,13 +9,7 @@ import {
 } from '../typeguard/utility.typeguards.js'
 
 // Identify numeric string kind
-export type NumericStringKind =
-    | 'decimal'
-    | 'scientific'
-    | 'hex'
-    | 'binary'
-    | 'bigint'
-    | undefined
+export type NumericStringKind = 'decimal' | 'scientific' | 'hex' | 'binary' | 'bigint' | undefined
 
 export const classifyNumericString = (raw: string): NumericStringKind => {
     const derp: number = 2
@@ -83,9 +72,7 @@ export const isPossibleNumeric = <Type extends PossibleNumeric>(
  *     isTrueNumeric(NaN) // false
  *     isTrueNumeric(Infinity) // false
  */
-export const isTrueNumeric = <Type extends Numeric>(
-    value: unknown,
-): value is Type =>
+export const isTrueNumeric = <Type extends Numeric>(value: unknown): value is Type =>
     isNotNaN(Number.parseFloat(String(value))) && isFinite(value)
 
 /**
@@ -99,9 +86,8 @@ export const isTrueNumeric = <Type extends Numeric>(
  *     isValidScientificNumber('1e') // false
  *     isValidScientificNumber('abc') // false
  */
-export const isValidScientificNumber = <Type extends PossibleNumeric>(
-    value: Type,
-): value is Type => scientificNumber.test(value.toString())
+export const isValidScientificNumber = <Type extends PossibleNumeric>(value: Type): value is Type =>
+    scientificNumber.test(value.toString())
 
 /**
  * String numeric shape check. strictChars=true: accepts decimal / scientific (with optional sign) OR hex / binary /
@@ -136,9 +122,8 @@ export const isStringNumeric = <Type extends string>(
  *     isNumeric('10') // false
  *     isNumeric('1e3') // false
  */
-export const isNumeric = <Type extends Numeric>(
-    value: unknown,
-): value is Type => isBigInt(value) || isNumber(value)
+export const isNumeric = <Type extends Numeric>(value: unknown): value is Type =>
+    isBigInt(value) || isNumber(value)
 
 /**
  * Integer guard for numeric primitives. Accepts 12 and 12.00; rejects 12.001. Bigints pass.
@@ -149,9 +134,8 @@ export const isNumeric = <Type extends Numeric>(
  *     isNumericInteger(12.001) // false
  *     isNumericInteger(10n) // true
  */
-export const isNumericInteger = <Type extends Numeric>(
-    value: Type,
-): value is Type => tgIsInteger(value)
+export const isNumericInteger = <Type extends Numeric>(value: Type): value is Type =>
+    tgIsInteger(value)
 
 /**
  * Fractional numeric guard. True for numbers with a fractional component; false for whole numbers and bigints.
@@ -161,9 +145,8 @@ export const isNumericInteger = <Type extends Numeric>(
  *     isNumericNonInteger(12) // false
  *     isNumericNonInteger(10n) // false
  */
-export const isNumericNonInteger = <Type extends Numeric>(
-    value: Type,
-): value is Type => isFloat(value)
+export const isNumericNonInteger = <Type extends Numeric>(value: Type): value is Type =>
+    isFloat(value)
 
 /**
  * Alias for isNumericNonInteger.
@@ -181,8 +164,7 @@ export const isNumericFloat = isNumericNonInteger
  * @example
  *     cleanString('  42 \n') // '42 '
  */
-export const cleanString = (value: string): string =>
-    value.trim().replace(/\s+/g, ' ')
+export const cleanString = (value: string): string => value.trim().replace(/\s+/g, ' ')
 
 // was: const STRIP_SIGN = /^[+\-]/
 const STRIP_SIGN = /^[+-]/

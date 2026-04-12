@@ -125,7 +125,13 @@ describe('scaffoldPackage', () => {
         const outDir = mkdtempSync(join(tmpdir(), 'scaffold-test-'))
         scaffoldPackage(testInput, outDir)
 
-        const files = ['package.json', 'tsconfig.json', 'rollup.config.mts', 'README.md', 'src/index.ts']
+        const files = [
+            'package.json',
+            'tsconfig.json',
+            'rollup.config.mts',
+            'README.md',
+            'src/index.ts',
+        ]
         for (const file of files) {
             const content = readFileSync(join(outDir, file), 'utf8')
             expect(content.length).toBeGreaterThan(0)

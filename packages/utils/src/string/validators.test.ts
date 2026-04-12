@@ -29,9 +29,7 @@ describe('Image Base64 Encoding', () => {
         expect(getValidUrl('google')).toBeUndefined()
         expect(isValidUrl('http://google.com', 'https')).toBe(false)
         expect(isValidUrl('google.com', 'https')).toBe(true)
-        expect(isValidUrl('https://google.com', ['ftp', 'https'], false)).toBe(
-            true,
-        )
+        expect(isValidUrl('https://google.com', ['ftp', 'https'], false)).toBe(true)
         expect(isValidUrl('https://google.com', 'https', false)).toBe(true)
 
         expect(
@@ -64,8 +62,6 @@ describe('Image Base64 Encoding', () => {
         expect(isValidIpAddress('http://192.168.1.1')).toBe(true)
         expect(isValidIpAddress('192.168.1.1')).toBe(true)
         expect(isValidIpAddress('http://192.167678.1.1')).toBe(false)
-        expect(
-            isValidIpAddress('http://192.168.1.1', ['ftp', 'https'], false),
-        ).toBe(false)
+        expect(isValidIpAddress('http://192.168.1.1', ['ftp', 'https'], false)).toBe(false)
     })
 })

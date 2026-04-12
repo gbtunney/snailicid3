@@ -7,9 +7,7 @@ export const modifyCaseIndexedLetter = (
     if (str.length >= 0 && str.length >= index + 1 && str[index]) {
         // const indexedElement =
         const str_transformed: string =
-            _case === 'upper'
-                ? str[index].toUpperCase()
-                : str[index].toLowerCase()
+            _case === 'upper' ? str[index].toUpperCase() : str[index].toLowerCase()
 
         return `${str_transformed}${str.slice(index + 1)}`
     }
@@ -21,11 +19,7 @@ export const lowerCaseFirstLetter = (str: string): string =>
 export const upperCaseFirstLetter = (str: string): string =>
     modifyCaseIndexedLetter(str, 'upper', 0)
 
-export const wrapString = (
-    value: string,
-    prefix: string = '(',
-    suffix: string = ')',
-): string => {
+export const wrapString = (value: string, prefix: string = '(', suffix: string = ')'): string => {
     const _value = value.trim()
     return _value.length > 0 ? `${prefix}${_value}${suffix}` : ''
 }

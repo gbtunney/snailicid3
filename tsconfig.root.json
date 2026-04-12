@@ -16,12 +16,6 @@
         "rootDir": ".",
         "types": ["node"]
     },
-    "include": [
-        "./*.ts",
-        "./*.cts",
-        "./*.mts",
-        "./.lintstagedrc.mts",
-        "./.markdownlint-cli2.mts"
-    ],
+    "include": ["./*.ts", "./*.cts", "./*.mts", "./.lintstagedrc.mts", "./.markdownlint-cli2.mts"],
     "exclude": ["./node_modules", "./packages"]
 }

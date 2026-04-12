@@ -1,8 +1,5 @@
 import { Config } from 'typescript-eslint'
-import {
-    getFileExtensionList,
-    JSLIKE_FILE_EXTENSIONS,
-} from '../../utilities.js'
+import { getFileExtensionList, JSLIKE_FILE_EXTENSIONS } from '../../utilities.js'
 
 export const importRules = (): Config => [
     {
@@ -17,13 +14,7 @@ export const importRules = (): Config => [
         },
     },
     {
-        files: [
-            ...getFileExtensionList(
-                JSLIKE_FILE_EXTENSIONS,
-                false,
-                '**/src/**/*.',
-            ),
-        ],
+        files: [...getFileExtensionList(JSLIKE_FILE_EXTENSIONS, false, '**/src/**/*.')],
         name: 'Import: no-default-export rule overridden for src files ',
         rules: {
             'import/no-default-export': 'warn',

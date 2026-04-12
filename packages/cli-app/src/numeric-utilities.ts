@@ -22,8 +22,7 @@ export const mapRange = (
 }
 export function wrapRange(value: number, [min, max]: Range): number {
     const span = max - min
-    if (span <= 0)
-        throw new Error(fmt`Invalid range: max(${max}) <= min(${min})`)
+    if (span <= 0) throw new Error(fmt`Invalid range: max(${max}) <= min(${min})`)
     return ((((value - min) % span) + span) % span) + min
 }
 
@@ -40,7 +39,5 @@ export const roundToDecimals = (
     const factor = 10 ** decimals
     return Math.round(value * factor) / factor
 }
-export const roundToDecimalsNoCarry = (
-    value: number,
-    decimals: number,
-): number => roundToDecimals(value, decimals, Math.trunc)
+export const roundToDecimalsNoCarry = (value: number, decimals: number): number =>
+    roundToDecimals(value, decimals, Math.trunc)

@@ -11,14 +11,7 @@ import type { BuildPlan, Product, Runtime } from '../../build/types.js'
 import { toRollupConfig } from './to-rollup.js'
 
 /** Products that may use the Rollup adapter when buildStrategy is 'bundle'. */
-const ROLLUP_PRODUCTS: Product[] = [
-    'library',
-    'cli',
-    'plugin',
-    'worker',
-    'server_app',
-    'web_app',
-]
+const ROLLUP_PRODUCTS: Product[] = ['library', 'cli', 'plugin', 'worker', 'server_app', 'web_app']
 
 export const rollupAdapter: BuildAdapter = {
     name: 'rollup',

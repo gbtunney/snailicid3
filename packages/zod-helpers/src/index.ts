@@ -24,9 +24,7 @@ export const schemaForType =
  *
  * @category Zod
  */
-export const wrapSchema = <Schema extends z.ZodType>(
-    schema: Schema,
-): Schema => {
+export const wrapSchema = <Schema extends z.ZodType>(schema: Schema): Schema => {
     return schema
 }
 /**
@@ -51,9 +49,7 @@ export const parseZodData = <Schema extends z.ZodType>(
     value: unknown,
     schema: Schema,
 ): z.infer<Schema> | undefined => {
-    return isZodParsable<Schema>(value, schema)
-        ? schema.parse(value)
-        : undefined
+    return isZodParsable<Schema>(value, schema) ? schema.parse(value) : undefined
 }
 /**
  * Guard function to determine if value is parseable according to schema

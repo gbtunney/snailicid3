@@ -73,8 +73,7 @@ export const properCase = (value: string): string =>
  *
  * @category Case
  */
-export const pascalCase = (value: string): string =>
-    replace(/^[a-z]/, toUpper, camelCase(value))
+export const pascalCase = (value: string): string => replace(/^[a-z]/, toUpper, camelCase(value))
 
 /**
  * Converts a string to sentence case.
@@ -85,9 +84,7 @@ export const sentenceCase = (value: string): string =>
     value
         .split('.')
         .map(function (word, index) {
-            return index === 0
-                ? word.charAt(0).toUpperCase().concat(word.substring(1))
-                : word
+            return index === 0 ? word.charAt(0).toUpperCase().concat(word.substring(1)) : word
         })
         .join(' ')
 
@@ -106,21 +103,18 @@ export const slugify = (value: string, delimiter = '-'): string => {
  *
  * @category Case
  */
-export const hyphenate = (value: string): string =>
-    pipe(unCamelCase, slugify)(value)
+export const hyphenate = (value: string): string => pipe(unCamelCase, slugify)(value)
 
 /**
  * Converts hyphenated text to spaces.
  *
  * @category Case
  */
-export const unhyphenate = (value: string): string =>
-    replace(/(\w)(-)(\w)/g, '$1 $3', value)
+export const unhyphenate = (value: string): string => replace(/(\w)(-)(\w)/g, '$1 $3', value)
 
 /**
  * Converts camelCase text to underscored text.
  *
  * @category Case
  */
-export const underscore = (value: string): string =>
-    slugify(unCamelCase(value), '_')
+export const underscore = (value: string): string => slugify(unCamelCase(value), '_')

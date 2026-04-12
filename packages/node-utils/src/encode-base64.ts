@@ -22,23 +22,14 @@ export const getImageExtensionLiteral = (value: string): ImageMimeType => {
     }
 }
 
-export const getImageBase64 = (
-    file_path: string,
-    mime_type: ImageMimeType = 'png',
-): string => {
-    const encoding = `data:image/${
-        mime_type === 'svg' ? 'svg+xml' : mime_type
-    };base64,`
+export const getImageBase64 = (file_path: string, mime_type: ImageMimeType = 'png'): string => {
+    const encoding = `data:image/${mime_type === 'svg' ? 'svg+xml' : mime_type};base64,`
     const resolvedPath = path.resolve(file_path)
     if (fs.existsSync(resolvedPath)) {
         const contents = fs.readFileSync(resolvedPath, 'base64')
         return `${encoding}${contents}`
     } else {
-        console.error(
-            'Error! base64 encoding fail :',
-            resolvedPath,
-            'does not excist',
-        )
+        console.error('Error! base64 encoding fail :', resolvedPath, 'does not excist')
         return 'undefined'
     }
 }

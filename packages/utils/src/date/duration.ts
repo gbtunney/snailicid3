@@ -10,8 +10,7 @@ export const format_duration_truncated = 'mm:ss'
 export const format_duration_basic = 'mm:ss.SS'
 
 /** Milliseconds to ISO String (UTC) */
-export const msToIsoString = (ms_value: number): string =>
-    dayjs.utc(ms_value).toISOString()
+export const msToIsoString = (ms_value: number): string => dayjs.utc(ms_value).toISOString()
 
 /**
  * Format a millisecond count into a custom duration pattern (HH:mm:ss.SS, mm:ss, mm:ss.SS).
@@ -28,8 +27,7 @@ export const formatDurationFromMs = (
     const seconds = totalSeconds % 60
     const hundredths = Math.floor(milliseconds / 10)
 
-    const pad = (value: number, length: number = 2): string =>
-        String(value).padStart(length, '0')
+    const pad = (value: number, length: number = 2): string => String(value).padStart(length, '0')
 
     switch (pattern) {
         case format_duration_long:

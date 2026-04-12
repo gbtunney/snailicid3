@@ -21,5 +21,6 @@
         "keesschollaart.vscode-home-assistant",
         "github.codespaces",
         "github.copilot",
-        "ms-vscode.vscode-speech"   ]
+        "ms-vscode.vscode-speech"
+    ]
 }

@@ -98,14 +98,10 @@ export const prettierConfiguration = (
     _overrides?: PrettierOverrides,
 ): PrettierConfig => {
     const myoption: PrettierOptions =
-        _options !== undefined
-            ? { ...getDefaultOptions(), ..._options }
-            : getDefaultOptions()
+        _options !== undefined ? { ...getDefaultOptions(), ..._options } : getDefaultOptions()
 
     const __overrides: PrettierOverrides =
-        _overrides !== undefined
-            ? [...defaultOverrides, ..._overrides]
-            : [...defaultOverrides]
+        _overrides !== undefined ? [...defaultOverrides, ..._overrides] : [...defaultOverrides]
     return {
         ...myoption,
         overrides: __overrides, //(overrides !== undefined ? { overrides } : []),

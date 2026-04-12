@@ -13,10 +13,7 @@ import path from 'path'
 
 export const JS_FILE_EXTENSIONS = ['js', 'mjs', 'cjs', 'jsx'] as const
 export const TS_FILE_EXTENSIONS = ['ts', 'mts', 'cts', 'tsx'] as const
-export const JSLIKE_FILE_EXTENSIONS = [
-    ...JS_FILE_EXTENSIONS,
-    ...TS_FILE_EXTENSIONS,
-] as const
+export const JSLIKE_FILE_EXTENSIONS = [...JS_FILE_EXTENSIONS, ...TS_FILE_EXTENSIONS] as const
 
 export type JSFileExtensions = ArrayValues<typeof JS_FILE_EXTENSIONS>
 export type TSFileExtensions = ArrayValues<typeof TS_FILE_EXTENSIONS>
@@ -77,9 +74,7 @@ export const safeDeserializeJSON = <Type extends JsonValue = JsonValue>(
     }
 }
 
-export const importJSON = async (
-    filename: string,
-): Promise<JsonValue | undefined> => {
+export const importJSON = async (filename: string): Promise<JsonValue | undefined> => {
     const absolutePath = path.resolve(filename)
     const logger = getTraceLogger('importJSON')
 
@@ -120,9 +115,7 @@ export const getFilePath = (meta: ImportMeta, filePath: string): string => {
     const directoryPath = path.dirname(fileURLToPath(meta.url))
 
     if (!fs.existsSync(path.resolve(directoryPath))) {
-        throw new Error(
-            `Directory does not exist: ${path.resolve(directoryPath)}`,
-        )
+        throw new Error(`Directory does not exist: ${path.resolve(directoryPath)}`)
     }
 
     return path.resolve(`${directoryPath}/${filePath}`)

@@ -1,29 +1,20 @@
-export type TypeGuardFunction = (
-    value: unknown,
-    ...args: Array<unknown>
-) => value is unknown
+export type TypeGuardFunction = (value: unknown, ...args: Array<unknown>) => value is unknown
 
-export type TypeGuardParameters<Guard extends TypeGuardFunction> =
-    Parameters<Guard>
+export type TypeGuardParameters<Guard extends TypeGuardFunction> = Parameters<Guard>
 
-export type TypeGuardInputValue<Guard extends TypeGuardFunction> =
-    TypeGuardParameters<Guard>[0]
+export type TypeGuardInputValue<Guard extends TypeGuardFunction> = TypeGuardParameters<Guard>[0]
 
 export type TypeGuardExtraParameters<Guard extends TypeGuardFunction> =
     TypeGuardParameters<Guard> extends [unknown, ...infer Rest] ? Rest : never
 
-export type TypeGuardNarrowedType<Guard extends TypeGuardFunction> =
-    Guard extends (
-        value: unknown,
-        ...args: Array<unknown>
-    ) => value is infer Narrowed
-        ? Narrowed
-        : never
-
-export type BooleanPredicateFunction = (
+export type TypeGuardNarrowedType<Guard extends TypeGuardFunction> = Guard extends (
     value: unknown,
     ...args: Array<unknown>
-) => boolean
+) => value is infer Narrowed
+    ? Narrowed
+    : never
+
+export type BooleanPredicateFunction = (value: unknown, ...args: Array<unknown>) => boolean
 
 /**
  * Builds an assertion from a boolean-returning predicate.
@@ -47,10 +38,7 @@ export function predicateToAssertion<
     predicate: (value: InputValue, ...args: ExtraParameters) => boolean,
     message = 'Assertion failed',
 ) {
-    return (
-        value: InputValue,
-        ...args: ExtraParameters
-    ): asserts value is Narrowed => {
+    return (value: InputValue, ...args: ExtraParameters): asserts value is Narrowed => {
         if (!predicate(value, ...args)) {
             throw new TypeError(message)
         }
@@ -79,10 +67,7 @@ export function guardToAssertion<
     guard: (value: InputValue, ...args: ExtraParameters) => value is Narrowed,
     message = 'Assertion failed',
 ) {
-    return (
-        value: InputValue,
-        ...args: ExtraParameters
-    ): asserts value is Narrowed => {
+    return (value: InputValue, ...args: ExtraParameters): asserts value is Narrowed => {
         if (!guard(value, ...args)) {
             throw new TypeError(message)
         }

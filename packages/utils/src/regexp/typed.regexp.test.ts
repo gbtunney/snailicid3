@@ -1,11 +1,7 @@
 // typed-regexp.test.ts
 import { describe, expect, it } from 'vitest'
 
-import {
-    asAnnotatedPattern,
-    cleanAnnotatedRegex,
-    typedRegexp,
-} from './typed.regexp.js' // adjust filename
+import { asAnnotatedPattern, cleanAnnotatedRegex, typedRegexp } from './typed.regexp.js' // adjust filename
 
 // ------------------------------------------------------------------------------------
 // 1. cleanRegex() behavior
@@ -57,9 +53,7 @@ describe('typedRegexp – runtime', () => {
 
 describe('typedRegexp – type inference', () => {
     it('infers group names as object keys', () => {
-        const regex = typedRegexp<'^(?<alpha>a+)(?<beta>b+)$'>(
-            '^(?<alpha>a+)(?<beta>b+)$',
-        )
+        const regex = typedRegexp<'^(?<alpha>a+)(?<beta>b+)$'>('^(?<alpha>a+)(?<beta>b+)$')
 
         const result = regex.execTyped('aaabbb')
         if (result === null) throw new Error('unexpected null')
@@ -112,10 +106,7 @@ describe('typedRegexp – integration', () => {
   $
 `
 
-        const flatPattern = asAnnotatedPattern(
-            annotatedPattern,
-            '^(?<lhs>[a-z]+)=(?<rhs>[0-9]+)$',
-        )
+        const flatPattern = asAnnotatedPattern(annotatedPattern, '^(?<lhs>[a-z]+)=(?<rhs>[0-9]+)$')
 
         const regex = typedRegexp(flatPattern)
 

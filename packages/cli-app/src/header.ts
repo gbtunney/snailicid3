@@ -6,10 +6,7 @@ export type PrintHeader = AppConfig & {
     app_title: string
     divider: string
 }
-const getTitleColor = (
-    value: string,
-    color: AppConfig['title_color'],
-): string => {
+const getTitleColor = (value: string, color: AppConfig['title_color']): string => {
     return chalk.bgHex(color.bg).hex(color.fg)(value)
 }
 export const doPrintHeader = (header: PrintHeader): string => {

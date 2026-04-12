@@ -50,9 +50,9 @@ export interface PackageBuildConfig {
  * const identity = identityFromPackage(pkg) ?? defineIdentity('node', 'library', 'bundle')
  * ```
  */
-export function identityFromPackage(
-    pkg: { buildConfig?: { runtime: string; product: string; buildStrategy: string } },
-): PackageIdentity | undefined {
+export function identityFromPackage(pkg: {
+    buildConfig?: { runtime: string; product: string; buildStrategy: string }
+}): PackageIdentity | undefined {
     if (!pkg.buildConfig) return undefined
     return defineIdentity(
         pkg.buildConfig.runtime as Runtime,

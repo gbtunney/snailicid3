@@ -19,15 +19,11 @@ export type AppFlagAliases<Schema extends ZodObjectSchema> = DefaultAliases & {
     [Key in keyof z.infer<Schema>]?: string
 }
 
-export type AppHidden<Schema extends ZodObjectSchema> = Array<
-    keyof z.infer<Schema>
->
+export type AppHidden<Schema extends ZodObjectSchema> = Array<keyof z.infer<Schema>>
 export type AppConfigOut = z.infer<typeof appConfigSchema>
 export type AppConfig = AppConfigOut
 
-export type AppConfigIn<
-    Schema extends ZodObjectSchema = typeof appConfigSchema,
-> = z.input<
+export type AppConfigIn<Schema extends ZodObjectSchema = typeof appConfigSchema> = z.input<
     z.ZodType<
         AppConfig,
         //  z.ZodTypeDef,
@@ -87,9 +83,7 @@ export const appConfigSchema = z.object({
         .meta({ description: 'hide a key from the help menu' }),*/
     name: z
         .string()
-        .transform((value: string): string =>
-            stringUtils.hyphenate(value).toLowerCase(),
-        ),
+        .transform((value: string): string => stringUtils.hyphenate(value).toLowerCase()),
     print: z.boolean().default(true).meta({ description: 'Print the header' }),
     /** Clears the terminal window */
     skip_interactive: z.boolean().default(false),
@@ -129,9 +123,7 @@ export const appConfigSchema = z.object({
 
 export type AppConfigSchema = typeof appConfigSchema
 
-export const resolveAppConfigSchema = <
-    AppOptionsSchema extends ZodObjectSchema,
->(
+export const resolveAppConfigSchema = <AppOptionsSchema extends ZodObjectSchema>(
     value: AppConfigIn<AppOptionsSchema>,
     schema: AppConfigSchema, //note : the default parameter errors like: schema:  AppConfigSchema=appConfigSchema
 ): z.infer<AppConfigSchema> | undefined => {
@@ -151,9 +143,7 @@ const packageSchema = wrapSchema<typeof appConfigSchema>(appConfigSchema).pick({
     version: true,
 })
 
-export const parsePackageJson = (
-    pkg: unknown,
-): z.infer<typeof packageSchema> | undefined => {
+export const parsePackageJson = (pkg: unknown): z.infer<typeof packageSchema> | undefined => {
     const _parseResult = packageSchema.safeParse(pkg)
     if (_parseResult.success) {
         return _parseResult.data

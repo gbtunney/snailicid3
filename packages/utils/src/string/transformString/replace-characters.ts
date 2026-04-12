@@ -1,11 +1,6 @@
 import { ensureArray, isString, replaceAll } from 'ramda-adjunct'
 
-import type {
-    BaseValue,
-    BatchBaseValue,
-    Pattern,
-    ReplaceCharacters,
-} from './type.js'
+import type { BaseValue, BatchBaseValue, Pattern, ReplaceCharacters } from './type.js'
 
 const replaceCharactersSinglePattern = ({
     pattern = ' ',

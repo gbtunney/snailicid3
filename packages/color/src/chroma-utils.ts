@@ -23,19 +23,14 @@ const validate = (value: Chromable): boolean => {
 }
 
 /** @category Validator */
-export const isValidColor = <Type extends Chromable>(
-    value: Type,
-): value is Type => {
+export const isValidColor = <Type extends Chromable>(value: Type): value is Type => {
     return validate(value)
 }
 
 export const getChromaColor = (value: Chromable): Color | undefined =>
     isValidColor(value) ? chroma.color(value) : undefined
 
-export const getColor = (
-    value: Chromable,
-    format: ColorFormat = 'hsl',
-): Color | undefined => {
+export const getColor = (value: Chromable, format: ColorFormat = 'hsl'): Color | undefined => {
     if (isValidColor(value)) {
         return chroma.color(value, format)
     }
@@ -47,26 +42,17 @@ const rotateHueFunction = (hue: number, incrementValue: number): number => {
     return (hue + incrementValue) % 360
 }
 /** RA.rangeStep(5, 0, 20); // => [0, 5, 10, 15] */
-export const complement = (
-    color: Chromable,
-    format: ColorFormat = 'hsl',
-): Color => {
+export const complement = (color: Chromable, format: ColorFormat = 'hsl'): Color => {
     const [hue, sat, luminance]: HSL = chroma.color(color).hsl()
     return chroma.color([rotateHueFunction(hue, 180), sat, luminance], format)
 }
-export const triad = (
-    color: Chromable,
-    format: ColorFormat = 'hsl',
-): Array<Color> => {
+export const triad = (color: Chromable, format: ColorFormat = 'hsl'): Array<Color> => {
     const [hue, sat, luminance]: HSL = chroma.color(color).hsl()
-    return [hue, rotateHueFunction(hue, 120), rotateHueFunction(hue, 240)].map(
-        (hue_step) => chroma.color([hue_step, sat, luminance], format),
+    return [hue, rotateHueFunction(hue, 120), rotateHueFunction(hue, 240)].map((hue_step) =>
+        chroma.color([hue_step, sat, luminance], format),
     )
 }
-export const tetrad = (
-    color: Chromable,
-    format: ColorFormat = 'hsl',
-): Array<Color> => {
+export const tetrad = (color: Chromable, format: ColorFormat = 'hsl'): Array<Color> => {
     const [hue, sat, luminance]: HSL = chroma.color(color).hsl()
     return [
         hue,
@@ -75,23 +61,16 @@ export const tetrad = (
         rotateHueFunction(hue, 270),
     ].map((hue_step) => chroma.color([hue_step, sat, luminance], format))
 }
-export const splitComplement = (
-    color: Chromable,
-    format: ColorFormat = 'hsl',
-): Array<Color> => {
+export const splitComplement = (color: Chromable, format: ColorFormat = 'hsl'): Array<Color> => {
     const [hue, sat, luminance]: HSL = chroma.color(color).hsl()
-    return [hue, rotateHueFunction(hue, 72), rotateHueFunction(hue, 216)].map(
-        (hue_step) => chroma.color([hue_step, sat, luminance], format),
+    return [hue, rotateHueFunction(hue, 72), rotateHueFunction(hue, 216)].map((hue_step) =>
+        chroma.color([hue_step, sat, luminance], format),
     )
 }
-export const analogous = (
-    color: Chromable,
-    results = 6,
-    slices = 30,
-): Array<Color> => {
+export const analogous = (color: Chromable, results = 6, slices = 30): Array<Color> => {
     const [hue, sat, luminance]: HSL = chroma.color(color).hsl()
-    return [hue, rotateHueFunction(hue, 72), rotateHueFunction(hue, 216)].map(
-        (hue_step) => chroma.color([hue_step, sat, luminance], 'hsl'),
+    return [hue, rotateHueFunction(hue, 72), rotateHueFunction(hue, 216)].map((hue_step) =>
+        chroma.color([hue_step, sat, luminance], 'hsl'),
     )
 }
 
@@ -120,10 +99,7 @@ export const analogous = (
     }
 }*/
 
-const chromaColorBrighten = (
-    value: string | undefined,
-    amount: number,
-): Color | undefined => {
+const chromaColorBrighten = (value: string | undefined, amount: number): Color | undefined => {
     if (tg.isUndefined(value) || isCSSColorSpecial(value)) return undefined
     if (tg.isNotUndefined<string>(value)) {
         if (isValidColor(value)) {
@@ -155,11 +131,7 @@ function _analogous(color: Chromable, results: number, slices: number): void {
         return ret;*/
 }
 
-function monochromatic(
-    color: Chromable,
-    format?: chroma.ColorFormat,
-    results = 6,
-): void {
+function monochromatic(color: Chromable, format?: chroma.ColorFormat, results = 6): void {
     // const [h,s,v] = chroma.color(color).hsv()
     const modification = 1 / results
     const explodeColorByResultsArr = repeat(chroma.color(color).hsv(), results)

@@ -14,10 +14,7 @@ export type ISO_8601 = 'ISO_8601'
 export const isValidIsoDate = (value: string): boolean => dayjs(value).isValid()
 
 /** Strict date validation against a format (customParseFormat strict mode) */
-export const isValidDate = (
-    value: string,
-    format: string = format_date_time_short,
-): boolean => {
+export const isValidDate = (value: string, format: string = format_date_time_short): boolean => {
     const parsed = dayjs(value, format, true)
     return parsed.isValid()
 }

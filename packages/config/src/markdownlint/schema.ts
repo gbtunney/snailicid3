@@ -68,29 +68,21 @@ export const markdownlintRuleOptsSchema = markdownlintOptsSchema.pick({
     useBaseConfig: true,
     useDefault: true,
 })
-export type MarkdownlintRuleOptsOutput = z.infer<
-    typeof markdownlintRuleOptsSchema
->
+export type MarkdownlintRuleOptsOutput = z.infer<typeof markdownlintRuleOptsSchema>
 export type MarkdownlintRuleOpts = z.input<typeof markdownlintRuleOptsSchema>
 
 export const loadJSONSchema = async <
     SchemaType extends JSONSchemaType<unknown> = JSONSchemaType<unknown>,
 >(
-    schemaFileName:
-        | typeof MDLINT_CLI2_JSON_SCHEMA
-        | typeof MDLINT_CLI2_RULES_JSON_SCHEMA,
+    schemaFileName: typeof MDLINT_CLI2_JSON_SCHEMA | typeof MDLINT_CLI2_RULES_JSON_SCHEMA,
 ): Promise<SchemaType> => {
     const _path = path.resolve(`${MDLINT_CLI2_PATH}/${schemaFileName}`)
     if (!fs.existsSync(_path))
-        throw new Error(
-            `markdownlint cli schema JSON does not exist at path: ${_path}`,
-        )
+        throw new Error(`markdownlint cli schema JSON does not exist at path: ${_path}`)
     const schemaJson = await importJSON(_path)
 
-    const _resultbool: boolean =
-        schemaJson === undefined || isPlainObject<JsonObject>(schemaJson)
-    if (!_resultbool)
-        throw new Error(`Failed to load markdownlint schema JSON at ${_path}`)
+    const _resultbool: boolean = schemaJson === undefined || isPlainObject<JsonObject>(schemaJson)
+    if (!_resultbool) throw new Error(`Failed to load markdownlint schema JSON at ${_path}`)
     return schemaJson as SchemaType
 }
 
@@ -101,9 +93,7 @@ export const parseOptionsSchema = <Schema extends z.ZodObject>(
     const _parseOptsResult = schema.safeParse(opts)
     if (!_parseOptsResult.success) {
         console.log(z.prettifyError(_parseOptsResult.error))
-        throw new Error(
-            'Invalid options provided for markdownlint configuration validation: ',
-        )
+        throw new Error('Invalid options provided for markdownlint configuration validation: ')
     }
     return _parseOptsResult.data
 }

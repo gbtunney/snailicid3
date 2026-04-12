@@ -22,9 +22,7 @@ export type ChalkColorPreset = ColorName
 export type ChalkColor = ChalkColorPreset | HexColor // LoggerRecord< ChalkInstance|ChalkColor|HexColor>
 
 /** Replace the guard to use Chalk's canonical list */
-export const isChalkColorPreset = (
-    value: string,
-): value is ChalkColorPreset => {
+export const isChalkColorPreset = (value: string): value is ChalkColorPreset => {
     return (colorNames as ReadonlyArray<string>).includes(value)
 }
 
@@ -34,9 +32,7 @@ export function assertChalkColorPreset(
     ctx?: string,
 ): asserts value is ChalkColorPreset {
     if (!isChalkColorPreset(value)) {
-        throw new Error(
-            `Invalid Chalk color${ctx ? ` (${ctx})` : ''}: "${value}"`,
-        )
+        throw new Error(`Invalid Chalk color${ctx ? ` (${ctx})` : ''}: "${value}"`)
     }
 }
 
@@ -56,17 +52,13 @@ export function isBright(value: ChalkColorPreset): boolean {
 }
 
 /** BgRed -> red (lowercase first letter after bg) */
-const stripBg = (color: string): string =>
-    color.startsWith('bg') ? color.slice(2) : color
+const stripBg = (color: string): string => (color.startsWith('bg') ? color.slice(2) : color)
 /** Red|redBright -> bgRed|bgRedBright (capitalize first letter, keep rest) */
 const addBg = (color: string): string => `bg${upperCaseFirstLetter(color)}`
 
 /** Converts any color to bright form */
 
-export const toBright = (
-    color: ChalkColorPreset,
-    strip = false,
-): ChalkColorPreset => {
+export const toBright = (color: ChalkColorPreset, strip = false): ChalkColorPreset => {
     if (strip) {
         const next = color.replace(/Bright$/, '')
         assertChalkColorPreset(next, 'toBright(strip)')
@@ -77,30 +69,19 @@ export const toBright = (
     return next
 }
 
-export const stripBright = (color: ChalkColorPreset): ChalkColorPreset =>
-    toBright(color, true)
+export const stripBright = (color: ChalkColorPreset): ChalkColorPreset => toBright(color, true)
 
 /** Converts any color to its foreground variant (strips bg + optional Bright) */
-export function toForeground(
-    color: ChalkColorPreset,
-    removeBright = false,
-): ChalkColorPreset {
-    const _color: string = lowerCaseFirstLetter(
-        isBackground(color) ? stripBg(color) : color,
-    )
+export function toForeground(color: ChalkColorPreset, removeBright = false): ChalkColorPreset {
+    const _color: string = lowerCaseFirstLetter(isBackground(color) ? stripBg(color) : color)
     assertChalkColorPreset(_color, 'toForeground')
     return removeBright ? stripBright(_color) : _color
 }
 
 /** Converts any color to its background variant (adds bg + preserves/removes Bright) */
-export function toBackground(
-    color: ChalkColorPreset,
-    removeBright = false,
-): ChalkColorPreset {
+export function toBackground(color: ChalkColorPreset, removeBright = false): ChalkColorPreset {
     // normalize to foreground base first
-    const _color: string = addBg(
-        lowerCaseFirstLetter(isBackground(color) ? stripBg(color) : color),
-    )
+    const _color: string = addBg(lowerCaseFirstLetter(isBackground(color) ? stripBg(color) : color))
     assertChalkColorPreset(_color, 'toBackground')
     return removeBright ? stripBright(_color) : _color
 }
@@ -120,15 +101,10 @@ const getModifiers = (): Record<ModifierName, ChalkInstance> => {
             return [key, chalk[key]]
         },
     )
-    return Object.fromEntries<ChalkInstance>(inner) as Record<
-        ModifierName,
-        ChalkInstance
-    >
+    return Object.fromEntries<ChalkInstance>(inner) as Record<ModifierName, ChalkInstance>
 }
 
-export const toChalkColorPresetInstance = (
-    value: ChalkColorPreset,
-): ChalkInstance => {
+export const toChalkColorPresetInstance = (value: ChalkColorPreset): ChalkInstance => {
     if (isChalkColorPreset(value) && chalk[value]) {
         return chalk[value]
     }
@@ -161,15 +137,12 @@ export const getColorChalkInstance = (
     if (isChalkColorPreset(color)) {
         assertChalkColorPreset(color)
         const chalkColor: ChalkColor = color
-        const _chalkColor =
-            theme === 'bg' ? toBackground(chalkColor) : toForeground(chalkColor)
+        const _chalkColor = theme === 'bg' ? toBackground(chalkColor) : toForeground(chalkColor)
         // : invertChalkColor(chalkColor)
 
         const readableColor = readableTextHex(stripBright(color), theme)
         const _resultContrast: ChalkColorPreset =
-            theme === 'bg'
-                ? toForeground(readableColor)
-                : toBackground(readableColor)
+            theme === 'bg' ? toForeground(readableColor) : toBackground(readableColor)
 
         return toChalkColorPresetInstance(_chalkColor)
     } else {

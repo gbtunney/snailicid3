@@ -14,10 +14,7 @@ export type SyncResult = {
     reason?: string
 }
 
-const syncPackageJson = (
-    input: ScaffoldInput,
-    packageDir: string,
-): SyncResult => {
+const syncPackageJson = (input: ScaffoldInput, packageDir: string): SyncResult => {
     const filePath = join(packageDir, 'package.json')
     const template = generatePackageJson(input)
 
@@ -26,20 +23,11 @@ const syncPackageJson = (
         return { file: 'package.json', action: 'created' }
     }
 
-    const existing = JSON.parse(readFileSync(filePath, 'utf8')) as Record<
-        string,
-        unknown
-    >
+    const existing = JSON.parse(readFileSync(filePath, 'utf8')) as Record<string, unknown>
 
     // Overwrite scripts entirely, merge devDependencies (add missing only)
-    const existingDevDeps = (existing.devDependencies ?? {}) as Record<
-        string,
-        string
-    >
-    const templateDevDeps = (template.devDependencies ?? {}) as Record<
-        string,
-        string
-    >
+    const existingDevDeps = (existing.devDependencies ?? {}) as Record<string, string>
+    const templateDevDeps = (template.devDependencies ?? {}) as Record<string, string>
     const mergedDevDeps: Record<string, string> = { ...existingDevDeps }
     for (const [key, value] of Object.entries(templateDevDeps)) {
         if (!(key in mergedDevDeps)) {
@@ -66,10 +54,7 @@ const syncTsConfig = (input: ScaffoldInput, packageDir: string): SyncResult => {
         return { file: 'tsconfig.json', action: 'created' }
     }
 
-    const existing = JSON.parse(readFileSync(filePath, 'utf8')) as Record<
-        string,
-        unknown
-    >
+    const existing = JSON.parse(readFileSync(filePath, 'utf8')) as Record<string, unknown>
     const updated = {
         ...existing,
         compilerOptions: {
@@ -126,10 +111,7 @@ const checkRollupConfig = (packageDir: string): SyncResult => {
     }
 }
 
-export const syncPackage = (
-    input: ScaffoldInput,
-    packageDir: string,
-): SyncResult[] => [
+export const syncPackage = (input: ScaffoldInput, packageDir: string): SyncResult[] => [
     syncPackageJson(input, packageDir),
     syncTsConfig(input, packageDir),
     syncReadme(input, packageDir),
