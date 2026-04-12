@@ -158,3 +158,5 @@ dist
 # Scratch Files
 scratch
 examples
+
+!/notes/scratch

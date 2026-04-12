@@ -1,3 +1,45 @@
 {
+    "[markdown]": {
+        "editor.wordWrap": "off",
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+
+    "files.associations": {
+        "*.yaml": "home-assistant"
+    },
+
+    "files.watcherExclude": {
+        "**/.git/**": true,
+        "**/node_modules/**": true,
+        "**/dist/**": true,
+        "**/.nx/**": true,
+        "**/.turbo/**": true
+    },
+
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/dist": true
+    },
+
+    "git.decorations.enabled": false,
+    "editor.minimap.enabled": false,
+
+    "workbench.list.smoothScrolling": false,
+    "editor.cursorSmoothCaretAnimation": "off",
+    "editor.smoothScrolling": false,
+
+    "typescript.tsserver.maxTsServerMemory": 4096,
+    "typescript.disableAutomaticTypeAcquisition": true,
+
+    "prettier.proseWrap": "never",
+    "prettier.printWidth": 140,
+    "typescript.tsserver.experimental.enableProjectDiagnostics": false,
+    "typescript.preferences.includePackageJsonAutoImports": "off",
+
+    "terminal.integrated.profiles.linux": {
+        "zsh": {
+            "path": "/usr/bin/zsh"
+        }
+    },
     "terminal.integrated.defaultProfile.linux": "zsh"
 }

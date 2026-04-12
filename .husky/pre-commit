@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# filepath: /Users/gilliantunney/gbt-template-boilerplate/.husky/pre-commit
+set -eu
+(set -o pipefail 2>/dev/null) || true
+
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+PROTECTED_BRANCHES="^(master|main)$"
+LINT_MODE="LINT_STAGED" # other values: LINT_ALL | DISABLED
+
+# Allowed: A-Z a-z 0-9 space . _ - + @ /   (blocks unicode like —)
+BAD_FILENAME_RE='[^A-Za-z0-9._/@ +\-]'
+
+# Force LINT_ALL on development branch
+if [ "$BRANCH" = "development" ]; then
+    LINT_MODE="LINT_ALL"
+fi
+
+printf "\n===\n>> Running in shell:: %s\n" "${SHELL:-unknown}"
+printf ">> Pre-commit Hook:: Checking BRANCH: %s LINT_MODE: %s\n===\n\n" "$BRANCH" "$LINT_MODE"
+
+# Protect branches from accidental commits.
+if echo "$BRANCH" | grep -Eq "$PROTECTED_BRANCHES"; then
+    printf "\nCommit directly to BRANCH '%s' is not allowed.\n\n" "$BRANCH"
+    exit 1
+fi
+
+# Validate branch name:
+# - lowercase letters + digits
+# - segments separated by / or -
+if echo "$BRANCH" | grep -Eq '^[a-z0-9]+([/-][a-z0-9]+)*$'; then
+    echo "Branch name is valid"
+else
+    printf "\nBranch name must be lowercase [a-z0-9] and may contain '/' or '-': %s\n\n" "$BRANCH"
+    exit 1
+fi
+
+# Block bad characters in STAGED filenames (spaces allowed)
+BAD_FILES="$(
+    git diff --cached --name-only \
+        | LC_ALL=C grep -nE "$BAD_FILENAME_RE" \
+        || true
+)"
+if [ -n "$BAD_FILES" ]; then
+    printf "\nBad characters in staged filenames.\n"
+    printf "Allowed: A-Z a-z 0-9 space . _ - + @ /\n"
+    printf "Rename these files:\n%s\n\n" "$BAD_FILES"
+    exit 1
+fi
+
+if [ "$LINT_MODE" = "DISABLED" ]; then
+    exit 0
+fi
+
+if [ "$LINT_MODE" = "LINT_ALL" ]; then
+    printf "\nRunning full lint/format (LINT_ALL)...\n\n"
+    pnpm lint:all
+    git add -A
+    exit 0
+fi
+
+# LINT_STAGED:
+# Intentionally do not run lint-staged here; commit flow handles it elsewhere.
+printf "\nLINT_STAGED: hook checks passed.\n\n"
+exit 0
