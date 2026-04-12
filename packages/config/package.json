@@ -1,6 +1,6 @@
 {
     "name": "@snailicid3/config",
-    "version": "0.0.0",
+    "version": "0.1.0",
     "private": false,
     "description": "Shared linting, formatting, and TypeScript config utilities for the snailicid3 monorepo",
     "scripts": {
@@ -9,6 +9,7 @@
         "clean:nx": "nx run $npm_package_name:clean",
         "\n========== DEVELOPMENT >> ==========": "",
         "dev": "tsc --build --watch",
+        "build": "tsc -p src/tsconfig.json",
         "\n========== TEST >> ==========": "",
         "test:watch": "vitest watch",
         "test:coverage": "vitest run --coverage"
@@ -44,13 +45,37 @@
             "import": "./dist/index.js",
             "types": "./types/index.d.ts"
         },
-        "./tsconfig-base": "./tsconfig-base.json"
+        "./eslint": {
+            "import": "./dist/eslint/index.js",
+            "types": "./types/eslint/index.d.ts"
+        },
+        "./prettier": {
+            "import": "./dist/prettier/index.js",
+            "types": "./types/prettier/index.d.ts"
+        },
+        "./commitlint": {
+            "import": "./dist/commitlint/index.js",
+            "types": "./types/commitlint/index.d.ts"
+        },
+        "./markdownlint": {
+            "import": "./dist/markdownlint/index.js",
+            "types": "./types/markdownlint/index.d.ts"
+        },
+        "./utilities": {
+            "import": "./dist/utilities.js",
+            "types": "./types/utilities.d.ts"
+        },
+        "./tsconfig-base": "./tsconfig-base.json",
+        "./tsconfig-src": "./tsconfig-src.json",
+        "./tsconfig-node": "./tsconfig-node.json"
     },
     "files": [
         "CHANGELOG.md",
         "dist",
         "types",
-        "tsconfig-base.json"
+        "tsconfig-base.json",
+        "tsconfig-src.json",
+        "tsconfig-node.json"
     ],
     "keywords": [
         "eslint",
@@ -92,6 +117,9 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/gbtunney/snailicid3-monorepo"
+    },
+    "publishConfig": {
+        "access": "public"
     },
     "main": "./dist/index.js",
     "types": "./types/index.d.ts"
