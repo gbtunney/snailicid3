@@ -53,15 +53,15 @@
         "test:coverage": "vitest run --coverage"
     },
     "dependencies": {
-        "ramda": "^0.30.0",
-        "ramda-adjunct": "^5.0.0",
-        "type-fest": "^4.26.0"
+        "ramda": "^0.32.0",
+        "ramda-adjunct": "^6.0.0",
+        "type-fest": "^5.5.0"
     },
     "devDependencies": {
         "@snailicid3/config": "workspace:*",
-        "@types/node": "^22.0.0",
-        "@types/ramda": "^0.30.0",
-        "typescript": "^5.7.0",
-        "vitest": "^2.1.0"
+        "@types/node": "^25.6.0",
+        "@types/ramda": "^0.31.1",
+        "typescript": "^6.0.2",
+        "vitest": "^4.1.4"
     }
 }

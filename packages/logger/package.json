@@ -14,17 +14,17 @@
         "test:coverage": "vitest run --coverage"
     },
     "dependencies": {
-        "chalk": "^5.4.0",
-        "dayjs": "^1.11.13",
-        "zod": "^4.0.0",
         "@snailicid3/color": "workspace:*",
-        "@snailicid3/utils": "workspace:*"
+        "@snailicid3/utils": "workspace:*",
+        "chalk": "^5.6.2",
+        "dayjs": "^1.11.20",
+        "zod": "^4.3.6"
     },
     "devDependencies": {
         "@snailicid3/config": "workspace:*",
-        "@types/node": "^22.0.0",
-        "typescript": "^5.7.0",
-        "vitest": "^2.1.0"
+        "@types/node": "^25.6.0",
+        "typescript": "^6.0.2",
+        "vitest": "^4.1.4"
     },
     "exports": {
         ".": {

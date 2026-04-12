@@ -12,8 +12,8 @@
 
 ```bash
 pnpm install
-pnpm build:self   # compile root tsconfig references
-pnpm nx:build     # build all packages bottom-up via Nx
+pnpm build:self # compile root tsconfig references
+pnpm nx:build   # build all packages bottom-up via Nx
 ```
 
 ## First-time codespace setup
@@ -40,16 +40,16 @@ pnpm report:workspace # pnpm outdated -r
 pnpm report:prettier  # prettier check
 
 # Build
-pnpm build            # build:self + nx run-many build
-pnpm nx:build:ts      # tsc-only pass across all packages
+pnpm build       # build:self + nx run-many build
+pnpm nx:build:ts # tsc-only pass across all packages
 
 # Nx
-pnpm nx:graph         # open dependency graph in browser
-pnpm nx:reset         # clear Nx cache
+pnpm nx:graph # open dependency graph in browser
+pnpm nx:reset # clear Nx cache
 
 # Code style
-pnpm fix              # prettier --write + eslint --fix + markdownlint --fix
-pnpm check            # lint + prettier --check (read-only)
+pnpm fix   # prettier --write + eslint --fix + markdownlint --fix
+pnpm check # lint + prettier --check (read-only)
 ```
 
 ## Nx target reference

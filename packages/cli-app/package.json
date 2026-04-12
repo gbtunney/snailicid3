@@ -14,18 +14,18 @@
         "test:coverage": "vitest run --coverage"
     },
     "dependencies": {
-        "zod": "^4.0.0",
-        "yargs": "^17.7.2",
+        "@snailicid3/node-utils": "workspace:*",
         "@snailicid3/types": "workspace:*",
         "@snailicid3/utils": "workspace:*",
-        "@snailicid3/node-utils": "workspace:*"
+        "yargs": "^18.0.0",
+        "zod": "^4.3.6"
     },
     "devDependencies": {
         "@snailicid3/config": "workspace:*",
-        "@types/node": "^22.0.0",
-        "@types/yargs": "^17.0.33",
-        "typescript": "^5.7.0",
-        "vitest": "^2.1.0"
+        "@types/node": "^25.6.0",
+        "@types/yargs": "^17.0.35",
+        "typescript": "^6.0.2",
+        "vitest": "^4.1.4"
     },
     "exports": {
         ".": {

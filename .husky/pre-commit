@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # filepath: /Users/gilliantunney/gbt-template-boilerplate/.husky/pre-commit
 set -eu
-(set -o pipefail 2>/dev/null) || true
+(set -o pipefail 2> /dev/null) || true
 
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 PROTECTED_BRANCHES="^(master|main)$"
