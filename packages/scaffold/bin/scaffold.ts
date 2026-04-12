@@ -6,20 +6,14 @@ import { initApp } from '@snailicid3/cli-app'
 import { scaffoldInputSchema, scaffoldPackage, syncPackage } from '../src/index.js'
 
 const schema = scaffoldInputSchema.extend({
-    sync: z
-        .boolean()
-        .default(false)
-        .meta({
-            alias: 's',
-            description: 'Sync an existing package instead of creating a new one',
-        }),
-    dir: z
-        .string()
-        .optional()
-        .meta({
-            alias: 'd',
-            description: '<path> Target output directory (defaults to ./packages/<name>)',
-        }),
+    sync: z.boolean().default(false).meta({
+        alias: 's',
+        description: 'Sync an existing package instead of creating a new one',
+    }),
+    dir: z.string().optional().meta({
+        alias: 'd',
+        description: '<path> Target output directory (defaults to ./packages/<name>)',
+    }),
 })
 
 await initApp(

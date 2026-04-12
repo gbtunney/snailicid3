@@ -14,16 +14,16 @@
         "test:coverage": "vitest run --coverage"
     },
     "dependencies": {
-        "zod": "^4.0.0",
-        "@snailicid3/types": "workspace:*",
         "@snailicid3/color": "workspace:*",
-        "@snailicid3/utils": "workspace:*"
+        "@snailicid3/types": "workspace:*",
+        "@snailicid3/utils": "workspace:*",
+        "zod": "^4.3.6"
     },
     "devDependencies": {
         "@snailicid3/config": "workspace:*",
-        "@types/node": "^22.0.0",
-        "typescript": "^5.7.0",
-        "vitest": "^2.1.0"
+        "@types/node": "^25.6.0",
+        "typescript": "^6.0.2",
+        "vitest": "^4.1.4"
     },
     "exports": {
         ".": {

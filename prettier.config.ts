@@ -1,6 +1,7 @@
 import type { Config as PrettierConfig } from 'prettier'
 
 const config: PrettierConfig = {
+    plugins: ['prettier-plugin-sh'],
     semi: false,
     singleQuote: true,
     tabWidth: 4,
@@ -10,6 +11,12 @@ const config: PrettierConfig = {
     overrides: [
         {
             files: '.husky/*',
+            options: {
+                parser: 'sh',
+            },
+        },
+        {
+            files: '**/*.sh',
             options: {
                 parser: 'sh',
             },
