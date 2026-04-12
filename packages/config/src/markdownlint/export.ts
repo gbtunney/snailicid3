@@ -1,9 +1,6 @@
 import RefParser from '@apidevtools/json-schema-ref-parser'
 import { JSONSchema4 } from 'json-schema'
-import {
-    compile as compileToTS,
-    Options as CompileToTSOpts,
-} from 'json-schema-to-typescript'
+import { compile as compileToTS, Options as CompileToTSOpts } from 'json-schema-to-typescript'
 import { Merge } from 'type-fest'
 import fs from 'fs'
 import { getFilePath } from './../utilities.js'
@@ -14,10 +11,7 @@ type AdditionalPropsMode =
     | 'remove' // remove index signature
     | 'loose' // allow boolean | string | object | null
     | 'strict' // only boolean
-type ExportOptions = Merge<
-    CompileToTSOpts,
-    { additionalProperties?: AdditionalPropsMode }
->
+type ExportOptions = Merge<CompileToTSOpts, { additionalProperties?: AdditionalPropsMode }>
 export const exportMDLintJSONSchemaTypes = async (
     _output_file_name: string = './markdownlint.config.ts',
     _schema_file_name: typeof MDLINT_CLI2_JSON_SCHEMA = MDLINT_CLI2_JSON_SCHEMA,
@@ -36,9 +30,7 @@ export const exportMDLintJSONSchemaTypes = async (
     LOGGER.info('Exporting config types →', output_path)
 
     // 1. Load wrapper schema (cli2)
-    const rawSchema: JSONSchema4 = (await loadJSONSchema(
-        _schema_file_name,
-    )) as JSONSchema4
+    const rawSchema: JSONSchema4 = (await loadJSONSchema(_schema_file_name)) as JSONSchema4
 
     // 2. Dereference $ref → get the REAL markdownlint rule schema
     const derefSchema: any = await RefParser.dereference(rawSchema)
@@ -48,9 +40,7 @@ export const exportMDLintJSONSchemaTypes = async (
     // 3. The real markdownlint rule schema is here:
     const ruleSchema = derefSchema.properties?.config
     if (!ruleSchema) {
-        throw new Error(
-            'Could not locate markdownlint rule schema (properties.config)',
-        )
+        throw new Error('Could not locate markdownlint rule schema (properties.config)')
     }
 
     // ---- PATCH additionalProperties BEHAVIOR ----
@@ -74,23 +64,14 @@ export const exportMDLintJSONSchemaTypes = async (
     if (mode === 'loose') {
         LOGGER.info('Setting loose index signature.')
         ruleSchema.additionalProperties = {
-            oneOf: [
-                { type: 'boolean' },
-                { type: 'string' },
-                { type: 'object' },
-                { type: 'null' },
-            ],
+            oneOf: [{ type: 'boolean' }, { type: 'string' }, { type: 'object' }, { type: 'null' }],
         }
     }
 
     // ---------------------------------------------
 
     // 4. Generate Typescript
-    const ts_file = await compileToTS(
-        derefSchema,
-        'MarkdownlintCli2ConfigurationSchema',
-        jsttOpts,
-    )
+    const ts_file = await compileToTS(derefSchema, 'MarkdownlintCli2ConfigurationSchema', jsttOpts)
 
     // 5. Write file
     if (fs.existsSync(output_path)) {

@@ -15,10 +15,7 @@ const { vsprintf }: typeof format = format
  * @category Replace
  * @category Format
  */
-export const formatString = (
-    value: string,
-    args: string | Array<string>,
-): string => {
+export const formatString = (value: string, args: string | Array<string>): string => {
     const _vars = ensureArray(z.string()).parse(args)
     return vsprintf(value, _vars)
 }

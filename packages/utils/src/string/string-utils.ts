@@ -13,14 +13,11 @@ export const removeNonWord = (value: string): string =>
 
 /** Generates a UUID v4 string. */
 export const uuidv4 = (): string => {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
-        /[xy]/g,
-        function (c) {
-            const r = (Math.random() * 16) | 0,
-                v = c == 'x' ? r : (r & 0x3) | 0x8
-            return v.toString(16)
-        },
-    )
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        const r = (Math.random() * 16) | 0,
+            v = c == 'x' ? r : (r & 0x3) | 0x8
+        return v.toString(16)
+    })
 }
 /**
  * Normalizes line breaks in a string to a specified line ending.
@@ -28,11 +25,7 @@ export const uuidv4 = (): string => {
  * @category Remove Characters
  */
 export const normalizeLineBreaks = (value: string, lineEnd = '\n'): string =>
-    pipe(
-        replace(/\r\n/g, lineEnd),
-        replace(/\r/g, lineEnd),
-        replace(/\n/g, lineEnd),
-    )(value)
+    pipe(replace(/\r\n/g, lineEnd), replace(/\r/g, lineEnd), replace(/\n/g, lineEnd))(value)
 
 /**
  * Replaces accented characters in a string with their non-accented equivalents.
@@ -82,8 +75,7 @@ export const abbreviate = (value: string): string => {
  *
  * @category Remove Characters
  */
-export const stripHtmlTags = (value: string): string =>
-    replace(/<[^>]*>/g, '', value)
+export const stripHtmlTags = (value: string): string => replace(/<[^>]*>/g, '', value)
 
 /**
  * Removes non-printable ASCII characters from a string.
@@ -91,16 +83,14 @@ export const stripHtmlTags = (value: string): string =>
  * @category Remove Characters
  * @see {@link http://en.wikipedia.org/wiki/ASCII#ASCII_printable_characters}
  */
-export const removeNonASCII = (value: string): string =>
-    replace(/[^\x20-\x7E]/g, '', value)
+export const removeNonASCII = (value: string): string => replace(/[^\x20-\x7E]/g, '', value)
 
 /**
  * Removes all newlines from a string.
  *
  * @category Remove Characters
  */
-export const removeAllNewlines = (value: string): string =>
-    replace(/\r?\n|\r/g, '', value)
+export const removeAllNewlines = (value: string): string => replace(/\r?\n|\r/g, '', value)
 
 /**
  * Removes whitespace from the start and end of a string.

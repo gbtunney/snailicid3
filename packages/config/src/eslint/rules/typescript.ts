@@ -14,10 +14,7 @@ export const typescriptRules = (): Config => {
              * @see [TypeScript Style Guide](https://mkosir.github.io/typescript-style-guide/)
              */
             rules: {
-                '@typescript-eslint/array-type': [
-                    'error',
-                    { default: 'generic' },
-                ],
+                '@typescript-eslint/array-type': ['error', { default: 'generic' }],
                 '@typescript-eslint/ban-ts-comment': [
                     'error',
                     {
@@ -27,10 +24,7 @@ export const typescriptRules = (): Config => {
                         'ts-nocheck': true,
                     },
                 ],
-                '@typescript-eslint/consistent-type-definitions': [
-                    'error',
-                    'type',
-                ],
+                '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
                 '@typescript-eslint/no-explicit-any': 'warn',
 
                 '@typescript-eslint/no-namespace': 'warn',
@@ -69,13 +63,7 @@ export const typescriptRules = (): Config => {
         },
         /** Typescript Rules overwritten for files in source folders */
         {
-            files: [
-                ...getFileExtensionList(
-                    TS_FILE_EXTENSIONS,
-                    false,
-                    '**/src/**/*.',
-                ),
-            ],
+            files: [...getFileExtensionList(TS_FILE_EXTENSIONS, false, '**/src/**/*.')],
             name: 'Typescript Rules : Explicit Return Type for files in source folders',
             rules: {
                 '@typescript-eslint/explicit-function-return-type': 'error',

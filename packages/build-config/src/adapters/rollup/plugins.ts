@@ -37,11 +37,7 @@ const tsPlugin = (): Plugin =>
         sourceMap: true,
     })
 
-export type RollupPluginPreset =
-    | 'node_library'
-    | 'browser_library'
-    | 'cli'
-    | 'iife'
+export type RollupPluginPreset = 'node_library' | 'browser_library' | 'cli' | 'iife'
 
 /**
  * Return a plugin array for the given preset.
@@ -95,10 +91,7 @@ export function getPluginsForPreset(
 /**
  * Infer a sensible preset from an entry's output kinds and the package runtime.
  */
-export function inferPreset(
-    outputKinds: string[],
-    runtime: string,
-): RollupPluginPreset {
+export function inferPreset(outputKinds: string[], runtime: string): RollupPluginPreset {
     if (outputKinds.includes('iife')) return 'iife'
     if (runtime === 'browser') return 'browser_library'
     if (outputKinds.includes('cjs') || outputKinds.includes('esm')) {

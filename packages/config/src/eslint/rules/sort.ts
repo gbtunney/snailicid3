@@ -11,14 +11,7 @@ export const sortRules = (): Config => [
                 'error',
                 {
                     alphabetize: { caseInsensitive: true, order: 'asc' },
-                    groups: [
-                        'external',
-                        'builtin',
-                        'internal',
-                        'sibling',
-                        'parent',
-                        'index',
-                    ],
+                    groups: ['external', 'builtin', 'internal', 'sibling', 'parent', 'index'],
                     pathGroups: [
                         { group: 'internal', pattern: 'components' },
                         { group: 'internal', pattern: 'common' },
@@ -32,10 +25,7 @@ export const sortRules = (): Config => [
                     pathGroupsExcludedImportTypes: ['internal'],
                 },
             ],
-            'sort/destructuring-properties': [
-                'error',
-                { caseSensitive: false, natural: true },
-            ],
+            'sort/destructuring-properties': ['error', { caseSensitive: false, natural: true }],
             'sort/exports': [
                 'error',
                 {

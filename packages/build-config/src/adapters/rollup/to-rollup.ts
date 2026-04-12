@@ -69,9 +69,7 @@ export function toRollupConfig(
             : path.resolve(plan.sourceDir, `${filename}.ts`)
 
         const banner =
-            entry.banner && packageMeta
-                ? createBanner(libraryName, packageMeta)
-                : undefined
+            entry.banner && packageMeta ? createBanner(libraryName, packageMeta) : undefined
 
         const preset = inferPreset(entry.outputKinds, plan.identity.runtime)
         const plugins = getPluginsForPreset(preset, {
@@ -85,13 +83,7 @@ export function toRollupConfig(
         if (entry.minify) {
             // Add minified variants alongside non-minified outputs
             const minOutputs: OutputOptions[] = entry.outputKinds.map((kind) => {
-                const base = buildOutputOptions(
-                    entry,
-                    kind,
-                    plan.outputDir,
-                    libraryName,
-                    banner,
-                )
+                const base = buildOutputOptions(entry, kind, plan.outputDir, libraryName, banner)
                 const file = base.file as string
                 const minFile = file.replace(/(\.[a-z]{2,7})$/, '.min$1')
                 return { ...base, file: minFile, sourcemap: false, plugins: [] }
@@ -112,9 +104,7 @@ export function toRollupConfig(
  *
  * Returns a plain object suitable for writing into `package.json#exports`.
  */
-export function toPackageExports(
-    plan: BuildPlan,
-): Record<string, Record<string, string>> {
+export function toPackageExports(plan: BuildPlan): Record<string, Record<string, string>> {
     const result: Record<string, Record<string, string>> = {}
 
     for (const entry of plan.entries) {

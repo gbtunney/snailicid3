@@ -12,15 +12,9 @@ import { sortRules } from './rules/sort.js'
 import { typescriptRules } from './rules/typescript.js'
 import { vitestRules } from './rules/vitest.js'
 import { SHARED_FORMATTING_RULES } from '../prettier/index.js'
-import {
-    getFileExtensionList,
-    JS_FILE_EXTENSIONS,
-    JSLIKE_FILE_EXTENSIONS,
-} from '../utilities.js'
+import { getFileExtensionList, JS_FILE_EXTENSIONS, JSLIKE_FILE_EXTENSIONS } from '../utilities.js'
 
-const base_files: Array<string> = [
-    ...getFileExtensionList(JSLIKE_FILE_EXTENSIONS, false, '*.'),
-]
+const base_files: Array<string> = [...getFileExtensionList(JSLIKE_FILE_EXTENSIONS, false, '*.')]
 const base_ignores = [
     '**/dist/**/*',
     '**/node_modules/**',
@@ -94,9 +88,7 @@ export const flatEslintConfig = async (__dirname: string): Promise<Config> => {
         {
             // Take the preset and apply only to JS extensions
             ...tseslint.configs.disableTypeChecked,
-            files: [
-                ...getFileExtensionList(JS_FILE_EXTENSIONS, false, '**/*.'),
-            ],
+            files: [...getFileExtensionList(JS_FILE_EXTENSIONS, false, '**/*.')],
             name: 'Typescript Eslint : Disable Type Checked for js files',
         },
     ]

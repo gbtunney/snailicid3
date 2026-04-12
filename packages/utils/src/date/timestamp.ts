@@ -16,8 +16,7 @@ export type DayjsDiffUnit =
 export const nsToMs = (ns_value: number): number => ns_value / 1_000_000
 
 /** High-res timestamp (nanoseconds) to ISO string (UTC) */
-export const highresTimestamptoISOString = (ns: number): string =>
-    msToIsoString(nsToMs(ns))
+export const highresTimestamptoISOString = (ns: number): string => msToIsoString(nsToMs(ns))
 
 /** Get formatted duration between two high-res timestamps (nanoseconds) */
 export const getTimestampDuration = (

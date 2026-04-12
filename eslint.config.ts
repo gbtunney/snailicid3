@@ -99,11 +99,10 @@ export default tsEslint.config(
     ...tsEslint.config({
         files: ['**/*.stories.ts', '**/*.stories.tsx'],
         ...(Array.isArray(storybook.configs['flat/recommended'])
-        ? storybook.configs['flat/recommended']
-        : [storybook.configs['flat/recommended']]),
+            ? storybook.configs['flat/recommended']
+            : [storybook.configs['flat/recommended']]),
 
         rules: {
-          
             '@typescript-eslint/explicit-function-return-type': 'off',
             '@typescript-eslint/naming-convention': [
                 'error',

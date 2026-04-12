@@ -22,17 +22,11 @@ export const normalizeRGBCoords = (color: ColorJS): Coords => {
     return mapColorJSCoords(color, mappingRGBFunction())
 }
 
-export const isHexColor = (value: string): value is HexColor =>
-    /^#[0-9A-Fa-f]{6}$/.test(value)
+export const isHexColor = (value: string): value is HexColor => /^#[0-9A-Fa-f]{6}$/.test(value)
 
-export function assertHexColor(
-    value: string,
-    ctx?: string,
-): asserts value is HexColor {
+export function assertHexColor(value: string, ctx?: string): asserts value is HexColor {
     if (!isHexColor(value)) {
-        throw new Error(
-            `Invalid hex color${ctx ? ` (${ctx})` : ''}: "${value}"`,
-        )
+        throw new Error(`Invalid hex color${ctx ? ` (${ctx})` : ''}: "${value}"`)
     }
 }
 
@@ -43,22 +37,15 @@ export function parseColorJS(
 ): ColorJS {
     try {
         const _space = 'srgb'
-        const color = new ColorIO(input)
-            .to(_space)
-            .toGamut({ method: 'clip', space: 'srgb' })
+        const color = new ColorIO(input).to(_space).toGamut({ method: 'clip', space: 'srgb' })
         return color
     } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
-        throw new Error(
-            fmt`Failed to parse color "${input}"${ctx ? ` (${ctx})` : ''}: ${msg}`,
-        )
+        throw new Error(fmt`Failed to parse color "${input}"${ctx ? ` (${ctx})` : ''}: ${msg}`)
     }
 }
 /** Parse any CSS color string via ColorJS; throws on failure TODO: expand gamuts, spaces. */
-export function parseColorToHexStrict(
-    input: string | Color,
-    ctx?: string,
-): HexColor {
+export function parseColorToHexStrict(input: string | Color, ctx?: string): HexColor {
     try {
         const color = parseColorJS(input)
         const hexVal = toHex(color)
@@ -84,12 +71,9 @@ export function tryParseColorToHex(input: string): undefined {
 export function toHex(color: ColorJS, includeAlpha = false): string {
     const srgb = color.to('srgb').toGamut({ method: 'clip' })
     /** TODO: use other clamp */
-    const clamp01 = (v: number | undefined): number =>
-        Math.max(0, Math.min(1, v ?? 0))
-    const toByte = (v: number | undefined): number =>
-        Math.round(clamp01(v) * 255)
-    const toHex2 = (n: number): string =>
-        n.toString(16).padStart(2, '0').toUpperCase()
+    const clamp01 = (v: number | undefined): number => Math.max(0, Math.min(1, v ?? 0))
+    const toByte = (v: number | undefined): number => Math.round(clamp01(v) * 255)
+    const toHex2 = (n: number): string => n.toString(16).padStart(2, '0').toUpperCase()
 
     const [rF, gF, bF] = srgb.coords as [number, number, number]
     const r = toByte(rF),
@@ -107,12 +91,8 @@ export type ColorTheme = {
 }
 export const apcaContrast = (theme: ColorTheme): number => {
     const { bg, fg } = theme
-    const _fg: ColorJS = isHexColor(fg.toString())
-        ? parseColorJS(fg)
-        : (fg as ColorJS)
-    const _bg: ColorJS = isHexColor(bg.toString())
-        ? parseColorJS(bg)
-        : (bg as ColorJS)
+    const _fg: ColorJS = isHexColor(fg.toString()) ? parseColorJS(fg) : (fg as ColorJS)
+    const _bg: ColorJS = isHexColor(bg.toString()) ? parseColorJS(bg) : (bg as ColorJS)
     return _bg.contrast(_fg, 'APCA')
 }
 

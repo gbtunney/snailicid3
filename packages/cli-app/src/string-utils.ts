@@ -13,11 +13,7 @@ export const prettyErrorLog = (
     return `${_instance.underline(`\n------ ✖ ${message} ------`)}\n${z.prettifyError(error)}`
 }
 
-export const wrapString = (
-    value: string,
-    prefix: string = '(',
-    suffix: string = ')',
-): string => {
+export const wrapString = (value: string, prefix: string = '(', suffix: string = ')'): string => {
     const _value = value.trim()
     return _value.length > 0 ? `${prefix}${_value}${suffix}` : ''
 }
@@ -30,5 +26,4 @@ const ansiRegex = ({ onlyFirst = false } = {}): RegExp => {
     return new RegExp(pattern, onlyFirst ? undefined : 'g')
 }
 
-export const removeAnsi = (value: string): string =>
-    value.replace(ansiRegex(), '')
+export const removeAnsi = (value: string): string => value.replace(ansiRegex(), '')

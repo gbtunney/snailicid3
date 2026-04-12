@@ -11,14 +11,7 @@ import type { BuildAdapter } from '../../build/ports.js'
 import type { BuildPlan, Product, Runtime } from '../../build/types.js'
 
 /** Products that default to transpile-only (tsc). */
-const TSC_PRODUCTS: Product[] = [
-    'library',
-    'cli',
-    'build_tool',
-    'plugin',
-    'worker',
-    'server_app',
-]
+const TSC_PRODUCTS: Product[] = ['library', 'cli', 'build_tool', 'plugin', 'worker', 'server_app']
 
 export const tscAdapter: BuildAdapter = {
     name: 'tsc',

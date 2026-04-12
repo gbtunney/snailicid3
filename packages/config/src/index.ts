@@ -1,7 +1,6 @@
 // @snailicid3/config
 // TODO: implement
 
-
 export type HelloWorld = string | number
 
 /** Returns the input value unchanged. */

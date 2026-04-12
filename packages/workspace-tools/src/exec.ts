@@ -20,8 +20,7 @@ export function getExecCommandOutput(command: string): ExecResult {
     } catch (err: unknown) {
         const message =
             err instanceof Error
-                ? ((err as NodeJS.ErrnoException & { stderr?: string }).stderr ??
-                  err.message)
+                ? ((err as NodeJS.ErrnoException & { stderr?: string }).stderr ?? err.message)
                 : String(err)
         return { success: false, result: message }
     }

@@ -2,11 +2,11 @@
 
 ## Requirements
 
-| Tool | Version |
-|---|---|
-| Node.js | >= 20.x |
-| pnpm | >= 10.0.0 |
-| Python | >= 3.11 (for workspace-tools bin/python scripts) |
+| Tool    | Version                                          |
+| ------- | ------------------------------------------------ |
+| Node.js | >= 20.x                                          |
+| pnpm    | >= 10.0.0                                        |
+| Python  | >= 3.11 (for workspace-tools bin/python scripts) |
 
 ## Quick start
 
@@ -56,17 +56,17 @@ pnpm check            # lint + prettier --check (read-only)
 
 All targets are defined globally in `nx.json` — packages don't need to repeat them.
 
-| Target | Cached | Notes |
-|---|---|---|
-| `build:ts` | yes | `tsc --build` |
-| `build:rollup` | yes | depends on build:ts |
-| `build` | yes | depends on build:ts + build:rollup |
-| `test` | yes | `vitest run` |
-| `lint` | yes | `eslint` |
-| `typecheck` | yes | `tsc --noEmit` |
-| `fix` | **no** | mutates files — never cached |
-| `clean` | no | depends on clean:ts + clean:build |
-| `docs:build` | yes | `typedoc` |
+| Target         | Cached | Notes                              |
+| -------------- | ------ | ---------------------------------- |
+| `build:ts`     | yes    | `tsc --build`                      |
+| `build:rollup` | yes    | depends on build:ts                |
+| `build`        | yes    | depends on build:ts + build:rollup |
+| `test`         | yes    | `vitest run`                       |
+| `lint`         | yes    | `eslint`                           |
+| `typecheck`    | yes    | `tsc --noEmit`                     |
+| `fix`          | **no** | mutates files — never cached       |
+| `clean`        | no     | depends on clean:ts + clean:build  |
+| `docs:build`   | yes    | `typedoc`                          |
 
 ## Package dependency graph
 

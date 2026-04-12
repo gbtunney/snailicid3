@@ -5,8 +5,7 @@ const scientificNumber =
     /^[+-]?(?:\d(?:_?\d)*(?:\.\d(?:_?\d)*)?|\.\d(?:_?\d)*)(?:e[+-]?\d(?:_?\d)*)?$/i
 const hexNumber = /^[+-]?0x0-9a-f*$/i
 const binaryNumber = /^[+-]?0b01*$/i
-const bigintNumber =
-    /^[+-]?(?:\d(?:_?\d)*|0x0-9a-f*|0b01*)n$/i
+const bigintNumber = /^[+-]?(?:\d(?:_?\d)*|0x0-9a-f*|0b01*)n$/i
 
 /** String type guards backed by local regex constants */
 const isScientificString = (value: unknown): value is string =>
@@ -26,10 +25,7 @@ export const { isScientificNumber, isNotScientificNumber } = factoryValidator(
     'scientificNumber',
 )
 
-export const { isHexNumber, isNotHexNumber } = factoryValidator(
-    isHexString,
-    'hexNumber',
-)
+export const { isHexNumber, isNotHexNumber } = factoryValidator(isHexString, 'hexNumber')
 
 export const { isBinaryNumber, isNotBinaryNumber } = factoryValidator(
     isBinaryString,

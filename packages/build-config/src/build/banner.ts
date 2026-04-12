@@ -38,10 +38,7 @@ function repoUrl(repository: BannerPackageMeta['repository']): string {
  * //  * /
  * ```
  */
-export function createBanner(
-    moduleName: string,
-    meta: BannerPackageMeta,
-): string | undefined {
+export function createBanner(moduleName: string, meta: BannerPackageMeta): string | undefined {
     if (!meta.name || !meta.version) return undefined
 
     const lines: string[] = [

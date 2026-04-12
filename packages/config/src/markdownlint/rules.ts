@@ -67,14 +67,9 @@ export type MarkdownlintRuleConfigurationNoAliases = Omit<
 export const validateRuleConfiguration = async (
     rules: MarkdownlintRuleConfiguration,
     opts: MarkdownlintOpts = DEFAULT_OPTS,
-): Promise<
-    Omit<MarkdownlintProcessedResult<MarkdownlintRuleConfiguration>, 'config'>
-> => {
-    const {
-        ajvOptions,
-        strictValidation,
-        throwOnError,
-    }: MarkdownlintOptsOutput = parseOptionsSchema(markdownlintOptsSchema, opts)
+): Promise<Omit<MarkdownlintProcessedResult<MarkdownlintRuleConfiguration>, 'config'>> => {
+    const { ajvOptions, strictValidation, throwOnError }: MarkdownlintOptsOutput =
+        parseOptionsSchema(markdownlintOptsSchema, opts)
 
     const schemaJson = await loadJSONSchema(MDLINT_CLI2_RULES_JSON_SCHEMA)
     const validateFn = getAjvValidator(schemaJson, strictValidation, ajvOptions)
@@ -86,21 +81,15 @@ export const validateRuleConfiguration = async (
             .map(
                 (e) =>
                     `${e.instancePath || '/'} ${e.message ?? e.keyword}${
-                        Object.keys(e.params || {}).length
-                            ? ' ' + JSON.stringify(e.params)
-                            : ''
+                        Object.keys(e.params || {}).length ? ' ' + JSON.stringify(e.params) : ''
                     }`,
             )
             .join('\n')
 
         if (throwOnError) {
-            throw new Error(
-                `markdownlint configuration failed validation:\n${msg}`,
-            )
+            throw new Error(`markdownlint configuration failed validation:\n${msg}`)
         } else {
-            logger().error(
-                `markdownlint configuration failed validation:\n${msg}`,
-            )
+            logger().error(`markdownlint configuration failed validation:\n${msg}`)
         }
     }
 
@@ -122,12 +111,15 @@ export const processRuleConfiguration = async (
         useDefault,
     }: MarkdownlintOptsOutput = parseOptionsSchema(markdownlintOptsSchema, opts)
 
-    const _normalized_rules_config: MarkdownlintRuleConfiguration =
-        getMergedRuleConfiguration(rules, { useBaseConfig, useDefault })
-    const validation_results = await validateRuleConfiguration(
-        _normalized_rules_config,
-        { ajvOptions, strictValidation, throwOnError },
+    const _normalized_rules_config: MarkdownlintRuleConfiguration = getMergedRuleConfiguration(
+        rules,
+        { useBaseConfig, useDefault },
     )
+    const validation_results = await validateRuleConfiguration(_normalized_rules_config, {
+        ajvOptions,
+        strictValidation,
+        throwOnError,
+    })
     return {
         config: _normalized_rules_config,
         ...validation_results,
@@ -143,10 +135,8 @@ export const getRuleConfiguration = async (
         opts,
     )
     const _result = await processRuleConfiguration(rules, opts)
-    if (!_result.valid && throwOnError)
-        throw new Error('Configuration is invalid')
-    if (!_result.valid && !throwOnError)
-        logger().error('Configuration is invalid')
+    if (!_result.valid && throwOnError) throw new Error('Configuration is invalid')
+    if (!_result.valid && !throwOnError) logger().error('Configuration is invalid')
 
     if (_result.valid) {
         return _result.config
@@ -158,8 +148,10 @@ export const getMergedRuleConfiguration = (
     rules: MarkdownlintRuleConfiguration,
     opts: MarkdownlintRuleOpts = {},
 ): MarkdownlintRuleConfiguration => {
-    const { useBaseConfig, useDefault }: MarkdownlintRuleOptsOutput =
-        parseOptionsSchema(markdownlintRuleOptsSchema, opts)
+    const { useBaseConfig, useDefault }: MarkdownlintRuleOptsOutput = parseOptionsSchema(
+        markdownlintRuleOptsSchema,
+        opts,
+    )
 
     const baseConfig = getBaseConfig()
 

@@ -4,9 +4,7 @@ import { getFileExtensionList, TS_FILE_EXTENSIONS } from '../../utilities.js'
 
 export const vitestRules = (): Config => [
     {
-        files: [
-            ...getFileExtensionList(TS_FILE_EXTENSIONS, false, '**/*.test.'),
-        ],
+        files: [...getFileExtensionList(TS_FILE_EXTENSIONS, false, '**/*.test.')],
         languageOptions: {
             globals: {
                 ...vitestPlugin.environments.env.globals,

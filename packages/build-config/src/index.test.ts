@@ -50,12 +50,9 @@ describe('@snailicid3/build-config', () => {
     })
 
     test('creates package exports map from plan', () => {
-        const plan = definePlan(
-            defineIdentity('node', 'library', 'bundle'),
-            './src',
-            './dist',
-            [defineEntry('.', ['esm', 'cjs'])],
-        )
+        const plan = definePlan(defineIdentity('node', 'library', 'bundle'), './src', './dist', [
+            defineEntry('.', ['esm', 'cjs']),
+        ])
 
         expect(toPackageExports(plan)).toEqual({
             '.': {
@@ -66,12 +63,9 @@ describe('@snailicid3/build-config', () => {
     })
 
     test('creates rollup config with esm and cjs outputs', () => {
-        const plan = definePlan(
-            defineIdentity('node', 'library', 'bundle'),
-            './src',
-            './dist',
-            [defineEntry('.', ['esm', 'cjs'])],
-        )
+        const plan = definePlan(defineIdentity('node', 'library', 'bundle'), './src', './dist', [
+            defineEntry('.', ['esm', 'cjs']),
+        ])
         const config = toRollupConfig(plan, 'exampleLib')
 
         expect(config).toHaveLength(1)
@@ -121,12 +115,9 @@ describe('@snailicid3/build-config', () => {
             './dist',
             [defineEntry('.', ['esm'])],
         )
-        const nonePlan = definePlan(
-            defineIdentity('node', 'config', 'none'),
-            './src',
-            './dist',
-            [defineEntry('.', ['esm'])],
-        )
+        const nonePlan = definePlan(defineIdentity('node', 'config', 'none'), './src', './dist', [
+            defineEntry('.', ['esm']),
+        ])
 
         expect(selectAdapter(bundlePlan)?.name).toBe('rollup')
         expect(selectAdapter(transpilePlan)?.name).toBe('tsc')

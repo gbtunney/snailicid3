@@ -19,8 +19,10 @@ pnpm add @snailicid3/scaffold
 - [ ] Add `mergePackageJson()` for merging scaffold defaults into an existing manifest
 - [ ] Add `updatePackageJsonSections()` for targeted section updates
 - [ ] Define per-section behavior rules
-- [ ] Reorder only: `name`, `version`, `private`, `description`, `type`, `author`, `license`, `repository`, `main`, `types`, `exports`, `files`, `keywords`, `nx`, `bin`
-- [ ] Merge shallow object sections: `scripts`, `dependencies`, `devDependencies`, `peerDependencies`, `optionalDependencies`, `engines`
+- [ ] Reorder only: `name`, `version`, `private`, `description`, `type`, `author`, `license`, `repository`,
+      `main`, `types`, `exports`, `files`, `keywords`, `nx`, `bin`
+- [ ] Merge shallow object sections: `scripts`, `dependencies`, `devDependencies`, `peerDependencies`,
+      `optionalDependencies`, `engines`
 - [ ] Preserve existing package-specific scalar values unless explicitly overridden
 - [ ] Decide array behavior per key
 - [ ] Replace arrays by default for `files`
@@ -37,33 +39,24 @@ pnpm add @snailicid3/scaffold
 ## Suggested First API Shape
 
 ```ts
-type PackageJsonSectionName =
-	| 'scripts'
-	| 'nx'
-	| 'dependencies'
-	| 'devDependencies'
-	
-|'bin'
-	| 'exports'
-	'rando entry pts'
-	| 'files'
-	| 'keywords'
+type PackageJsonSectionName = 'scripts' | 'nx' | 'dependencies' | 'devDependencies' | 'bin' | 'exports'
+;'rando entry pts' | 'files' | 'keywords'
 
 type PackageJsonStrategy = 'create' | 'merge' | 'update-sections'
 
 type UpdatePackageJsonOptions = {
-	strategy: PackageJsonStrategy
-	sections?: PackageJsonSectionName[]
+  strategy: PackageJsonStrategy
+  sections?: PackageJsonSectionName[]
 }
 
 declare function reorderPackageJsonKeys(packageJson: Record<string, unknown>): Record<string, unknown>
 declare function mergePackageJson(
-	existingPackageJson: Record<string, unknown>,
-	scaffoldPackageJson: Record<string, unknown>,
+  existingPackageJson: Record<string, unknown>,
+  scaffoldPackageJson: Record<string, unknown>,
 ): Record<string, unknown>
 declare function updatePackageJsonSections(
-	existingPackageJson: Record<string, unknown>,
-	scaffoldPackageJson: Record<string, unknown>,
-	options: UpdatePackageJsonOptions,
+  existingPackageJson: Record<string, unknown>,
+  scaffoldPackageJson: Record<string, unknown>,
+  options: UpdatePackageJsonOptions,
 ): Record<string, unknown>
 ```

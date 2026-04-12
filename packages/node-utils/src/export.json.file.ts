@@ -25,9 +25,7 @@ export const exportJSONFile = (
             entry.filename.endsWith('.json') || entry.filename.endsWith('json')
                 ? entry.filename
                 : `${entry.filename}.json`
-        const file_path = outdir
-            ? path.resolve(outdir, file_name)
-            : path.resolve(file_name)
+        const file_path = outdir ? path.resolve(outdir, file_name) : path.resolve(file_name)
 
         const writeFile = (path: string = file_path): void => {
             fs.writeFileSync(path, prettyPrintJSON(entry.data))
@@ -41,11 +39,7 @@ export const exportJSONFile = (
             console.warn('FILE PATH ALREADY EXCISTS::: ', file_path, entry)
             writeFile() ///write the file return success.
         } else if (overwrite === 'ERROR' || fs.existsSync(file_path)) {
-            console.error(
-                `Cannot write ${file_path}, file already excists`,
-                file_path,
-                entry,
-            )
+            console.error(`Cannot write ${file_path}, file already excists`, file_path, entry)
             ////throw eror??'
             throw new Error(`Cannot write ${file_path}, file already excists`)
         }

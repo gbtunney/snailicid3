@@ -7,10 +7,7 @@ import { generateReadme } from './templates/readme.js'
 import { generateRollupConfig } from './templates/rollup-config.js'
 import { generateTsConfig } from './templates/tsconfig.js'
 
-export const scaffoldPackage = (
-    input: ScaffoldInput,
-    outDir: string,
-): void => {
+export const scaffoldPackage = (input: ScaffoldInput, outDir: string): void => {
     mkdirSync(join(outDir, 'src'), { recursive: true })
 
     writeFileSync(

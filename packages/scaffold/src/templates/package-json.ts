@@ -1,8 +1,6 @@
 import type { ScaffoldInput } from '../input.js'
 
-export const generatePackageJson = (
-    input: ScaffoldInput,
-): Record<string, unknown> => ({
+export const generatePackageJson = (input: ScaffoldInput): Record<string, unknown> => ({
     name: `@snailicid3/${input.name}`,
     version: '0.0.0',
     private: false,

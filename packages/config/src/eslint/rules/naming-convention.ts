@@ -4,9 +4,7 @@ import { getFileExtensionList, TS_FILE_EXTENSIONS } from '../../utilities.js'
 /** @todo: breakdown this file into groups? */
 export const namingConventionRules = (error: boolean = true): Config => [
     {
-        files: [
-            ...getFileExtensionList(TS_FILE_EXTENSIONS, false, '**/src/**/*.'),
-        ],
+        files: [...getFileExtensionList(TS_FILE_EXTENSIONS, false, '**/src/**/*.')],
         name: 'Naming Convention: General rules for source files',
         rules: {
             '@typescript-eslint/naming-convention': [
@@ -83,13 +81,7 @@ export const namingConventionRules = (error: boolean = true): Config => [
         },
     },
     {
-        files: [
-            ...getFileExtensionList(
-                TS_FILE_EXTENSIONS,
-                false,
-                '**/src/**/index.',
-            ),
-        ],
+        files: [...getFileExtensionList(TS_FILE_EXTENSIONS, false, '**/src/**/index.')],
         name: 'Naming Convention: Overriden rules for index files in src',
         rules: {
             '@typescript-eslint/naming-convention': [
@@ -107,17 +99,7 @@ export const namingConventionRules = (error: boolean = true): Config => [
                 {
                     format: ['StrictPascalCase'],
                     leadingUnderscore: 'allowSingleOrDouble',
-                    prefix: [
-                        'is',
-                        'should',
-                        'has',
-                        'can',
-                        'does',
-                        'do',
-                        'did',
-                        'use',
-                        'will',
-                    ],
+                    prefix: ['is', 'should', 'has', 'can', 'does', 'do', 'did', 'use', 'will'],
                     selector: 'parameter',
                     types: ['boolean'],
                 },

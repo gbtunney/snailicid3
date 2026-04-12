@@ -1,28 +1,26 @@
 # Package files
 
-
-## Scripts 
-
-
+## Scripts
 
 ```json
 {
-    "\n========== DEVELOPMENT >> ==========": "",
-        "dev": "pnpm build:ts --watch",
-        "dev:ts": "pnpm build:ts --watch",
-        "dev:rollup": "rollup --watch --config ./rollup.config.mjs",
-        "dev:vite": "pnpm exec vite --config ./vite.config.ts",
+  "\n========== DEVELOPMENT >> ==========": "",
+  "dev": "pnpm build:ts --watch",
+  "dev:ts": "pnpm build:ts --watch",
+  "dev:rollup": "rollup --watch --config ./rollup.config.mjs",
+  "dev:vite": "pnpm exec vite --config ./vite.config.ts",
 
- "\n========== TEST >> ==========": "",
-        "test": "vitest run",
-        "test:nx": "cross-var nx run $npm_package_name:test",
-        "test:watch": "vitest watch",
+  "\n========== TEST >> ==========": "",
+  "test": "vitest run",
+  "test:nx": "cross-var nx run $npm_package_name:test",
+  "test:watch": "vitest watch"
 }
 ```
-to nx.json defaults... 
 
+to nx.json defaults...
 
 workspace packages.json need default nx project targets...
+
 ```json5
  {
         "targets": {
@@ -31,7 +29,7 @@ workspace packages.json need default nx project targets...
             "build:ts": {},
             "build:rollup": {},
             "build:vite": {},
-           
+
         /** ========= TEST >> ========== */
             "test": "vitest run",
         "test:nx": "cross-var nx run $npm_package_name:test",
@@ -48,12 +46,12 @@ workspace packages.json need default nx project targets...
 
             "lint": {},
             "fix": {},
-            
+
             "docs:build": {}
         }
 ```
 
-```json 
+````json
  {
         "targets": {
             "build:ts": {},
@@ -68,7 +66,7 @@ workspace packages.json need default nx project targets...
             "clean:build": {},
             "docs:build": {}
         }
-        
+
  "dependsOn": [
                     "build:ts"
                 ]
@@ -77,7 +75,7 @@ workspace packages.json need default nx project targets...
 ### Older package.json scripts example for ref:
 ```json5
 
-//probably not complete example. 
+//probably not complete example.
 {
         "\n========== DEVELOPMENT >> ==========": "",
         "dev": "pnpm build:ts --watch",
@@ -115,4 +113,4 @@ workspace packages.json need default nx project targets...
         "lint:md": "pnpm exec markdownlint-cli2 '{./*,./**/*}.md' '#**/node_modules/**' '#packages/test-package/**/*' "
 }
 
-```
+````

@@ -4,11 +4,7 @@ import type { Numeric, PossibleNumeric } from './numeric.js'
 import { parseStringToInteger, parseToFloat } from './parse.js'
 import { isPossibleNumeric, isStringNumeric } from './validators.js'
 import { removeAllNewlines, trimWhiteSpace } from '../string/string-utils.js'
-import {
-    isBigInt,
-    isNumber,
-    isString as tgIsString,
-} from '../typeguard/utility.typeguards.js'
+import { isBigInt, isNumber, isString as tgIsString } from '../typeguard/utility.typeguards.js'
 
 /**
  * Convert a string to a numeric value
@@ -28,10 +24,7 @@ export const toStringNumeric = <Type extends string>(
         const _parsedFloat = parseFloat(trimmedValue)
 
         if (isNaN(newNumber)) {
-            if (
-                /[n]$/.test(trimmedValue) &&
-                !/[n]/.test(trimmedValue.replace(/[n]$/, ''))
-            ) {
+            if (/[n]$/.test(trimmedValue) && !/[n]/.test(trimmedValue.replace(/[n]$/, ''))) {
                 //if ( /[n]/.test(  trimmedValue.replace(/[n]$/ , ""))  ===  false ) {
                 //if it ends in 'n' its a bigint ( exampel 0x01n or 2n ) >>> remove n and new BigInt and test its validity
                 return BigInt(trimmedValue.replace(/[n]$/, ''))
@@ -78,9 +71,7 @@ export const toStringNumeric = <Type extends string>(
  * @group Transform
  * See: parseToNumeric, parseStringToInteger
  */
-export const toNumeric = <Type extends PossibleNumeric>(
-    value: Type,
-): Numeric | undefined => {
+export const toNumeric = <Type extends PossibleNumeric>(value: Type): Numeric | undefined => {
     if (isPossibleNumeric<Type>(value)) {
         // avoid unnecessary BigInt() on a bigint
         if (isBigInt(value)) return value
@@ -97,9 +88,8 @@ export const toNumeric = <Type extends PossibleNumeric>(
  *
  * @group Transform
  */
-export const numericToFloat = <Type extends Numeric>(
-    value: Type,
-): Numeric | undefined => parseToFloat<Type>(value)
+export const numericToFloat = <Type extends Numeric>(value: Type): Numeric | undefined =>
+    parseToFloat<Type>(value)
 
 /**
  * Converts a integer number to a exact Integer using parseInt (ie not 12.001 but 12.00 is allowed)
@@ -118,5 +108,4 @@ export const numericToInteger = <Type extends Numeric, Strict = false>(
     return parseStringToInteger(str)
 }
 
-const cleanString = (value: string): string =>
-    trimWhiteSpace(removeAllNewlines(value))
+const cleanString = (value: string): string => trimWhiteSpace(removeAllNewlines(value))

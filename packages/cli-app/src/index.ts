@@ -11,10 +11,6 @@ export type {
 } from './app-config.js'
 export { parsePackageJson } from './app-config.js'
 export { commonFlagsSchema } from './app-options.js'
-export type {
-    CommonFlagsInput,
-    CommonFlagsOutput,
-    CommonFlagsSchema,
-} from './app-options.js'
+export type { CommonFlagsInput, CommonFlagsOutput, CommonFlagsSchema } from './app-options.js'
 export { wrapSchema } from './helpers.js'
 export type { WrappedSchema, ZodObjectSchema } from './helpers.js'

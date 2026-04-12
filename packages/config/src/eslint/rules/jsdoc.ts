@@ -12,20 +12,14 @@ export const jsdocRules = (): Config => [
 
             'jsdoc/check-alignment': 'error',
             'jsdoc/check-indentation': ['error', { excludeTags: ['example'] }],
-            'jsdoc/check-line-alignment': [
-                'error',
-                'any',
-                { wrapIndent: '  ' },
-            ],
+            'jsdoc/check-line-alignment': ['error', 'any', { wrapIndent: '  ' }],
 
             /** Lines */
             'jsdoc/multiline-blocks': [
                 'error',
                 {
                     allowMultipleTags: true,
-                    minimumLengthForMultiline: Math.floor(
-                        getScaledWidth('comments') / 3,
-                    ),
+                    minimumLengthForMultiline: Math.floor(getScaledWidth('comments') / 3),
                     noMultilineBlocks: false,
                     noZeroLineText: true,
                     noFinalLineText: true,
@@ -34,10 +28,7 @@ export const jsdocRules = (): Config => [
 
             /** Tags */
             'jsdoc/tag-lines': ['error', 'any', { startLines: 1 }],
-            'jsdoc/check-tag-names': [
-                'warn',
-                { definedTags: ['group', 'category', 'todo'] },
-            ],
+            'jsdoc/check-tag-names': ['warn', { definedTags: ['group', 'category', 'todo'] }],
 
             /** Blank Lines */
             'jsdoc/no-blank-block-descriptions': 'error',
@@ -52,10 +43,7 @@ export const jsdocRules = (): Config => [
             'jsdoc/no-multi-asterisks': ['error', { allowWhitespace: false }],
 
             /** Misc */
-            'jsdoc/convert-to-jsdoc-comments': [
-                'error',
-                { lineOrBlockStyle: 'both' },
-            ],
+            'jsdoc/convert-to-jsdoc-comments': ['error', { lineOrBlockStyle: 'both' }],
         },
     },
     {

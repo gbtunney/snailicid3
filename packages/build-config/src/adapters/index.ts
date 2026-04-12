@@ -16,11 +16,7 @@ import { noneAdapter } from './none/index.js'
 import { rollupAdapter } from './rollup/index.js'
 import { tscAdapter } from './tsc/index.js'
 
-export const adapters: BuildAdapter[] = [
-    noneAdapter,
-    rollupAdapter,
-    tscAdapter,
-]
+export const adapters: BuildAdapter[] = [noneAdapter, rollupAdapter, tscAdapter]
 
 /**
  * Select the appropriate adapter for a plan.
@@ -41,7 +37,13 @@ export function selectAdapter(plan: BuildPlan): BuildAdapter | undefined {
 }
 
 export { noneAdapter } from './none/index.js'
-export { rollupAdapter, toRollupConfig, toPackageExports, getPluginsForPreset, inferPreset } from './rollup/index.js'
+export {
+    rollupAdapter,
+    toRollupConfig,
+    toPackageExports,
+    getPluginsForPreset,
+    inferPreset,
+} from './rollup/index.js'
 export type { RollupPluginPreset } from './rollup/index.js'
 export { tscAdapter } from './tsc/index.js'
 

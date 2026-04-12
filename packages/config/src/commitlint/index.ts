@@ -56,24 +56,20 @@ export const configuration = (
                     description: 'Does this change affect any open issues?',
                 },
                 issues: {
-                    description:
-                        'Add issue references (e.g. "fix #123", "re #123".)',
+                    description: 'Add issue references (e.g. "fix #123", "re #123".)',
                 },
                 issuesBody: {
                     description:
                         'If issues are closed, the commit requires a body. Please enter a longer description of the commit itself',
                 },
                 scope: {
-                    description:
-                        'What is the scope of this change (e.g. component or file name)',
+                    description: 'What is the scope of this change (e.g. component or file name)',
                 },
                 subject: {
-                    description:
-                        'Write a short, imperative tense description of the change',
+                    description: 'Write a short, imperative tense description of the change',
                 },
                 type: {
-                    description:
-                        "Select the type of change that you're committing:",
+                    description: "Select the type of change that you're committing:",
                     enum: {
                         build: {
                             description:
@@ -82,8 +78,7 @@ export const configuration = (
                             title: 'Builds',
                         },
                         chore: {
-                            description:
-                                "Other changes that don't modify src or test files",
+                            description: "Other changes that don't modify src or test files",
                             emoji: '♻️',
                             title: 'Chores',
                         },
@@ -109,8 +104,7 @@ export const configuration = (
                             title: 'Bug Fixes',
                         },
                         perf: {
-                            description:
-                                'A code change that improves performance',
+                            description: 'A code change that improves performance',
                             emoji: '🚀',
                             title: 'Performance Improvements',
                         },
@@ -132,8 +126,7 @@ export const configuration = (
                             title: 'Styles',
                         },
                         test: {
-                            description:
-                                'Adding missing tests or correcting existing tests',
+                            description: 'Adding missing tests or correcting existing tests',
                             emoji: '🚨',
                             title: 'Tests',
                         },

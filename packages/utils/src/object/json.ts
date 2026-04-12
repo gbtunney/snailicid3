@@ -15,11 +15,7 @@ export const prettyPrintJSON = <Type extends Jsonifiable>(
     value: Type,
     indentSpaces = 4,
 ): string => {
-    return JSON.stringify(
-        JSON.parse(JSON.stringify(value)),
-        undefined,
-        indentSpaces,
-    )
+    return JSON.stringify(JSON.parse(JSON.stringify(value)), undefined, indentSpaces)
 }
 
 /**

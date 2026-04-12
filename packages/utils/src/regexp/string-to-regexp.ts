@@ -21,10 +21,7 @@ export const stringToRegexp = (
         return isStringValidRegExp(escapeStringRegexp(value))
             ? new RegExp(escapeStringRegexp(value), mapFlags(flag))
             : undefined
-    } else
-        return isStringValidRegExp(value)
-            ? new RegExp(value, mapFlags(flag))
-            : undefined
+    } else return isStringValidRegExp(value) ? new RegExp(value, mapFlags(flag)) : undefined
 }
 
 /**
@@ -88,9 +85,7 @@ const stringListJoinRegexp = (
     useParenthesis: boolean = false,
 ): string => {
     const value: Array<string> = ensureArray(_value)
-    const escaped: Array<string> = value.map((str: string) =>
-        escapeStringRegexp(str),
-    )
+    const escaped: Array<string> = value.map((str: string) => escapeStringRegexp(str))
     return useParenthesis ? `(${escaped.join('|')})` : escaped.join('|')
 }
 export const flagMap = {

@@ -1,9 +1,6 @@
 export { batchReplaceAll as replaceCharacters } from './replace-characters.js'
 
-export {
-    explodeCSSClassString,
-    transformExplodeArray,
-} from './transform-explode-array.js'
+export { explodeCSSClassString, transformExplodeArray } from './transform-explode-array.js'
 
 export {
     batchTrimCharacters,

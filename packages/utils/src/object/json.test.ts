@@ -45,8 +45,7 @@ describe('JSON serialize', () => {
             age: z.number(),
             name: z.string(),
         })
-        const result =
-            makeJsonStringifiedSchema<typeof _schemaa>(_schemaa).serialize(obj)
+        const result = makeJsonStringifiedSchema<typeof _schemaa>(_schemaa).serialize(obj)
         expect(result).toMatch(new RegExp(/age/, 'gm'))
         const result2 = jsonParser().serialize(obj)
 

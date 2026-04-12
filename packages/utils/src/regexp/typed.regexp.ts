@@ -43,17 +43,15 @@ export const typedRegexp = <PatternString extends string>(
 
     return Object.assign(compiledRegularExpression, {
         execTyped(inputText: string): TypedRegexpMatch<PatternString> | null {
-            const matchResult: RegExpExecArray | null =
-                compiledRegularExpression.exec(inputText)
+            const matchResult: RegExpExecArray | null = compiledRegularExpression.exec(inputText)
 
             if (matchResult === null) {
                 return null
             }
 
             // Infer group types from the annotated pattern string
-            const typedGroups: ExtractGroupNames<PatternString> =
-                (matchResult.groups ??
-                    Object.create(null)) as ExtractGroupNames<PatternString>
+            const typedGroups: ExtractGroupNames<PatternString> = (matchResult.groups ??
+                Object.create(null)) as ExtractGroupNames<PatternString>
 
             return {
                 0: matchResult[0],

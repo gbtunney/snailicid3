@@ -5,6 +5,7 @@
 > The adapter-based core in `src/build/` and `src/adapters/` is implemented and used now.
 >
 > Implemented now:
+>
 > - tool-agnostic build model (`BuildPlan`, `PackageIdentity`, `EntrySpec`)
 > - adapter port (`BuildAdapter`)
 > - adapter registry and selection logic
@@ -12,6 +13,7 @@
 > - Rollup plugin presets + plan-to-rollup translation + exports map generation
 >
 > Not implemented yet:
+>
 > - dedicated `vite` and `esbuild` adapters in `src/adapters/`
 > - typedoc/vitepress utility modules that were removed during migration
 >
@@ -54,8 +56,8 @@ Every package must define three core attributes.
 
 Where the code executes.
 
-| Value       | Rules                                                              |
-|-------------|--------------------------------------------------------------------|
+| Value       | Rules                                                             |
+| ----------- | ----------------------------------------------------------------- |
 | `node`      | may use `fs`, `path`, `child_process`; may depend on Node APIs    |
 | `browser`   | must not use Node builtins; must rely on browser APIs             |
 | `universal` | must avoid Node-specific or DOM-specific APIs in the main entry   |
@@ -74,11 +76,11 @@ web_app · server_app · worker · script
 
 Defines how code is produced.
 
-| Value       | Meaning                                                    |
-|-------------|------------------------------------------------------------|
-| `transpile` | TypeScript compilation via `tsc --build`                   |
-| `bundle`    | Bundler (Rollup, Vite, esbuild)                            |
-| `none`      | No compilation step — files shipped as-is                  |
+| Value       | Meaning                                   |
+| ----------- | ----------------------------------------- |
+| `transpile` | TypeScript compilation via `tsc --build`  |
+| `bundle`    | Bundler (Rollup, Vite, esbuild)           |
+| `none`      | No compilation step — files shipped as-is |
 
 ---
 
@@ -89,11 +91,7 @@ The core build model must remain **tool-agnostic**.
 ```ts
 // src/build/types.ts
 
-export type Runtime =
-  | 'node'
-  | 'browser'
-  | 'universal'
-  | 'edge'
+export type Runtime = 'node' | 'browser' | 'universal' | 'edge'
 
 export type Product =
   | 'library'
@@ -106,10 +104,7 @@ export type Product =
   | 'worker'
   | 'script'
 
-export type BuildStrategy =
-  | 'transpile'
-  | 'bundle'
-  | 'none'
+export type BuildStrategy = 'transpile' | 'bundle' | 'none'
 
 export interface PackageIdentity {
   runtime: Runtime
@@ -117,14 +112,10 @@ export interface PackageIdentity {
   buildStrategy: BuildStrategy
 }
 
-export type OutputKind =
-  | 'esm'
-  | 'cjs'
-  | 'iife'
-  | 'umd'
+export type OutputKind = 'esm' | 'cjs' | 'iife' | 'umd'
 
 export interface EntrySpec {
-  key: string           // maps to exports path or filename
+  key: string // maps to exports path or filename
   input?: string
   outputKinds: OutputKind[]
   banner?: boolean
@@ -189,6 +180,7 @@ Used for packages with no build step (ESLint configs, JSON schemas, templates). 
 ### esbuild Adapter
 
 Used when:
+
 - building CLI tools
 - bundling Node scripts
 - producing small, fast single-file bundles
@@ -199,6 +191,7 @@ Used when:
 ### Rollup Adapter
 
 Used when:
+
 - multiple output formats are needed (ESM + CJS, IIFE, UMD)
 - browser library builds need controlled output
 
@@ -207,6 +200,7 @@ See [Rollup Plugin Strategy](#6-rollup-plugin-strategy) below.
 ### Vite Adapter
 
 Used when:
+
 - building browser libraries
 - building web apps
 - using React or other UI frameworks
@@ -223,24 +217,19 @@ Use **small named plugin presets** instead of a single giant configuration facto
 ```ts
 // src/adapters/rollup/plugins.ts
 
-export type RollupPluginPreset =
-  | 'node_library'
-  | 'browser_library'
-  | 'cli'
-  | 'iife'
+export type RollupPluginPreset = 'node_library' | 'browser_library' | 'cli' | 'iife'
 ```
 
-| Preset            | Plugins                                                         |
-|-------------------|-----------------------------------------------------------------|
-| `node_library`    | `nodeResolve`, `commonjs`, `json`                               |
-| `browser_library` | `nodeResolve({ browser: true })`, optional `commonjs`, `json`   |
-| `cli`             | `nodeResolve({ preferBuiltins: true })`, `commonjs`             |
+| Preset            | Plugins                                                                          |
+| ----------------- | -------------------------------------------------------------------------------- |
+| `node_library`    | `nodeResolve`, `commonjs`, `json`                                                |
+| `browser_library` | `nodeResolve({ browser: true })`, optional `commonjs`, `json`                    |
+| `cli`             | `nodeResolve({ preferBuiltins: true })`, `commonjs`                              |
 | `iife`            | `nodeResolve({ browser: true })`, optional `commonjs`, `json`, optional `terser` |
 
 ### Historical reference
 
-The old `snailicide-monorepo` package at
-`packages/build-config/src/rollup` handled:
+The old `snailicide-monorepo` package at `packages/build-config/src/rollup` handled:
 
 - plugin composition
 - entry → output mapping
@@ -267,20 +256,14 @@ The new adapter should **not** recreate:
 ```ts
 // src/adapters/index.ts
 
-export const adapters: BuildAdapter[] = [
-  noneAdapter,
-  rollupAdapter,
-  tscAdapter,
-]
+export const adapters: BuildAdapter[] = [noneAdapter, rollupAdapter, tscAdapter]
 
 export function selectAdapter(plan: BuildPlan): BuildAdapter | undefined {
   const { runtime, product, buildStrategy } = plan.identity
 
   if (buildStrategy === 'none') return noneAdapter
   if (buildStrategy === 'bundle') {
-    const bundler = [rollupAdapter].find((adapter) =>
-      adapter.supports(runtime, product),
-    )
+    const bundler = [rollupAdapter].find((adapter) => adapter.supports(runtime, product))
     if (bundler) return bundler
   }
 
@@ -292,12 +275,12 @@ export function selectAdapter(plan: BuildPlan): BuildAdapter | undefined {
 
 ## 8. Default Build Policy
 
-| Rule | Description |
-|------|-------------|
-| 1    | All packages must compile successfully with `tsc --build` |
-| 2    | Bundlers should only be used when required |
-| 3    | Default module format is **ESM** |
-| 4    | Type declarations should come from `tsc` output |
+| Rule | Description                                                 |
+| ---- | ----------------------------------------------------------- |
+| 1    | All packages must compile successfully with `tsc --build`   |
+| 2    | Bundlers should only be used when required                  |
+| 3    | Default module format is **ESM**                            |
+| 4    | Type declarations should come from `tsc` output             |
 | 5    | Packages should generally have a **single primary runtime** |
 
 ---
@@ -337,12 +320,14 @@ index.ts        ← public surface
 ## 10. Design Principles
 
 **Keep:**
+
 - tool-agnostic domain model (`BuildPlan`, `BuildAdapter`)
 - tsc-first default
 - adapter-scoped tool configuration
 - small, named plugin presets
 
 **Avoid:**
+
 - hardcoding Rollup logic across the repo
 - mixing domain planning with tool configuration
 - giant build-config factories
@@ -362,13 +347,12 @@ Adding a new adapter should require **no changes to the existing domain model**.
 
 The package currently exports and uses these APIs:
 
-- Domain and helpers: `defineIdentity`, `defineEntry`, `definePlan`,
-  `identityFromPackage`, `resolveEntryFilename`, `normaliseExportKey`
+- Domain and helpers: `defineIdentity`, `defineEntry`, `definePlan`, `identityFromPackage`,
+  `resolveEntryFilename`, `normaliseExportKey`
 - Banner: `createBanner`
 - Adapter selection: `adapters`, `selectAdapter`
 - Adapters: `noneAdapter`, `tscAdapter`, `rollupAdapter`
-- Rollup conversion: `toRollupConfig`, `toPackageExports`,
-  `getPluginsForPreset`, `inferPreset`
+- Rollup conversion: `toRollupConfig`, `toPackageExports`, `getPluginsForPreset`, `inferPreset`
 
-This means the requested "bundle plugins and stuff" workflow is present for Rollup,
-and package-level plans can already emit both ESM and CJS outputs.
+This means the requested "bundle plugins and stuff" workflow is present for Rollup, and package-level plans
+can already emit both ESM and CJS outputs.
