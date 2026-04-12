@@ -15,7 +15,7 @@ const plan = definePlan(
     identityFromPackage(pkg) ?? defineIdentity('node', 'library', 'bundle'),
     './src',
     './dist',
-    [defineEntry('.', ['esm', 'cjs'], { banner: true, sourcemap: true })],
+    [defineEntry('.', ['esm', 'cjs', 'iife', 'umd'], { banner: true, sourcemap: true })],
 )
 
 if (PRINT_EXPORTS) console.log(toPackageExports(plan))

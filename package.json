@@ -71,7 +71,7 @@
         "fix:md": "pnpm run lint:md --fix",
         "fix:self": "pnpm prettier --write && pnpm lint --fix && pnpm fix:md",
         "\n========== CLEAN >> ==========": "",
-        "clean": "pnpm clean:self",
+        "clean": "pnpm clean:self && pnpm nx:clean",
         "clean:self": "rm -f tsconfig.tsbuildinfo",
         "nx:clean": "pnpm exec nx run-many -t clean",
         "clean:all": "pnpm nx:clean",

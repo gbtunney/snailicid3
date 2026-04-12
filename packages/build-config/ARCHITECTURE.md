@@ -1,10 +1,19 @@
 # @snailicid3/build-config — Architecture
 
-> **Status: Target Architecture — not yet implemented.**
+> **Status: Partially Implemented (Current + Target).**
 >
-> This document describes the intended design for `@snailicid3/build-config`. The current code in
-> `src/rollup/` reflects the **old** factory-based system that this design replaces. The new adapter-based
-> layer (`src/build/`, `src/adapters/`) has not been written yet.
+> The adapter-based core in `src/build/` and `src/adapters/` is implemented and used now.
+>
+> Implemented now:
+> - tool-agnostic build model (`BuildPlan`, `PackageIdentity`, `EntrySpec`)
+> - adapter port (`BuildAdapter`)
+> - adapter registry and selection logic
+> - `none`, `tsc`, and `rollup` adapters
+> - Rollup plugin presets + plan-to-rollup translation + exports map generation
+>
+> Not implemented yet:
+> - dedicated `vite` and `esbuild` adapters in `src/adapters/`
+> - typedoc/vitepress utility modules that were removed during migration
 >
 > See [`docs/PACKAGE_ANATOMY.md`](../../docs/PACKAGE_ANATOMY.md) for the vocabulary (runtime, product type,
 > output format, build strategy) used throughout this document.
@@ -259,17 +268,23 @@ The new adapter should **not** recreate:
 // src/adapters/index.ts
 
 export const adapters: BuildAdapter[] = [
-  rollupAdapter,
-  viteAdapter,
-  esbuildAdapter,
-  tscAdapter,
   noneAdapter,
+  rollupAdapter,
+  tscAdapter,
 ]
 
 export function selectAdapter(plan: BuildPlan): BuildAdapter | undefined {
-  return adapters.find((adapter) =>
-    adapter.supports(plan.identity.runtime, plan.identity.product),
-  )
+  const { runtime, product, buildStrategy } = plan.identity
+
+  if (buildStrategy === 'none') return noneAdapter
+  if (buildStrategy === 'bundle') {
+    const bundler = [rollupAdapter].find((adapter) =>
+      adapter.supports(runtime, product),
+    )
+    if (bundler) return bundler
+  }
+
+  return adapters.find((adapter) => adapter.supports(runtime, product))
 }
 ```
 
@@ -303,17 +318,16 @@ adapters/
     index.ts
     plugins.ts  ← RollupPluginPreset + preset → plugin[] helper
     to-rollup.ts
-  vite/
-    index.ts
-  esbuild/
-    index.ts
   tsc/
     index.ts
   none/
     index.ts
 
+vite/
+  index.ts
+
 vitest/
-  config.ts
+  index.ts
 
 index.ts        ← public surface
 ```
@@ -341,3 +355,20 @@ index.ts        ← public surface
 Possible future adapters: `rspack`, `rolldown`, `bun build`, `tsup`.
 
 Adding a new adapter should require **no changes to the existing domain model**.
+
+---
+
+## 12. Current Implementation Snapshot
+
+The package currently exports and uses these APIs:
+
+- Domain and helpers: `defineIdentity`, `defineEntry`, `definePlan`,
+  `identityFromPackage`, `resolveEntryFilename`, `normaliseExportKey`
+- Banner: `createBanner`
+- Adapter selection: `adapters`, `selectAdapter`
+- Adapters: `noneAdapter`, `tscAdapter`, `rollupAdapter`
+- Rollup conversion: `toRollupConfig`, `toPackageExports`,
+  `getPluginsForPreset`, `inferPreset`
+
+This means the requested "bundle plugins and stuff" workflow is present for Rollup,
+and package-level plans can already emit both ESM and CJS outputs.

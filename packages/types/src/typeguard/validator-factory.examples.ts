@@ -1,26 +1,27 @@
 import { factoryValidator } from './validator-factory.js'
-import {
-    bigintNumber,
-    binaryNumber,
-    hexNumber,
-    scientificNumber,
-} from '../regexp/dictionary.js'
 
-/** String type guards backed by regex dictionary */
-const isScientificString = (v: unknown): v is string =>
-    typeof v === 'string' && scientificNumber.test(v)
+/** Numeric string regexes kept local so this example has no cross-package import dependency. */
+const scientificNumber =
+    /^[+-]?(?:\d(?:_?\d)*(?:\.\d(?:_?\d)*)?|\.\d(?:_?\d)*)(?:e[+-]?\d(?:_?\d)*)?$/i
+const hexNumber = /^[+-]?0x0-9a-f*$/i
+const binaryNumber = /^[+-]?0b01*$/i
+const bigintNumber =
+    /^[+-]?(?:\d(?:_?\d)*|0x0-9a-f*|0b01*)n$/i
 
-const isHexString = (v: unknown): v is string =>
-    typeof v === 'string' && hexNumber.test(v)
+/** String type guards backed by local regex constants */
+const isScientificString = (value: unknown): value is string =>
+    typeof value === 'string' && scientificNumber.test(value)
 
-const isBinaryString = (v: unknown): v is string =>
-    typeof v === 'string' && binaryNumber.test(v)
+const isHexString = (value: unknown): value is string =>
+    typeof value === 'string' && hexNumber.test(value)
 
-const isBigIntLiteralString = (v: unknown): v is string =>
-    typeof v === 'string' && bigintNumber.test(v)
+const isBinaryString = (value: unknown): value is string =>
+    typeof value === 'string' && binaryNumber.test(value)
 
-// Create paired validators
-export const { isNotScientificNumber, isScientificNumber } = factoryValidator(
+const isBigIntLiteralString = (value: unknown): value is string =>
+    typeof value === 'string' && bigintNumber.test(value)
+
+export const { isScientificNumber, isNotScientificNumber } = factoryValidator(
     isScientificString,
     'scientificNumber',
 )
