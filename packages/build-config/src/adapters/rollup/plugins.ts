@@ -12,6 +12,7 @@ import terser from '@rollup/plugin-terser'
 import typescript from '@rollup/plugin-typescript'
 import type { Plugin } from 'rollup'
 import nodeExternals from 'rollup-plugin-node-externals'
+import nodePolyfills from 'rollup-plugin-node-polyfills'
 
 /**
  * TypeScript plugin config shared across all presets.
@@ -64,6 +65,7 @@ export function getPluginsForPreset(
         case 'browser_library':
             return [
                 tsPlugin(),
+                nodePolyfills(),
                 nodeResolve({ browser: true }),
                 commonjs({ requireReturnsDefault: 'auto' }),
                 json(),
