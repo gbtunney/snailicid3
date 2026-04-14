@@ -1,6 +1,6 @@
 import { Plugin as PrettierPlugin } from "prettier";
 import xmlPlugin from "@prettier/plugin-xml";
-import phpPlugin from "@prettier/plugin-php";
+import * as phpPlugin from "@prettier/plugin-php";
 import * as unResolvedJsdocPlugin from "prettier-plugin-jsdoc";
 import * as shPlugin from "prettier-plugin-sh";
 import type { UnknownRecord } from "type-fest";
