@@ -1,8 +1,7 @@
-import { EsLint } from '@snailicid3/config'
-import url from 'node:url'
+import { EsLint } from "@snailicid3/config";
+import url from "node:url";
 
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
+const CONFIG = await EsLint.config(__dirname);
 
-const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
-const CONFIG = await EsLint.config(__dirname)
-
- export default EsLint.defineConfig( CONFIG)
+export default EsLint.defineConfig(CONFIG);

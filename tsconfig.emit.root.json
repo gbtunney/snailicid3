@@ -5,12 +5,14 @@
   "compilerOptions": {
     "rootDir": ".",
     "types": ["node"],
-    "noEmit": true
+    "noEmit": false
   },
-  "include": [
-    "./*.ts",
-       "./*.cts",
-       "./*.mts",
-  ],
-  "exclude": ["./node_modules", "./packages"]
+ 
+    "files":["./commitlint.config.ts","./.markdownlint-cli2.mts"],
+
+  "exclude": ["./*"]
 }
+
+
+
+

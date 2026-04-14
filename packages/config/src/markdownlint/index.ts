@@ -6,72 +6,88 @@
  * todo: format front-matter?
  * @todo Validate the schema ! function! important!
  */
-import { JsonObject } from 'type-fest'
+import { JsonObject } from "type-fest";
 
-import { getBaseConfig } from './base.config.js'
+import { getBaseConfig } from "./base.config.js";
 import {
-    getConfiguration,
-    processConfiguration,
-    validateFullConfiguration,
-} from './configuration.js'
+  getConfiguration,
+  processConfiguration,
+  validateFullConfiguration
+} from "./configuration.js";
 import {
-    getRuleConfiguration,
-    processRuleConfiguration,
-    validateRuleConfiguration,
-} from './rules.js'
-import { DEFAULT_OPTS, type MarkdownlintConfiguration, MarkdownlintOpts } from './schema.js'
-import { isPlainObject, safeDeserializeJSON } from '../utilities.js'
+  getRuleConfiguration,
+  processRuleConfiguration,
+  validateRuleConfiguration
+} from "./rules.js";
+import {
+  DEFAULT_OPTS,
+  type MarkdownlintConfiguration,
+  MarkdownlintOpts
+} from "./schema.js";
+import { isPlainObject, safeDeserializeJSON } from "../utilities.js";
+
+/** TODO Figure out how these ignores should work */
+        //gitignore: true,
+      //  ignores: [*/
+        // '**/dist/**',
+        // '**/build/**',
+        // '**/.git/**',
+        // '**/.github/instructions/**',
+        // '**/.husky/**',
+        // '**/coverage/**',
+        // '**/{.changeset,docs}/**',
+        // 'packages/cli-template/templates/**/*',
 
 export type MarkdownlintAPI = {
-    rules: {
-        config: typeof getRuleConfiguration
-        get: typeof getRuleConfiguration
-        validate: typeof validateRuleConfiguration
-        build: typeof processRuleConfiguration
-        baseConfig: typeof getBaseConfig
-    }
-    config: {
-        get: typeof getConfiguration
-        validate: typeof validateFullConfiguration
-        build: typeof processConfiguration
-    }
-}
+  rules: {
+    config: typeof getRuleConfiguration;
+    get: typeof getRuleConfiguration;
+    validate: typeof validateRuleConfiguration;
+    build: typeof processRuleConfiguration;
+    baseConfig: typeof getBaseConfig;
+  };
+  config: {
+    get: typeof getConfiguration;
+    validate: typeof validateFullConfiguration;
+    build: typeof processConfiguration;
+  };
+};
 
 export const markdownlint: MarkdownlintAPI = {
-    config: {
-        build: processConfiguration,
-        get: getConfiguration,
-        validate: validateFullConfiguration,
-    },
-    rules: {
-        baseConfig: getBaseConfig,
-        build: processRuleConfiguration,
-        config: getRuleConfiguration,
-        get: getRuleConfiguration,
-        validate: validateRuleConfiguration,
-    },
-}
+  config: {
+    build: processConfiguration,
+    get: getConfiguration,
+    validate: validateFullConfiguration
+  },
+  rules: {
+    baseConfig: getBaseConfig,
+    build: processRuleConfiguration,
+    config: getRuleConfiguration,
+    get: getRuleConfiguration,
+    validate: validateRuleConfiguration
+  }
+};
 
 export const markdownLintConfigJson = async (
-    config: MarkdownlintConfiguration,
-    opts: MarkdownlintOpts = DEFAULT_OPTS,
+  config: MarkdownlintConfiguration,
+  opts: MarkdownlintOpts = DEFAULT_OPTS
 ): Promise<JsonObject> => {
-    const _result = await processConfiguration(config, opts)
+  const _result = await processConfiguration(config, opts);
 
-    if (_result.valid && isPlainObject<JsonObject>(_result.config)) {
-        const result = safeDeserializeJSON<JsonObject>(_result.config)
-        return result ?? {}
-    }
-    return {}
-}
+  if (_result.valid && isPlainObject<JsonObject>(_result.config)) {
+    const result = safeDeserializeJSON<JsonObject>(_result.config);
+    return result ?? {};
+  }
+  return {};
+};
 
 export type {
-    MarkdownlintCli2ConfigurationSchema,
-    MarkdownlintConfigurationSchema,
-} from './markdownlint.config.js'
+  MarkdownlintCli2ConfigurationSchema,
+  MarkdownlintConfigurationSchema
+} from "./markdownlint.config.js";
 export type {
-    MarkdownlintConfiguration,
-    MarkdownlintOpts,
-    MarkdownlintProcessedResult,
-    MarkdownlintRuleConfiguration,
-} from './schema.js'
+  MarkdownlintConfiguration,
+  MarkdownlintOpts,
+  MarkdownlintProcessedResult,
+  MarkdownlintRuleConfiguration
+} from "./schema.js";

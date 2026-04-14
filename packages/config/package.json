@@ -1,102 +1,119 @@
 {
-    "name": "@snailicid3/config",
-    "version": "0.0.0",
-    "private": false,
-    "description": "Shared linting, formatting, and TypeScript config utilities for the snailicid3 monorepo",
-    "scripts": {
-        "build:nx": "nx run $npm_package_name:build",
-        "test:nx": "nx run $npm_package_name:test",
-        "clean:nx": "nx run $npm_package_name:clean",
-        "\n========== DEVELOPMENT >> ==========": "",
-        "dev": "tsc --build --watch",
-        "\n========== TEST >> ==========": "",
-        "test:watch": "vitest watch",
-        "test:coverage": "vitest run --coverage"
+  "name": "@snailicid3/config",
+  "version": "0.0.0",
+  "private": false,
+  "description": "Shared linting, formatting, and TypeScript config utilities for the snailicid3 monorepo",
+  "scripts": {
+    "build:custom": "pnpm exec tsx ./build-temp.ts",
+    "build:nx": "nx run $npm_package_name:build",
+    "test:nx": "nx run $npm_package_name:test",
+    "clean:nx": "nx run $npm_package_name:clean",
+    "\n========== DEVELOPMENT >> ==========": "",
+    "dev": "tsc --build --watch",
+    "\n========== TEST >> ==========": "",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@commitlint/types": "^20.5.0",
+    "@eslint/config-helpers": "^0.5.5",
+    "@eslint/js": "^10.0.1",
+    "@prettier/plugin-php": "^0.25.0",
+    "@prettier/plugin-xml": "^3.4.2",
+    "@types/json-schema": "^7.0.15",
+    "@vitest/eslint-plugin": "^1.6.15",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-filenames-simple": "^0.9.0",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsdoc": "^62.9.0",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "eslint-plugin-sort": "^4.0.0",
+    "eslint-plugin-storybook": "^10.3.5",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "globals": "^17.5.0",
+    "markdownlint-cli2": "^0.22.0",
+    "prettier": "^3.8.2",
+    "prettier-plugin-jsdoc": "^1.8.0",
+    "prettier-plugin-sh": "^0.18.1",
+    "ts-deepmerge": "^7.0.3",
+    "type-fest": "^5.5.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@apidevtools/json-schema-ref-parser": "^15.3.5",
+    "@types/node": "24.1.0",
+    "ajv": "^8.18.0",
+    "json-schema": "^0.4.0",
+    "json-schema-to-typescript": "^15.0.4",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.4"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./types/index.d.ts"
     },
-    "dependencies": {
-        "@commitlint/types": "^20.5.0",
-        "@eslint/config-helpers": "^0.5.5",
-        "@eslint/js": "^10.0.1",
-        "@types/json-schema": "^7.0.15",
-        "eslint-plugin-eslint-comments": "^3.2.0",
-        "eslint-plugin-filenames-simple": "^0.9.0",
-        "eslint-plugin-import": "^2.32.0",
-        "eslint-plugin-jsdoc": "^62.9.0",
-        "eslint-plugin-react-hooks": "^7.0.1",
-        "eslint-plugin-react-refresh": "^0.5.2",
-        "eslint-plugin-sort": "^4.0.0",
-        "eslint-plugin-storybook": "^10.3.5",
-        "eslint-plugin-unused-imports": "^4.4.1",
-        "eslint-plugin-vitest": "^0.5.4",
-        "globals": "^17.5.0",
-        "prettier-plugin-jsdoc": "^1.8.0",
-        "ts-deepmerge": "^7.0.3",
-        "type-fest": "^5.5.0",
-        "zod": "^4.3.6"
-    },
-    "devDependencies": {
-        "@apidevtools/json-schema-ref-parser": "^15.3.5",
-        "@types/node": "^25.6.0",
-        "ajv": "^8.18.0",
-        "json-schema": "^0.4.0",
-        "json-schema-to-typescript": "^15.0.4",
-        "typescript": "^6.0.2",
-        "vitest": "^4.1.4"
-    },
-    "exports": {
-        ".": {
-            "import": "./dist/index.js",
-            "types": "./types/index.d.ts"
-        },
-        "./tsconfig-base": "./tsconfig-base.json"
-    },
-    "files": [
-        "CHANGELOG.md",
-        "dist",
-        "types",
-        "tsconfig-base.json"
-    ],
-    "keywords": [
-        "eslint",
-        "prettier",
-        "typescript",
-        "config"
-    ],
-    "nx": {
-        "targets": {
-            "dev": {},
-            "dev:ts": {},
-            "dev:rollup": {},
-            "dev:vite": {},
-            "build:ts": {},
-            "build:rollup": {},
-            "build:vite": {},
-            "build": {
-                "dependsOn": [
-                    "build:ts"
-                ]
-            },
-            "test": {},
-            "test:nx": {},
-            "test:watch": {},
-            "lint": {},
-            "fix": {},
-            "clean": {},
-            "clean:ts": {},
-            "clean:build": {},
-            "docs:build": {}
-        }
-    },
-    "type": "module",
-    "author": {
-        "name": "Gillian Tunney",
-        "email": "gbtunney@mac.com"
-    },
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/gbtunney/snailicid3-monorepo"
-    },
-    "main": "./dist/index.js",
-    "types": "./types/index.d.ts"
+    "./tsconfig-base": "./tsconfig-base.json",
+    "./markdownlint": "./dist/.markdownlint.json",
+    "./prettier": {
+      "import": "./dist/prettier/index.js",
+      "types": "./types/prettier/index.d.ts"
+    }
+  },
+  "files": [
+    "CHANGELOG.md",
+    "dist",
+    "types",
+    "tsconfig-base.json"
+  ],
+  "keywords": [
+    "eslint",
+    "prettier",
+    "typescript",
+    "config"
+  ],
+  "nx": {
+    "targets": {
+      "dev": {},
+      "dev:ts": {},
+      "dev:rollup": {},
+      "dev:vite": {},
+      "build:ts": {},
+      "build:rollup": {},
+      "build:vite": {},
+      "build:custom":{
+      "dependsOn": ["build:ts"]
+      },
+    
+      "build": {
+        "dependsOn": [
+        
+          "build:ts", "build:custom"
+        ]
+      },
+      "test": {},
+      "test:nx": {},
+      "test:watch": {},
+      "lint": {},
+      "fix": {},
+      "clean": {},
+      "clean:ts": {},
+      "clean:build": {},
+      "docs:build": {}
+    }
+  },
+  "type": "module",
+  "author": {
+    "name": "Gillian Tunney",
+    "email": "gbtunney@mac.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gbtunney/snailicid3-monorepo"
+  },
+  "main": "./dist/index.js",
+  "types": "./types/index.d.ts"
 }

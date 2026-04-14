@@ -3,126 +3,78 @@
  *
  * @see [Prettier - Opinionated Code Formatter](https://prettier.io/)
  */
-import { Config, Options } from 'prettier'
-import type { Options as JsDocOptions } from 'prettier-plugin-jsdoc'
-import type { IterableElement, Merge } from 'type-fest'
+import { Config, Options } from "prettier";
+import type { Options as JsDocOptions } from "prettier-plugin-jsdoc";
+import type { IterableElement, Merge } from "type-fest";
+import {getDefaultOptions,getDefaultOverrides}from './options.js'
+import {getPrettierPluginsBundled,getPrettierPluginsList}from './plugins.js'
+export { getScaledWidth, SHARED_FORMATTING_RULES } from "../shared.js";
 
-const PRETTIER_WIDTH_BASE: PrettierConfig['tabWidth'] = 100
-
-const PRETTIER_WIDTH_SCALE = {
-    code: 0.8,
-    comments: 1.2,
-    markdown: 0.8,
-} as const
-
-export type PrettierOptions = Options & JsDocOptions
+export type PrettierOptions = Options & JsDocOptions;
 export type PrettierOverrides = Array<
-    Merge<IterableElement<Config['overrides']>, { options: PrettierOptions }>
->
+  Merge<IterableElement<Config["overrides"]>, { options: PrettierOptions }>
+>;
 
 export type PrettierConfig = Merge<
-    Merge<Config, PrettierOptions>,
-    {
-        overrides: PrettierOverrides
-    }
->
+  Merge<Config, PrettierOptions>,
+  {
+    overrides: PrettierOverrides;
+  }
+>;
+/**  TODO: put back in 
+ * packageIgnoreSort: ["scripts"],
+    //SHARED_FORMATTING_RULES.tabWidth,
+    packageSortOrder: [
+      "name",
+      "version",
+      "private",
+      "description",
+      "scripts",
+      "main",
+      "module",
+      "types",
+      "dependencies",
+      "devDependencies",
+      "type",
+      "exports",
+      "author",
+      "license"
+    ],
+    */
 
-export const SHARED_FORMATTING_RULES: Merge<
-    PrettierOptions,
-    {
-        maxEmptyLines: number
-        markdownTabWidth: number
-    }
-> = {
-    markdownTabWidth: 2,
-    maxEmptyLines: 1,
-    tabWidth: 4, //todo: use in "no-multiple-empty-lines" //MD012/no-multiple-blanks
-} as const
 
-export const getScaledWidth = (
-    scaleKey: keyof typeof PRETTIER_WIDTH_SCALE,
-    baseWidth: number = PRETTIER_WIDTH_BASE,
-    scaleMap: typeof PRETTIER_WIDTH_SCALE = PRETTIER_WIDTH_SCALE,
-): number => {
-    return Math.floor(scaleMap[scaleKey] * baseWidth)
-}
-
-const getDefaultOptions = (): PrettierOptions => {
-    return {
-        bracketSameLine: true,
-
-        /** JS Doc */
-        jsdocPrintWidth: getScaledWidth('comments'),
-        packageIgnoreSort: ['scripts'],
-        //SHARED_FORMATTING_RULES.tabWidth,
-        packageSortOrder: [
-            'name',
-            'version',
-            'private',
-            'description',
-            'scripts',
-            'main',
-            'module',
-            'types',
-            'dependencies',
-            'devDependencies',
-            'type',
-            'exports',
-            'author',
-            'license',
-        ],
-        printWidth: getScaledWidth('code'),
-        proseWrap: 'never',
-
-        quoteProps: 'consistent',
-        semi: false,
-        singleQuote: true,
-        tabWidth: 4,
-    } as const
-}
-
-const defaultOverrides: PrettierOverrides = [
-    /** Override for markdown files only */
-    {
-        files: '**/*.md',
-        options: {
-            printWidth: getScaledWidth('markdown'),
-            proseWrap: 'always',
-            tabWidth: SHARED_FORMATTING_RULES.markdownTabWidth,
-        },
-    },
-]
 
 export const prettierConfiguration = (
-    _options?: PrettierOptions,
-    _overrides?: PrettierOverrides,
+  bundled:boolean = true,
+  _options?: PrettierOptions,
+  _overrides?: PrettierOverrides
 ): PrettierConfig => {
-    const myoption: PrettierOptions =
-        _options !== undefined ? { ...getDefaultOptions(), ..._options } : getDefaultOptions()
 
-    const __overrides: PrettierOverrides =
-        _overrides !== undefined ? [...defaultOverrides, ..._overrides] : [...defaultOverrides]
-    return {
-        ...myoption,
-        overrides: __overrides, //(overrides !== undefined ? { overrides } : []),
-        plugins: [
-            '@prettier/plugin-xml',
-            '@prettier/plugin-php',
-            'prettier-plugin-jsdoc',
-            'prettier-plugin-sh',
-            'prettier-plugin-pkg',
-            //  'prettier-plugin-tailwindcss',
-        ],
-    }
-}
+  const defaultOverrides = getDefaultOverrides()
+  const defaultOptions = getDefaultOptions() 
+  const myoption: PrettierOptions =
+    _options !== undefined
+      ? { ...defaultOptions, ..._options }
+      :defaultOptions;
+
+  const __overrides: PrettierOverrides =
+    _overrides !== undefined
+      ? [...defaultOverrides, ..._overrides]
+      : [...defaultOverrides];
+  return {
+    ...myoption,
+    overrides: __overrides, //(overrides !== undefined ? { overrides } : []),
+    plugins: [...(bundled)? getPrettierPluginsBundled():getPrettierPluginsList()]
+  };
+};
 
 /** @ignore */
 export const Prettier: {
-    config: PrettierConfig
-    options: PrettierOptions
-    configuration: typeof prettierConfiguration
+  config: PrettierConfig;
+  options: PrettierOptions;
+  configuration: typeof prettierConfiguration;
 } = {
-    config: prettierConfiguration(),
-    configuration: prettierConfiguration,
-    options: getDefaultOptions(),
-}
+  config: prettierConfiguration(),
+  configuration: prettierConfiguration,
+  options: getDefaultOptions()
+};

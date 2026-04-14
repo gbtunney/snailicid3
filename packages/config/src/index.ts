@@ -8,24 +8,33 @@
  * @see [Commitizen](https://commitizen-tools.github.io/commitizen/)
  */
 
-export { commitlint } from './commitlint/index.js'
-export type * from './commitlint/index.js'
+export { commitlint } from "./commitlint/index.js";
+export type * from "./commitlint/index.js";
 
 /**
  * @namespace Eslint / Tslint Configuration
  * @see [eslint - Find and fix problems in your JavaScript code.](https://eslint.org/)
  * @see [typescript-eslint](https://typescript-eslint.io/getting-started/)
  */
-export { EsLint } from './eslint/index.js'
-export type * from './eslint/index.js'
-
+export { EsLint } from "./eslint/index.js";
+export type * from "./eslint/index.js";
 
 /**
  * @namespace Prettier Configuration
  * @see [Prettier - Opinionated Code Formatter](https://prettier.io/)
  */
-export { Prettier } from './prettier/index.js'
+export { Prettier } from "./prettier/index.js";
 
-export type { PrettierConfig, PrettierOptions } from './prettier/index.js'
+export type { PrettierConfig, PrettierOptions } from "./prettier/index.js";
 
-export { merge } from 'ts-deepmerge'
+/**
+ * A Node.js command line interface and style checker / lint tool for Markdown files.
+ *
+ * @see [igorshubovych/markdownlint-cli:](https://github.com/igorshubovych/markdownlint-cli)
+ * @see [davidAnson/markdownlint](https://github.com/DavidAnson/markdownlint)
+ */
+export { markdownlint } from './markdownlint/index.js'
+
+export type * from './markdownlint/index.js'
+
+export { merge } from "ts-deepmerge";
