@@ -1,9 +1,9 @@
-import type { Config } from 'typescript-eslint'
 import tsEslint from 'typescript-eslint'
 import { getFileExtensionList, TS_FILE_EXTENSIONS } from '../../utilities.js'
+import {defineConfig,type Config}from '@eslint/config-helpers'
 
-export const typescriptRules = (): Config => {
-    return [
+export const typescriptRules = (): Config[]=> {
+    return defineConfig([
         ...tsEslint.configs.recommended,
         ...tsEslint.configs.strictTypeChecked,
         {
@@ -75,5 +75,5 @@ export const typescriptRules = (): Config => {
                 typechecked stuff moved up ^
             },
         },*/
-    ]
+    ])
 }

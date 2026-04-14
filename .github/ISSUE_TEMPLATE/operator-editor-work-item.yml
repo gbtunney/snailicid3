@@ -1,0 +1,106 @@
+name: Operator Editor Work Item
+description: Create a feature, bug, or design issue for the Operator Editor system
+title: '<scope>: <short summary>'
+labels: []
+assignees: []
+
+body:
+    - type: dropdown
+      id: issue_type
+      attributes:
+          label: Issue Type
+          description: What kind of work is this?
+          options:
+              - Feature
+              - Bug
+              - Task
+              - Refactor
+              - Docs
+              - Chore
+              - Idea
+      validations:
+          required: true
+
+    - type: dropdown
+      id: scope
+      attributes:
+          label: Scope
+          description: Which package or repository scope does this affect?
+          options:
+              - root
+              - repo
+              - scripts
+              - playground
+              - adapter-drizzle
+              - adapter-local
+              - api-client
+              - api-server
+              - core
+              - store
+              - ui
+      validations:
+          required: true
+
+    - type: dropdown
+      id: category
+      attributes:
+          label: Category
+          description: Cross-cutting technical area (optional)
+          options:
+              - build
+              - ci
+              - deps
+              - dx
+              - security
+              - perf
+      validations:
+          required: false
+
+    - type: dropdown
+      id: domain
+      attributes:
+          label: Domain
+          description: Product or feature area (optional)
+          options:
+              - UI
+              - Evidence System
+              - Proposal System
+              - Patch / History
+              - Attachments
+              - Schema / Form
+              - API
+              - Dev Environment
+              - Storybook
+      validations:
+          required: false
+
+    - type: textarea
+      id: summary
+      attributes:
+          label: Summary
+          description: Short description of the problem or request
+          placeholder: Describe the issue briefly.
+      validations:
+          required: true
+
+    - type: textarea
+      id: requirements
+      attributes:
+          label: Requirements
+          description: Checklist or acceptance criteria
+          placeholder: |
+              - [ ] Requirement 1
+              - [ ] Requirement 2
+      validations:
+          required: false
+
+    - type: textarea
+      id: notes
+      attributes:
+          label: Notes
+          description: Extra context, links, screenshots, blockers, or references
+          placeholder: |
+              Related to #123
+              Blocked by #456
+      validations:
+          required: false

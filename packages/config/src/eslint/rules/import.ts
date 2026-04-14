@@ -1,7 +1,7 @@
-import { Config } from 'typescript-eslint'
 import { getFileExtensionList, JSLIKE_FILE_EXTENSIONS } from '../../utilities.js'
+import {defineConfig,type Config}from '@eslint/config-helpers'
 
-export const importRules = (): Config => [
+export const importRules = (): Config[] => defineConfig(
     {
         name: 'Import: Default Rules',
         rules: {
@@ -20,4 +20,4 @@ export const importRules = (): Config => [
             'import/no-default-export': 'warn',
         },
     },
-]
+)

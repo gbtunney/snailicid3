@@ -1,8 +1,8 @@
 import sortPlugin from 'eslint-plugin-sort'
-import type { Config } from 'typescript-eslint'
+import {defineConfig,type Config}from '@eslint/config-helpers'
 
 /** @see [How to quickly configure ESLint for import sorting](https://medium.com/@diballesteros/how-to-quickly-configure-eslint-for-import-sorting-3a4017bd4853) */
-export const sortRules = (): Config => [
+export const sortRules = (): Config[] => defineConfig([
     sortPlugin.configs['flat/recommended'],
     {
         name: 'SORT IMPORTS & EXPORTS : ERROR',
@@ -39,4 +39,4 @@ export const sortRules = (): Config => [
             'sort/imports': 'off',
         },
     },
-]
+])

@@ -6,17 +6,17 @@
  * @see Styleguide: _(rule motivation and reference)_ {@link [TypeScript Style Guide](https://mkosir.github.io/typescript-style-guide/) }
  */
 import { flatEslintConfig } from './base.js'
-
+import {defineConfig,globalIgnores}from '@eslint/config-helpers'
 /** @ignore */
 export const EsLint: {
     config: typeof flatEslintConfig
-    flatConfig: typeof flatEslintConfig
+    defineConfig: typeof defineConfig
 } = {
     config: flatEslintConfig,
-    flatConfig: flatEslintConfig,
+    defineConfig
 }
 
 export { flatEslintConfig } from './base.js'
 export { flatEslintConfig as config } from './base.js'
-export type { Config as EslintConfig } from 'typescript-eslint'
+export type { Config as EslintConfig } from '@eslint/config-helpers'
 export type { Config as TsConfig } from 'typescript-eslint'

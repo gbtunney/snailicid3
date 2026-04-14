@@ -1,8 +1,8 @@
 import vitestPlugin from 'eslint-plugin-vitest'
-import { Config } from 'typescript-eslint'
 import { getFileExtensionList, TS_FILE_EXTENSIONS } from '../../utilities.js'
+import {defineConfig,type Config}from '@eslint/config-helpers'
 
-export const vitestRules = (): Config => [
+export const vitestRules = (): Config []=> defineConfig(
     {
         files: [...getFileExtensionList(TS_FILE_EXTENSIONS, false, '**/*.test.')],
         languageOptions: {
@@ -20,4 +20,4 @@ export const vitestRules = (): Config => [
             },
         },
     },
-]
+)

@@ -1,8 +1,8 @@
-import { Config } from 'typescript-eslint'
 import { getFileExtensionList, TS_FILE_EXTENSIONS } from '../../utilities.js'
+import {defineConfig,type Config}from '@eslint/config-helpers'
 
 /** @todo: breakdown this file into groups? */
-export const namingConventionRules = (error: boolean = true): Config => [
+export const namingConventionRules = (error: boolean = true): Config[] => defineConfig([
     {
         files: [...getFileExtensionList(TS_FILE_EXTENSIONS, false, '**/src/**/*.')],
         name: 'Naming Convention: General rules for source files',
@@ -106,4 +106,4 @@ export const namingConventionRules = (error: boolean = true): Config => [
             ],
         },
     },
-]
+])
