@@ -17,7 +17,7 @@ export type * from "./commitlint/index.js";
  * @see [typescript-eslint](https://typescript-eslint.io/getting-started/)
  */
 export { EsLint } from "./eslint/index.js";
-export type * from "./eslint/index.js";
+// Do not re-export all types to avoid duplicate identifier error
 
 /**
  * @namespace Prettier Configuration
