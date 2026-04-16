@@ -1,5 +1,5 @@
-// @snailicid3/config
-// TODO: implement
+export { EsLint, config, flatEslintConfig } from './eslint/index.js'
+export type { EslintConfig, TsConfig } from './eslint/index.js'
 
 /**
  * @namespace Commitlint configuration for use in Monorepo.

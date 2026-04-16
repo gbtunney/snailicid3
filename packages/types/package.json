@@ -1,6 +1,6 @@
 {
     "name": "@snailicid3/types",
-    "version": "0.0.0",
+    "version": "0.1.0",
     "private": false,
     "description": "Pure TypeScript types, utility types and typeguards",
     "type": "module",
@@ -50,6 +50,7 @@
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
         "\n========== DEVELOPMENT >> ==========": "",
+        "build": "tsc -p src/tsconfig.json",
         "dev": "tsc --build --watch",
         "\n========== TEST >> ==========": "",
         "test:watch": "vitest watch",
@@ -66,5 +67,8 @@
         "@types/ramda": "^0.31.1",
         "typescript": "^6.0.2",
         "vitest": "^4.1.4"
+    },
+    "publishConfig": {
+        "access": "public"
     }
 }
