@@ -1,23 +1,15 @@
 {
     "recommendations": [
-        "ms-python.vscode-pylance",
-        "njpwerner.autodocstring",
         "ms-vscode-remote.remote-containers",
         "dbaeumer.vscode-eslint",
         "donjayamanne.git-extension-pack",
         "mhutchie.git-graph",
         "donjayamanne.githistory",
         "github.copilot-chat",
-        "nicscott.gitkraken-dark",
         "eamodio.gitlens",
         "xyz.local-history",
         "nrwl.angular-console",
         "christian-kohler.path-intellisense",
-        "xdebug.php-debug",
-        "ms-python.python",
-        "ms-python.debugpy",
-        "plibither8.remove-comments",
-        "sibiraj-s.vscode-scss-formatter",
         "gruntfuggly.todo-tree",
         "imekachi.webstorm-darcula",
         "linbudu.pnpm-vscode-helper",
@@ -26,10 +18,9 @@
         "github.codespaces",
         "github.copilot",
         "ms-vscode.vscode-speech",
-        "alefragnani.project-manager",
-        "googlecloudtools.cloudcode",
-        "naumovs.color-highlight",
+\        "naumovs.color-highlight",
         "christian-kohler.npm-intellisense",
-        "redhat.vscode-yaml"
+        "redhat.vscode-yaml",
+        "anseki.vscode-color"
     ]
 }
