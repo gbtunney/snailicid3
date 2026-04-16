@@ -8,6 +8,9 @@ import type { Options as JsDocOptions } from "prettier-plugin-jsdoc";
 import type { IterableElement, Merge } from "type-fest";
 import {getDefaultOptions,getDefaultOverrides}from './options.js'
 import {getPrettierPluginsBundled,getPrettierPluginsList}from './plugins.js'
+import {ArrayValues}from 'type-fest'
+
+
 export { getScaledWidth, SHARED_FORMATTING_RULES } from "../shared.js";
 
 export type PrettierOptions = Options & JsDocOptions;

@@ -7,6 +7,7 @@
  */
 import { flatEslintConfig } from './base.js'
 import {defineConfig,globalIgnores}from '@eslint/config-helpers'
+
 /** @ignore */
 export const EsLint: {
     config: typeof flatEslintConfig

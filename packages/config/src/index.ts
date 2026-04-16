@@ -37,4 +37,26 @@ export { markdownlint } from './markdownlint/index.js'
 
 export type * from './markdownlint/index.js'
 
+
+/* *  UTILITIES *  */
+export {
+    //globFileFilter,
+    importJSON,
+    isPlainObject,
+    safeDeserializeJSON,
+} from './utilities.js'
+export {
+  expandExtensions
+} from './helpers.js'
+export type * from './utilities.js'
+
+export {JSLIKE_FILE_EXTENSIONS,JS_FILE_EXTENSIONS,TS_FILE_EXTENSIONS}from './shared.js'
+export type {JSLikeFileExtensions,JSFileExtensions,TSFileExtensions} from './shared.js'
+
+export {PRETTIER_FILE_EXTENSIONS}from './shared.js'
+export type {PrettierFileExtensions}from './shared.js'
+
+export {MARKDOWN_FILE_EXTENSIONS}from './shared.js'
+export type {MarkdownFileExtensions}from './shared.js'
+
 export { merge } from "ts-deepmerge";

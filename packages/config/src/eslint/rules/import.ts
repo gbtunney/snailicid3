@@ -1,4 +1,6 @@
-import { getFileExtensionList, JSLIKE_FILE_EXTENSIONS } from '../../utilities.js'
+import {  JSLIKE_FILE_EXTENSIONS } from '../../shared.js'
+import { expandExtensions } from '../../helpers.js'
+
 import {defineConfig,type Config}from '@eslint/config-helpers'
 
 export const importRules = (): Config[] => defineConfig(
@@ -14,7 +16,7 @@ export const importRules = (): Config[] => defineConfig(
         },
     },
     {
-        files: [...getFileExtensionList(JSLIKE_FILE_EXTENSIONS, false, '**/src/**/*.')],
+        files: [...expandExtensions(JSLIKE_FILE_EXTENSIONS, '**/src/**/*.')],
         name: 'Import: no-default-export rule overridden for src files ',
         rules: {
             'import/no-default-export': 'warn',

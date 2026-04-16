@@ -104,7 +104,7 @@
         },
         "clean:ts": {
             "cache": false,
-            "command": "rm -f src/tsconfig.tsbuildinfo tsconfig.tsbuildinfo",
+            "command": "pnpm exec tsc --build --clean && rm -f src/tsconfig.tsbuildinfo tsconfig.tsbuildinfo",
             "options": { "cwd": "{projectRoot}" }
         },
         "clean:build": {

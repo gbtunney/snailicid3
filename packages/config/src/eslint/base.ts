@@ -11,10 +11,11 @@ import { sortRules } from './rules/sort.js'
 import { typescriptRules } from './rules/typescript.js'
 import { vitestRules } from './rules/vitest.js'
 import { SHARED_FORMATTING_RULES } from '../prettier/index.js'
-import { getFileExtensionList, TS_FILE_EXTENSIONS,JS_FILE_EXTENSIONS, JSLIKE_FILE_EXTENSIONS } from '../utilities.js'
+import { TS_FILE_EXTENSIONS, JS_FILE_EXTENSIONS } from '../shared.js'
 import {reactRules} from './rules/react.js'
+import {expandExtensions}from './../helpers.js'
 import {defineConfig,type Config}from '@eslint/config-helpers'
-const base_files: Array<string> = [...getFileExtensionList(TS_FILE_EXTENSIONS, false, '*.')]
+const base_files: Array<string> = [...expandExtensions(TS_FILE_EXTENSIONS, '*.')]
 const base_ignores = [
     '**/dist/**/*',
     '**/node_modules/**',
@@ -86,7 +87,7 @@ export const flatEslintConfig = async (__dirname: string): Promise<Config[]> => 
 
         /** Common JS Rules */
         {
-            files: [...getFileExtensionList(['cjs', 'cts'], false, '*/**.')],
+            files: [...expandExtensions(['cjs', 'cts'], '*/**.')],
             name: 'Custom CommonJS Rules',
             rules: {
                 '@typescript-eslint/no-unused-vars': 'warn',
@@ -99,7 +100,7 @@ export const flatEslintConfig = async (__dirname: string): Promise<Config[]> => 
         {
             // Take the preset and apply only to JS extensions
             ...tseslint.configs.disableTypeChecked,
-            files: [...getFileExtensionList(JS_FILE_EXTENSIONS, false, '**/*.')],
+            files: [...expandExtensions(JS_FILE_EXTENSIONS, '**/*.')],
             name: 'Typescript Eslint : Disable Type Checked for js files',
         },
     )

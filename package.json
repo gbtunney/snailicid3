@@ -34,7 +34,7 @@
     "report:prettier": "pnpm exec tsx packages/workspace-tools/bin/node/prettier-status.ts",
     "\n========== BUILD >> ==========": "",
     "build": "pnpm nx:build && pnpm build:self",
-    "build:self": "pnpm exec tsc -p tsconfig.root.json",
+    "build:self": "pnpm exec tsc -p tsconfig.root.json && pnpm run build:self:emit",
     "build:self:emit": "pnpm exec tsc -p tsconfig.emit.root.json",
     "nx:build": "pnpm exec nx run-many -t build",
     "nx:build:ts": "pnpm exec nx run-many -t build:ts",

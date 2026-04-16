@@ -1,5 +1,7 @@
 import tsEslint from 'typescript-eslint'
-import { getFileExtensionList, TS_FILE_EXTENSIONS } from '../../utilities.js'
+import { expandExtensions } from '../../helpers.js'
+import { TS_FILE_EXTENSIONS } from '../../shared.js'
+
 import {defineConfig,type Config}from '@eslint/config-helpers'
 
 export const typescriptRules = (): Config[]=> {
@@ -63,7 +65,7 @@ export const typescriptRules = (): Config[]=> {
         },
         /** Typescript Rules overwritten for files in source folders */
         {
-            files: [...getFileExtensionList(TS_FILE_EXTENSIONS, false, '**/src/**/*.')],
+            files: [...expandExtensions(TS_FILE_EXTENSIONS, '**/src/**/*.')],
             name: 'Typescript Rules : Explicit Return Type for files in source folders',
             rules: {
                 '@typescript-eslint/explicit-function-return-type': 'error',

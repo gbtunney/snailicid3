@@ -6,22 +6,11 @@ import type {
     JsonValue,
     ReadonlyDeep,
     UnknownRecord,
+    Spread
 } from 'type-fest'
 import fs from 'fs'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-
-export const JS_FILE_EXTENSIONS = ['js', 'mjs', 'cjs', 'jsx'] as const
-export const TS_FILE_EXTENSIONS = ['ts', 'mts', 'cts', 'tsx'] as const
-export const JSLIKE_FILE_EXTENSIONS = [...JS_FILE_EXTENSIONS, ...TS_FILE_EXTENSIONS] as const
-
-export type JSFileExtensions = ArrayValues<typeof JS_FILE_EXTENSIONS>
-export type TSFileExtensions = ArrayValues<typeof TS_FILE_EXTENSIONS>
-export type JSLikeFileExtensions = ArrayValues<typeof JSLIKE_FILE_EXTENSIONS>
-
-export type AllowedExtensions =
-    | Array<JSLikeFileExtensions>
-    | ReadonlyDeep<Array<JSLikeFileExtensions>>
 
 type TraceLogger = {
     error: (...args: Array<unknown>) => void
@@ -36,18 +25,6 @@ const getTraceLogger = (scope: string): TraceLogger => {
             console.trace(label)
         },
     }
-}
-
-export const getFileExtensionList = (
-    extensions: AllowedExtensions,
-    joined: boolean = true,
-    prefix: string = '',
-): Array<string> => {
-    const values = extensions.map((value: string): string => {
-        return `${prefix}${value}`
-    })
-
-    return joined ? [values.join(',')] : values
 }
 
 export const isPlainObject = <Type extends UnknownRecord = UnknownRecord>(
@@ -73,7 +50,10 @@ export const safeDeserializeJSON = <Type extends JsonValue = JsonValue>(
         return undefined
     }
 }
-
+/** TODO idk isnt this more of a node-utls function? and the next one? Idk export is not actually exported from this package 
+ * export.json.file is more of a node-utils thing too and should probably be moved? i am confused. :(
+ * 
+ */
 export const importJSON = async (filename: string): Promise<JsonValue | undefined> => {
     const absolutePath = path.resolve(filename)
     const logger = getTraceLogger('importJSON')

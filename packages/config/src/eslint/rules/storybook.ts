@@ -1,6 +1,7 @@
 import storybook from 'eslint-plugin-storybook'
 import {defineConfig,type Config,}from '@eslint/config-helpers'
-import { getFileExtensionList, TS_FILE_EXTENSIONS } from '../../utilities.js'
+import { expandExtensions } from '../../helpers.js'
+import { TS_FILE_EXTENSIONS } from '../../shared.js'
 
 //const test :Config[]=         defineConfig(  [storybook.configs['flat/recommended']])
 
@@ -14,7 +15,7 @@ console.log("GBT WTF STORYBOOK RECCD",storybookRecommended)
 }
 
 const objFuture:Config[] = defineConfig({
-files: getFileExtensionList(TS_FILE_EXTENSIONS, false, '**/src/**/*.'),
+files: expandExtensions(TS_FILE_EXTENSIONS, '**/src/**/*.'),
   rules: {
             '@typescript-eslint/explicit-function-return-type': 'off',
             '@typescript-eslint/naming-convention': [
