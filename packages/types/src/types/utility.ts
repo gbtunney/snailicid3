@@ -24,7 +24,7 @@ export type {
     ValueOf,
     Stringified,
     PartialDeep,
-    Jsonify,
+    Jsonify,KeyAsString,
     Jsonifiable,
     Entries,
     Entry,

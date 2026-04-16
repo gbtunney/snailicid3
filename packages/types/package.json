@@ -46,6 +46,9 @@
         }
     },
     "scripts": {
+        "build:nx": "nx run $npm_package_name:build",
+        "test:nx": "nx run $npm_package_name:test",
+        "clean:nx": "nx run $npm_package_name:clean",
         "\n========== DEVELOPMENT >> ==========": "",
         "dev": "tsc --build --watch",
         "\n========== TEST >> ==========": "",

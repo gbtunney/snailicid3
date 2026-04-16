@@ -3,9 +3,9 @@ import { factoryValidator } from './validator-factory.js'
 /** Numeric string regexes kept local so this example has no cross-package import dependency. */
 const scientificNumber =
     /^[+-]?(?:\d(?:_?\d)*(?:\.\d(?:_?\d)*)?|\.\d(?:_?\d)*)(?:e[+-]?\d(?:_?\d)*)?$/i
-const hexNumber = /^[+-]?0x0-9a-f*$/i
-const binaryNumber = /^[+-]?0b01*$/i
-const bigintNumber = /^[+-]?(?:\d(?:_?\d)*|0x0-9a-f*|0b01*)n$/i
+const hexNumber = /^[+-]?0x[0-9a-f]+$/i
+const binaryNumber = /^[+-]?0b[01]+$/i
+const bigintNumber = /^[+-]?(?:\d(?:_?\d)*|0x[0-9a-f]+|0b[01]+)n$/i
 
 /** String type guards backed by local regex constants */
 const isScientificString = (value: unknown): value is string =>
