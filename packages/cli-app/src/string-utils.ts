@@ -1,4 +1,4 @@
-import { ChalkColor, logger } from '@snailicid3/build-config'
+import { ChalkColor, logger } from '@snailicid3/logger'
 import chalk, { ChalkInstance } from 'chalk'
 import { z } from 'zod'
 

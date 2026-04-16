@@ -1,4 +1,5 @@
-import { fmt, logger } from '@snailicid3/build-config'
+import { fmt, formatValue } from '@snailicid3/utils'
+import {  logger ,type Logger} from '@snailicid3/logger'
 import yargsInteractive from 'yargs-interactive'
 import { z } from 'zod'
 import { AppConfig } from './app-config.js'

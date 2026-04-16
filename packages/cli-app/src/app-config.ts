@@ -1,5 +1,7 @@
-import { logger } from '@snailicid3/build-config'
-import { colorUtils, stringUtils } from '@snailicid3/g-library'
+import { logger } from '@snailicid3/logger'
+import {  stringUtils } from '@snailicid3/utils'
+import { parseColorToHex,isValidColor} from '@snailicid3/color'
+
 import { Merge } from 'type-fest'
 import { z } from 'zod'
 import { tgZodSchema, wrapSchema, ZodObjectSchema } from './helpers.js'
@@ -88,30 +90,34 @@ export const appConfigSchema = z.object({
     /** Clears the terminal window */
     skip_interactive: z.boolean().default(false),
     title_color: z
+        
         .object({
+            //TODO make into zod schema
             bg: z
                 .string()
                 .default('#12043A')
                 .refine(
-                    (value: string) => colorUtils.isValidColor(value),
-                    'Must be a valid chroma.ts color string',
-                ),
+                    (value: string) => isValidColor(value),
+                    'Must be a valid hex color string',
+                ).transform((value: string)=> parseColorToHex(value)),
             fg: z
                 .string()
                 .default('#d104ff')
                 .refine(
-                    (value: string) => colorUtils.isValidColor(value),
-                    'Must be a valid chroma.ts color string',
-                ),
+                    (value: string) => isValidColor(value),
+                    'Must be a valid hex color string',
+                ).transform((value: string)=> parseColorToHex(value)),
         })
         .default({
-            bg: '#12043A',
-            fg: '#d104ff',
+            bg: parseColorToHex('#12043A'),
+           fg: parseColorToHex('#d104ff'),
         })
         .meta({
             description:
-                'Color for the title text and background. Please use a valid string chroma.ts color value.',
-        }),
+
+                /** TODO make all colorjs string colors parse to hex */
+                'Color for the title text and background. Please use a valid hex color value.',
+        }), 
     version: z
         .string()
         .default('0.0.0')
