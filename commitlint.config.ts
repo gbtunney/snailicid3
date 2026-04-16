@@ -19,7 +19,6 @@ const Configuration: CommitlintUserConfig = commitlint.configuration([
 "@snailicid3/node-utils",
 "@snailicid3/scaffold",
 "@snailicid3/workspace-tools",
-"@snailicid3/zod-helpers",
 "@snailicid3/playground"
 ])
 
