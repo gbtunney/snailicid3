@@ -10,7 +10,7 @@ import {
     getFilePathArr,
     getFullPath,
     normalizePath,
-} from './../node/file.path.array.js'
+} from './file.path.array.js'
 
 /* * CUSTOM ZOD UTILITIES!! * */
 /** @group Zod Schemas */

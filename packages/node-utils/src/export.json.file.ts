@@ -1,8 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
-import { prettyPrintJSON } from './../object/json.js'
-import { Json, Jsonifiable } from './../types/utility.js'
+import { prettyPrintJSON,type Json, type Jsonifiable } from '@snailicid3/utils'
 export type JSONExportEntry<
     Type = Json.Value,
     DataType = Type extends Jsonifiable ? Type : never,
