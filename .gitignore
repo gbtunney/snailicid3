@@ -45,8 +45,6 @@ jspm_packages/
 # TypeScript v1 declaration files
 typings/
 types/
-# Un-ignore the @snailicid3/types source package
-!packages/types/
 
 # TypeScript cache
 *.tsbuildinfo
@@ -150,13 +148,16 @@ dist
 *.d.cts.map
 *.map
 
+# Un-ignore the @snailicid3/types source package
+!packages/types/
+# Un-ignore src/types/ subdirectories (source code, not declarations)
+!packages/*/src/types/
+
 #Husky
 .husky/_
 # Allowed javascript source files
-#!eslint.config.js
 
 # Scratch Files
 scratch
 examples
-
 !/notes/scratch

@@ -2,8 +2,8 @@ import type { Chromable, Color, ColorFormat } from 'chroma.ts'
 import * as chroma from 'chroma.ts'
 import { repeat } from 'ramda'
 
-import { isCSSColorSpecial } from './../browser/css.js'
-import { tg } from './../typeguard/index.js'
+import { isCSSColorSpecial } from './browser/css.js'
+import { tg } from './typeguard/index.js'
 
 /**
  * @see https://en.wikipedia.org/wiki/HSL_and_HSV

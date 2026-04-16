@@ -1,5 +1,6 @@
 export * from './string/index.js'
 export * from './regexp/index.js'
+export * from './types/utility.js'
 export * as numeric from './number/index.js'
 export { keysOf, entriesOf, fromEntries, mapKeys, mapObject, mapValues } from './object/entries.js'
 export { prettyPrintJSON, safeSerializeJson, safeDeserializeJson } from './object/json.js'

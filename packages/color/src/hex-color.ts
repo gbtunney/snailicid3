@@ -1,5 +1,5 @@
 import ColorIO, { ColorObject as Color, Coords } from 'colorjs.io'
-import { fmt } from './../pretty.print.js'
+import { fmt } from './pretty.print.js'
 import { mapRange, Range, roundToDecimals } from './numeric.js'
 // Branded hex type
 export type HexColor = `#${string}` & { readonly __hexBrand: 'HexColor' }
@@ -9,7 +9,7 @@ export function mapColorJSCoords(
     mapFunction: (value: number) => number,
 ): [number, number, number] {
     // Always convert to sRGB 0..255
-    return color.coords.map(mapFunction) as [number, number, number]
+    return color.coords.map((v) => mapFunction(v as number)) as [number, number, number]
 }
 
 const mappingRGBFunction = (

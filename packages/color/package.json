@@ -14,8 +14,12 @@
         "test:coverage": "vitest run --coverage"
     },
     "dependencies": {
+        "@snailicid3/types": "workspace:*",
         "@snailicid3/utils": "workspace:*",
-        "colorjs.io": "^0.6.1"
+        "@types/ramda": "^0.30.0",
+        "chroma.ts": "^1.0.0",
+        "colorjs.io": "^0.6.1",
+        "ramda": "^0.30.0"
     },
     "devDependencies": {
         "@snailicid3/config": "workspace:*",
