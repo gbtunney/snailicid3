@@ -3,6 +3,11 @@
     "version": "0.0.0",
     "private": false,
     "description": "String, numeric, object, date and fmt utilities",
+ "buildConfig": {
+        "runtime": "universal",
+        "product": "library",
+        "buildStrategy": "bundle"
+    },
     "scripts": {
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
@@ -14,16 +19,18 @@
         "test:coverage": "vitest run --coverage"
     },
     "dependencies": {
+        "@snailicid3/build-config": "workspace:*",
         "@snailicid3/types": "workspace:*",
-        "@types/semver": "^7.0.0",
-        "semver": "^7.0.0",
         "@types/ramda": "^0.31.1",
+        "@types/semver": "^7.0.0",
         "dayjs": "^1.11.20",
         "escape-string-regexp": "^5.0.0",
         "flat": "^6.0.1",
         "minimatch": "^10.2.5",
         "ramda": "^0.32.0",
         "ramda-adjunct": "^6.0.0",
+        "rollup": "^4.60.1",
+        "semver": "^7.0.0",
         "ts-deepmerge": "^7.0.3",
         "type-fest": "^5.5.0",
         "zod": "^4.3.6"
