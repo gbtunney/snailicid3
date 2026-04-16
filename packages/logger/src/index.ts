@@ -21,6 +21,8 @@ export const logger = {
     wrapChalkText: wrapColorChalkInstanceText,
 }
 
+export { parseColorToHexStrict as parseHexColor } from './utilities/color.js'
+
 /** @internal */
 export default logger
 
