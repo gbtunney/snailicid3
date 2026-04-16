@@ -1,6 +1,6 @@
-import { Config } from 'typescript-eslint'
+import {defineConfig,type Config}from '@eslint/config-helpers'
 
-export const filenamesRules = (): Config => [
+export const filenamesRules = (): Config[] => defineConfig(
     /** @todo : is there a recommended config? dont know if this is needed */
     {
         name: 'Filenames: OFF',
@@ -16,4 +16,4 @@ export const filenamesRules = (): Config => [
             'filenames-simple/naming-convention': 'error',
         },
     },
-]
+)

@@ -1,0 +1,16 @@
+{
+  /* * TODO : WIP maybe extend child package */
+  
+  "extends": "@snailicid3/config/tsconfig-base",
+  "compilerOptions": {
+    "rootDir": ".",
+    "types": ["node"],
+    "noEmit": false
+  },
+    "files":["./commitlint.config.ts","./.markdownlint-cli2.mts",".lintstagedrc.mts"],
+  "exclude": ["./*"]
+}
+
+
+
+

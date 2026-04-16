@@ -1,8 +1,8 @@
 import jsdoc from 'eslint-plugin-jsdoc'
-import { Config } from 'typescript-eslint'
 import { getScaledWidth } from '../../prettier/index.js'
+import {defineConfig,type Config}from '@eslint/config-helpers'
 
-export const jsdocRules = (): Config => [
+export const jsdocRules = (): Config []=> defineConfig(
     { ...jsdoc.configs['flat/recommended'] },
     /* eslint sort/object-properties:off */
     {
@@ -48,6 +48,7 @@ export const jsdocRules = (): Config => [
     },
     {
         name: 'JSDoc: OFF',
+   
         rules: {
             /** Require */
             'jsdoc/require-jsdoc': 'off',
@@ -57,4 +58,4 @@ export const jsdocRules = (): Config => [
             'jsdoc/lines-before-block': 'off',
         },
     },
-]
+)

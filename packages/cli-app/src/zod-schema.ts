@@ -1,4 +1,5 @@
-import { fmt, formatValue, Logger, logger } from '@snailicid3/build-config'
+import { fmt, formatValue } from '@snailicid3/utils'
+import {  logger ,type Logger} from '@snailicid3/logger'
 import type { ArrayValues, Primitive } from 'type-fest'
 import { Choices, Options as SingleYarg } from 'yargs'
 import yargsInteractive from 'yargs-interactive'

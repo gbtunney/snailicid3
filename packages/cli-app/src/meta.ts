@@ -1,5 +1,4 @@
-import { zodHelpers } from '@snailicid3/g-library'
-import type { Logger } from 'winston'
+import { zodHelpers } from '@snailicid3/utils'
 import { z } from 'zod'
 import { appConfigSchema } from './app-config.js'
 import { wrapAnyZodSchema } from './helpers.js'
@@ -49,8 +48,9 @@ export const updateMetaForSchema = <Schema extends z.ZodType>(
     return getMetaForSchema(_schema)
 }
 
+/** TODO i have no idea what this is */
 export type AppConfigMeta = {
-    logger: Logger | string
+    logger:  string 
 }
 
 export const initAppRegistry = (): void => {

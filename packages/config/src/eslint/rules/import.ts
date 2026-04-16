@@ -1,7 +1,9 @@
-import { Config } from 'typescript-eslint'
-import { getFileExtensionList, JSLIKE_FILE_EXTENSIONS } from '../../utilities.js'
+import {  JSLIKE_FILE_EXTENSIONS } from '../../shared.js'
+import { expandExtensions } from '../../helpers.js'
 
-export const importRules = (): Config => [
+import {defineConfig,type Config}from '@eslint/config-helpers'
+
+export const importRules = (): Config[] => defineConfig(
     {
         name: 'Import: Default Rules',
         rules: {
@@ -14,10 +16,10 @@ export const importRules = (): Config => [
         },
     },
     {
-        files: [...getFileExtensionList(JSLIKE_FILE_EXTENSIONS, false, '**/src/**/*.')],
+        files: [...expandExtensions(JSLIKE_FILE_EXTENSIONS, '**/src/**/*.')],
         name: 'Import: no-default-export rule overridden for src files ',
         rules: {
             'import/no-default-export': 'warn',
         },
     },
-]
+)

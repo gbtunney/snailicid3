@@ -3,6 +3,7 @@ import { ensureArray, numeric, resolveRegExpSchema } from './schemas.js'
 
 /**
  * @category Zod
+ * @deprecated this is replaced with ZodType<> in zod 4
  * @example
  *     schemaForType<{
  *         horse: string
@@ -94,3 +95,5 @@ export const zodHelpers = {
 }
 export default zodHelpers
 export type { ZodRegExp } from './schemas.js'
+
+export * from  './json-stringified.js'

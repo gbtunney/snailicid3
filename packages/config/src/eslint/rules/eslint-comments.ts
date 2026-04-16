@@ -1,6 +1,6 @@
-import { Config } from 'typescript-eslint'
+import {defineConfig,type Config}from '@eslint/config-helpers'
 
-export const eslintCommentRules = (): Config => [
+export const eslintCommentRules = (): Config []=> defineConfig(
     {
         name: 'ESLint Comments : ERROR',
         rules: {
@@ -23,4 +23,4 @@ export const eslintCommentRules = (): Config => [
             ],
         },
     },
-]
+)

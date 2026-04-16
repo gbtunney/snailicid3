@@ -1,5 +1,5 @@
 import ColorIO, { ColorObject as Color, Coords } from 'colorjs.io'
-import { fmt } from './../pretty.print.js'
+import { fmt } from './pretty.print.js'
 import { mapRange, Range, roundToDecimals } from './numeric.js'
 // Branded hex type
 export type HexColor = `#${string}` & { readonly __hexBrand: 'HexColor' }
@@ -9,7 +9,7 @@ export function mapColorJSCoords(
     mapFunction: (value: number) => number,
 ): [number, number, number] {
     // Always convert to sRGB 0..255
-    return color.coords.map(mapFunction) as [number, number, number]
+    return color.coords.map((v) => mapFunction(v as number)) as [number, number, number]
 }
 
 const mappingRGBFunction = (
@@ -24,6 +24,18 @@ export const normalizeRGBCoords = (color: ColorJS): Coords => {
 
 export const isHexColor = (value: string): value is HexColor => /^#[0-9A-Fa-f]{6}$/.test(value)
 
+/**
+ * Checks if a color string is valid by attempting to parse it to hex
+ * also validates the string 
+ */
+export function isValidColor(input: string): boolean {
+    try {
+        parseColorToHexStrict(input)
+        return true
+    } catch {
+        return false
+    }
+}
 export function assertHexColor(value: string, ctx?: string): asserts value is HexColor {
     if (!isHexColor(value)) {
         throw new Error(`Invalid hex color${ctx ? ` (${ctx})` : ''}: "${value}"`)
@@ -59,6 +71,7 @@ export function parseColorToHexStrict(input: string | Color, ctx?: string): HexC
     }
 }
 
+export const parseColorToHex: typeof parseColorToHexStrict = parseColorToHexStrict
 /** Parse to branded #RRGGBB; returns undefined instead of throwing on failure */
 export function tryParseColorToHex(input: string): undefined {
     try {

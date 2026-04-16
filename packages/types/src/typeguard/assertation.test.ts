@@ -1,6 +1,22 @@
 import { describe, expect, test } from 'vitest'
-import { isNumeric, isPossibleNumeric, isValidScientificNumber } from './../number/validators.js'
 import { PlainObject } from './../types/utility.js'
+
+/** Local minimal validators replacing the removed number/validators dependency */
+const isNumeric = (value: unknown): value is number | bigint =>
+    typeof value === 'number' || typeof value === 'bigint'
+const isPossibleNumeric = (value: unknown, strict = true): value is number | string => {
+    if (typeof value === 'number') return true
+    if (typeof value !== 'string') return false
+    const trimmed = value.trim()
+    if (trimmed === '') return false
+    if (!strict) return true
+    return !Number.isNaN(Number(trimmed)) || /^[+-]?0x[0-9a-f]+$/i.test(trimmed)
+}
+const isValidScientificNumber = (value: unknown): value is string | number => {
+    if (typeof value === 'number') return !Number.isNaN(value)
+    if (typeof value !== 'string') return false
+    return /^[+-]?(?:\d(?:_?\d)*(?:\.\d(?:_?\d)*)?|\.\d(?:_?\d)*)(?:e[+-]?\d(?:_?\d)*)?$/i.test(value)
+}
 import { guardToAssertion, predicateToAssertion } from './assertation.js'
 import { isJsonifiableArray } from './json.typeguards.js'
 import { isBigInt, isPlainObject, isString } from './utility.typeguards.js'
@@ -28,7 +44,7 @@ const assertIsBigInt: AssertBigInt = guardToAssertion(isBigInt)
 const assertIsNumeric: AssertNumber = guardToAssertion(isNumeric)
 /** Wrap to widen the parameter to unknown */
 const assertIsPossibleNumeric: AssertPossibleNumeric = (value, strict) =>
-    (guardToAssertion(isPossibleNumeric) as any)(value as any, strict)
+    ( guardToAssertion(isPossibleNumeric) as any)(value as any, strict)
 const assertIsPlainObject: AssertPlainObject = (value) =>
     (guardToAssertion(isPlainObject) as any)(value as any)
 const assertIsJsonArray: AssertJsonArray = guardToAssertion(isJsonifiableArray)

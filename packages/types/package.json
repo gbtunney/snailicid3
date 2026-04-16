@@ -46,6 +46,9 @@
         }
     },
     "scripts": {
+        "build:nx": "nx run $npm_package_name:build",
+        "test:nx": "nx run $npm_package_name:test",
+        "clean:nx": "nx run $npm_package_name:clean",
         "\n========== DEVELOPMENT >> ==========": "",
         "build": "tsc -p src/tsconfig.json",
         "dev": "tsc --build --watch",

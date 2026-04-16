@@ -14,7 +14,32 @@ export type TypeGuardNarrowedType<Guard extends TypeGuardFunction> = Guard exten
     ? Narrowed
     : never
 
+export type AssertionFunctionFromGuard<Guard extends TypeGuardFunction> = (
+    value: TypeGuardInputValue<Guard>,
+    ...args: TypeGuardExtraParameters<Guard>
+) => asserts value is TypeGuardNarrowedType<Guard>
+
 export type BooleanPredicateFunction = (value: unknown, ...args: Array<unknown>) => boolean
+
+export type PredicateInputValue<Predicate extends BooleanPredicateFunction> =
+    Parameters<Predicate>[0]
+
+export type PredicateExtraParameters<Predicate extends BooleanPredicateFunction> =
+    Parameters<Predicate> extends [unknown, ...infer Rest] ? Rest : never
+
+/**
+ * Assertion type derived from a boolean predicate.
+ *
+ * Preserves the predicate's input type and extra parameters. The narrowed type defaults
+ * to the input type since boolean predicates do not carry narrowing information.
+ */
+export type AssertionFunctionFromPredicate<
+    Predicate extends BooleanPredicateFunction,
+    Narrowed extends PredicateInputValue<Predicate> = PredicateInputValue<Predicate>,
+> = (
+    value: PredicateInputValue<Predicate>,
+    ...args: PredicateExtraParameters<Predicate>
+) => asserts value is Narrowed
 
 /**
  * Builds an assertion from a boolean-returning predicate.
@@ -24,21 +49,20 @@ export type BooleanPredicateFunction = (value: unknown, ...args: Array<unknown>)
  * @category Assertions
  * @example
  *     const isEven = (n: number) => n % 2 === 0
- *     const assertIsEven = predicateToAssertion<number, number>(isEven)
+ *     const assertIsEven = predicateToAssertion(isEven)
  *     assertIsEven(4) // ok
  *     // assertIsEven(3) // throws TypeError
  *
  * @group Typeguard
  */
-export function predicateToAssertion<
-    InputValue = unknown,
-    Narrowed extends InputValue = InputValue,
-    ExtraParameters extends Array<unknown> = Array<unknown>,
->(
-    predicate: (value: InputValue, ...args: ExtraParameters) => boolean,
+export function predicateToAssertion<Predicate extends BooleanPredicateFunction>(
+    predicate: Predicate,
     message = 'Assertion failed',
-) {
-    return (value: InputValue, ...args: ExtraParameters): asserts value is Narrowed => {
+): AssertionFunctionFromPredicate<Predicate> {
+    return (
+        value: PredicateInputValue<Predicate>,
+        ...args: PredicateExtraParameters<Predicate>
+    ): asserts value is PredicateInputValue<Predicate> => {
         if (!predicate(value, ...args)) {
             throw new TypeError(message)
         }
@@ -53,21 +77,20 @@ export function predicateToAssertion<
  * @category Assertions
  * @example
  *     const isStringGuard = (v: unknown): v is string => typeof v === 'string'
- *     const assertIsString2 = guardToAssertion<unknown, string>(isStringGuard)
+ *     const assertIsString2 = guardToAssertion(isStringGuard)
  *     assertIsString2('ok') // v is string afterwards
  *     // assertIsString2(42)  // throws TypeError
  *
  * @group Typeguard
  */
-export function guardToAssertion<
-    InputValue = unknown,
-    Narrowed extends InputValue = InputValue,
-    ExtraParameters extends Array<unknown> = Array<unknown>,
->(
-    guard: (value: InputValue, ...args: ExtraParameters) => value is Narrowed,
+export function guardToAssertion<Guard extends TypeGuardFunction>(
+    guard: Guard,
     message = 'Assertion failed',
-) {
-    return (value: InputValue, ...args: ExtraParameters): asserts value is Narrowed => {
+) : AssertionFunctionFromGuard<Guard> {
+    return (
+        value: TypeGuardInputValue<Guard>,
+        ...args: TypeGuardExtraParameters<Guard>
+    ): asserts value is TypeGuardNarrowedType<Guard> => {
         if (!guard(value, ...args)) {
             throw new TypeError(message)
         }

@@ -1,4 +1,4 @@
-import { fmt } from '@snailicid3/build-config'
+import { fmt } from '@snailicid3/utils'
 // ==============================
 // File: src/lib/units.ts
 // ==============================

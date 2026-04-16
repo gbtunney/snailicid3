@@ -63,8 +63,8 @@ The foundation layer everything else imports from.
 **Key exports:**
 
 ```ts
-export type * from './utility.js' // Json, Simplify, KeysOf, EntriesOf, etc.
-export { tg } from './typeguard/index.js'
+export type * from "./utility.js"; // Json, Simplify, KeysOf, EntriesOf, etc.
+export { tg } from "./typeguard/index.js";
 ```
 
 **Dependencies:** `type-fest`
@@ -97,18 +97,29 @@ date/duration/timestamp helpers, and `fmt` (the tagged template literal that sil
 **Key exports:**
 
 ```ts
-export { stringUtils } from './string/index.js'
-export { regexp } from './regexp/index.js'
-export * as numeric from './number/index.js'
-export { keysOf, entriesOf, fromEntries, mapKeys, mapObject, mapValues } from './object/entries.js'
-export { prettyPrintJSON, safeSerializeJson, safeDeserializeJson } from './object/json.js'
-export { fmt, formatValue, formatArgs } from './fmt.js'
-export { flatten, unflatten } from 'flat'
+export { stringUtils } from "./string/index.js";
+export { regexp } from "./regexp/index.js";
+export * as numeric from "./number/index.js";
+export {
+  keysOf,
+  entriesOf,
+  fromEntries,
+  mapKeys,
+  mapObject,
+  mapValues
+} from "./object/entries.js";
+export {
+  prettyPrintJSON,
+  safeSerializeJson,
+  safeDeserializeJson
+} from "./object/json.js";
+export { fmt, formatValue, formatArgs } from "./fmt.js";
+export { flatten, unflatten } from "flat";
 // date — three focused subnamespaces
-export { dateUtils } from './date/date.js' // formatIsoDate, isValidDate, isValidIsoDate
-export { durationUtils } from './date/duration.js' // formatDurationFromMs, format presets
-export { timestampUtils } from './date/timestamp.js' // nsToMs, highresTimestamptoISOString, getTimestampDuration
-export { dayjs } from './date/dayjs.js' // pre-extended instance (utc + customParseFormat + duration)
+export { dateUtils } from "./date/date.js"; // formatIsoDate, isValidDate, isValidIsoDate
+export { durationUtils } from "./date/duration.js"; // formatDurationFromMs, format presets
+export { timestampUtils } from "./date/timestamp.js"; // nsToMs, highresTimestamptoISOString, getTimestampDuration
+export { dayjs } from "./date/dayjs.js"; // pre-extended instance (utc + customParseFormat + duration)
 ```
 
 **Dependencies:** `type-fest`, `flat`, `ts-deepmerge`, `dayjs`, `@snailicid3/types`
@@ -149,9 +160,15 @@ export { dayjs } from './date/dayjs.js' // pre-extended instance (utc + customPa
 **Key exports:**
 
 ```ts
-export type { HexColor, ColorJS }
-export { isHexColor, assertHexColor, parseColorJS, parseColorToHexStrict, readableTextHex }
-export { mapColorJSCoords, normalizeRGBCoords }
+export type { HexColor, ColorJS };
+export {
+  isHexColor,
+  assertHexColor,
+  parseColorJS,
+  parseColorToHexStrict,
+  readableTextHex
+};
+export { mapColorJSCoords, normalizeRGBCoords };
 ```
 
 **Dependencies:** `colorjs.io`, `chroma.ts`, `@snailicid3/utils`
@@ -177,10 +194,14 @@ codec.
 **Key exports:**
 
 ```ts
-export { zodHelpers } from './index.js'
-export type { ZodRegExp }
-export { makeJsonStringifiedSchema, jsonParser, jsonStringified } from './json-stringified.js'
-export type { JsonStringified, JsonStringifiedSchema, JsonStringifiedAPI }
+export { zodHelpers } from "./index.js";
+export type { ZodRegExp };
+export {
+  makeJsonStringifiedSchema,
+  jsonParser,
+  jsonStringified
+} from "./json-stringified.js";
+export type { JsonStringified, JsonStringifiedSchema, JsonStringifiedAPI };
 ```
 
 **Dependencies:** `zod`, `@snailicid3/types`, `@snailicid3/color` (for color schemas), `@snailicid3/utils`
@@ -209,10 +230,16 @@ Node.
 **Key exports:**
 
 ```ts
-export { node } from './index.js'
-export type { FilePath, FileType, JSONExportEntry, JSONExportConfig, ImageMimeType }
-export { exportJSONFile, getImageBase64, getArgsObject, getYArgs }
-export { fsPath, fsPathArray, fsPathExists } // Zod path schemas
+export { node } from "./index.js";
+export type {
+  FilePath,
+  FileType,
+  JSONExportEntry,
+  JSONExportConfig,
+  ImageMimeType
+};
+export { exportJSONFile, getImageBase64, getArgsObject, getYArgs };
+export { fsPath, fsPathArray, fsPathExists }; // Zod path schemas
 ```
 
 **Dependencies:** `fs`, `path`, `glob`, `is-glob`, `yargs`, `zod`, `@snailicid3/types`, `@snailicid3/utils`
@@ -241,9 +268,9 @@ Matching shell script output is a future goal.
 **Key exports:**
 
 ```ts
-export { logger } from './logger.js'
-export type { LogLevelName, LogLevelColors, LoggerRecord }
-export type { ChalkColor, ChalkColorPreset }
+export { logger } from "./logger.js";
+export type { LogLevelName, LogLevelColors, LoggerRecord };
+export type { ChalkColor, ChalkColorPreset };
 ```
 
 **Dependencies:** `chalk`, `dayjs`, `zod`, `@snailicid3/color`, `@snailicid3/utils`
@@ -280,10 +307,10 @@ export type { ChalkColor, ChalkColorPreset }
 
 ```ts
 // consumed via extends, not import
-export { eslintConfig } from './eslint/index.js'
-export { prettierConfig } from './prettier/index.js'
-export { markdownlintConfig } from './markdownlint/index.js'
-export { commitlintConfig } from './commitlint/index.js'
+export { eslintConfig } from "./eslint/index.js";
+export { prettierConfig } from "./prettier/index.js";
+export { markdownlintConfig } from "./markdownlint/index.js";
+export { commitlintConfig } from "./commitlint/index.js";
 // tsconfig files referenced via "extends": "@snailicid3/config/tsconfig-base"
 ```
 
@@ -459,46 +486,46 @@ scaffold/
 **Key exports:**
 
 ```ts
-export { scaffoldPackage } from './scaffold.js'
-export type { ScaffoldInput } from './input.js'
+export { scaffoldPackage } from "./scaffold.js";
+export type { ScaffoldInput } from "./input.js";
 // templates exported so they can be used or overridden individually
-export { generatePackageJson } from './templates/package-json.js'
-export { generateTsConfig } from './templates/tsconfig.js'
-export { generateRollupConfig } from './templates/rollup-config.js'
-export { generateReadme } from './templates/readme.js'
+export { generatePackageJson } from "./templates/package-json.js";
+export { generateTsConfig } from "./templates/tsconfig.js";
+export { generateRollupConfig } from "./templates/rollup-config.js";
+export { generateReadme } from "./templates/readme.js";
 ```
 
 **`package-json.ts` pattern** — typed object, no string interpolation:
 
 ```ts
-import type { PackageJson } from '@snailicid3/node-utils'
+import type { PackageJson } from "@snailicid3/node-utils";
 
 export const generatePackageJson = (input: ScaffoldInput): PackageJson => ({
   name: `@snailicid3/${input.name}`,
-  version: '0.0.0',
+  version: "0.0.0",
   description: input.description,
   private: false,
-  type: 'module',
+  type: "module",
   exports: {
-    '.': {
-      import: './dist/index.js',
-      types: './dist/index.d.ts',
-    },
+    ".": {
+      import: "./dist/index.js",
+      types: "./dist/index.d.ts"
+    }
   },
   scripts: {
-    '\n========== DEVELOPMENT >> ==========': '',
-    dev: 'tsc --build --watch',
-    '\n========== TEST >> ==========': '',
-    'test:watch': 'vitest watch',
-    'test:coverage': 'vitest run --coverage',
+    "\n========== DEVELOPMENT >> ==========": "",
+    dev: "tsc --build --watch",
+    "\n========== TEST >> ==========": "",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage"
   },
   devDependencies: {
-    '@snailicid3/config': 'workspace:*',
-    '@snailicid3/build-config': 'workspace:*',
-    typescript: 'catalog:',
-    vitest: 'catalog:',
-  },
-})
+    "@snailicid3/config": "workspace:*",
+    "@snailicid3/build-config": "workspace:*",
+    typescript: "catalog:",
+    vitest: "catalog:"
+  }
+});
 ```
 
 **`rollup-config.ts` pattern** — template literal inside TS, still formatted by Prettier:
@@ -518,42 +545,51 @@ const CONFIG = rollup.getConfigEntries(
 )
 
 export default rollup.getRollupConfig(CONFIG)
-`.trimStart()
+`.trimStart();
 ```
 
 **`scaffold.ts` — the writer:**
 
 ```ts
-import { writeFileSync, mkdirSync } from 'fs'
-import { join } from 'path'
+import { writeFileSync, mkdirSync } from "fs";
+import { join } from "path";
 
 export const scaffoldPackage = (input: ScaffoldInput, outDir: string): void => {
-  mkdirSync(join(outDir, 'src'), { recursive: true })
+  mkdirSync(join(outDir, "src"), { recursive: true });
 
-  writeFileSync(join(outDir, 'package.json'), JSON.stringify(generatePackageJson(input), null, 4))
-  writeFileSync(join(outDir, 'tsconfig.json'), JSON.stringify(generateTsConfig(input), null, 4))
-  writeFileSync(join(outDir, 'rollup.config.mts'), generateRollupConfig(input))
-  writeFileSync(join(outDir, 'README.md'), generateReadme(input))
-  writeFileSync(join(outDir, 'src/index.ts'), `// ${input.name}\n`)
-}
+  writeFileSync(
+    join(outDir, "package.json"),
+    JSON.stringify(generatePackageJson(input), null, 4)
+  );
+  writeFileSync(
+    join(outDir, "tsconfig.json"),
+    JSON.stringify(generateTsConfig(input), null, 4)
+  );
+  writeFileSync(join(outDir, "rollup.config.mts"), generateRollupConfig(input));
+  writeFileSync(join(outDir, "README.md"), generateReadme(input));
+  writeFileSync(join(outDir, "src/index.ts"), `// ${input.name}\n`);
+};
 ```
 
 **`sync.ts` — update mode for existing packages:**
 
 ```ts
 export type SyncResult = {
-  file: string
-  action: 'created' | 'updated' | 'skipped' | 'needs-review'
-  reason?: string
-}
+  file: string;
+  action: "created" | "updated" | "skipped" | "needs-review";
+  reason?: string;
+};
 
 // Run against any existing package dir — safe to rerun, revert via git if needed
-export const syncPackage = (input: ScaffoldInput, packageDir: string): Array<SyncResult> => [
+export const syncPackage = (
+  input: ScaffoldInput,
+  packageDir: string
+): Array<SyncResult> => [
   syncPackageJson(input, packageDir), // deep-merge scripts + devDeps, preserve rest
   syncTsConfig(input, packageDir), // merge compilerOptions, preserve references
   syncReadme(input, packageDir), // marker-based header insert/replace
-  checkRollupConfig(packageDir), // flags as needs-review, never overwrites
-]
+  checkRollupConfig(packageDir) // flags as needs-review, never overwrites
+];
 ```
 
 **README header sync — marker block pattern:**
@@ -677,15 +713,19 @@ workspace-tools/
 **Key Node exports (importable by other packages):**
 
 ```ts
-export { execCommand, getExecCommandOutput, quoteShellArgument } from './exec.js'
+export {
+  execCommand,
+  getExecCommandOutput,
+  quoteShellArgument
+} from "./exec.js";
 export {
   getWorkspacePackagesList,
   getWorkspacePackagesLookup,
   getWorkspacePackagesObject,
-  getWorkspaceRoot,
-} from './packages.js'
-export type { WorkspacePackage } from './packages.js'
-export { isRepoClean, ensureRepoClean } from './git.js'
+  getWorkspaceRoot
+} from "./packages.js";
+export type { WorkspacePackage } from "./packages.js";
+export { isRepoClean, ensureRepoClean } from "./git.js";
 ```
 
 **Dependencies:** `@snailicid3/utils`, `@snailicid3/logger`, `@nx/devkit` (for nx-status)
@@ -700,8 +740,8 @@ export { isRepoClean, ensureRepoClean } from './git.js'
 ```yaml
 # pnpm-workspace.yaml
 packages:
-  - 'packages/*'
-  - 'apps/*'
+  - "packages/*"
+  - "apps/*"
 ```
 
 The full catalog lives in `pnpm-catalog.yaml`. It covers shared tooling deps (typescript, vitest, eslint,

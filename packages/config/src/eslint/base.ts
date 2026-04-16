@@ -1,6 +1,5 @@
 import pluginJs from '@eslint/js'
 import globals from 'globals'
-import type { Config } from 'typescript-eslint'
 import tseslint from 'typescript-eslint'
 import pluginsConfig from './plugins.js'
 import { eslintCommentRules } from './rules/eslint-comments.js'
@@ -12,26 +11,39 @@ import { sortRules } from './rules/sort.js'
 import { typescriptRules } from './rules/typescript.js'
 import { vitestRules } from './rules/vitest.js'
 import { SHARED_FORMATTING_RULES } from '../prettier/index.js'
-import { getFileExtensionList, JS_FILE_EXTENSIONS, JSLIKE_FILE_EXTENSIONS } from '../utilities.js'
-
-const base_files: Array<string> = [...getFileExtensionList(JSLIKE_FILE_EXTENSIONS, false, '*.')]
+import { TS_FILE_EXTENSIONS, JS_FILE_EXTENSIONS } from '../shared.js'
+import {reactRules} from './rules/react.js'
+import {expandExtensions}from './../helpers.js'
+import {defineConfig,type Config}from '@eslint/config-helpers'
+const base_files: Array<string> = [...expandExtensions(TS_FILE_EXTENSIONS, '*.')]
 const base_ignores = [
     '**/dist/**/*',
     '**/node_modules/**',
     '**/dist/**',
     '**/types/**/*',
     '**/types/**',
+
     /** SYSTEM */
     '**/.history/**',
+     '**/scratch/**',
+   // '**/examples/**',
+   /** python related ignores TODO: idkk is this needed? */
+'**/.venv/**',
+            '**/venv/**',
+            '**/__pycache__/**',
+            '**/*.py',
+    
     /** DECLARATIONS */
     '**/*.d.*',
-    '**/*.d.mts',
-    '**/*.d.cts',
+   // '**/*.d.mts',
+   // '**/*.d.cts',
     '**/*.map',
+/** STORYBOOK */
+      '**/storybook-static/**',
 ]
 
-export const flatEslintConfig = async (__dirname: string): Promise<Config> => {
-    const EslintConfig: Config = [
+export const flatEslintConfig = async (__dirname: string): Promise<Config[]> => {
+    const EslintConfig: Config []= defineConfig(
         { files: base_files, name: 'Custom Base Configuration : Includes' },
         { ignores: base_ignores, name: 'Custom Base Configuration : Ignores' },
         {
@@ -57,7 +69,7 @@ export const flatEslintConfig = async (__dirname: string): Promise<Config> => {
         ...(await filenamesRules()),
         ...(await namingConventionRules()),
         ...(await eslintCommentRules()),
-
+...(await reactRules()),
         /**
          * No multiple empty lines should ERROR
          *
@@ -75,7 +87,7 @@ export const flatEslintConfig = async (__dirname: string): Promise<Config> => {
 
         /** Common JS Rules */
         {
-            files: [...getFileExtensionList(['cjs', 'cts'], false, '*/**.')],
+            files: [...expandExtensions(['cjs', 'cts'], '*/**.')],
             name: 'Custom CommonJS Rules',
             rules: {
                 '@typescript-eslint/no-unused-vars': 'warn',
@@ -88,10 +100,10 @@ export const flatEslintConfig = async (__dirname: string): Promise<Config> => {
         {
             // Take the preset and apply only to JS extensions
             ...tseslint.configs.disableTypeChecked,
-            files: [...getFileExtensionList(JS_FILE_EXTENSIONS, false, '**/*.')],
+            files: [...expandExtensions(JS_FILE_EXTENSIONS, '**/*.')],
             name: 'Typescript Eslint : Disable Type Checked for js files',
         },
-    ]
+    )
     return EslintConfig
 }
 

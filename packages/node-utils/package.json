@@ -16,8 +16,11 @@
     "dependencies": {
         "@snailicid3/types": "workspace:*",
         "@snailicid3/utils": "workspace:*",
+        "@types/is-glob": "^4.0.4",
         "glob": "^13.0.6",
         "is-glob": "^4.0.3",
+        "ramda-adjunct": "^6.0.0",
+        "type-fest": "^5.5.0",
         "yargs": "^18.0.0",
         "zod": "^4.3.6"
     },
