@@ -250,6 +250,9 @@ importers:
       '@commitlint/types':
         specifier: ^20.5.0
         version: 20.5.0
+      '@eslint-community/eslint-plugin-eslint-comments':
+        specifier: ^4.7.1
+        version: 4.7.1(eslint@10.2.0(jiti@2.6.1))
       '@eslint/config-helpers':
         specifier: ^0.5.5
         version: 0.5.5
@@ -268,9 +271,12 @@ importers:
       '@vitest/eslint-plugin':
         specifier: ^1.6.15
         version: 1.6.16(@typescript-eslint/eslint-plugin@8.58.2(@typescript-eslint/parser@8.58.2(eslint@10.2.0(jiti@2.6.1))(typescript@6.0.3))(eslint@10.2.0(jiti@2.6.1))(typescript@6.0.3))(eslint@10.2.0(jiti@2.6.1))(typescript@6.0.3)(vitest@4.1.4(@types/node@24.1.0)(vite@8.0.8(@types/node@24.1.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)))
-      eslint-plugin-eslint-comments:
-        specifier: ^3.2.0
-        version: 3.2.0(eslint@10.2.0(jiti@2.6.1))
+      eslint:
+        specifier: ^10.2.0
+        version: 10.2.0(jiti@2.6.1)
+      eslint-plugin-check-file:
+        specifier: ^3.3.1
+        version: 3.3.1(eslint@10.2.0(jiti@2.6.1))
       eslint-plugin-filenames-simple:
         specifier: ^0.9.0
         version: 0.9.0(eslint@10.2.0(jiti@2.6.1))
@@ -1178,6 +1184,12 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@eslint-community/eslint-plugin-eslint-comments@4.7.1':
+    resolution: {integrity: sha512-Ql2nJFwA8wUGpILYGOQaT1glPsmvEwE0d+a+l7AALLzQvInqdbXJdx7aSu0DpUX9dB1wMVBMhm99/++S3MdEtQ==}
+    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    peerDependencies:
+      eslint: ^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0
 
   '@eslint-community/eslint-utils@4.9.1':
     resolution: {integrity: sha512-phrYmNiYppR7znFEdqgfWHXR6NCkZEK7hwWDHZUjit/2/U0r6XvkDl0SYnoM51Hq7FhCGdLDT6zxCCOY1hexsQ==}
@@ -3184,6 +3196,12 @@ packages:
         optional: true
       eslint-import-resolver-webpack:
         optional: true
+
+  eslint-plugin-check-file@3.3.1:
+    resolution: {integrity: sha512-b7fDkp8Y0T9vloTYSrkMnb5Cqpk1bc6+jDQdgKIhzdwb47NmLAvMFYo3SzHOPF8u4SEsOVhmrNSbo6Sp633syg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      eslint: '>=9.0.0'
 
   eslint-plugin-eslint-comments@3.2.0:
     resolution: {integrity: sha512-0jkOl0hfojIHHmEHgmNdqv4fmh7300NdpA9FFpF7zaoLvB/QeXOGNLIo86oAveJFrfB1p05kC8hpEMHM8DwWVQ==}
@@ -6704,6 +6722,12 @@ snapshots:
   '@esbuild/win32-x64@0.27.7':
     optional: true
 
+  '@eslint-community/eslint-plugin-eslint-comments@4.7.1(eslint@10.2.0(jiti@2.6.1))':
+    dependencies:
+      escape-string-regexp: 4.0.0
+      eslint: 10.2.0(jiti@2.6.1)
+      ignore: 7.0.5
+
   '@eslint-community/eslint-utils@4.9.1(eslint@10.2.0(jiti@2.6.1))':
     dependencies:
       eslint: 10.2.0(jiti@2.6.1)
@@ -8874,6 +8898,12 @@ snapshots:
       eslint-import-resolver-node: 0.3.10
     transitivePeerDependencies:
       - supports-color
+
+  eslint-plugin-check-file@3.3.1(eslint@10.2.0(jiti@2.6.1)):
+    dependencies:
+      eslint: 10.2.0(jiti@2.6.1)
+      is-glob: 4.0.3
+      micromatch: 4.0.8
 
   eslint-plugin-eslint-comments@3.2.0(eslint@10.2.0(jiti@2.6.1)):
     dependencies:

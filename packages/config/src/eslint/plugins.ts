@@ -5,6 +5,7 @@ import jsdocPlugin from 'eslint-plugin-jsdoc'
 import sortPlugin from 'eslint-plugin-sort'
 import unusedImports from 'eslint-plugin-unused-imports'
 import vitestPlugin from '@vitest/eslint-plugin'
+import checkFilePlugin from 'eslint-plugin-check-file'
 //import type { Config } from 'typescript-eslint'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
@@ -18,7 +19,8 @@ export const pluginsConfig = (): Config[] =>
             plugins: {
                 ['@typescript-eslint']: tsEslint.plugin,
                 ['eslint-comments']: eslintCommentsPlugin,
-                ['filenames-simple']: simpleFilenamesPlugin,
+                ['check-file']: checkFilePlugin,
+                //['filenames-simple']: simpleFilenamesPlugin,
                 ['import']: importPlugin,
                 ['jsdoc']: jsdocPlugin,
                 ['sort']: sortPlugin,
