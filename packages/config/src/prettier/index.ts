@@ -24,29 +24,8 @@ export type PrettierConfig = Merge<
     overrides: PrettierOverrides;
   }
 >;
-/**  TODO: put back in 
- * packageIgnoreSort: ["scripts"],
     //SHARED_FORMATTING_RULES.tabWidth,
-    packageSortOrder: [
-      "name",
-      "version",
-      "private",
-      "description",
-      "scripts",
-      "main",
-      "module",
-      "types",
-      "dependencies",
-      "devDependencies",
-      "type",
-      "exports",
-      "author",
-      "license"
-    ],
-    */
-
-
-
+ 
 export const prettierConfiguration = (
   bundled:boolean = true,
   _options?: PrettierOptions,

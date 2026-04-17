@@ -4,7 +4,7 @@
     "private": false,
     "description": "String, numeric, object, date and fmt utilities",
  "buildConfig": {
-        "runtime": "universal",
+        "runtime": "node",
         "product": "library",
         "buildStrategy": "bundle"
     },
@@ -61,11 +61,7 @@
             "build:ts": {},
             "build:rollup": {},
             "build:vite": {},
-            "build": {
-                "dependsOn": [
-                    "build:ts"
-                ]
-            },
+            "build": {   },
             "test": {},
             "test:nx": {},
             "test:watch": {},

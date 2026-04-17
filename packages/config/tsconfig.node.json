@@ -1,10 +1,5 @@
 {
-    "extends": "@snailicid3/config/tsconfig-base",
-    "compilerOptions": {
-        "rootDir": ".",
-        "types": ["node"],
-        "noEmit": true
-    },
+    "extends": "./typescript-config/tsconfig.typecheck.json",
     "exclude": ["./node_modules"],
     "files": ["package.json"],
     "include": [

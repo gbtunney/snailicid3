@@ -28,9 +28,10 @@ export const getDefaultOptions = (): PrettierOptions => {
 
     /** JS Doc */
     jsdocPrintWidth: getScaledWidth("comments"),
-    packageIgnoreSort: ["scripts"],
+    //packageIgnoreSort: ["scripts"],
     //SHARED_FORMATTING_RULES.tabWidth,
-    packageSortOrder: [
+    /** TODO reenabled or remove
+     *  packageSortOrder: [
       "name",
       "version",
       "private",
@@ -45,7 +46,7 @@ export const getDefaultOptions = (): PrettierOptions => {
       "exports",
       "author",
       "license"
-    ],
+    ],*/
     printWidth: getScaledWidth("code"),
     proseWrap: "never",
 

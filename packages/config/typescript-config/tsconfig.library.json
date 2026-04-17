@@ -1,0 +1,21 @@
+{
+    "extends":"./tsconfig.base.json",
+    "compilerOptions": {
+                "tsBuildInfoFile": "${configDir}/node_modules/.tmp/tsconfig.library.tsbuildinfo",
+         "rootDir": "${configDir}/src",
+        "outDir": "${configDir}/dist",
+        "declarationDir": "${configDir}/types",
+    
+        "composite": true,
+    "incremental": true,
+
+        "declaration": true,
+         "sourceMap": true,
+        "declarationMap": true,
+        
+       
+   
+
+        "forceConsistentCasingInFileNames": true
+    }
+}

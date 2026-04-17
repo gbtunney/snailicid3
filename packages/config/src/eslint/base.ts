@@ -3,7 +3,7 @@ import globals from 'globals'
 import tseslint from 'typescript-eslint'
 import pluginsConfig from './plugins.js'
 import { eslintCommentRules } from './rules/eslint-comments.js'
-import { filenamesRules } from './rules/filenames.js'
+import { checkFileRules } from './rules/check-file.js'
 import { importRules } from './rules/import.js'
 import { jsdocRules } from './rules/jsdoc.js'
 import { namingConventionRules } from './rules/naming-convention.js'
@@ -66,7 +66,7 @@ export const flatEslintConfig = async (__dirname: string): Promise<Config[]> => 
         ...(await sortRules()),
         ...(await vitestRules()),
         ...(await jsdocRules()),
-        ...(await filenamesRules()),
+        ...(await checkFileRules()),
         ...(await namingConventionRules()),
         ...(await eslintCommentRules()),
 ...(await reactRules()),

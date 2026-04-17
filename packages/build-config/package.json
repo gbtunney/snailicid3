@@ -1,17 +1,13 @@
 {
     "name": "@snailicid3/build-config",
-    "version": "0.1.0",
+    "version": "0.0.0",
     "private": false,
     "description": "Shared rollup, vite, vitest and typedoc build tool configs",
     "scripts": {
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
-        "\n========== DEVELOPMENT >> ==========": "",
-        "dev": "tsc --build --watch",
-        "build": "tsc -p src/tsconfig.json",
         "\n========== TEST >> ==========": "",
-        "test:watch": "vitest watch",
         "test:coverage": "vitest run --coverage"
     },
     "devDependencies": {
@@ -23,7 +19,6 @@
         "@snailicid3/config": "workspace:*",
         "@types/node": "^25.6.0",
         "rollup": "^4.60.1",
-        "rollup-plugin-node-polyfills": "^0.2.1",
         "rollup-plugin-node-externals": "^8.1.2",
         "tslib": "^2.8.1",
         "typedoc": "^0.28.19",
@@ -48,7 +43,13 @@
             "dev:ts": {},
             "dev:rollup": {},
             "dev:vite": {},
-            "build:ts": {},
+            "build:ts": {
+                 "cache": true,
+            "dependsOn": ["^build"],
+            "inputs": ["production", "^production"],
+            "outputs": ["{projectRoot}/dist", "{projectRoot}/types"],
+            "command": "tsc --build ./tsconfig.json && tsc --build ./tsconfig.node.json"
+            },
             "build:rollup": {},
             "build:vite": {},
             "build": {
@@ -77,9 +78,9 @@
         "type": "git",
         "url": "https://github.com/gbtunney/snailicid3-monorepo"
     },
-    "publishConfig": {
-        "access": "public"
-    },
     "main": "./dist/index.js",
-    "types": "./types/index.d.ts"
+    "types": "./types/index.d.ts",
+    "dependencies": {
+        "rollup-plugin-polyfill-node": "^0.13.0"
+    }
 }

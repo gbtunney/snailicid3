@@ -12,8 +12,9 @@ import terser from '@rollup/plugin-terser'
 import typescript from '@rollup/plugin-typescript'
 import type { Plugin } from 'rollup'
 import nodeExternals from 'rollup-plugin-node-externals'
-import nodePolyfills from 'rollup-plugin-node-polyfills'
+import nodePolyfills from 'rollup-plugin-polyfill-node'
 
+export type RollupPluginPreset = 'node_library' | 'browser_library' | 'cli' | 'iife'
 /**
  * TypeScript plugin config shared across all presets.
  *
@@ -26,6 +27,7 @@ import nodePolyfills from 'rollup-plugin-node-polyfills'
  * separation of concerns rather than a workaround.
  */
 const tsPlugin = (): Plugin =>
+    // TODO how can we use the normal config?
     typescript({
         tsconfig: false,
         target: 'ESNext',
@@ -37,9 +39,6 @@ const tsPlugin = (): Plugin =>
         declarationMap: false,
         sourceMap: true,
     })
-
-export type RollupPluginPreset = 'node_library' | 'browser_library' | 'cli' | 'iife'
-
 /**
  * Return a plugin array for the given preset.
  *
@@ -101,3 +100,17 @@ export function inferPreset(outputKinds: string[], runtime: string): RollupPlugi
     }
     return 'node_library'
 }
+
+/** 
+ * TODO add dts somewhere
+ * import { dts } from "rollup-plugin-dts";
+
+const config = [
+  // …
+  {
+    input: "./my-input/index.d.ts",
+    output: [{ file: "dist/my-library.d.ts", format: "es" }],
+    plugins: [dts()],
+  },
+];
+ */

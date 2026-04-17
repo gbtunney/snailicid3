@@ -1,3 +1,9 @@
 {
-    "references": [{ "path": "./src" }]
+    "extends": "@snailicid3/config/tsconfig.library",
+    "include": ["./src/**/*.ts", "./src/**/*.cts", "./src/**/*.mts"],
+        "exclude": [
+        "**/*.test.ts",
+        "**/*.test.mts",
+        "**/*.test.cts"
+    ]
 }
