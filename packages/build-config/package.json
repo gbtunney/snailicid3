@@ -7,10 +7,7 @@
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
-        "\n========== DEVELOPMENT >> ==========": "",
-        "dev": "tsc --build --watch",
         "\n========== TEST >> ==========": "",
-        "test:watch": "vitest watch",
         "test:coverage": "vitest run --coverage"
     },
     "devDependencies": {
@@ -46,7 +43,13 @@
             "dev:ts": {},
             "dev:rollup": {},
             "dev:vite": {},
-            "build:ts": {},
+            "build:ts": {
+                 "cache": true,
+            "dependsOn": ["^build"],
+            "inputs": ["production", "^production"],
+            "outputs": ["{projectRoot}/dist", "{projectRoot}/types"],
+            "command": "tsc --build ./tsconfig.json && tsc --build ./tsconfig.node.json"
+            },
             "build:rollup": {},
             "build:vite": {},
             "build": {

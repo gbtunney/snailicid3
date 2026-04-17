@@ -50,12 +50,17 @@
     "typescript": "^6.0.2",
     "vitest": "^4.1.4"
   },
+  "main": "./dist/index.js",
+  "types": "./types/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.js",
       "types": "./types/index.d.ts"
     },
     "./tsconfig-base": "./tsconfig-base.json",
+         "./tsconfig.base": "./typescript-config/tsconfig.base.json",
+     "./tsconfig.library": "./typescript-config/tsconfig.library.json",
+          "./tsconfig.typecheck": "./typescript-config/tsconfig.typecheck.json",
     "./markdownlint": "./dist/.markdownlint.json",
     "./prettier": {
       "import": "./dist/prettier/index.js",
@@ -84,11 +89,8 @@
       "build:rollup": {},
       "build:vite": {},
       "build:custom":{
-        "options":{
-                      "cache": true
-
-        },
-      "dependsOn": ["build:ts"]
+         "cache": true,
+            "dependsOn": ["build:ts"]
       },
     
       "build": {
@@ -117,7 +119,5 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/gbtunney/snailicid3-monorepo"
-  },
-  "main": "./dist/index.js",
-  "types": "./types/index.d.ts"
+  }
 }

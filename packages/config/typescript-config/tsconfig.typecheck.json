@@ -1,0 +1,17 @@
+{
+    "extends":"./tsconfig.base.json",
+    "compilerOptions": {
+                "tsBuildInfoFile": "${configDir}/node_modules/.tmp/tsconfig.typecheck.tsbuildinfo",
+        
+        //these dont do anything if noEmit is true
+        "composite": false,
+    "incremental": false, 
+
+        "declaration": false,
+         "sourceMap": false,
+        "declarationMap": false,
+        
+         "types": ["node"],
+        "noEmit": true
+       }
+}
