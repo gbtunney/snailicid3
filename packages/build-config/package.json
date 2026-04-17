@@ -76,5 +76,8 @@
         "url": "https://github.com/gbtunney/snailicid3-monorepo"
     },
     "main": "./dist/index.js",
-    "types": "./types/index.d.ts"
+    "types": "./types/index.d.ts",
+    "dependencies": {
+        "rollup-plugin-polyfill-node": "^0.13.0"
+    }
 }
