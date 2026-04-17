@@ -1,5 +1,3 @@
-export { EsLint, config, flatEslintConfig } from './eslint/index.js'
-export type { EslintConfig, TsConfig } from './eslint/index.js'
 
 /**
  * @namespace Commitlint configuration for use in Monorepo.
@@ -18,6 +16,7 @@ export type * from "./commitlint/index.js";
  */
 export { EsLint } from "./eslint/index.js";
 // Do not re-export all types to avoid duplicate identifier error
+export type { EslintConfig, TsConfig } from './eslint/index.js'
 
 /**
  * @namespace Prettier Configuration
