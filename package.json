@@ -60,7 +60,7 @@
 
         "\n========== FIX >> ==========": "",
     "fix": "pnpm build:self && pnpm check:prettier && pnpm check:eslint && pnpm check:md",
-    "fix:prettier": "pnpm run prettier --check",
+    "fix:prettier": "pnpm run prettier --write",
     "fix:eslint": "pnpm run lint --fix",
     "fix:md": "pnpm run lint:md --fix && true",
   "\n========== CHECK >> ==========": "",
