@@ -1,20 +1,20 @@
+import {type Config,defineConfig}from '@eslint/config-helpers'
 import pluginJs from '@eslint/js'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
+import {expandExtensions}from './../helpers.js'
 import pluginsConfig from './plugins.js'
-import { eslintCommentRules } from './rules/eslint-comments.js'
 import { checkFileRules } from './rules/check-file.js'
+import { eslintCommentRules } from './rules/eslint-comments.js'
 import { importRules } from './rules/import.js'
 import { jsdocRules } from './rules/jsdoc.js'
 import { namingConventionRules } from './rules/naming-convention.js'
+import {reactRules} from './rules/react.js'
 import { sortRules } from './rules/sort.js'
 import { typescriptRules } from './rules/typescript.js'
 import { vitestRules } from './rules/vitest.js'
 import { SHARED_FORMATTING_RULES } from '../prettier/index.js'
-import { TS_FILE_EXTENSIONS, JS_FILE_EXTENSIONS } from '../shared.js'
-import {reactRules} from './rules/react.js'
-import {expandExtensions}from './../helpers.js'
-import {defineConfig,type Config}from '@eslint/config-helpers'
+import { JS_FILE_EXTENSIONS, TS_FILE_EXTENSIONS } from '../shared.js'
 const base_files: Array<string> = [...expandExtensions(TS_FILE_EXTENSIONS, '*.')]
 const base_ignores = [
     '**/dist/**/*',
@@ -43,14 +43,15 @@ const base_ignores = [
       '**/storybook-static/**',
 ]
 
-export const flatEslintConfig = async (__dirname: string): Promise<Config[]> => {
-    const EslintConfig: Config []= defineConfig(
+export const flatEslintConfig = async (__dirname: string): Promise<Array<Config>> => {
+    const EslintConfig: Array<Config>= defineConfig(
         { files: base_files, name: 'Custom Base Configuration : Includes' },
         { ignores: base_ignores, name: 'Custom Base Configuration : Ignores' },
         {
             languageOptions: {
                 globals: { ...globals.browser, ...globals.node },
                 parserOptions: {
+                    // project: true,
                     projectService: true,
                     tsconfigRootDir: __dirname,
                 },
@@ -96,16 +97,9 @@ export const flatEslintConfig = async (__dirname: string): Promise<Config[]> => 
             },
         },
 
-        /** Disable type-checked rules for test files — projectService can't
-         *  resolve them because tsconfig.json excludes *.test.ts */
+        /** ** Typescript Eslint : Disable Type Checked for js files */
         {
-            ...tseslint.configs.disableTypeChecked,
-            files: [...expandExtensions(TS_FILE_EXTENSIONS, '**/*.test.')],
-            name: 'Typescript Eslint : Disable Type Checked for test files',
-        },
-
-        /** Disable type-checked rules for JS files */
-        {
+            // Take the preset and apply only to JS extensions
             ...tseslint.configs.disableTypeChecked,
             files: [...expandExtensions(JS_FILE_EXTENSIONS, '**/*.')],
             name: 'Typescript Eslint : Disable Type Checked for js files',

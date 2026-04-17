@@ -1,13 +1,16 @@
 {
-    "extends": "./typescript-config/tsconfig.typecheck.json",
-    "exclude": ["./node_modules"],
-    "files": ["package.json"],
+    "extends": "./typescript-config/tsconfig.library.json",
+    "compilerOptions": {
+        "types": ["node"]
+    },
     "include": [
-        "./*.ts",
-        "./*.cts",
-        "./*.mts",
-        "./**/*.test.ts",
-        "./**/*.test.mts",
-        "./**/*.test.cts"
+        "./src/**/*.ts",
+        "./src/**/*.cts",
+        "./src/**/*.mts"
+    ],
+    "exclude": [
+        "**/*.test.ts",
+        "**/*.test.mts",
+        "**/*.test.cts"
     ]
 }

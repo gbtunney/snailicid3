@@ -1,13 +1,20 @@
 {
-    "extends": "@snailicid3/config/tsconfig.library",
-     "compilerOptions": {
-        /** this is node project */
-        "types": ["node"]
-    },
-    "include": ["./src/**/*.ts", "./src/**/*.cts", "./src/**/*.mts"],
+    "extends": "@snailicid3/config/tsconfig.typecheck",
     "exclude": [
-        "**/*.test.ts",
-        "**/*.test.mts",
-        "**/*.test.cts"
+        "./node_modules"
+    ],
+    "files": [
+        "package.json"
+    ],
+    "include": [
+        "./*.ts",
+        "./*.cts",
+        "./*.mts",
+        "./src/**/*.ts",
+        "./src/**/*.cts",
+        "./src/**/*.mts",
+        "./**/*.test.ts",
+        "./**/*.test.mts",
+        "./**/*.test.cts"
     ]
 }
