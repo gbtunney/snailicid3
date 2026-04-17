@@ -22,6 +22,7 @@ const base_ignores = [
     '**/dist/**',
     '**/types/**/*',
     '**/types/**',
+    '!**/packages/types/**',
 
     /** SYSTEM */
     '**/.history/**',
@@ -50,7 +51,6 @@ export const flatEslintConfig = async (__dirname: string): Promise<Config[]> => 
             languageOptions: {
                 globals: { ...globals.browser, ...globals.node },
                 parserOptions: {
-                    // project: true,
                     projectService: true,
                     tsconfigRootDir: __dirname,
                 },
@@ -96,9 +96,16 @@ export const flatEslintConfig = async (__dirname: string): Promise<Config[]> => 
             },
         },
 
-        /** ** Typescript Eslint : Disable Type Checked for js files */
+        /** Disable type-checked rules for test files — projectService can't
+         *  resolve them because tsconfig.json excludes *.test.ts */
         {
-            // Take the preset and apply only to JS extensions
+            ...tseslint.configs.disableTypeChecked,
+            files: [...expandExtensions(TS_FILE_EXTENSIONS, '**/*.test.')],
+            name: 'Typescript Eslint : Disable Type Checked for test files',
+        },
+
+        /** Disable type-checked rules for JS files */
+        {
             ...tseslint.configs.disableTypeChecked,
             files: [...expandExtensions(JS_FILE_EXTENSIONS, '**/*.')],
             name: 'Typescript Eslint : Disable Type Checked for js files',

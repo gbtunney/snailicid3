@@ -9,15 +9,14 @@ export const vitestRules = (): Config[] =>
     languageOptions: {
       globals: {
         ...vitestPlugin.environments.env.globals
-      }
+      },
+      parserOptions: {
+        project: false,
+      },
     },
-    name: "Vitest: Recommended, Typecheck enabled",
+    name: "Vitest: Recommended",
     rules: {
-      ...vitestPlugin.configs.recommended.rules
+      ...vitestPlugin.configs.recommended.rules,
+      'vitest/valid-title': 'off',
     },
-    settings: {
-      vitest: {
-        typecheck: true
-      }
-    }
   });
