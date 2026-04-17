@@ -48,6 +48,7 @@
                     "build:rollup"
                 ]
             },
+            "typecheck": {},
             "test": {},
             "test:nx": {},
             "test:watch": {},

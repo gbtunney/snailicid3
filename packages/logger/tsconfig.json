@@ -1,3 +1,13 @@
 {
-    "references": [{ "path": "./tsconfig.node.json" }, { "path": "./src" }]
+    "extends": "@snailicid3/config/tsconfig.library",
+     "compilerOptions": {
+        /** setting this to node will stop error re console */
+        "types": ["node"]
+    },
+       "include": ["./src/**/*.ts", "./src/**/*.cts", "./src/**/*.mts"],
+    "exclude": [
+        "**/*.test.ts",
+        "**/*.test.mts",
+        "**/*.test.cts"
+    ]
 }
