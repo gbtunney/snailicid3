@@ -66,7 +66,7 @@ export const flatEslintConfig = async (__dirname: string): Promise<Config[]> => 
         ...(await sortRules()),
         ...(await vitestRules()),
         ...(await jsdocRules()),
-        ...(await filenamesRules()),
+        ...(await checkFileRules()),
         ...(await namingConventionRules()),
         ...(await eslintCommentRules()),
 ...(await reactRules()),
