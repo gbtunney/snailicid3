@@ -1,10 +1,9 @@
+import {type Config,defineConfig}from '@eslint/config-helpers'
 import tsEslint from 'typescript-eslint'
 import { expandExtensions } from '../../helpers.js'
 import { TS_FILE_EXTENSIONS } from '../../shared.js'
 
-import {defineConfig,type Config}from '@eslint/config-helpers'
-
-export const typescriptRules = (): Config[]=> {
+export const typescriptRules = (): Array<Config>=> {
     return defineConfig([
         ...tsEslint.configs.recommended,
         ...tsEslint.configs.strictTypeChecked,

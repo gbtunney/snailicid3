@@ -1,6 +1,6 @@
-import {defineConfig,type Config}from '@eslint/config-helpers'
+import {type Config,defineConfig}from '@eslint/config-helpers'
 
-export const eslintCommentRules = (): Config []=> defineConfig(
+export const eslintCommentRules = (): Array<Config>=> defineConfig(
     {
         name: 'ESLint Comments : ERROR',
         rules: {

@@ -16,13 +16,13 @@ export function execCommand(
 
 export function getExecCommandOutput(command: string): ExecResult {
     try {
-        return { success: true, result: execCommand(command) }
+        return { result: execCommand(command), success: true }
     } catch (err: unknown) {
         const message =
             err instanceof Error
                 ? ((err as NodeJS.ErrnoException & { stderr?: string }).stderr ?? err.message)
                 : String(err)
-        return { success: false, result: message }
+        return { result: message, success: false }
     }
 }
 

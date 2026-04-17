@@ -7,7 +7,7 @@
 
 import type { BuildPlan, Product, Runtime } from './types.js'
 
-export interface BuildAdapter {
+export type BuildAdapter = {
     /** Human-readable adapter name (e.g. `"rollup"`, `"tsc"`). */
     name: string
 

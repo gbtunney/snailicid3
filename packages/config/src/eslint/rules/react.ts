@@ -1,9 +1,9 @@
-import { defineConfig,Config, globalIgnores } from "@eslint/config-helpers";
+import { Config,defineConfig } from "@eslint/config-helpers";
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
 /** TODO: add real react rules not just the vite ones */
-export const reactRules :() => Config[]= ()=> defineConfig([
+export const reactRules :() => Array<Config>= ()=> defineConfig([
 	{
  files: ['**/main.tsx'],
         ...reactHooks.configs.flat.recommended,

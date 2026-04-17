@@ -25,7 +25,6 @@ import {
   MarkdownlintOpts
 } from "./schema.js";
 import { isPlainObject, safeDeserializeJSON } from "../utilities.js";
-import {ArrayValues}from 'type-fest'
 
 /** TODO Figure out how these ignores should work */
         //gitignore: true,

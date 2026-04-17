@@ -11,15 +11,9 @@ import type { BuildAdapter } from '../../build/ports.js'
 import type { BuildPlan, Product, Runtime } from '../../build/types.js'
 
 /** Products that default to transpile-only (tsc). */
-const TSC_PRODUCTS: Product[] = ['library', 'cli', 'build_tool', 'plugin', 'worker', 'server_app']
+const TSC_PRODUCTS: Array<Product> = ['library', 'cli', 'build_tool', 'plugin', 'worker', 'server_app']
 
 export const tscAdapter: BuildAdapter = {
-    name: 'tsc',
-
-    supports(_runtime: Runtime, product: Product): boolean {
-        return TSC_PRODUCTS.includes(product)
-    },
-
     async build(plan: BuildPlan): Promise<void> {
         // Run tsc --build from the package's source directory.
         execSync('tsc --build', {
@@ -31,5 +25,11 @@ export const tscAdapter: BuildAdapter = {
     createConfig(_plan: BuildPlan): null {
         // tsc uses tsconfig.json, not a programmatic config object.
         return null
+    },
+
+    name: 'tsc',
+
+    supports(_runtime: Runtime, product: Product): boolean {
+        return TSC_PRODUCTS.includes(product)
     },
 }

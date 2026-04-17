@@ -1,6 +1,6 @@
-import {defineConfig,type Config}from '@eslint/config-helpers'
+import {type Config,defineConfig}from '@eslint/config-helpers'
 
-export const filenamesRules = (): Config[] => defineConfig(
+export const filenamesRules = (): Array<Config> => defineConfig(
     /** @todo : is there a recommended config? dont know if this is needed */
     {
         name: 'Filenames: OFF',

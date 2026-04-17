@@ -3,8 +3,8 @@ import { ensureArray, isString, replaceAll } from 'ramda-adjunct'
 import type { BaseValue, BatchBaseValue, Pattern, ReplaceCharacters } from './type.js'
 
 const replaceCharactersSinglePattern = ({
-    pattern = ' ',
-    replacement = '',
+    pattern,
+    replacement,
     value,
 }: BaseValue & {
     pattern: Pattern
@@ -15,8 +15,8 @@ const replaceCharactersSinglePattern = ({
  * @see {@link batchReplaceAll}
  */
 export const replaceAllCharacters = ({
-    pattern = ' ',
-    replacement = '',
+    pattern,
+    replacement,
     value,
 }: BaseValue & {
     pattern: Pattern | Array<Pattern>
@@ -36,8 +36,8 @@ export const replaceAllCharacters = ({
  * @see {@link replaceAllCharacters}
  */
 export const batchReplaceAll = ({
-    pattern = ' ',
-    replacement = '',
+    pattern,
+    replacement,
     value,
 }: BatchBaseValue & {
     pattern: Pattern | Array<Pattern>
@@ -52,6 +52,6 @@ export const batchReplaceAll = ({
             value: single_value,
         })
     })
-    return isString(value) && result.length > 0 ? (result[0] as string) : result
+    return isString(value) && result.length > 0 ? (result[0]) : result
 }
 export default replaceAllCharacters

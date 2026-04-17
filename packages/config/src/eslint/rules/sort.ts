@@ -1,8 +1,8 @@
+import {type Config,defineConfig}from '@eslint/config-helpers'
 import sortPlugin from 'eslint-plugin-sort'
-import {defineConfig,type Config}from '@eslint/config-helpers'
 
 /** @see [How to quickly configure ESLint for import sorting](https://medium.com/@diballesteros/how-to-quickly-configure-eslint-for-import-sorting-3a4017bd4853) */
-export const sortRules = (): Config[] => defineConfig([
+export const sortRules = (): Array<Config> => defineConfig([
     sortPlugin.configs['flat/recommended'],
     {
         name: 'SORT IMPORTS & EXPORTS : ERROR',

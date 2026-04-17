@@ -1,6 +1,6 @@
 import ColorIO, { ColorObject as Color, Coords } from 'colorjs.io'
-import { fmt } from './pretty.print.js'
 import { mapRange, Range, roundToDecimals } from './numeric.js'
+import { fmt } from './pretty.print.js'
 // Branded hex type
 export type HexColor = `#${string}` & { readonly __hexBrand: 'HexColor' }
 export type ColorJS = ColorIO

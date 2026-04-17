@@ -91,7 +91,7 @@ export const getConfiguration = async (
     config: MarkdownlintConfiguration,
     opts: MarkdownlintOpts = DEFAULT_OPTS,
 ): Promise<MarkdownlintConfiguration | undefined> => {
-    const { throwOnError = false }: MarkdownlintOptsOutput = parseOptionsSchema(
+    const { throwOnError }: MarkdownlintOptsOutput = parseOptionsSchema(
         markdownlintOptsSchema,
         opts,
     )

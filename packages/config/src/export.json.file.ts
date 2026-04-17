@@ -43,7 +43,7 @@ export type JSONExportConfig = Array<JSONExportEntry>
 /** Throws error if file save fails */
 export const exportJSONFile = (
     config: JSONExportConfig,
-    outdir: string | undefined = undefined,
+    outdir?: string  ,
     /** File overwrite mode if exists */
     overwrite: boolean = true,
     logData: boolean = false,

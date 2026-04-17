@@ -1,9 +1,8 @@
-import {  JSLIKE_FILE_EXTENSIONS } from '../../shared.js'
+import {type Config,defineConfig}from '@eslint/config-helpers'
 import { expandExtensions } from '../../helpers.js'
+import {  JSLIKE_FILE_EXTENSIONS } from '../../shared.js'
 
-import {defineConfig,type Config}from '@eslint/config-helpers'
-
-export const importRules = (): Config[] => defineConfig(
+export const importRules = (): Array<Config> => defineConfig(
     {
         name: 'Import: Default Rules',
         rules: {

@@ -94,6 +94,6 @@ export const zodHelpers = {
     wrapSchema,
 }
 export default zodHelpers
-export type { ZodRegExp } from './schemas.js'
-
 export * from  './json-stringified.js'
+
+export type { ZodRegExp } from './schemas.js'
