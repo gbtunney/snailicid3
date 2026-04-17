@@ -3,20 +3,20 @@ import {
     defineIdentity,
     definePlan,
     identityFromPackage,
-    toPackageExports,
-    toRollupConfig,PackageIdentity
+    toPackageExports,type PackageIdentity,
+    toRollupConfig,
 } from '@snailicid3/build-config'
 import type { RollupOptions } from 'rollup'
 import pkg from './package.json' with { type: 'json' }
 
 const PRINT_EXPORTS = false
 
-/*
+
 const ID :PackageIdentity= {
-    runtime:"universal","product":"library","buildStrategy":"bundle"}
-*/
+    runtime:"universal","product":"library","buildStrategy":"bundle"
+}
 const plan = definePlan(
-    identityFromPackage(pkg) ?? defineIdentity('node', 'library', 'bundle'),
+    /* identityFromPackage(pkg)*/ ID  ?? defineIdentity('node', 'library', 'bundle'),
     './src',
     './dist',
     [defineEntry('.', ['esm', 'cjs', 'iife', 'umd'], { banner: true, sourcemap: true })],
