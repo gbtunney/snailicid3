@@ -1,68 +1,49 @@
-import {
-    getFileExtensionList,
-    JSLIKE_FILE_EXTENSIONS,
-    PRETTIER_FILE_EXTENSIONS,
-} from '@snailicide/build-config'
+// Lint-staged is still necessary: it scopes pre-commit linting to staged files
+// only, making commits fast regardless of repo size.
 
-//TODO : figure out a way this is not utterly ridiculous
+const JS_EXTS = '{js,mjs,cjs,jsx,ts,mts,cts,tsx}'
+const PRETTIER_EXTS = '{json,xml,php,html,css,sh,yaml,yml,graphql}'
+
 const mdIgnores = [
-    '#**/{node_modules,.changeset,docs,scratch}/**',
+    '#**/node_modules/**',
+    '#**/.changeset/**',
+    '#**/docs/**',
+    '#**/scratch/**',
     '#packages/cli-template/templates/**/*',
-    '#api/gbt-tuya-device',
 ]
 
-// If true, markdownlint will run but will not block commits
-const WARN_ONLY: boolean = true
-
 const quoteArg = (p: string) => `"${p.replaceAll('"', '\\"')}"`
+const toFileArgs = (staged: string | string[]) =>
+    (Array.isArray(staged) ? staged : [staged]).map(quoteArg).join(' ')
+const toIgnoreArgs = (ignores: string[]) => ignores.map(quoteArg).join(' ')
 
-const toFileArgs = (stagedFiles: string | Array<string>) => {
-    const arr = Array.isArray(stagedFiles) ? stagedFiles : [stagedFiles]
-    return arr.map(quoteArg).join(' ')
+export default {
+    [`*.${JS_EXTS}`]: (staged: string[]) => {
+        const files = toFileArgs(staged)
+        return [
+            `pnpm exec prettier --write ${files}`,
+            `pnpm exec eslint --flag unstable_ts_config --fix ${files}`,
+        ]
+    },
+
+    [`*.md`]: (staged: string[]) => {
+        const files = toFileArgs(staged)
+        const ignores = toIgnoreArgs(mdIgnores)
+        return [
+            `pnpm exec prettier --write ${files}`,
+            `pnpm exec markdownlint-cli2 ${files} ${ignores} || true`,
+        ]
+    },
+
+    [`*.${PRETTIER_EXTS}`]: (staged: string[]) => {
+        const files = toFileArgs(staged)
+        return `pnpm exec prettier --write ${files}`
+    },
+
+    '.gitignore': 'pnpm exec prettier --write .gitignore',
+
+    '.husky/**/*': (staged: string[]) => {
+        const files = toFileArgs(staged)
+        return `pnpm exec prettier --write ${files}`
+    },
 }
-
-const toIgnoreArgs = (ignores: Array<string>) => ignores.map(quoteArg).join(' ')
-
-/** TODO #6 : had to remove the type so i could use staged function */
-const getLintStagedConfig = () => {
-    const jsExt = getFileExtensionList(JSLIKE_FILE_EXTENSIONS)
-    const prettierExt = getFileExtensionList<true>(PRETTIER_FILE_EXTENSIONS)
-    const mdExt = getFileExtensionList<true>(['md'])
-
-    return {
-        /** Markdown */
-        [`*.${mdExt.toString()}`]: (stagedFiles: string | Array<string>) => {
-            const files = toFileArgs(stagedFiles)
-            /**
-             * TODO #6 : lint-staged fails on Markdown linting and stashes/resets changes; filenames with spaces were
-             * previously split
-             */
-            const markdownlintCmd = WARN_ONLY
-                ? `pnpm exec markdownlint-cli2 ${files} ${toIgnoreArgs(mdIgnores)} || true`
-                : `pnpm exec markdownlint-cli2 ${files} ${toIgnoreArgs(mdIgnores)}`
-
-            return [`pnpm exec prettier --write ${files}` /* markdownlintCmd*/]
-        },
-
-        /** JS-Like Files */
-        [`*.{${jsExt.toString()}}`]: (stagedFiles: string | Array<string>) => {
-            const files = toFileArgs(stagedFiles)
-            return [`pnpm exec prettier --write ${files}`, `pnpm exec eslint --fix ${files}`]
-        },
-
-        /** Misc Prettier Files */
-        [`*.{${prettierExt.toString()}}`]: (stagedFiles: string | Array<string>) => {
-            const files = toFileArgs(stagedFiles)
-            return `pnpm exec prettier --write ${files}`
-        },
-
-        '.gitignore': 'pnpm exec prettier --write .gitignore',
-
-        '.husky/**/*': (stagedFiles: string | Array<string>) => {
-            const files = toFileArgs(stagedFiles)
-            return `pnpm exec prettier --write ${files}`
-        },
-    }
-}
-
-export default getLintStagedConfig()

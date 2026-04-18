@@ -58,7 +58,7 @@ if [ "$LINT_MODE" = "LINT_ALL" ]; then
     exit 0
 fi
 
-# LINT_STAGED:
-# Intentionally do not run lint-staged here; commit flow handles it elsewhere.
-printf "\nLINT_STAGED: hook checks passed.\n\n"
+# LINT_STAGED: run on all commits (including direct git commit)
+printf "\nRunning lint-staged...\n\n"
+pnpm exec lint-staged --relative
 exit 0
