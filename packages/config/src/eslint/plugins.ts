@@ -1,5 +1,4 @@
 import eslintCommentsPlugin from '@eslint-community/eslint-plugin-eslint-comments'
-import simpleFilenamesPlugin from 'eslint-plugin-filenames-simple'
 import importPlugin from 'eslint-plugin-import'
 import jsdocPlugin from 'eslint-plugin-jsdoc'
 import sortPlugin from 'eslint-plugin-sort'

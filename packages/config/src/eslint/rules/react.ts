@@ -1,58 +1,25 @@
-import { defineConfig,Config, globalIgnores } from "@eslint/config-helpers";
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
+import { defineConfig, type Config } from '@eslint/config-helpers'
 
-/** TODO: add real react rules not just the vite ones */
-export const reactRules :() => Config[]= ()=> defineConfig([
-	{
- files: ['**/main.tsx'],
-        ...reactHooks.configs.flat.recommended,
-                ...reactRefresh.configs.vite,
-                 rules: {
-            // Allow PascalCase for .tsx component files
-            '@typescript-eslint/naming-convention': [
-                'error',
-                {
-                    format: ['PascalCase', 'camelCase'],
-                    selector: 'function',
-                },
-            ],
-            'filenames-simple/naming-convention': [
-                'error',
-                { rule: 'PascalCase' },
-            ],
-            'sort/destructuring-properties': [
-                'error',
-                { caseSensitive: false, natural: true },
-            ],
-        },
-    },
-    // Hook filenames like useAudioRecorder.ts should be camelCase
-	 {
-        files: ['**/use*.ts', '**/use*.tsx'],
-        rules: {
-            'filenames-simple/naming-convention': [
-                'error',
-                { rule: 'camelCase' },
-            ],
-        },
-    },
-    //allow lowercase for files called main
+export const reactRules = (): Config[] =>
+    defineConfig(
+        reactHooks.configs.flat.recommended,
+        reactRefresh.configs.vite,
         {
-            files: ['**/main.tsx'],
-            ...reactHooks.configs.flat.recommended,
-            ...reactRefresh.configs.vite,
+            name: 'React: naming convention for functions in JSX/TSX',
             rules: {
-                'filenames-simple/naming-convention': [
+                '@typescript-eslint/naming-convention': [
                     'error',
-                    { rule: 'camelCase' },
+                    {
+                        format: ['PascalCase', 'camelCase'],
+                        selector: 'function',
+                    },
+                ],
+                'sort/destructuring-properties': [
+                    'error',
+                    { caseSensitive: false, natural: true },
                 ],
             },
         },
-
-        //  'react-hooks/exhaustive-deps': 'error',
-       /*     'react-refresh/only-export-components': [
-                'warn',
-                { allowConstantExport: true },
-            ],*/
-])
+    )
