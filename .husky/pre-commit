@@ -25,12 +25,12 @@ if echo "$BRANCH" | grep -Eq "$PROTECTED_BRANCHES"; then
 fi
 
 # Validate branch name:
-# - lowercase letters + digits
+# - alphanumeric (upper or lower) + digits
 # - segments separated by / or -
-if echo "$BRANCH" | grep -Eq '^[a-z0-9]+([/-][a-z0-9]+)*$'; then
+if echo "$BRANCH" | grep -Eq '^[a-zA-Z0-9]+([/-][a-zA-Z0-9]+)*$'; then
     echo "Branch name is valid"
 else
-    printf "\nBranch name must be lowercase [a-z0-9] and may contain '/' or '-': %s\n\n" "$BRANCH"
+    printf "\nBranch name must be alphanumeric and may contain '/' or '-': %s\n\n" "$BRANCH"
     exit 1
 fi
 

@@ -9,10 +9,10 @@ export const filePatternOverrides = (): Config[] =>
     defineConfig(
         {
             files: ['**/main.tsx'],
-            name: 'Override: main.tsx — React entrypoint (camelCase filename, hooks, refresh)',
-            ...reactHooks.configs.flat.recommended,
-            ...reactRefresh.configs.vite,
+            name: 'Override: main.tsx — React entrypoint (hooks, refresh, camelCase filename)',
             rules: {
+                ...(reactHooks.configs.flat.recommended.rules ?? {}),
+                ...(reactRefresh.configs.vite.rules ?? {}),
                 'filenames-simple/naming-convention': ['error', { rule: 'camelCase' }],
             },
         },
