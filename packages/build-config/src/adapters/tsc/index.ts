@@ -20,12 +20,13 @@ const TSC_PRODUCTS: Array<Product> = [
 ]
 
 export const tscAdapter: BuildAdapter = {
-    async build(plan: BuildPlan): Promise<void> {
+    build(plan: BuildPlan): Promise<void> {
         // Run tsc --build from the package's source directory.
         execSync('tsc --build', {
             cwd: plan.sourceDir,
             stdio: 'inherit',
         })
+        return Promise.resolve()
     },
 
     createConfig(_plan: BuildPlan): null {

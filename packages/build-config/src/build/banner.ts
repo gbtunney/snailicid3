@@ -47,7 +47,7 @@ export function createBanner(
     const lines: Array<string> = [
         ` * ${meta.name} v${meta.version}`,
         ` * Module: ${moduleName}`,
-        ` * (c) ${new Date().getFullYear()} ${authorName(meta.author)}`,
+        ` * (c) ${String(new Date().getFullYear())} ${authorName(meta.author)}`,
     ]
 
     if (meta.description) lines.push(` * ${meta.description}`)

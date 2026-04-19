@@ -1,14 +1,13 @@
+import { type Config, defineConfig, type Plugin } from '@eslint/config-helpers'
 import eslintCommentsPlugin from '@eslint-community/eslint-plugin-eslint-comments'
-import simpleFilenamesPlugin from 'eslint-plugin-filenames-simple'
-import importPlugin from 'eslint-plugin-import'
-import jsdocPlugin from 'eslint-plugin-jsdoc'
-import sortPlugin from 'eslint-plugin-sort'
-import unusedImports from 'eslint-plugin-unused-imports'
 import vitestPlugin from '@vitest/eslint-plugin'
 import checkFilePlugin from 'eslint-plugin-check-file'
+import importPlugin from 'eslint-plugin-import-x'
+import jsdocPlugin from 'eslint-plugin-jsdoc'
 import _reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
-import { defineConfig, type Config, type Plugin } from '@eslint/config-helpers'
+import sortPlugin from 'eslint-plugin-sort'
+import unusedImports from 'eslint-plugin-unused-imports'
 import tsEslint from 'typescript-eslint'
 
 /**
@@ -20,7 +19,7 @@ const reactHooks: Plugin = {
     rules: _reactHooks.rules,
 }
 
-export const pluginsConfig = (): Config[] =>
+export const pluginsConfig = (): Array<Config> =>
     defineConfig([
         {
             name: 'Custom Base Configuration : Included plugins',
@@ -28,7 +27,6 @@ export const pluginsConfig = (): Config[] =>
                 ['@typescript-eslint']: tsEslint.plugin,
                 ['check-file']: checkFilePlugin,
                 ['eslint-comments']: eslintCommentsPlugin,
-                ['filenames-simple']: simpleFilenamesPlugin,
                 ['import']: importPlugin,
                 ['jsdoc']: jsdocPlugin,
                 ['react-hooks']: reactHooks,

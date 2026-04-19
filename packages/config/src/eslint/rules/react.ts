@@ -1,8 +1,8 @@
+import { type Config, defineConfig } from '@eslint/config-helpers'
 import _reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
-import { defineConfig, type Config } from '@eslint/config-helpers'
 
-export const reactRules = (): Config[] =>
+export const reactRules = (): Array<Config> =>
     defineConfig({
         name: 'React: hooks, refresh, and JSX/TSX naming',
         rules: {

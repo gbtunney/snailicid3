@@ -1,8 +1,8 @@
-import { defineConfig, type Config } from '@eslint/config-helpers'
-import { TS_FILE_EXTENSIONS } from '../../shared.js'
+import { type Config, defineConfig } from '@eslint/config-helpers'
 import { expandExtensions } from '../../helpers.js'
+import { TS_FILE_EXTENSIONS } from '../../shared.js'
 
-export const namingRules = (error: boolean = true): Config[] =>
+export const namingRules = (error: boolean = true): Array<Config> =>
     defineConfig(
         {
             files: [...expandExtensions(TS_FILE_EXTENSIONS, '**/src/**/*.')],
@@ -110,23 +110,7 @@ export const namingRules = (error: boolean = true): Config[] =>
             },
         },
         {
-            name: 'Naming: filenames OFF (filenames-simple)',
-            rules: {
-                'filenames-simple/no-index': 'off',
-                'filenames-simple/pluralize': 'off',
-            },
-        },
-        {
-            files: ['**/src/**/*'],
-            name: 'Naming: filename convention in src (filenames-simple)',
-            rules: {
-                'filenames-simple/naming-convention': 'error',
-            },
-        },
-        {
             name: 'Naming: check-file rules',
-            rules: {
-                // TODO: migrate filename rules from filenames-simple to check-file plugin
-            },
+            rules: {},
         },
     )

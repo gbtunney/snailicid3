@@ -1,8 +1,8 @@
+import { type Config, defineConfig } from '@eslint/config-helpers'
 import jsdoc from 'eslint-plugin-jsdoc'
-import { defineConfig, type Config } from '@eslint/config-helpers'
 import { getScaledWidth } from '../../shared.js'
 
-export const docsRules = (): Config[] =>
+export const docsRules = (): Array<Config> =>
     defineConfig(
         { ...jsdoc.configs['flat/recommended'] },
         /* eslint sort/object-properties:off */

@@ -99,14 +99,12 @@ export const validateStringBatch = (
     validateObjects?: Array<Omit<IValidateObj, 'value'>>,
     operation: 'some' | 'every' = 'some',
 ): boolean => {
-    let validateArr: Array<IValidateObj> = []
-    if (isString(value) && isNotUndefined(validateObjects)) {
-        validateArr = (
-            validateObjects as Array<Omit<IValidateObj, 'value'>>
-        ).map((obj) => {
-            return { ...obj, value }
-        })
-    } else validateArr = value as Array<IValidateObj>
+    const validateArr: Array<IValidateObj> =
+        isString(value) && isNotUndefined(validateObjects)
+            ? (validateObjects as Array<Omit<IValidateObj, 'value'>>).map(
+                  (obj) => ({ ...obj, value }),
+              )
+            : (value as Array<IValidateObj>)
 
     const _operation =
         /* eslint  @typescript-eslint/unbound-method: "warn" */

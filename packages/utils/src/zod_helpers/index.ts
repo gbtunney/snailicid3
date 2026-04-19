@@ -94,7 +94,6 @@ export const zodHelpers = {
     parseFactory,
     parseZodData,
     resolveRegExpSchema,
-    schemaForType,
     wrapSchema,
 }
 export default zodHelpers

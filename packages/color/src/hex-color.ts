@@ -64,6 +64,7 @@ export function parseColorJS(
         const msg = err instanceof Error ? err.message : String(err)
         throw new Error(
             fmt`Failed to parse color "${input}"${ctx ? ` (${ctx})` : ''}: ${msg}`,
+            { cause: err },
         )
     }
 }
@@ -81,6 +82,7 @@ export function parseColorToHexStrict(
         const msg = err instanceof Error ? err.message : String(err)
         throw new Error(
             fmt`Failed to parse color to hex "${input}"${ctx ? ` (${ctx})` : ''}: ${msg}`,
+            { cause: err },
         )
     }
 }

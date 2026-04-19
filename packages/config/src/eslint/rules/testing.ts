@@ -1,9 +1,9 @@
+import { type Config, defineConfig } from '@eslint/config-helpers'
 import vitestPlugin from '@vitest/eslint-plugin'
-import { defineConfig, type Config } from '@eslint/config-helpers'
 import { expandExtensions } from '../../helpers.js'
 import { TS_FILE_EXTENSIONS } from '../../shared.js'
 
-export const testingRules = (): Config[] =>
+export const testingRules = (): Array<Config> =>
     defineConfig({
         files: [...expandExtensions(TS_FILE_EXTENSIONS, '**/*.test.')],
         languageOptions: {

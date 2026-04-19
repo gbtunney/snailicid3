@@ -10,7 +10,7 @@ export function execCommand(
     trim = true,
     encoding: BufferEncoding = 'utf8',
 ): string {
-    const out = execSync(command, { encoding }).toString()
+    const out = execSync(command, { encoding })
     return trim ? out.trim() : out
 }
 

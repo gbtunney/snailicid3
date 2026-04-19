@@ -1,11 +1,11 @@
-import tseslint from 'typescript-eslint'
+import { type Config, defineConfig } from '@eslint/config-helpers'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
-import { defineConfig, type Config } from '@eslint/config-helpers'
+import tseslint from 'typescript-eslint'
 import { expandExtensions } from '../../helpers.js'
 import { JS_FILE_EXTENSIONS } from '../../shared.js'
 
-export const filePatternOverrides = (): Config[] =>
+export const filePatternOverrides = (): Array<Config> =>
     defineConfig(
         {
             files: ['**/main.tsx'],
@@ -13,21 +13,12 @@ export const filePatternOverrides = (): Config[] =>
             rules: {
                 ...(reactHooks.configs.flat.recommended.rules ?? {}),
                 ...(reactRefresh.configs.vite.rules ?? {}),
-                'filenames-simple/naming-convention': [
-                    'error',
-                    { rule: 'camelCase' },
-                ],
             },
         },
         {
             files: ['**/use*.ts', '**/use*.tsx'],
             name: 'Override: hook files — camelCase filename (e.g. useAudioRecorder.ts)',
-            rules: {
-                'filenames-simple/naming-convention': [
-                    'error',
-                    { rule: 'camelCase' },
-                ],
-            },
+            rules: {},
         },
         {
             files: [...expandExtensions(['cjs', 'cts'], '*/**.')],

@@ -20,7 +20,7 @@ const isBinaryString = (value: unknown): value is string =>
 const isBigIntLiteralString = (value: unknown): value is string =>
     typeof value === 'string' && bigintNumber.test(value)
 
-export const { isScientificNumber, isNotScientificNumber } = factoryValidator(
+export const { isNotScientificNumber, isScientificNumber } = factoryValidator(
     isScientificString,
     'scientificNumber',
 )
