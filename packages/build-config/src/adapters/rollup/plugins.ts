@@ -29,15 +29,15 @@ export type RollupPluginPreset = 'node_library' | 'browser_library' | 'cli' | 'i
 const tsPlugin = (): Plugin =>
     // TODO how can we use the normal config?
     typescript({
-        tsconfig: false,
-        target: 'ESNext',
-        module: 'ESNext',
-        moduleResolution: 'bundler',
-        esModuleInterop: true,
-        strict: true,
         declaration: false,
         declarationMap: false,
+        esModuleInterop: true,
+        module: 'ESNext',
+        moduleResolution: 'bundler',
         sourceMap: true,
+        strict: true,
+        target: 'ESNext',
+        tsconfig: false,
     })
 /**
  * Return a plugin array for the given preset.
@@ -50,7 +50,7 @@ const tsPlugin = (): Plugin =>
 export function getPluginsForPreset(
     preset: RollupPluginPreset,
     options: { minify?: boolean } = {},
-): Plugin[] {
+): Array<Plugin> {
     switch (preset) {
         case 'node_library':
             return [
@@ -92,7 +92,7 @@ export function getPluginsForPreset(
 /**
  * Infer a sensible preset from an entry's output kinds and the package runtime.
  */
-export function inferPreset(outputKinds: string[], runtime: string): RollupPluginPreset {
+export function inferPreset(outputKinds: Array<string>, runtime: string): RollupPluginPreset {
     if (outputKinds.includes('iife')) return 'iife'
     if (runtime === 'browser') return 'browser_library'
     if (outputKinds.includes('cjs') || outputKinds.includes('esm')) {
@@ -104,12 +104,12 @@ export function inferPreset(outputKinds: string[], runtime: string): RollupPlugi
 /** 
  * TODO add dts somewhere
  * import { dts } from "rollup-plugin-dts";
-
-const config = [
-  // …
-  {
-    input: "./my-input/index.d.ts",
-    output: [{ file: "dist/my-library.d.ts", format: "es" }],
+ *
+ * const config = [
+ * // …
+ * {
+ * input: "./my-input/index.d.ts",
+    * output: [{ file: "dist/my-library.d.ts", format: "es" }],
     plugins: [dts()],
   },
 ];

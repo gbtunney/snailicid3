@@ -15,5 +15,5 @@ const plan = definePlan(
     [defineEntry('.', ['esm'], { banner: true, sourcemap: true })],
 )
 
-const config: RollupOptions[] = toRollupConfig(plan, 'scaffold', pkg)
+const config: Array<RollupOptions> = toRollupConfig(plan, 'scaffold', pkg)
 export default config

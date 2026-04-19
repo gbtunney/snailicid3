@@ -17,12 +17,12 @@
     "targetDefaults": {
         "dev": {
             "cache": false,
-            "command": "tsc -p src/tsconfig.json --watch",
+            "command": "tsc --build tsconfig.node.json --watch",
             "options": { "cwd": "{projectRoot}" }
         },
         "dev:ts": {
             "cache": false,
-            "command": "tsc -p src/tsconfig.json --watch",
+            "command": "tsc --build tsconfig.node.json --watch",
             "options": { "cwd": "{projectRoot}" }
         },
         "dev:rollup": {
@@ -40,7 +40,7 @@
             "dependsOn": ["^build"],
             "inputs": ["production", "^production"],
             "outputs": ["{projectRoot}/dist", "{projectRoot}/types"],
-            "command": "tsc --build",
+            "command": "tsc --build tsconfig.node.json",
             "options": { "cwd": "{projectRoot}" }
         },
         "build:rollup": {

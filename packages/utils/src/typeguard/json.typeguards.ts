@@ -5,8 +5,8 @@ import { tg } from '@snailicid3/types'
 
 export const {
     isJsonifiable,
-    isJsonValue,
-    isJsonifiableObjectLike,
-    isJsonifiableObject,
     isJsonifiableArray,
+    isJsonifiableObject,
+    isJsonifiableObjectLike,
+    isJsonValue,
 } = tg

@@ -21,13 +21,13 @@ export const logger = {
     wrapChalkText: wrapColorChalkInstanceText,
 }
 
-export { parseColorToHexStrict as parseHexColor } from './utilities/color.js'
-
 /** @internal */
 export default logger
 
 export type { Logger, LoggerOpts, LogLevelColors, LogLevelName } from './logger.js'
-export { getLogger, LOG_LEVELS } from './logger.js'
 
+export { getLogger, LOG_LEVELS } from './logger.js'
 export { fmt, formatArgs, formatValue, prettify, prettyPrint } from './pretty.print.js'
+
 export { type ChalkColor } from './utilities/chalk.js'
+export { parseColorToHexStrict as parseHexColor } from './utilities/color.js'

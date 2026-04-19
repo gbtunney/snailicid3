@@ -1,5 +1,5 @@
-import { fmt, formatValue } from '@snailicid3/utils'
-import {  logger ,type Logger} from '@snailicid3/logger'
+import {  logger } from '@snailicid3/logger'
+import { fmt } from '@snailicid3/utils'
 import { MergeExclusive } from 'type-fest'
 import { z } from 'zod'
 // Example: Refactor sichema merging

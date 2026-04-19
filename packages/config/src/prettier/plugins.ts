@@ -1,6 +1,6 @@
-import { Plugin as PrettierPlugin } from "prettier";
-import xmlPlugin from "@prettier/plugin-xml";
 import * as phpPlugin from "@prettier/plugin-php";
+import xmlPlugin from "@prettier/plugin-xml";
+import { Plugin as PrettierPlugin } from "prettier";
 import * as unResolvedJsdocPlugin from "prettier-plugin-jsdoc";
 import * as shPlugin from "prettier-plugin-sh";
 import type { UnknownRecord } from "type-fest";
@@ -10,7 +10,7 @@ export const keysOf = <ObjectType extends UnknownRecord>(
     obj: ObjectType,
 ): Array<KeysOf<ObjectType>> => Object.keys(obj) as Array<KeysOf<ObjectType>>;
 
-type AnyPrettierPlugin = PrettierPlugin<any>;
+type AnyPrettierPlugin = PrettierPlugin;
 
 type UnresolvedPrettierPlugin<Type extends AnyPrettierPlugin = AnyPrettierPlugin> =
   | Type
@@ -35,13 +35,13 @@ export const resolvePrettierPlugin = (
 };
 
 const PRETTIER_PLUGINS = {
-  "@prettier/plugin-xml": resolvePrettierPlugin(xmlPlugin),
   "@prettier/plugin-php": resolvePrettierPlugin(phpPlugin),
+  "@prettier/plugin-xml": resolvePrettierPlugin(xmlPlugin),
   "prettier-plugin-jsdoc": resolvePrettierPlugin(jsDocPlugin),
   "prettier-plugin-sh": resolvePrettierPlugin(shPlugin),
 } as const satisfies Record<PrettierPluginName, AnyPrettierPlugin>;
 
-export const getPrettierPluginsBundled = (): AnyPrettierPlugin[] => {
+export const getPrettierPluginsBundled = (): Array<AnyPrettierPlugin> => {
   return Object.values(PRETTIER_PLUGINS);
 };
 

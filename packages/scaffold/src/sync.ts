@@ -20,7 +20,7 @@ const syncPackageJson = (input: ScaffoldInput, packageDir: string): SyncResult =
 
     if (!existsSync(filePath)) {
         writeFileSync(filePath, JSON.stringify(template, null, 4) + '\n')
-        return { file: 'package.json', action: 'created' }
+        return { action: 'created', file: 'package.json' }
     }
 
     const existing = JSON.parse(readFileSync(filePath, 'utf8')) as Record<string, unknown>
@@ -37,12 +37,12 @@ const syncPackageJson = (input: ScaffoldInput, packageDir: string): SyncResult =
 
     const updated = {
         ...existing,
-        scripts: template.scripts,
         devDependencies: mergedDevDeps,
+        scripts: template.scripts,
     }
 
     writeFileSync(filePath, JSON.stringify(updated, null, 4) + '\n')
-    return { file: 'package.json', action: 'updated', reason: 'scripts + devDependencies merged' }
+    return { action: 'updated', file: 'package.json', reason: 'scripts + devDependencies merged' }
 }
 
 const syncTsConfig = (input: ScaffoldInput, packageDir: string): SyncResult => {
@@ -51,7 +51,7 @@ const syncTsConfig = (input: ScaffoldInput, packageDir: string): SyncResult => {
 
     if (!existsSync(filePath)) {
         writeFileSync(filePath, JSON.stringify(template, null, 4) + '\n')
-        return { file: 'tsconfig.json', action: 'created' }
+        return { action: 'created', file: 'tsconfig.json' }
     }
 
     const existing = JSON.parse(readFileSync(filePath, 'utf8')) as Record<string, unknown>
@@ -64,7 +64,7 @@ const syncTsConfig = (input: ScaffoldInput, packageDir: string): SyncResult => {
     }
 
     writeFileSync(filePath, JSON.stringify(updated, null, 4) + '\n')
-    return { file: 'tsconfig.json', action: 'updated', reason: 'compilerOptions merged' }
+    return { action: 'updated', file: 'tsconfig.json', reason: 'compilerOptions merged' }
 }
 
 const syncReadme = (input: ScaffoldInput, packageDir: string): SyncResult => {
@@ -73,7 +73,7 @@ const syncReadme = (input: ScaffoldInput, packageDir: string): SyncResult => {
 
     if (!existsSync(filePath)) {
         writeFileSync(filePath, header)
-        return { file: 'README.md', action: 'created' }
+        return { action: 'created', file: 'README.md' }
     }
 
     const existing = readFileSync(filePath, 'utf8')
@@ -87,31 +87,31 @@ const syncReadme = (input: ScaffoldInput, packageDir: string): SyncResult => {
             header.trimEnd() +
             existing.slice(endIdx + HEADER_END.length)
         writeFileSync(filePath, updated)
-        return { file: 'README.md', action: 'updated', reason: 'header block replaced' }
+        return { action: 'updated', file: 'README.md', reason: 'header block replaced' }
     }
 
     // Prepend header block
     writeFileSync(filePath, header + '\n' + existing)
-    return { file: 'README.md', action: 'updated', reason: 'header block prepended' }
+    return { action: 'updated', file: 'README.md', reason: 'header block prepended' }
 }
 
 const checkRollupConfig = (packageDir: string): SyncResult => {
     const filePath = join(packageDir, 'rollup.config.mts')
     if (!existsSync(filePath)) {
         return {
-            file: 'rollup.config.mts',
             action: 'skipped',
+            file: 'rollup.config.mts',
             reason: 'file not found — run scaffold to create',
         }
     }
     return {
-        file: 'rollup.config.mts',
         action: 'needs-review',
+        file: 'rollup.config.mts',
         reason: 'never overwritten — review manually',
     }
 }
 
-export const syncPackage = (input: ScaffoldInput, packageDir: string): SyncResult[] => [
+export const syncPackage = (input: ScaffoldInput, packageDir: string): Array<SyncResult> => [
     syncPackageJson(input, packageDir),
     syncTsConfig(input, packageDir),
     syncReadme(input, packageDir),

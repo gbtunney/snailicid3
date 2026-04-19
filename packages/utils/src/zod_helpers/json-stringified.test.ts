@@ -3,8 +3,8 @@ import { z } from 'zod'
 import {
     type InferJsonSchemaInput,
     type InferStringifiedOutput,
-    jsonLooseCodec,makeJsonStringifiedSchema,
-    jsonStringified,jsonParser,
+    jsonLooseCodec,
+    jsonStringified,
 } from './json-stringified.js'
 
 describe('jsonStringified<T>()', () => {

@@ -102,7 +102,7 @@ export type Flag = keyof typeof flagMap
 export type FlagAlias = ValueOf<typeof flagMap>
 
 const mapFlags = (
-    flags: Flag | FlagAlias | Array<FlagAlias | Flag> | undefined = undefined,
+    flags?: Flag | FlagAlias | Array<FlagAlias | Flag>  ,
 ): string => {
     if (flags === undefined) return ''
     else {

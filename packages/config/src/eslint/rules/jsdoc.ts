@@ -1,8 +1,8 @@
+import {type Config,defineConfig}from '@eslint/config-helpers'
 import jsdoc from 'eslint-plugin-jsdoc'
 import { getScaledWidth } from '../../prettier/index.js'
-import {defineConfig,type Config}from '@eslint/config-helpers'
 
-export const jsdocRules = (): Config []=> defineConfig(
+export const jsdocRules = (): Array<Config>=> defineConfig(
     { ...jsdoc.configs['flat/recommended'] },
     /* eslint sort/object-properties:off */
     {

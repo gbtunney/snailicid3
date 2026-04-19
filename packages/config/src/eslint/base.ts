@@ -1,20 +1,20 @@
+import {type Config,defineConfig}from '@eslint/config-helpers'
 import pluginJs from '@eslint/js'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
+import {expandExtensions}from './../helpers.js'
 import pluginsConfig from './plugins.js'
-import { eslintCommentRules } from './rules/eslint-comments.js'
 import { checkFileRules } from './rules/check-file.js'
+import { eslintCommentRules } from './rules/eslint-comments.js'
 import { importRules } from './rules/import.js'
 import { jsdocRules } from './rules/jsdoc.js'
 import { namingConventionRules } from './rules/naming-convention.js'
+import {reactRules} from './rules/react.js'
 import { sortRules } from './rules/sort.js'
 import { typescriptRules } from './rules/typescript.js'
 import { vitestRules } from './rules/vitest.js'
 import { SHARED_FORMATTING_RULES } from '../prettier/index.js'
-import { TS_FILE_EXTENSIONS, JS_FILE_EXTENSIONS } from '../shared.js'
-import {reactRules} from './rules/react.js'
-import {expandExtensions}from './../helpers.js'
-import {defineConfig,type Config}from '@eslint/config-helpers'
+import { JS_FILE_EXTENSIONS, TS_FILE_EXTENSIONS } from '../shared.js'
 const base_files: Array<string> = [...expandExtensions(TS_FILE_EXTENSIONS, '*.')]
 const base_ignores = [
     '**/dist/**/*',
@@ -22,6 +22,7 @@ const base_ignores = [
     '**/dist/**',
     '**/types/**/*',
     '**/types/**',
+    '!**/packages/types/**',
 
     /** SYSTEM */
     '**/.history/**',
@@ -42,8 +43,8 @@ const base_ignores = [
       '**/storybook-static/**',
 ]
 
-export const flatEslintConfig = async (__dirname: string): Promise<Config[]> => {
-    const EslintConfig: Config []= defineConfig(
+export const flatEslintConfig = async (__dirname: string): Promise<Array<Config>> => {
+    const EslintConfig: Array<Config>= defineConfig(
         { files: base_files, name: 'Custom Base Configuration : Includes' },
         { ignores: base_ignores, name: 'Custom Base Configuration : Ignores' },
         {

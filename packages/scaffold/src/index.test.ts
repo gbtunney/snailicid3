@@ -1,8 +1,7 @@
+import { describe, expect, test } from 'vitest'
 import { mkdtempSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-
-import { describe, expect, test } from 'vitest'
 
 import { scaffoldInputSchema } from './input.js'
 import { scaffoldPackage } from './scaffold.js'
@@ -12,8 +11,8 @@ import { generateRollupConfig } from './templates/rollup-config.js'
 import { generateTsConfig } from './templates/tsconfig.js'
 
 const testInput = scaffoldInputSchema.parse({
-    name: 'my-pkg',
     description: 'A test package',
+    name: 'my-pkg',
 })
 
 describe('scaffoldInputSchema', () => {

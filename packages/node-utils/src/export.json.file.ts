@@ -1,7 +1,7 @@
+import { type Json,type Jsonifiable, prettyPrintJSON } from '@snailicid3/utils'
 import fs from 'fs'
 import path from 'path'
 
-import { prettyPrintJSON,type Json, type Jsonifiable } from '@snailicid3/utils'
 export type JSONExportEntry<
     Type = Json.Value,
     DataType = Type extends Jsonifiable ? Type : never,
@@ -15,7 +15,7 @@ export type JSONExportConfig = Array<JSONExportEntry>
 /** Throws error if file save fails */
 export const exportJSONFile = (
     config: JSONExportConfig,
-    outdir: string | undefined = undefined,
+    outdir?: string  ,
     /** File overwrite mode if exists */
     overwrite: 'ON' | 'ERROR' | 'WARN' = 'ON',
 ): void => {

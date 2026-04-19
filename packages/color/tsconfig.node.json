@@ -1,13 +1,13 @@
 {
-    "extends": "@snailicid3/config/tsconfig.typecheck",
-    "exclude": ["./node_modules"],
-    "files": ["package.json"],
+    "extends": "@snailicid3/config/tsconfig.library",
     "include": [
-        "./*.ts",
-        "./*.cts",
-        "./*.mts",
-        "./**/*.test.ts",
-        "./**/*.test.mts",
-        "./**/*.test.cts"
+        "./src/**/*.ts",
+        "./src/**/*.cts",
+        "./src/**/*.mts"
+    ],
+    "exclude": [
+        "**/*.test.ts",
+        "**/*.test.mts",
+        "**/*.test.cts"
     ]
 }

@@ -37,8 +37,11 @@ export const formatValue = (value: unknown, _opts?: FormatValueOptions): string 
 export const formatArgs = (delimiter = '', ...vals: Array<unknown>): string =>
     vals.map((v) => formatValue(v)).join(delimiter)
 
-/** Tagged template: safely interpolate unknowns without triggering restrict-template-expressions
- * @example fmt`Value: ${myValue}` */
+/**
+ * Tagged template: safely interpolate unknowns without triggering restrict-template-expressions
+ *
+ * @example fmt`Value: ${myValue}`
+ */
 export const fmt = (strings: TemplateStringsArray, ...values: Array<unknown>): string =>
     strings.reduce((accumulated, chunk, index) => {
         const interpolated = index < values.length ? formatValue(values[index]) : ''

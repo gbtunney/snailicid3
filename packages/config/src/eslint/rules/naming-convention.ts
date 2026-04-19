@@ -1,9 +1,9 @@
-import { TS_FILE_EXTENSIONS } from '../../shared.js'
+import {type Config,defineConfig}from '@eslint/config-helpers'
 import { expandExtensions } from '../../helpers.js'
-import {defineConfig,type Config}from '@eslint/config-helpers'
+import { TS_FILE_EXTENSIONS } from '../../shared.js'
 
 /** @todo: breakdown this file into groups? */
-export const namingConventionRules = (error: boolean = true): Config[] => defineConfig([
+export const namingConventionRules = (error: boolean = true): Array<Config> => defineConfig([
     {
         files: [...expandExtensions(TS_FILE_EXTENSIONS, '**/src/**/*.')],
         name: 'Naming Convention: General rules for source files',

@@ -117,7 +117,6 @@ export const jsonSchema= <TSchema extends z.ZodType>(
     schema: TSchema,
 ): JsonStringifiedSchema<TSchema> => makeJsonStringifiedSchema(schema)
 
-
 /** WIP @todo - some other day */
 export const jsonLooseCodec = <
     TSchema extends z.ZodType<Exclude<Jsonifiable, null | number | boolean>>,

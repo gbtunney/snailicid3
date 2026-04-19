@@ -130,7 +130,7 @@ export const getRuleConfiguration = async (
     rules: MarkdownlintRuleConfiguration,
     opts: MarkdownlintOpts = DEFAULT_OPTS,
 ): Promise<MarkdownlintRuleConfiguration | undefined> => {
-    const { throwOnError = false }: MarkdownlintOptsOutput = parseOptionsSchema(
+    const { throwOnError }: MarkdownlintOptsOutput = parseOptionsSchema(
         markdownlintOptsSchema,
         opts,
     )
