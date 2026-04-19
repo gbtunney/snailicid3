@@ -58,6 +58,7 @@
                 ],
                 "command": "tsc --build ./tsconfig.json && tsc --build ./tsconfig.node.json"
             },
+            "check:ts": {},
             "build:rollup": {},
             "build:vite": {},
             "build": {
