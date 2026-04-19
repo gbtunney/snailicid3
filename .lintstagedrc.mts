@@ -13,12 +13,12 @@ const mdIgnores = [
 ]
 
 const quoteArg = (p: string) => `"${p.replaceAll('"', '\\"')}"`
-const toFileArgs = (staged: string | string[]) =>
+const toFileArgs = (staged: string | Array<string>) =>
     (Array.isArray(staged) ? staged : [staged]).map(quoteArg).join(' ')
-const toIgnoreArgs = (ignores: string[]) => ignores.map(quoteArg).join(' ')
+const toIgnoreArgs = (ignores: Array<string>) => ignores.map(quoteArg).join(' ')
 
 export default {
-    [`*.${JS_EXTS}`]: (staged: string[]) => {
+    [`*.${JS_EXTS}`]: (staged: Array<string>) => {
         const files = toFileArgs(staged)
         return [
             `pnpm exec prettier --write ${files}`,
@@ -26,7 +26,7 @@ export default {
         ]
     },
 
-    [`*.md`]: (staged: string[]) => {
+    [`*.md`]: (staged: Array<string>) => {
         const files = toFileArgs(staged)
         const ignores = toIgnoreArgs(mdIgnores)
         return [
@@ -35,14 +35,14 @@ export default {
         ]
     },
 
-    [`*.${PRETTIER_EXTS}`]: (staged: string[]) => {
+    [`*.${PRETTIER_EXTS}`]: (staged: Array<string>) => {
         const files = toFileArgs(staged)
         return `pnpm exec prettier --write ${files}`
     },
 
     '.gitignore': 'pnpm exec prettier --write .gitignore',
 
-    '.husky/**/*': (staged: string[]) => {
+    '.husky/**/*': (staged: Array<string>) => {
         const files = toFileArgs(staged)
         return `pnpm exec prettier --write ${files}`
     },
