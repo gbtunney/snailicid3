@@ -1,6 +1,4 @@
-/**
- * Re-exports JSON type guards from @snailicid3/types.
- */
+/** Re-exports JSON type guards from @snailicid3/types. */
 import { tg } from '@snailicid3/types'
 
 export const {

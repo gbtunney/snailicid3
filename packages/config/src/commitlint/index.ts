@@ -7,31 +7,20 @@
  */
 import config_conventional from '@commitlint/config-conventional'
 import type { UserConfig as CommitlintUserConfig } from '@commitlint/types'
-import type {LiteralUnion} from 'type-fest';
+import type { LiteralUnion } from 'type-fest'
 
-export type ConventionalCommitType = keyof typeof config_conventional.prompt.questions.type.enum
-export const COMMIT_TYPES: Array<ConventionalCommitType> =Object.keys(config_conventional.prompt.questions.type.enum) as Array<ConventionalCommitType>
+export type ConventionalCommitType =
+    keyof typeof config_conventional.prompt.questions.type.enum
+export const COMMIT_TYPES: Array<ConventionalCommitType> = Object.keys(
+    config_conventional.prompt.questions.type.enum,
+) as Array<ConventionalCommitType>
 
-/**
- *[
- * 'feat',
- * 'fix',
- * 'wip',
- * 'build',
-    * 'chore',
-    'docs',
-    'release',
-    'ci',
-    'perf',
-    'refactor',
-    'revert',
-    'style',
-    'test',
-]
- */
+/** [ 'feat', 'fix', 'wip', 'build', 'chore', 'docs', 'release', 'ci', 'perf', 'refactor', 'revert', 'style', 'test', ] */
 export const configuration = (
     scope_enum: Array<string> = [],
-    type_enum: Array<LiteralUnion<ConventionalCommitType,string>> = COMMIT_TYPES ,
+    type_enum: Array<
+        LiteralUnion<ConventionalCommitType, string>
+    > = COMMIT_TYPES,
 ): CommitlintUserConfig => {
     const baseConfig: CommitlintUserConfig = {
         extends: ['@commitlint/config-conventional'],

@@ -19,8 +19,11 @@ export const validateFullConfiguration = async (
     config: MarkdownlintConfiguration,
     opts: MarkdownlintOpts = DEFAULT_OPTS,
 ): Promise<Omit<MarkdownlintProcessedResult, 'config'>> => {
-    const { ajvOptions, strictValidation, throwOnError }: MarkdownlintOptsOutput =
-        parseOptionsSchema(markdownlintOptsSchema, opts)
+    const {
+        ajvOptions,
+        strictValidation,
+        throwOnError,
+    }: MarkdownlintOptsOutput = parseOptionsSchema(markdownlintOptsSchema, opts)
 
     const LOGGER = logger()
 
@@ -39,15 +42,21 @@ export const validateFullConfiguration = async (
             .map(
                 (e) =>
                     `${e.instancePath || '/'} ${e.message ?? e.keyword}${
-                        Object.keys(e.params || {}).length ? ' ' + JSON.stringify(e.params) : ''
+                        Object.keys(e.params || {}).length
+                            ? ' ' + JSON.stringify(e.params)
+                            : ''
                     }`,
             )
             .join('\n')
 
         if (throwOnError) {
-            throw new Error(`markdownlint configuration failed validation:\n${msg}`)
+            throw new Error(
+                `markdownlint configuration failed validation:\n${msg}`,
+            )
         } else {
-            LOGGER.error(`markdownlint configuration failed validation:\n${msg}`)
+            LOGGER.error(
+                `markdownlint configuration failed validation:\n${msg}`,
+            )
         }
     }
 
@@ -76,11 +85,14 @@ export const processConfiguration = async (
             useDefault,
         }),
     }
-    const validation_results = await validateFullConfiguration(_normalized_config, {
-        ajvOptions,
-        strictValidation,
-        throwOnError,
-    })
+    const validation_results = await validateFullConfiguration(
+        _normalized_config,
+        {
+            ajvOptions,
+            strictValidation,
+            throwOnError,
+        },
+    )
     return {
         config: _normalized_config,
         ...validation_results,
@@ -96,8 +108,10 @@ export const getConfiguration = async (
         opts,
     )
     const _result = await processConfiguration(config, opts)
-    if (!_result.valid && throwOnError) throw new Error('Configuration is invalid')
-    else if (!_result.valid && !throwOnError) logger().error('Configuration is invalid')
+    if (!_result.valid && throwOnError)
+        throw new Error('Configuration is invalid')
+    else if (!_result.valid && !throwOnError)
+        logger().error('Configuration is invalid')
     else if (_result.valid) {
         return _result.config
     }

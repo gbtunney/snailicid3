@@ -1,6 +1,4 @@
-/**
- * BuildPlan helpers and constructors.
- */
+/** BuildPlan helpers and constructors. */
 
 import type {
     BuildPlan,
@@ -15,19 +13,19 @@ import type {
 /**
  * The shape of the `buildConfig` field in `package.json`.
  *
- * Adding this field to a package's `package.json` makes its build identity
- * explicit and machine-readable. The `identityFromPackage()` helper reads it.
+ * Adding this field to a package's `package.json` makes its build identity explicit and machine-readable. The
+ * `identityFromPackage()` helper reads it.
  *
  * @example
- * ```json
- * {
- *   "buildConfig": {
- *     "runtime": "node",
- *     "product": "library",
- *     "buildStrategy": "bundle"
- *   }
- * }
- * ```
+ *     ;```json
+ *     {
+ *       "buildConfig": {
+ *         "runtime": "node",
+ *         "product": "library",
+ *         "buildStrategy": "bundle"
+ *       }
+ *     }
+ *     ```
  */
 export type PackageBuildConfig = {
     runtime: Runtime
@@ -36,19 +34,19 @@ export type PackageBuildConfig = {
 }
 
 /**
- * Read a {@link PackageIdentity} from a `package.json` object's `buildConfig`
- * field. Returns `undefined` if the field is absent.
+ * Read a {@link PackageIdentity} from a `package.json` object's `buildConfig` field. Returns `undefined` if the field is
+ * absent.
  *
- * Intended for use in `rollup.config.mts` files so the identity is defined
- * once in `package.json` rather than repeated in every config file.
+ * Intended for use in `rollup.config.mts` files so the identity is defined once in `package.json` rather than repeated
+ * in every config file.
  *
  * @example
- * ```ts
- * import pkg from './package.json' with { type: 'json' }
- * import { identityFromPackage, defineIdentity } from '@snailicid3/build-config'
+ *     ;```ts
+ *     import pkg from './package.json' with { type: 'json' }
+ *     import { identityFromPackage, defineIdentity } from '@snailicid3/build-config'
  *
- * const identity = identityFromPackage(pkg) ?? defineIdentity('node', 'library', 'bundle')
- * ```
+ *     const identity = identityFromPackage(pkg) ?? defineIdentity('node', 'library', 'bundle')
+ *     ```
  */
 export function identityFromPackage(pkg: {
     buildConfig?: { runtime: string; product: string; buildStrategy: string }

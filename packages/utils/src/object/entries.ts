@@ -7,9 +7,7 @@ import type {
 export const keysOf = <ObjectType extends UnknownRecord>(
     obj: ObjectType,
 ): Array<KeysOf<ObjectType>> => Object.keys(obj) as Array<KeysOf<ObjectType>>
-/**
- *TODO : maybe pick, omit, prefix keys. Also see workspace utils to have a search function.
- */
+/** TODO : maybe pick, omit, prefix keys. Also see workspace utils to have a search function. */
 export const entriesOf = <ObjectType extends UnknownRecord>(
     obj: ObjectType,
 ): EntriesOf<ObjectType> => Object.entries(obj) as EntriesOf<ObjectType>

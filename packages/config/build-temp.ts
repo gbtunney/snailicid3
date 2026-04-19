@@ -22,7 +22,6 @@ const _prettierConfig = JSON.parse(
 )
 const prettierConfig: Jsonify<typeof _prettierConfig> = _prettierConfig
 
-
 /** As const */
 const JSON_EXPORTS = [
     {
@@ -32,7 +31,7 @@ const JSON_EXPORTS = [
     {
         data: mdConfig,
         filename: 'dist/.markdownlint.json',
-    }
+    },
 ]
 
 exportJSONFile(JSON_EXPORTS, '.')

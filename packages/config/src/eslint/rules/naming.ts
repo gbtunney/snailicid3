@@ -41,7 +41,10 @@ export const namingRules = (error: boolean = true): Config[] =>
                         selector: 'typeAlias',
                     },
                     {
-                        custom: { match: true, regex: '^[A-Z]([A-Z]|[a-z]){2,}' },
+                        custom: {
+                            match: true,
+                            regex: '^[A-Z]([A-Z]|[a-z]){2,}',
+                        },
                         format: ['PascalCase'],
                         selector: 'typeParameter',
                     },
@@ -69,7 +72,9 @@ export const namingRules = (error: boolean = true): Config[] =>
             },
         },
         {
-            files: [...expandExtensions(TS_FILE_EXTENSIONS, '**/src/**/index.')],
+            files: [
+                ...expandExtensions(TS_FILE_EXTENSIONS, '**/src/**/index.'),
+            ],
             name: 'Naming: overrides for index files in src',
             rules: {
                 '@typescript-eslint/naming-convention': [

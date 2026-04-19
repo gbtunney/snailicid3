@@ -2,7 +2,10 @@ import { pipe, replace as ramda_replace } from 'ramda'
 import { ensureArray, trimCharsEnd, trimCharsStart } from 'ramda-adjunct'
 
 import type { BaseValue, BatchBaseValue, TrimCharacters } from './type.js'
-import { getRegExpEndOfString, getRegExpStartOfString } from '../../regexp/string-to-regexp.js'
+import {
+    getRegExpEndOfString,
+    getRegExpStartOfString,
+} from '../../regexp/string-to-regexp.js'
 
 /**
  * Trims characters from the start and/or end of a string based on the provided pattern(s). If multiple patterns are

@@ -7,7 +7,10 @@ import {
     resetLogger,
     setLogger,
 } from './logger.js'
-import { getColorChalkInstance, wrapColorChalkInstanceText } from './utilities/chalk.js'
+import {
+    getColorChalkInstance,
+    wrapColorChalkInstanceText,
+} from './utilities/chalk.js'
 /** @internal */
 export const logger = {
     create: createLogger,
@@ -24,10 +27,21 @@ export const logger = {
 /** @internal */
 export default logger
 
-export type { Logger, LoggerOpts, LogLevelColors, LogLevelName } from './logger.js'
+export type {
+    Logger,
+    LoggerOpts,
+    LogLevelColors,
+    LogLevelName,
+} from './logger.js'
 
 export { getLogger, LOG_LEVELS } from './logger.js'
-export { fmt, formatArgs, formatValue, prettify, prettyPrint } from './pretty.print.js'
+export {
+    fmt,
+    formatArgs,
+    formatValue,
+    prettify,
+    prettyPrint,
+} from './pretty.print.js'
 
 export { type ChalkColor } from './utilities/chalk.js'
 export { parseColorToHexStrict as parseHexColor } from './utilities/color.js'

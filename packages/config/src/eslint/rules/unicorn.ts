@@ -27,7 +27,9 @@ export const unicornRules = (): Array<Config> =>
                 // → toReversed()
                 'unicorn/no-array-sort': 'warn',
 
-                'unicorn/no-empty-file': 'warn', 'unicorn/no-for-loop': 'off', 'unicorn/no-instanceof-array': 'error',
+                'unicorn/no-empty-file': 'warn',
+                'unicorn/no-for-loop': 'off',
+                'unicorn/no-instanceof-array': 'error',
                 'unicorn/no-null': 'off',
                 // → toSorted()
                 'unicorn/no-unnecessary-array-flat-depth': 'warn',

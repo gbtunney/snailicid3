@@ -1,8 +1,8 @@
 /**
  * Rollup adapter.
  *
- * Used when multiple output formats are needed (ESM + CJS, IIFE, UMD), or
- * when browser library builds require controlled, tree-shaken output.
+ * Used when multiple output formats are needed (ESM + CJS, IIFE, UMD), or when browser library builds require
+ * controlled, tree-shaken output.
  */
 
 import { rollup } from 'rollup'
@@ -11,7 +11,14 @@ import type { BuildAdapter } from '../../build/ports.js'
 import type { BuildPlan, Product, Runtime } from '../../build/types.js'
 
 /** Products that may use the Rollup adapter when buildStrategy is 'bundle'. */
-const ROLLUP_PRODUCTS: Array<Product> = ['library', 'cli', 'plugin', 'worker', 'server_app', 'web_app']
+const ROLLUP_PRODUCTS: Array<Product> = [
+    'library',
+    'cli',
+    'plugin',
+    'worker',
+    'server_app',
+    'web_app',
+]
 
 export const rollupAdapter: BuildAdapter = {
     async build(plan: BuildPlan): Promise<void> {

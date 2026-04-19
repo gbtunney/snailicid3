@@ -25,7 +25,10 @@ export const { isScientificNumber, isNotScientificNumber } = factoryValidator(
     'scientificNumber',
 )
 
-export const { isHexNumber, isNotHexNumber } = factoryValidator(isHexString, 'hexNumber')
+export const { isHexNumber, isNotHexNumber } = factoryValidator(
+    isHexString,
+    'hexNumber',
+)
 
 export const { isBinaryNumber, isNotBinaryNumber } = factoryValidator(
     isBinaryString,

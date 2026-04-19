@@ -12,10 +12,20 @@ import { parseColorToHexStrict } from './utilities/color.js'
 
 export type LogLevelColors = ChalkColor
 
-export const LEVEL_NAMES = ['trace', 'info', 'debug', 'warn', 'error', 'fatal', 'silent'] as const
+export const LEVEL_NAMES = [
+    'trace',
+    'info',
+    'debug',
+    'warn',
+    'error',
+    'fatal',
+    'silent',
+] as const
 export type LogLevelName = (typeof LEVEL_NAMES)[number]
 
-type ExtractKeys<Type extends ReadonlyArray<unknown> | Record<keyof unknown, unknown>> =
+type ExtractKeys<
+    Type extends ReadonlyArray<unknown> | Record<keyof unknown, unknown>,
+> =
     Type extends ReadonlyArray<infer U>
         ? Extract<U, PropertyKey>
         : Type extends Record<keyof any, unknown>
@@ -28,7 +38,10 @@ type ExhaustiveRecordFrom<
     Value = unknown,
 > = Record<ExtractKeys<Type>, Value>
 
-export type LoggerRecord<Value> = ExhaustiveRecordFrom<typeof LEVEL_NAMES, Value>
+export type LoggerRecord<Value> = ExhaustiveRecordFrom<
+    typeof LEVEL_NAMES,
+    Value
+>
 
 export const LOG_LEVELS: LoggerRecord<number> = {
     debug: 35,
@@ -57,7 +70,10 @@ const isBrowser = (): boolean =>
 const RESET = '\x1b[0m'
 
 /** TODO: use hex color in config */
-function colorizeBrowser(label: string, color: LogLevelColors): [string, string, string] {
+function colorizeBrowser(
+    label: string,
+    color: LogLevelColors,
+): [string, string, string] {
     const css = fmt`color:${color};font-weight:600`
     return [`%c${label}%c`, css, '']
 }
@@ -80,7 +96,10 @@ function pickConsole(level: LogLevelName): (...args: Array<unknown>) => void {
 
 const schemaLoggerOpts = z.object({
     colors: z
-        .transform<Partial<LoggerRecord<LogLevelColors>>, LoggerRecord<LogLevelColors>>((val) => {
+        .transform<
+            Partial<LoggerRecord<LogLevelColors>>,
+            LoggerRecord<LogLevelColors>
+        >((val) => {
             return { ...LEVEL_COLORS, ...val }
         })
         .prefault({}),
@@ -94,7 +113,10 @@ export type Logger = {
     readonly name: string | undefined
     readonly level: LogLevelName
     setLevel: (level: LogLevelName) => void
-    child: (name: string, overrides?: Partial<z.input<typeof schemaLoggerOpts>>) => Logger
+    child: (
+        name: string,
+        overrides?: Partial<z.input<typeof schemaLoggerOpts>>,
+    ) => Logger
     trace: <Type extends Array<unknown>>(...a: Type) => void
     debug: <Type extends Array<unknown>>(...a: Type) => void
     info: <Type extends Array<unknown>>(...a: Type) => void
@@ -141,7 +163,10 @@ export const createLogger = (opts?: LoggerOpts): Logger => {
         ].join(' ')
     }
 
-    const emit = <Type extends Array<unknown>>(level: LogLevelName, ...args: Type): void => {
+    const emit = <Type extends Array<unknown>>(
+        level: LogLevelName,
+        ...args: Type
+    ): void => {
         if (!shouldLog(level)) return
         const out = pickConsole(level)
         const head = prefix(level)
@@ -151,12 +176,17 @@ export const createLogger = (opts?: LoggerOpts): Logger => {
             out(fmt, css, reset, ...args)
         } else {
             //chalk.bgRed('THIS IS A COLOR ', color)
-            out(wrapColorChalkInstanceText(head, color, 'fg'), formatArgs('', ...args))
+            out(
+                wrapColorChalkInstanceText(head, color, 'fg'),
+                formatArgs('', ...args),
+            )
         }
     }
 
     const _levelName = (): LogLevelName =>
-        (Object.entries(LOG_LEVELS).find(([, n]) => n === minLevel)?.[0] as LogLevelName) ?? 'info'
+        (Object.entries(LOG_LEVELS).find(
+            ([, n]) => n === minLevel,
+        )?.[0] as LogLevelName) ?? 'info'
 
     return {
         child: (childName, overrides = {}): Logger =>
@@ -207,7 +237,10 @@ let loggerInstance: Logger | undefined
  * - With opts: returns a new, non-singleton instance configured with those opts.
  */
 /** ...existing code... */
-export const getLogger = (opts?: z.input<typeof schemaLoggerOpts>, makeDefault = false): Logger => {
+export const getLogger = (
+    opts?: z.input<typeof schemaLoggerOpts>,
+    makeDefault = false,
+): Logger => {
     if (!loggerInstance) {
         loggerInstance = createLogger(opts)
         return loggerInstance

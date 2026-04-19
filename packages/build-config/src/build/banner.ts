@@ -29,16 +29,19 @@ function repoUrl(repository: BannerPackageMeta['repository']): string {
  * Returns `undefined` if `meta` is missing required fields (`name`, `version`).
  *
  * @example
- * ```ts
- * const banner = createBanner('myModule', pkg)
- * // /*
- * //  * my-package v1.0.0
- * //  * Module: myModule
- * //  * ...
- * //  * /
- * ```
+ *     ;```ts
+ *     const banner = createBanner('myModule', pkg)
+ *     // /*
+ *     //  * my-package v1.0.0
+ *     //  * Module: myModule
+ *     //  * ...
+ *     //  * /
+ *     ```
  */
-export function createBanner(moduleName: string, meta: BannerPackageMeta): string | undefined {
+export function createBanner(
+    moduleName: string,
+    meta: BannerPackageMeta,
+): string | undefined {
     if (!meta.name || !meta.version) return undefined
 
     const lines: Array<string> = [
@@ -49,7 +52,8 @@ export function createBanner(moduleName: string, meta: BannerPackageMeta): strin
 
     if (meta.description) lines.push(` * ${meta.description}`)
     if (meta.repository) lines.push(` * ${repoUrl(meta.repository)}`)
-    if (meta.license) lines.push(` * Released under the ${meta.license} License.`)
+    if (meta.license)
+        lines.push(` * Released under the ${meta.license} License.`)
     lines.push(` * Build: ${new Date().toLocaleString()}`)
 
     return `/*\n${lines.join('\n')}\n */`

@@ -13,7 +13,9 @@ import { TS_FILE_EXTENSIONS } from '../shared.js'
 import { expandExtensions } from '../helpers.js'
 import { defineConfig, type Config } from '@eslint/config-helpers'
 
-const base_files: Array<string> = [...expandExtensions(TS_FILE_EXTENSIONS, '*.')]
+const base_files: Array<string> = [
+    ...expandExtensions(TS_FILE_EXTENSIONS, '*.'),
+]
 const base_ignores = [
     '**/dist/**/*',
     '**/node_modules/**',
@@ -31,7 +33,9 @@ const base_ignores = [
     '**/storybook-static/**',
 ]
 
-export const flatEslintConfig = async (__dirname: string): Promise<Config[]> => {
+export const flatEslintConfig = async (
+    __dirname: string,
+): Promise<Config[]> => {
     const EslintConfig: Config[] = defineConfig(
         { files: base_files, name: 'Base: included file extensions' },
         { ignores: base_ignores, name: 'Base: ignored paths' },

@@ -17,10 +17,15 @@ export function getWorkspacePackagesList(
 }
 
 export function workspacePackagesToArray(
-    input: ReadonlyMap<string, WorkspacePackage> | Record<string, WorkspacePackage>,
+    input:
+        | ReadonlyMap<string, WorkspacePackage>
+        | Record<string, WorkspacePackage>,
 ): Array<WorkspacePackage> {
-    if (input instanceof Map) return Array.from<WorkspacePackage>(input.values())
-    return Object.values<WorkspacePackage>(input as Record<string, WorkspacePackage>)
+    if (input instanceof Map)
+        return Array.from<WorkspacePackage>(input.values())
+    return Object.values<WorkspacePackage>(
+        input as Record<string, WorkspacePackage>,
+    )
 }
 
 export function getWorkspacePackagesLookup(
@@ -74,11 +79,19 @@ export function setPackageKeys<Key extends keyof WorkspacePackage>(
     keys: ReadonlyArray<Key>,
 ) {
     if (mode === 'include') {
-        return Object.fromEntries(keys.map((key) => [key, pkg[key]])) as Pick<WorkspacePackage, Key>
+        return Object.fromEntries(keys.map((key) => [key, pkg[key]])) as Pick<
+            WorkspacePackage,
+            Key
+        >
     }
     return Object.fromEntries(
         (Object.keys(pkg) as Array<keyof WorkspacePackage>)
-            .filter((key) => !(keys as ReadonlyArray<keyof WorkspacePackage>).includes(key))
+            .filter(
+                (key) =>
+                    !(keys as ReadonlyArray<keyof WorkspacePackage>).includes(
+                        key,
+                    ),
+            )
             .map((key) => [key, pkg[key]]),
     ) as Omit<WorkspacePackage, Key>
 }

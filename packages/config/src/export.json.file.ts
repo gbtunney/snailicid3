@@ -1,4 +1,4 @@
-/** TODO: Remove this pls this is temporary  */
+/** TODO: Remove this pls this is temporary */
 import {
     JsonArray,
     Jsonifiable,
@@ -43,7 +43,7 @@ export type JSONExportConfig = Array<JSONExportEntry>
 /** Throws error if file save fails */
 export const exportJSONFile = (
     config: JSONExportConfig,
-    outdir?: string  ,
+    outdir?: string,
     /** File overwrite mode if exists */
     overwrite: boolean = true,
     logData: boolean = false,

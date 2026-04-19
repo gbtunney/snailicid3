@@ -2,8 +2,8 @@ import z from 'zod'
 import { ensureArray, numeric, resolveRegExpSchema } from './schemas.js'
 
 /**
+ * @deprecated This is replaced with ZodType<> in zod 4
  * @category Zod
- * @deprecated this is replaced with ZodType<> in zod 4
  * @example
  *     schemaForType<{
  *         horse: string
@@ -25,7 +25,9 @@ export const schemaForType =
  *
  * @category Zod
  */
-export const wrapSchema = <Schema extends z.ZodType>(schema: Schema): Schema => {
+export const wrapSchema = <Schema extends z.ZodType>(
+    schema: Schema,
+): Schema => {
     return schema
 }
 /**
@@ -50,7 +52,9 @@ export const parseZodData = <Schema extends z.ZodType>(
     value: unknown,
     schema: Schema,
 ): z.infer<Schema> | undefined => {
-    return isZodParsable<Schema>(value, schema) ? schema.parse(value) : undefined
+    return isZodParsable<Schema>(value, schema)
+        ? schema.parse(value)
+        : undefined
 }
 /**
  * Guard function to determine if value is parseable according to schema
@@ -94,6 +98,6 @@ export const zodHelpers = {
     wrapSchema,
 }
 export default zodHelpers
-export * from  './json-stringified.js'
+export * from './json-stringified.js'
 
 export type { ZodRegExp } from './schemas.js'

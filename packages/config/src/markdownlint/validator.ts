@@ -1,4 +1,9 @@
-import Ajv, { ErrorObject, type JSONSchemaType, Options as AjvOptions, ValidateFunction } from 'ajv'
+import Ajv, {
+    ErrorObject,
+    type JSONSchemaType,
+    Options as AjvOptions,
+    ValidateFunction,
+} from 'ajv'
 
 export type ValidationErrorObject = ErrorObject
 export const getAjvValidator = <SchemaType extends JSONSchemaType<unknown>>(

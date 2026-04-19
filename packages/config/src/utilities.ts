@@ -3,7 +3,7 @@ import type {
     JsonObject,
     JsonPrimitive,
     JsonValue,
-    UnknownRecord
+    UnknownRecord,
 } from 'type-fest'
 import fs from 'fs'
 import { fileURLToPath } from 'node:url'
@@ -48,11 +48,12 @@ export const safeDeserializeJSON = <Type extends JsonValue = JsonValue>(
     }
 }
 /**
- * TODO idk isnt this more of a node-utls function? and the next one? Idk export is not actually exported from this package 
- * export.json.file is more of a node-utils thing too and should probably be moved? i am confused. :(
- * 
+ * TODO idk isnt this more of a node-utls function? and the next one? Idk export is not actually exported from this
+ * package export.json.file is more of a node-utils thing too and should probably be moved? i am confused. :(
  */
-export const importJSON = async (filename: string): Promise<JsonValue | undefined> => {
+export const importJSON = async (
+    filename: string,
+): Promise<JsonValue | undefined> => {
     const absolutePath = path.resolve(filename)
     const logger = getTraceLogger('importJSON')
 
@@ -93,7 +94,9 @@ export const getFilePath = (meta: ImportMeta, filePath: string): string => {
     const directoryPath = path.dirname(fileURLToPath(meta.url))
 
     if (!fs.existsSync(path.resolve(directoryPath))) {
-        throw new Error(`Directory does not exist: ${path.resolve(directoryPath)}`)
+        throw new Error(
+            `Directory does not exist: ${path.resolve(directoryPath)}`,
+        )
     }
 
     return path.resolve(`${directoryPath}/${filePath}`)

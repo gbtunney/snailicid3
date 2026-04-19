@@ -9,7 +9,11 @@ export function mapColorJSCoords(
     mapFunction: (value: number) => number,
 ): [number, number, number] {
     // Always convert to sRGB 0..255
-    return color.coords.map((v) => mapFunction(v as number)) as [number, number, number]
+    return color.coords.map((v) => mapFunction(v as number)) as [
+        number,
+        number,
+        number,
+    ]
 }
 
 const mappingRGBFunction = (
@@ -22,12 +26,10 @@ export const normalizeRGBCoords = (color: ColorJS): Coords => {
     return mapColorJSCoords(color, mappingRGBFunction())
 }
 
-export const isHexColor = (value: string): value is HexColor => /^#[0-9A-Fa-f]{6}$/.test(value)
+export const isHexColor = (value: string): value is HexColor =>
+    /^#[0-9A-Fa-f]{6}$/.test(value)
 
-/**
- * Checks if a color string is valid by attempting to parse it to hex
- * also validates the string 
- */
+/** Checks if a color string is valid by attempting to parse it to hex also validates the string */
 export function isValidColor(input: string): boolean {
     try {
         parseColorToHexStrict(input)
@@ -36,9 +38,14 @@ export function isValidColor(input: string): boolean {
         return false
     }
 }
-export function assertHexColor(value: string, ctx?: string): asserts value is HexColor {
+export function assertHexColor(
+    value: string,
+    ctx?: string,
+): asserts value is HexColor {
     if (!isHexColor(value)) {
-        throw new Error(`Invalid hex color${ctx ? ` (${ctx})` : ''}: "${value}"`)
+        throw new Error(
+            `Invalid hex color${ctx ? ` (${ctx})` : ''}: "${value}"`,
+        )
     }
 }
 
@@ -49,15 +56,22 @@ export function parseColorJS(
 ): ColorJS {
     try {
         const _space = 'srgb'
-        const color = new ColorIO(input).to(_space).toGamut({ method: 'clip', space: 'srgb' })
+        const color = new ColorIO(input)
+            .to(_space)
+            .toGamut({ method: 'clip', space: 'srgb' })
         return color
     } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
-        throw new Error(fmt`Failed to parse color "${input}"${ctx ? ` (${ctx})` : ''}: ${msg}`)
+        throw new Error(
+            fmt`Failed to parse color "${input}"${ctx ? ` (${ctx})` : ''}: ${msg}`,
+        )
     }
 }
 /** Parse any CSS color string via ColorJS; throws on failure TODO: expand gamuts, spaces. */
-export function parseColorToHexStrict(input: string | Color, ctx?: string): HexColor {
+export function parseColorToHexStrict(
+    input: string | Color,
+    ctx?: string,
+): HexColor {
     try {
         const color = parseColorJS(input)
         const hexVal = toHex(color)
@@ -71,7 +85,8 @@ export function parseColorToHexStrict(input: string | Color, ctx?: string): HexC
     }
 }
 
-export const parseColorToHex: typeof parseColorToHexStrict = parseColorToHexStrict
+export const parseColorToHex: typeof parseColorToHexStrict =
+    parseColorToHexStrict
 /** Parse to branded #RRGGBB; returns undefined instead of throwing on failure */
 export function tryParseColorToHex(input: string): undefined {
     try {
@@ -84,9 +99,12 @@ export function tryParseColorToHex(input: string): undefined {
 export function toHex(color: ColorJS, includeAlpha = false): string {
     const srgb = color.to('srgb').toGamut({ method: 'clip' })
     /** TODO: use other clamp */
-    const clamp01 = (v: number | undefined): number => Math.max(0, Math.min(1, v ?? 0))
-    const toByte = (v: number | undefined): number => Math.round(clamp01(v) * 255)
-    const toHex2 = (n: number): string => n.toString(16).padStart(2, '0').toUpperCase()
+    const clamp01 = (v: number | undefined): number =>
+        Math.max(0, Math.min(1, v ?? 0))
+    const toByte = (v: number | undefined): number =>
+        Math.round(clamp01(v) * 255)
+    const toHex2 = (n: number): string =>
+        n.toString(16).padStart(2, '0').toUpperCase()
 
     const [rF, gF, bF] = srgb.coords as [number, number, number]
     const r = toByte(rF),
@@ -104,8 +122,12 @@ export type ColorTheme = {
 }
 export const apcaContrast = (theme: ColorTheme): number => {
     const { bg, fg } = theme
-    const _fg: ColorJS = isHexColor(fg.toString()) ? parseColorJS(fg) : (fg as ColorJS)
-    const _bg: ColorJS = isHexColor(bg.toString()) ? parseColorJS(bg) : (bg as ColorJS)
+    const _fg: ColorJS = isHexColor(fg.toString())
+        ? parseColorJS(fg)
+        : (fg as ColorJS)
+    const _bg: ColorJS = isHexColor(bg.toString())
+        ? parseColorJS(bg)
+        : (bg as ColorJS)
     return _bg.contrast(_fg, 'APCA')
 }
 

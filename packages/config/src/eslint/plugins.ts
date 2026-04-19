@@ -12,8 +12,8 @@ import { defineConfig, type Config, type Plugin } from '@eslint/config-helpers'
 import tsEslint from 'typescript-eslint'
 
 /**
- * eslint-plugin-react-hooks has a `configs.flat` shape that is incompatible with
- * the Plugin type. Strip it down to only meta + rules so TypeScript is happy.
+ * Eslint-plugin-react-hooks has a `configs.flat` shape that is incompatible with the Plugin type. Strip it down to only
+ * meta + rules so TypeScript is happy.
  */
 const reactHooks: Plugin = {
     meta: _reactHooks.meta,

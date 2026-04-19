@@ -2,12 +2,12 @@
     "compilerOptions": {
         "target": "ESNext",
         "module": "ESNext",
-             "lib": ["ESNext"],
+        "lib": ["ESNext"],
         "moduleResolution": "bundler",
-     
-           "tsBuildInfoFile": "${configDir}/node_modules/.tmp/tsconfig.tsbuildinfo",
-         "rootDir": "${configDir}",
-    
+
+        "tsBuildInfoFile": "${configDir}/node_modules/.tmp/tsconfig.tsbuildinfo",
+        "rootDir": "${configDir}",
+
         "declaration": true,
         "declarationMap": false,
         "sourceMap": false,
@@ -17,6 +17,6 @@
         "resolveJsonModule": true,
         "isolatedModules": true,
         "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true,
+        "forceConsistentCasingInFileNames": true
     }
 }

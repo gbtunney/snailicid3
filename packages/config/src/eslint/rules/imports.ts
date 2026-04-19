@@ -57,7 +57,9 @@ export const importRules = (): Config[] =>
             },
         },
         {
-            files: [...expandExtensions(JSLIKE_FILE_EXTENSIONS, '**/src/**/*.')],
+            files: [
+                ...expandExtensions(JSLIKE_FILE_EXTENSIONS, '**/src/**/*.'),
+            ],
             name: 'Imports: warn on default exports in src files',
             rules: {
                 'import/no-default-export': 'warn',

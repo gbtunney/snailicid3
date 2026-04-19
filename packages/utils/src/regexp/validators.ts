@@ -10,7 +10,9 @@ export const isValidRegExp = (value: string | RegExp): boolean =>
     isString(value) ? isStringValidRegExp(value) : isRegExp(value)
 
 /** Check to see if string needs to be escaped or otherwise it will throw error */
-export const isStringValidRegExp = <Type extends string>(value: Type): value is Type => {
+export const isStringValidRegExp = <Type extends string>(
+    value: Type,
+): value is Type => {
     try {
         const regExp = new RegExp(value)
         return true
@@ -21,4 +23,5 @@ export const isStringValidRegExp = <Type extends string>(value: Type): value is 
 }
 
 /** Matches a string to a regular expression pattern. */
-export const matchStringToRegExp = (value: string, pattern: RegExp): boolean => pattern.test(value)
+export const matchStringToRegExp = (value: string, pattern: RegExp): boolean =>
+    pattern.test(value)

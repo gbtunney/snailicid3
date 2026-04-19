@@ -35,10 +35,7 @@ export const {
 import { tg } from '@snailicid3/types'
 
 /**
- * Re-exports utility type guards from @snailicid3/types.
- * Local files import from this module so the guard implementations
- * live in one place (types package) and utils just adapts.
+ * Re-exports utility type guards from @snailicid3/types. Local files import from this module so the guard
+ * implementations live in one place (types package) and utils just adapts.
  */
-export {
-    tg as _tg,
-} from '@snailicid3/types'
+export { tg as _tg } from '@snailicid3/types'

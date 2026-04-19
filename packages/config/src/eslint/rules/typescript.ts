@@ -1,9 +1,9 @@
-import {type Config,defineConfig}from '@eslint/config-helpers'
+import { type Config, defineConfig } from '@eslint/config-helpers'
 import tsEslint from 'typescript-eslint'
 import { expandExtensions } from '../../helpers.js'
 import { TS_FILE_EXTENSIONS } from '../../shared.js'
 
-export const typescriptRules = (): Array<Config>=> {
+export const typescriptRules = (): Array<Config> => {
     return defineConfig([
         ...tsEslint.configs.recommended,
         ...tsEslint.configs.strictTypeChecked,
@@ -15,7 +15,10 @@ export const typescriptRules = (): Array<Config>=> {
              * @see [TypeScript Style Guide](https://mkosir.github.io/typescript-style-guide/)
              */
             rules: {
-                '@typescript-eslint/array-type': ['error', { default: 'generic' }],
+                '@typescript-eslint/array-type': [
+                    'error',
+                    { default: 'generic' },
+                ],
                 '@typescript-eslint/ban-ts-comment': [
                     'error',
                     {
@@ -25,7 +28,10 @@ export const typescriptRules = (): Array<Config>=> {
                         'ts-nocheck': true,
                     },
                 ],
-                '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
+                '@typescript-eslint/consistent-type-definitions': [
+                    'error',
+                    'type',
+                ],
                 '@typescript-eslint/no-explicit-any': 'warn',
 
                 '@typescript-eslint/no-namespace': 'warn',

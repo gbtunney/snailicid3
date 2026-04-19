@@ -5,7 +5,10 @@ describe('factoryValidator core', () => {
     const finitePredicate = (value: unknown): value is number =>
         typeof value === 'number' && Number.isFinite(value)
 
-    const { isFiniteNumber, isNotFiniteNumber } = factoryValidator(finitePredicate, 'finiteNumber')
+    const { isFiniteNumber, isNotFiniteNumber } = factoryValidator(
+        finitePredicate,
+        'finiteNumber',
+    )
 
     test('finiteNumber guards', () => {
         expect(isFiniteNumber(10)).toBe(true)

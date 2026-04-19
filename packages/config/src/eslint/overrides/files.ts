@@ -13,14 +13,20 @@ export const filePatternOverrides = (): Config[] =>
             rules: {
                 ...(reactHooks.configs.flat.recommended.rules ?? {}),
                 ...(reactRefresh.configs.vite.rules ?? {}),
-                'filenames-simple/naming-convention': ['error', { rule: 'camelCase' }],
+                'filenames-simple/naming-convention': [
+                    'error',
+                    { rule: 'camelCase' },
+                ],
             },
         },
         {
             files: ['**/use*.ts', '**/use*.tsx'],
             name: 'Override: hook files — camelCase filename (e.g. useAudioRecorder.ts)',
             rules: {
-                'filenames-simple/naming-convention': ['error', { rule: 'camelCase' }],
+                'filenames-simple/naming-convention': [
+                    'error',
+                    { rule: 'camelCase' },
+                ],
             },
         },
         {

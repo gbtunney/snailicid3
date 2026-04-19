@@ -7,10 +7,15 @@ export const randomIntInRange = <Min extends number, Max extends number>(
     min: Integer<Min> | 0 = 0,
     max: Integer<Max> | 100 = 100,
 ): IntegerInRange => {
-    return parseInt(Math.floor(Math.random() * (max - min + 1) + min).toString())
+    return parseInt(
+        Math.floor(Math.random() * (max - min + 1) + min).toString(),
+    )
 }
 /** Number Rounded to Decimal */
-export const getNumberRoundedToDecimal = <Value extends number, Multiplier extends number>(
+export const getNumberRoundedToDecimal = <
+    Value extends number,
+    Multiplier extends number,
+>(
     value: Finite<Value>,
     multiplier: Integer<Multiplier> | 100 = 100,
 ): number => {

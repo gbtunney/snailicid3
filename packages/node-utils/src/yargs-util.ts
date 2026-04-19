@@ -17,4 +17,5 @@ export const getYArgs = <Type extends z.ZodObject>(
 /** @group yargs */
 export const getArgsObject = (
     value = process.argv,
-): Promise<Record<string, unknown>> | Record<string, unknown> => yargs(value).argv
+): Promise<Record<string, unknown>> | Record<string, unknown> =>
+    yargs(value).argv

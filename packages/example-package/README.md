@@ -4,7 +4,8 @@
 ![License: MIT](https://img.shields.io/npm/l/gbt-boilerplate)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
-_Provides repository with base configurations that can be extended in new packages._
+_Provides repository with base configurations that can be extended in new
+packages._
 
 ---
 
@@ -20,7 +21,8 @@ _Provides repository with base configurations that can be extended in new packag
 
 - **Github:** [`gbt-boilerplate`](https://github.com/gbtunney/gbt-boilerplate) •
   [`snailicide-monorepo`](https://github.com/gbtunney/snailicide-monorepo.git)
-- **CDN**: [jsdeliver](https://cdn.jsdelivr.net/npm/gbt-boilerplate/dist/index.min.js)
+- **CDN**:
+  [jsdeliver](https://cdn.jsdelivr.net/npm/gbt-boilerplate/dist/index.min.js)
 
 ### Author
 
@@ -37,16 +39,18 @@ _Provides repository with base configurations that can be extended in new packag
 
 ---
 
-This package provides {blah,blah, blah,blah,blah} ... Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit
-in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+This package provides {blah,blah, blah,blah,blah} ... Lorem ipsum dolor sit
+amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+deserunt mollit anim id est laborum.
 
 ## TODO
 
-- The path `$(git rev-parse --show-toplevel)/$npm_package_config_eslint_config` errors when it's in a root
-  repo, it should not do thiis.
+- The path `$(git rev-parse --show-toplevel)/$npm_package_config_eslint_config`
+  errors when it's in a root repo, it should not do thiis.
 -
 
 ## Installation

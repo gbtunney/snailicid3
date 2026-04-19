@@ -1,6 +1,11 @@
 import { ensureArray, isString, replaceAll } from 'ramda-adjunct'
 
-import type { BaseValue, BatchBaseValue, Pattern, ReplaceCharacters } from './type.js'
+import type {
+    BaseValue,
+    BatchBaseValue,
+    Pattern,
+    ReplaceCharacters,
+} from './type.js'
 
 const replaceCharactersSinglePattern = ({
     pattern,
@@ -52,6 +57,6 @@ export const batchReplaceAll = ({
             value: single_value,
         })
     })
-    return isString(value) && result.length > 0 ? (result[0]) : result
+    return isString(value) && result.length > 0 ? result[0] : result
 }
 export default replaceAllCharacters

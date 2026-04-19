@@ -7,26 +7,39 @@ type ConsoleLoggerMethodNameKey = 'debug' | 'info' | 'warn' | 'error'
 // Loosely typed spy instance to avoid constructor/function overload mismatch
 type LooseVitestConsoleSpyInstance = {
     mock: { calls: Array<Array<unknown>> }
-    mockImplementation: (...args: Array<unknown>) => LooseVitestConsoleSpyInstance
+    mockImplementation: (
+        ...args: Array<unknown>
+    ) => LooseVitestConsoleSpyInstance
 }
 
-type ConsoleSpyCollectionRecord = Record<ConsoleLoggerMethodNameKey, LooseVitestConsoleSpyInstance>
+type ConsoleSpyCollectionRecord = Record<
+    ConsoleLoggerMethodNameKey,
+    LooseVitestConsoleSpyInstance
+>
 
 let consoleSpyCollectionRecord: ConsoleSpyCollectionRecord
 
 const createConsoleSpyCollectionRecord = (): ConsoleSpyCollectionRecord => {
     const debug = vi
         .spyOn(console, 'debug')
-        .mockImplementation(() => {}) as unknown as LooseVitestConsoleSpyInstance
+        .mockImplementation(
+            () => {},
+        ) as unknown as LooseVitestConsoleSpyInstance
     const info = vi
         .spyOn(console, 'info')
-        .mockImplementation(() => {}) as unknown as LooseVitestConsoleSpyInstance
+        .mockImplementation(
+            () => {},
+        ) as unknown as LooseVitestConsoleSpyInstance
     const warn = vi
         .spyOn(console, 'warn')
-        .mockImplementation(() => {}) as unknown as LooseVitestConsoleSpyInstance
+        .mockImplementation(
+            () => {},
+        ) as unknown as LooseVitestConsoleSpyInstance
     const error = vi
         .spyOn(console, 'error')
-        .mockImplementation(() => {}) as unknown as LooseVitestConsoleSpyInstance
+        .mockImplementation(
+            () => {},
+        ) as unknown as LooseVitestConsoleSpyInstance
     return { debug, error, info, warn }
 }
 
@@ -77,7 +90,9 @@ describe('constants', () => {
     })
 
     it('LOG_LEVELS numeric ordering is ascending', () => {
-        const logLevelValues = logger.LEVEL_NAMES.map((levelName) => logger.LOG_LEVELS[levelName])
+        const logLevelValues = logger.LEVEL_NAMES.map(
+            (levelName) => logger.LOG_LEVELS[levelName],
+        )
         const sortedLogLevelValues = [...logLevelValues].sort((a, b) => a - b)
         expect(logLevelValues).toEqual(sortedLogLevelValues)
     })
@@ -112,7 +127,8 @@ describe('createLogger options', () => {
     it('applies custom name if provided', () => {
         const _logger = logger.create({ level: 'info', name: 'gillian' })
         _logger.info('hello')
-        const lastInfoFirstArg = consoleSpyCollectionRecord.info.mock.calls.at(-1)?.[0]
+        const lastInfoFirstArg =
+            consoleSpyCollectionRecord.info.mock.calls.at(-1)?.[0]
         expect(String(lastInfoFirstArg)).toContain('gillian')
     })
 })
@@ -122,7 +138,8 @@ describe('logging output basics', () => {
         const _logger = logger.create({ level: 'info' })
         _logger.info('hello', { x: 1 })
         expect(consoleSpyCollectionRecord.info).toHaveBeenCalled()
-        const lastInfoCallArguments = consoleSpyCollectionRecord.info.mock.calls.at(-1)
+        const lastInfoCallArguments =
+            consoleSpyCollectionRecord.info.mock.calls.at(-1)
         expect(
             lastInfoCallArguments?.some((argumentValue: unknown) =>
                 String(argumentValue).includes('hello'),
