@@ -1,10 +1,7 @@
-// @ts-expect-error: no definition file
-import format from 'format'
+import { vsprintf } from 'sprintf-js'
 import z from 'zod'
 
 import { ensureArray } from '../zod_helpers/schemas.js'
-
-const { vsprintf }: typeof format = format
 
 /**
  * Formats a string by replacing placeholders with provided arguments. This function utilizes the `vsprintf` method from
@@ -15,7 +12,10 @@ const { vsprintf }: typeof format = format
  * @category Replace
  * @category Format
  */
-export const formatString = (value: string, args: string | Array<string>): string => {
+export const formatString = (
+    value: string,
+    args: string | Array<string>,
+): string => {
     const _vars = ensureArray(z.string()).parse(args)
     return vsprintf(value, _vars)
 }

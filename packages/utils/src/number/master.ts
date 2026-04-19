@@ -12,12 +12,12 @@ export function parseMaster(rawValue: string): number | bigint | undefined {
     const value = cleanupNumericSeparators(trimmed)
 
     let detectedKind: keyof typeof numericFormats
-    if (/^[-+]?0b/i.test(trimmed)) detectedKind = 'binary'
+    if (/n$/i.test(trimmed)) detectedKind = 'bigint'
+    else if (/^[-+]?0b/i.test(trimmed)) detectedKind = 'binary'
     else if (/^[-+]?0o/i.test(trimmed)) detectedKind = 'octal'
     else if (/^[-+]?0x/i.test(trimmed)) detectedKind = 'hex'
     else if (/[eE][+-]?\d/.test(trimmed))
         detectedKind = trimmed.includes('.') ? 'scientific' : 'exponential'
-    else if (/n$/i.test(trimmed)) detectedKind = 'bigint'
     else detectedKind = 'decimal'
 
     return numericFormats[detectedKind].parse(value)

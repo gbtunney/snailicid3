@@ -4,7 +4,10 @@ import { PlainObject } from './../types/utility.js'
 /** Local minimal validators replacing the removed number/validators dependency */
 const isNumeric = (value: unknown): value is number | bigint =>
     typeof value === 'number' || typeof value === 'bigint'
-const isPossibleNumeric = (value: unknown, strict = true): value is number | string => {
+const isPossibleNumeric = (
+    value: unknown,
+    strict = true,
+): value is number | string => {
     if (typeof value === 'number') return true
     if (typeof value !== 'string') return false
     const trimmed = value.trim()
@@ -15,7 +18,9 @@ const isPossibleNumeric = (value: unknown, strict = true): value is number | str
 const isValidScientificNumber = (value: unknown): value is string | number => {
     if (typeof value === 'number') return !Number.isNaN(value)
     if (typeof value !== 'string') return false
-    return /^[+-]?(?:\d(?:_?\d)*(?:\.\d(?:_?\d)*)?|\.\d(?:_?\d)*)(?:e[+-]?\d(?:_?\d)*)?$/i.test(value)
+    return /^[+-]?(?:\d(?:_?\d)*(?:\.\d(?:_?\d)*)?|\.\d(?:_?\d)*)(?:e[+-]?\d(?:_?\d)*)?$/i.test(
+        value,
+    )
 }
 import { guardToAssertion, predicateToAssertion } from './assertation.js'
 import { isJsonifiableArray } from './json.typeguards.js'
@@ -31,12 +36,20 @@ const startsWithPrefix = (value: string, prefix: string): boolean =>
 type AssertString = (value: unknown) => asserts value is string
 type AssertBigInt = (value: unknown) => asserts value is bigint
 type AssertNumber = (value: unknown) => asserts value is number
-type AssertPlainObject = (value: unknown) => asserts value is PlainObject | Record<string, unknown>
+type AssertPlainObject = (
+    value: unknown,
+) => asserts value is PlainObject | Record<string, unknown>
 type AssertJsonArray = (value: unknown) => asserts value is Array<unknown>
-type AssertPossibleNumeric = (value: unknown, strict?: boolean) => asserts value is number | string
+type AssertPossibleNumeric = (
+    value: unknown,
+    strict?: boolean,
+) => asserts value is number | string
 type AssertScientific = (value: unknown) => asserts value is string
 type AssertMinLen = (value: string, min: number) => asserts value is string
-type AssertStartsWith = (value: string, prefix: string) => asserts value is string
+type AssertStartsWith = (
+    value: string,
+    prefix: string,
+) => asserts value is string
 
 // Guard-derived assertions
 const assertIsString: AssertString = guardToAssertion(isString)
@@ -44,16 +57,20 @@ const assertIsBigInt: AssertBigInt = guardToAssertion(isBigInt)
 const assertIsNumeric: AssertNumber = guardToAssertion(isNumeric)
 /** Wrap to widen the parameter to unknown */
 const assertIsPossibleNumeric: AssertPossibleNumeric = (value, strict) =>
-    ( guardToAssertion(isPossibleNumeric) as any)(value as any, strict)
+    (guardToAssertion(isPossibleNumeric as any) as any)(value as any, strict)
 const assertIsPlainObject: AssertPlainObject = (value) =>
-    (guardToAssertion(isPlainObject) as any)(value as any)
+    (guardToAssertion(isPlainObject as any) as any)(value as any)
 const assertIsJsonArray: AssertJsonArray = guardToAssertion(isJsonifiableArray)
 
 // Predicate-based assertions
-const assertMinLen: AssertMinLen = predicateToAssertion(minLen)
-const assertStartsWithPrefix: AssertStartsWith = predicateToAssertion(startsWithPrefix)
+const assertMinLen: AssertMinLen = predicateToAssertion(
+    minLen as any,
+) as unknown as AssertMinLen
+const assertStartsWithPrefix: AssertStartsWith = predicateToAssertion(
+    startsWithPrefix as any,
+) as unknown as AssertStartsWith
 const assertIsValidScientific: AssertScientific = (value) =>
-    (predicateToAssertion<string>(isValidScientificNumber as any) as any)(value as any)
+    (predicateToAssertion(isValidScientificNumber as any) as any)(value as any)
 
 describe('typeguards', () => {
     test('string', () => {
@@ -125,4 +142,5 @@ describe('typeguards', () => {
     })
 })
 
-const unsafeFn: (value: string, ...args: Array<unknown>) => boolean = (value) => value.length > 0
+const unsafeFn: (value: string, ...args: Array<unknown>) => boolean = (value) =>
+    value.length > 0
