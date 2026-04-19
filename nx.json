@@ -11,7 +11,8 @@
             "{workspaceRoot}/tsconfig.json",
             "{workspaceRoot}/pnpm-lock.yaml",
             "{workspaceRoot}/eslint.config.ts",
-            "{workspaceRoot}/pnpm-workspace.yaml"
+            "{workspaceRoot}/pnpm-workspace.yaml",
+            "{workspaceRoot}/.markdownlint-cli2.mts"
         ]
     },
     "targetDefaults": {
@@ -85,6 +86,12 @@
             "cache": true,
             "inputs": ["default", "^default"],
             "command": "eslint --flag unstable_ts_config .",
+            "options": { "cwd": "{projectRoot}" }
+        },
+        "lint:md": {
+            "cache": true,
+            "inputs": ["default"],
+            "command": "markdownlint-cli2 \"**/*.md\" \"#**/node_modules/**\" \"#**/dist/**\" \"#**/scratch/**\"",
             "options": { "cwd": "{projectRoot}" }
         },
         "typecheck": {

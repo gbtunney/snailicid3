@@ -1,20 +1,18 @@
-import {type Config,defineConfig}from '@eslint/config-helpers'
-import pluginJs from '@eslint/js'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
-import {expandExtensions}from './../helpers.js'
 import pluginsConfig from './plugins.js'
-import { checkFileRules } from './rules/check-file.js'
-import { eslintCommentRules } from './rules/eslint-comments.js'
-import { importRules } from './rules/import.js'
-import { jsdocRules } from './rules/jsdoc.js'
-import { namingConventionRules } from './rules/naming-convention.js'
-import {reactRules} from './rules/react.js'
-import { sortRules } from './rules/sort.js'
+import { baseRules } from './rules/base.js'
+import { importRules } from './rules/imports.js'
+import { docsRules } from './rules/docs.js'
+import { namingRules } from './rules/naming.js'
 import { typescriptRules } from './rules/typescript.js'
-import { vitestRules } from './rules/vitest.js'
-import { SHARED_FORMATTING_RULES } from '../prettier/index.js'
-import { JS_FILE_EXTENSIONS, TS_FILE_EXTENSIONS } from '../shared.js'
+import { testingRules } from './rules/testing.js'
+import { reactRules } from './rules/react.js'
+import { filePatternOverrides } from './overrides/files.js'
+import { TS_FILE_EXTENSIONS } from '../shared.js'
+import { expandExtensions } from '../helpers.js'
+import { defineConfig, type Config } from '@eslint/config-helpers'
+
 const base_files: Array<string> = [...expandExtensions(TS_FILE_EXTENSIONS, '*.')]
 const base_ignores = [
     '**/dist/**/*',
@@ -22,88 +20,46 @@ const base_ignores = [
     '**/dist/**',
     '**/types/**/*',
     '**/types/**',
-    '!**/packages/types/**',
-
-    /** SYSTEM */
     '**/.history/**',
-     '**/scratch/**',
-   // '**/examples/**',
-   /** python related ignores TODO: idkk is this needed? */
-'**/.venv/**',
-            '**/venv/**',
-            '**/__pycache__/**',
-            '**/*.py',
-    
-    /** DECLARATIONS */
+    '**/scratch/**',
+    '**/.venv/**',
+    '**/venv/**',
+    '**/__pycache__/**',
+    '**/*.py',
     '**/*.d.*',
-   // '**/*.d.mts',
-   // '**/*.d.cts',
     '**/*.map',
-/** STORYBOOK */
-      '**/storybook-static/**',
+    '**/storybook-static/**',
 ]
 
-export const flatEslintConfig = async (__dirname: string): Promise<Array<Config>> => {
-    const EslintConfig: Array<Config>= defineConfig(
-        { files: base_files, name: 'Custom Base Configuration : Includes' },
-        { ignores: base_ignores, name: 'Custom Base Configuration : Ignores' },
+export const flatEslintConfig = async (__dirname: string): Promise<Config[]> => {
+    const EslintConfig: Config[] = defineConfig(
+        { files: base_files, name: 'Base: included file extensions' },
+        { ignores: base_ignores, name: 'Base: ignored paths' },
         {
             languageOptions: {
                 globals: { ...globals.browser, ...globals.node },
                 parserOptions: {
-                    // project: true,
                     projectService: true,
                     tsconfigRootDir: __dirname,
                 },
             },
-            name: 'Custom Base Configuration : globals, parserOptions, projectService',
+            name: 'Base: globals and projectService',
         },
         ...(await pluginsConfig()),
 
-        /** RULES START HERE */
-        pluginJs.configs.recommended,
-        ...(await typescriptRules()),
-        ...(await importRules()),
-        ...(await sortRules()),
-        ...(await vitestRules()),
-        ...(await jsdocRules()),
-        ...(await checkFileRules()),
-        ...(await namingConventionRules()),
-        ...(await eslintCommentRules()),
-...(await reactRules()),
-        /**
-         * No multiple empty lines should ERROR
-         *
-         * @todo: not even sure if this works?
-         */
-        {
-            name: 'TODO: No multiple empty lines ERROR',
-            rules: {
-                'no-multiple-empty-lines': [
-                    'error',
-                    { max: SHARED_FORMATTING_RULES.maxEmptyLines },
-                ],
-            },
-        },
+        /** Global defaults */
+        ...baseRules(),
 
-        /** Common JS Rules */
-        {
-            files: [...expandExtensions(['cjs', 'cts'], '*/**.')],
-            name: 'Custom CommonJS Rules',
-            rules: {
-                '@typescript-eslint/no-unused-vars': 'warn',
-                '@typescript-eslint/no-var-requires': 'off',
-                'no-undef': 'error',
-            },
-        },
+        /** Concern-based rules */
+        ...typescriptRules(),
+        ...importRules(),
+        ...docsRules(),
+        ...namingRules(),
+        ...reactRules(),
+        ...testingRules(),
 
-        /** ** Typescript Eslint : Disable Type Checked for js files */
-        {
-            // Take the preset and apply only to JS extensions
-            ...tseslint.configs.disableTypeChecked,
-            files: [...expandExtensions(JS_FILE_EXTENSIONS, '**/*.')],
-            name: 'Typescript Eslint : Disable Type Checked for js files',
-        },
+        /** File-pattern overrides — all exceptions in one place */
+        ...filePatternOverrides(),
     )
     return EslintConfig
 }
