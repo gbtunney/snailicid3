@@ -1,0 +1,170 @@
+name: Fix & Commit
+
+# ─────────────────────────────────────────────────────────────
+# Manually triggered workflow for fixing and committing changes
+# without opening a Codespace.
+#
+# Notes:
+# - Refuses to run on main.
+# - Commits only if the repo is dirty.
+# - Optional verify job controlled by input `run_verify`.
+# - Commit author is configurable via inputs:
+#   user.name = commit_user_name
+#   user.email = "<commit_user_name>@<commit_user_domain>"
+# - Commit message subject is configurable via input `commit_message_subject`.
+# ─────────────────────────────────────────────────────────────
+
+on:
+    workflow_dispatch:
+        inputs:
+            commit_message_type:
+                description: Conventional commit type prefix
+                required: false
+                default: chore
+                type: choice
+                options: [chore, fix, docs, build]
+
+            commit_message_subject:
+                description: Commit subject (without type/scope). Default is "autofix".
+                required: false
+                default: autofix
+                type: string
+
+            commit_user_name:
+                description: Git author name + email local-part (email becomes "<name>@<domain>")
+                required: false
+                default: github-actions[bot]
+                type: string
+
+            commit_user_domain:
+                description: Git author email domain (email becomes "<name>@<domain>")
+                required: false
+                default: users.noreply.github.com
+                type: string
+
+            run_verify:
+                description: Run ci-core verify job (report mode) after committing
+                required: false
+                default: true
+                type: boolean
+
+permissions:
+    contents: write
+
+env:
+    HUSKY: 0
+
+jobs:
+    autofix:
+        runs-on: ubuntu-latest
+
+        steps:
+            # ── Guard: refuse to run on main ─────────────────────────
+            - name: 🚫 Refuse to run on main
+              shell: bash
+              run: |
+                  if [ "${{ github.ref_name }}" = "main" ]; then
+                    echo "❌ Autofix cannot run on main. Checkout a feature or fix branch first."
+                    exit 1
+                  fi
+                  echo "✅ Branch: ${{ github.ref_name }}"
+
+            # ── Checkout ──────────────────────────────────────────────
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  # Use a PAT or the default GITHUB_TOKEN.
+                  # GITHUB_TOKEN is fine here since we're pushing to the
+                  # same branch and not trying to trigger other workflows.
+                  token: ${{ secrets.GITHUB_TOKEN }}
+
+            - uses: pnpm/action-setup@v4
+              with:
+                  run_install: false
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: .nvmrc
+                  cache: pnpm
+
+            # ── Derive commit scope from nx affected ──────────────────
+            - name: 🔎 Derive commit scope
+              id: scope
+              shell: bash
+              run: |
+                  SCOPE=$(bash scripts/get-scope.sh --base origin/main --head HEAD)
+                  echo "scope=$SCOPE" >> "$GITHUB_OUTPUT"
+                  echo "📦 Commit scope: $SCOPE"
+
+            # ── Check if repo is dirty ────────────────────────────────
+            - name: 🧼 Check repo status
+              id: dirty
+              shell: bash
+              run: |
+                  STATUS=$(git status --porcelain)
+                  if [ -n "$STATUS" ]; then
+                    echo "dirty=true" >> "$GITHUB_OUTPUT"
+                    echo "⚠️ Repo is dirty. Files to commit:"
+                    echo "$STATUS"
+                  else
+                    echo "dirty=false" >> "$GITHUB_OUTPUT"
+                    echo "✅ Nothing to commit."
+                  fi
+
+            # ── Commit and push ───────────────────────────────────────
+            - name: 📝 Commit changes
+              if: ${{ steps.dirty.outputs.dirty == 'true' }}
+              shell: bash
+              run: |
+                  git config user.name  "${{ inputs.commit_user_name }}"
+                  git config user.email "${{ inputs.commit_user_name }}@${{ inputs.commit_user_domain }}"
+
+                  SCOPE="${{ steps.scope.outputs.scope }}"
+                  TYPE="${{ inputs.commit_message_type }}"
+                  SUBJECT="${{ inputs.commit_message_subject }}"
+
+                  MESSAGE="${TYPE}(${SCOPE}): ${SUBJECT}"
+
+                  git add -A
+                  git commit -m "$MESSAGE" \
+                    -m "Triggered by: @${{ github.actor }} via workflow_dispatch" \
+                    -m "Branch: ${{ github.ref_name }}" \
+                    -m "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+                  echo "✅ Committed: $MESSAGE"
+
+            - name: 🚀 Push
+              if: ${{ steps.dirty.outputs.dirty == 'true' }}
+              run: git push origin ${{ github.ref_name }}
+
+            - name: ℹ️ Nothing to commit
+              if: ${{ steps.dirty.outputs.dirty == 'false' }}
+              run: echo "No changes detected — skipping commit and push."
+
+            - name: 🧾 Summary
+              if: ${{ always() }}
+              shell: bash
+              run: |
+                  {
+                    echo "## Autofix summary"
+                    echo ""
+                    echo "- branch: \`${{ github.ref_name }}\`"
+                    echo "- scope: \`${{ steps.scope.outputs.scope }}\`"
+                    echo "- dirty: \`${{ steps.dirty.outputs.dirty }}\`"
+                    echo "- verify: \`${{ inputs.run_verify }}\`"
+                  } >> "$GITHUB_STEP_SUMMARY"
+
+    # TODO: this should proobaably run pipeline instead lol.
+    verify:
+        name: Verify (ci-core)
+        needs: autofix
+        if: ${{ always() && inputs.run_verify }}
+        uses: ./.github/workflows/ci-core.yml
+        with:
+            mode: report
+            check_mode: check
+            build_mode: skip
+            test_mode: skip
+            docs_mode: skip
+            require_lockfile: false
+            require_clean_repo: true
