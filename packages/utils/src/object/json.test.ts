@@ -1,7 +1,10 @@
 import { describe, expect, expectTypeOf, test } from 'vitest'
 import { z } from 'zod'
-import { jsonParser, makeJsonStringifiedSchema } from './json-stringified.js'
 import { prettyPrintJSON, safeDeserializeJson } from './json.js'
+import {
+    jsonParser,
+    makeJsonStringifiedSchema,
+} from '../zod_helpers/json-stringified.js'
 describe('JSON serialize', () => {
     test('prettyPrintJSON should return a pretty-printed JSON string', () => {
         const obj = { age: 30, name: 'John' }
@@ -45,7 +48,8 @@ describe('JSON serialize', () => {
             age: z.number(),
             name: z.string(),
         })
-        const result = makeJsonStringifiedSchema<typeof _schemaa>(_schemaa).serialize(obj)
+        const result =
+            makeJsonStringifiedSchema<typeof _schemaa>(_schemaa).serialize(obj)
         expect(result).toMatch(new RegExp(/age/, 'gm'))
         const result2 = jsonParser().serialize(obj)
 

@@ -89,6 +89,7 @@
             "dev:rollup": {},
             "dev:vite": {},
             "build:ts": {},
+            "check:ts": {},
             "build:rollup": {},
             "build:vite": {},
             "build:custom": {

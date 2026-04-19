@@ -67,7 +67,7 @@
         },
         "test": {
             "cache": true,
-            "dependsOn": ["build", "^test"],
+            "dependsOn": ["build", "check:ts", "^test"],
             "inputs": ["default", "^default"],
             "command": "vitest run",
             "options": { "cwd": "{projectRoot}" }
@@ -82,7 +82,7 @@
             "command": "vitest watch",
             "options": { "cwd": "{projectRoot}" }
         },
-        "lint": {
+        "check:bk": {
             "cache": true,
             "inputs": ["default", "^default"],
             "command": "eslint --flag unstable_ts_config .",
@@ -94,14 +94,23 @@
             "command": "markdownlint-cli2 \"**/*.md\" \"#**/node_modules/**\" \"#**/dist/**\" \"#**/scratch/**\"",
             "options": { "cwd": "{projectRoot}" }
         },
-        "typecheck": {
+        "check:ts": {
             "cache": true,
+            "dependsOn": ["build:ts", "^test"],
+
             "inputs": ["default", "^default"],
-            "command": "tsc --build tsconfig.node.json",
+            "command": "tsc --build tsconfig.json",
+            "options": { "cwd": "{projectRoot}" }
+        },
+        "lint": {
+            "cache": false,
+            "dependsOn": ["check:ts"],
+            "command": "prettier --check . && eslint --flag unstable_ts_config .",
             "options": { "cwd": "{projectRoot}" }
         },
         "fix": {
             "cache": false,
+            "dependsOn": ["check:ts"],
             "command": "prettier --write . && eslint --flag unstable_ts_config . --fix",
             "options": { "cwd": "{projectRoot}" }
         },

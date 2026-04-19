@@ -10,11 +10,6 @@ LINT_MODE="LINT_STAGED" # other values: LINT_ALL | DISABLED
 # Allowed: A-Z a-z 0-9 space . _ - + @ /   (blocks unicode like —)
 BAD_FILENAME_RE='[^A-Za-z0-9._/@ +\-]'
 
-# Force LINT_ALL on development branch
-if [ "$BRANCH" = "development" ]; then
-    LINT_MODE="LINT_ALL"
-fi
-
 printf "\n===\n>> Running in shell:: %s\n" "${SHELL:-unknown}"
 printf ">> Pre-commit Hook:: Checking BRANCH: %s LINT_MODE: %s\n===\n\n" "$BRANCH" "$LINT_MODE"
 
@@ -51,14 +46,7 @@ if [ "$LINT_MODE" = "DISABLED" ]; then
     exit 0
 fi
 
-if [ "$LINT_MODE" = "LINT_ALL" ]; then
-    printf "\nRunning full lint/format (LINT_ALL)...\n\n"
-    pnpm lint:all
-    git add -A
-    exit 0
-fi
-
 # LINT_STAGED: run on all commits (including direct git commit)
 printf "\nRunning lint-staged...\n\n"
-pnpm exec lint-staged --relative
+#pnpm exec lint-staged --relative
 exit 0

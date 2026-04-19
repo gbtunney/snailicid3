@@ -1,0 +1,328 @@
+# ─────────────────────────────────────────────────────────────
+# WORKFLOW: Pipeline
+# TYPE: reusable (workflow_call)
+#
+# Notes:
+# - Inputs are typed; outputs are strings (boolean-like outputs use 'true'/'false').
+# - In mode=report, many steps use continue-on-error to produce a full report.
+# - Workspace artifact upload is optional and uploads from filesystem globs (does not respect .gitignore).
+# ─────────────────────────────────────────────────────────────
+
+name: Pipeline
+
+on:
+    workflow_call:
+        inputs:
+            # options: report | abort_on_error
+            mode:
+                required: false
+                default: report
+                type: string
+
+            # options: fix | check | skip
+            check_mode:
+                required: false
+                default: check
+                type: string
+
+            run_install:
+                required: false
+                default: true
+                type: boolean
+
+            # If true: frozen-lockfile failure is treated as required.
+            # If false: relaxed install is allowed to recover from lockfile mismatch.
+            require_lockfile:
+                required: false
+                default: false
+                type: boolean
+
+            run_build:
+                required: false
+                default: false
+                type: boolean
+
+            run_test:
+                required: false
+                default: false
+                type: boolean
+
+            run_docs_build:
+                required: false
+                default: false
+                type: boolean
+
+            # If true: fail/report if repo is dirty at the end of the workflow.
+            require_clean_repo:
+                required: false
+                default: false
+                type: boolean
+
+            # Artifact upload options
+            upload_workspace_artifact:
+                required: false
+                default: false
+                type: boolean
+
+            artifact_name_prefix:
+                required: false
+                default: workspace
+                type: string
+
+            # reset caching options
+            nx_cache_reset:
+                required: false
+                default: false
+                type: boolean
+
+            pnpm_store_reset:
+                required: false
+                default: false
+                type: boolean
+
+        outputs:
+            is_repo_dirty:
+                description: Whether repository is dirty at end ('true'|'false')
+                value: ${{ jobs.pipeline.outputs.is_repo_dirty }}
+
+            workspace_artifact_name:
+                description: Artifact name if uploaded; empty string otherwise
+                value: ${{ jobs.pipeline.outputs.workspace_artifact_name }}
+
+            artifact_uploaded:
+                description: Whether artifact upload ran successfully ('true'|'false')
+                value: ${{ jobs.pipeline.outputs.artifact_uploaded }}
+
+permissions:
+    contents: read
+
+env:
+    HUSKY: 0
+
+jobs:
+    pipeline:
+        runs-on: ubuntu-latest
+
+        outputs:
+            is_repo_dirty: ${{ steps.repo_dirty.outputs.is_repo_dirty }}
+            workspace_artifact_name: ${{ steps.artifact_name.outputs.name }}
+            artifact_uploaded: ${{ steps.artifact_uploaded.outputs.artifact_uploaded }}
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - uses: pnpm/action-setup@v4
+              with:
+                  run_install: false
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: .nvmrc
+                  cache: pnpm
+
+            # ── Input summary ────────────────────────────────────────
+            # Note: no native foreach over inputs; keep this explicit.
+            - name: 🌸 Input Summary
+              shell: bash
+              run: |
+                  {
+                    echo "## Pipeline inputs"
+                    echo ""
+                    echo "- mode: \`${{ inputs.mode }}\`"
+                    echo "- check_mode: \`${{ inputs.check_mode }}\`"
+                    echo "- run_install: \`${{ inputs.run_install }}\`"
+                    echo "- require_lockfile: \`${{ inputs.require_lockfile }}\`"
+                    echo "- require_clean_repo: \`${{ inputs.require_clean_repo }}\`"
+                    echo "- run_build: \`${{ inputs.run_build }}\`"
+                    echo "- run_test: \`${{ inputs.run_test }}\`"
+                    echo "- run_docs_build: \`${{ inputs.run_docs_build }}\`"
+                    echo "- nx_cache_reset: \`${{ inputs.nx_cache_reset }}\`"
+                    echo "- pnpm_store_reset: \`${{ inputs.pnpm_store_reset }}\`"
+                    echo "- upload_workspace_artifact: \`${{ inputs.upload_workspace_artifact }}\`"
+                    echo "- artifact_name_prefix: \`${{ inputs.artifact_name_prefix }}\`"
+                  } | tee -a "$GITHUB_STEP_SUMMARY"
+
+            - name: 🩺 Report Environment
+              if: ${{ always() }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm report:env
+
+            - name: 🗂️ Report Repository
+              if: ${{ always() }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm report:repo
+
+            # ── Install attempts ─────────────────────────────────────
+            - name: 📦 Install Attempt 1 Frozen Lockfile
+              id: install_frozen
+              if: ${{ inputs.run_install }}
+              continue-on-error: true
+              run: pnpm install --frozen-lockfile
+
+            - name: 🚧 Abort on Required Frozen Lockfile Failure
+              if: ${{ inputs.run_install && inputs.require_lockfile && inputs.mode == 'abort_on_error' && steps.install_frozen.outcome == 'failure' }}
+              run: exit 1
+
+            - name: 📦 Install Attempt 2 Relaxed Lockfile
+              id: install_relaxed
+              if: ${{ inputs.run_install }}
+              continue-on-error: true
+              run: pnpm install --no-frozen-lockfile
+
+            - name: 🚧 Abort on Required Relaxed Install Failure
+              if: ${{ inputs.run_install && !inputs.require_lockfile && inputs.mode == 'abort_on_error' && steps.install_relaxed.outcome == 'failure' }}
+              run: exit 1
+
+            - name: 📦 Install Attempt 3 Delete Lockfile and Retry
+              id: install_reset_lockfile
+              if: ${{ inputs.run_install }}
+              continue-on-error: true
+              run: |
+                  rm -f pnpm-lock.yaml
+                  pnpm install --no-frozen-lockfile
+
+            - name: 🚨 Validate Install Attempts (fail only if all failed)
+              if: ${{ inputs.run_install && steps.install_frozen.outcome == 'failure' && steps.install_relaxed.outcome == 'failure' && steps.install_reset_lockfile.outcome == 'failure' }}
+              run: |
+                  echo "All install attempts failed."
+                  exit 1
+
+            - name: 🎀 Report Prettier
+              if: ${{ always() }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm report:prettier
+
+            - name: 📚 Report Workspace
+              if: ${{ always() }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm report:workspace
+
+            # ── Cache resets ─────────────────────────────────────────
+            - name: 🧹 Reset Nx Cache
+              if: ${{ inputs.nx_cache_reset }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm nx:reset
+
+            - name: 🗑️ Run Uninstall Cleanup
+              if: ${{ inputs.nx_cache_reset }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm run uninstall
+
+            - name: 🧺 Prune pnpm Store
+              if: ${{ inputs.pnpm_store_reset }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm store prune
+
+            # ── Routines ────────────────────────────────────────────
+            - name: ✨ Run Fix Routine
+              if: ${{ inputs.check_mode == 'fix' }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm fix
+
+            - name: ✅ Run Check Routine
+              if: ${{ inputs.check_mode == 'check' }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm check
+
+            - name: ⏭️ Skip Check Routine
+              if: ${{ inputs.check_mode == 'skip' }}
+              run: echo "check_mode=skip"
+
+            - name: 🏗️ Run Build
+              if: ${{ inputs.run_build }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm build
+
+            - name: 🧪 Run Test
+              if: ${{ inputs.run_test }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm test
+
+            - name: 📘 Run Docs Build
+              if: ${{ inputs.run_docs_build }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm -r --if-present run docs:build
+
+            # ── Clean repo gate + dirty output ──────────────────────
+            - name: 🧼 Require Clean Repo
+              if: ${{ inputs.require_clean_repo }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              shell: bash
+              run: |
+                  if [ -n "$(git status --porcelain)" ]; then
+                    echo "repository is dirty"
+                    exit 1
+                  fi
+
+            - name: 🧾 Compute is_repo_dirty output
+              id: repo_dirty
+              if: ${{ always() }}
+              shell: bash
+              run: |
+                  if [ -n "$(git status --porcelain)" ]; then
+                    echo "is_repo_dirty=true" >> "$GITHUB_OUTPUT"
+                  else
+                    echo "is_repo_dirty=false" >> "$GITHUB_OUTPUT"
+                  fi
+
+            # ── Artifact upload + outputs ────────────────────────────
+            - name: 🏷️ Compute artifact name
+              id: artifact_name
+              if: ${{ inputs.upload_workspace_artifact }}
+              shell: bash
+              run: |
+                  NAME="${{ inputs.artifact_name_prefix }}-${{ github.repository }}-${{ github.run_id }}-${{ github.run_attempt }}"
+                  NAME="${NAME//\//-}"
+                  echo "name=$NAME" >> "$GITHUB_OUTPUT"
+                  echo "Artifact name: $NAME"
+
+            - name: 📦 Upload workspace artifact
+              id: upload_workspace
+              if: ${{ inputs.upload_workspace_artifact }}
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ${{ steps.artifact_name.outputs.name }}
+                  if-no-files-found: error
+                  path: |
+                      .
+                      !**/.git/**
+                      !**/node_modules/**
+                      !**/.nx/cache/**
+                      !**/.pnpm-store/**
+                      !**/coverage/**
+                      !**/.turbo/**
+
+            - name: 🧾 Compute artifact_uploaded output
+              id: artifact_uploaded
+              if: ${{ always() }}
+              shell: bash
+              run: |
+                  if [ "${{ inputs.upload_workspace_artifact }}" != "true" ]; then
+                    echo "artifact_uploaded=false" >> "$GITHUB_OUTPUT"
+                    exit 0
+                  fi
+
+                  if [ "${{ steps.upload_workspace.outcome }}" = "success" ]; then
+                    echo "artifact_uploaded=true" >> "$GITHUB_OUTPUT"
+                  else
+                    echo "artifact_uploaded=false" >> "$GITHUB_OUTPUT"
+                  fi
+
+            - name: 🧾 Output Summary
+              if: ${{ always() }}
+              shell: bash
+              run: |
+                  {
+                    echo ""
+                    echo "## Outputs"
+                    echo ""
+                    echo "- is_repo_dirty: \`${{ steps.repo_dirty.outputs.is_repo_dirty }}\`"
+                    echo "- artifact_uploaded: \`${{ steps.artifact_uploaded.outputs.artifact_uploaded }}\`"
+                    echo "- workspace_artifact_name: \`${{ steps.artifact_name.outputs.name }}\`"
+                  } >> "$GITHUB_STEP_SUMMARY"
+
+            - name: 🌈 Done
+              if: ${{ always() }}
+              run: echo "Pipeline workflow completed."

@@ -11,7 +11,8 @@ import type { Writable } from 'type-fest'
  *         'GLibrary',
  *     )
  */
-export const validPackageName = /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/
+export const validPackageName =
+    /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/
 
 /**
  * PackageManager field in package.json
@@ -23,19 +24,30 @@ export const packageManager = /(npm|pnpm|yarn)@\d+\.\d+\.\d+(-.+)?/
 /**
  * Scientific Number
  *
- * @category Numeric Removed NaN and Infinity from original source. Allows numeric separators (_) in integer,
- *   fractional, and exponent digits.
+ * @category Numeric
  * @see {@link https://regex101.com/r/oubK67/5}
  */
 export const scientificNumber =
     /^[+-]?(?:\d(?:_?\d)*(?:\.\d(?:_?\d)*)?|\.\d(?:_?\d)*)(?:e[+-]?\d(?:_?\d)*)?$/i
 
 export const hexNumber = /^[+-]?0x[0-9a-f](?:_?[0-9a-f])*$/i
+export const octalNumber = /^[+-]?0o[0-7](?:_?[0-7])*$/i
 export const binaryNumber = /^[+-]?0b[01](?:_?[01])*$/i
-export const bigintNumber = /^[+-]?(?:\d(?:_?\d)*|0x[0-9a-f](?:_?[0-9a-f])*|0b[01](?:_?[01])*)n$/i
+export const bigintNumber =
+    /^[+-]?(?:\d(?:_?\d)*|0x[0-9a-f](?:_?[0-9a-f])*|0b[01](?:_?[01])*)n$/i
 
 /** Common characters to trim from CSS classes or otherwise. */
-export const DEFAULT_TRIM_CHARACTERS = ['.', "'", '"', ' ', '-', '[', ']', '(', ')']
+export const DEFAULT_TRIM_CHARACTERS = [
+    '.',
+    "'",
+    '"',
+    ' ',
+    '-',
+    '[',
+    ']',
+    '(',
+    ')',
+]
 export const TRIM_CHARS_DEFAULT = DEFAULT_TRIM_CHARACTERS
 /** A list of new line characters, both unicode and ascii. */
 export const NEW_LINE_CHARS = [
@@ -370,7 +382,9 @@ export const IP_ADDRESS_REG_EXP = new RegExp(
 export const anyURLDomainExtension = (): RegExp => urlDomainExtension()
 /** Todo: handle urls with query strings */
 export const urlDomainExtension = (
-    value: string | Array<string> = URL_DOMAIN_EXTENSION as Writable<typeof URL_DOMAIN_EXTENSION>,
+    value: string | Array<string> = URL_DOMAIN_EXTENSION as Writable<
+        typeof URL_DOMAIN_EXTENSION
+    >,
 ): RegExp => new RegExp(`^(?!\\.)[^.]+\\.(${ensureArray(value).join('|')})$`)
 
 export const anyURLScheme = (): RegExp => urlScheme()
