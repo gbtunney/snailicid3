@@ -6,21 +6,14 @@
  */
 
 import { rollup } from 'rollup'
+import { toRollupConfig } from './to-rollup.js'
 import type { BuildAdapter } from '../../build/ports.js'
 import type { BuildPlan, Product, Runtime } from '../../build/types.js'
-import { toRollupConfig } from './to-rollup.js'
 
 /** Products that may use the Rollup adapter when buildStrategy is 'bundle'. */
-const ROLLUP_PRODUCTS: Product[] = ['library', 'cli', 'plugin', 'worker', 'server_app', 'web_app']
+const ROLLUP_PRODUCTS: Array<Product> = ['library', 'cli', 'plugin', 'worker', 'server_app', 'web_app']
 
 export const rollupAdapter: BuildAdapter = {
-    name: 'rollup',
-
-    supports(runtime: Runtime, product: Product): boolean {
-        void runtime
-        return ROLLUP_PRODUCTS.includes(product)
-    },
-
     async build(plan: BuildPlan): Promise<void> {
         const configs = toRollupConfig(plan, plan.identity.product)
         for (const config of configs) {
@@ -40,8 +33,15 @@ export const rollupAdapter: BuildAdapter = {
     createConfig(plan: BuildPlan): ReturnType<typeof toRollupConfig> {
         return toRollupConfig(plan, plan.identity.product)
     },
+
+    name: 'rollup',
+
+    supports(runtime: Runtime, product: Product): boolean {
+        void runtime
+        return ROLLUP_PRODUCTS.includes(product)
+    },
 }
 
-export { toRollupConfig, toPackageExports } from './to-rollup.js'
 export { getPluginsForPreset, inferPreset } from './plugins.js'
 export type { RollupPluginPreset } from './plugins.js'
+export { toPackageExports, toRollupConfig } from './to-rollup.js'

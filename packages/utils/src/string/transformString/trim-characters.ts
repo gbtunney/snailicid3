@@ -14,7 +14,7 @@ import { getRegExpEndOfString, getRegExpStartOfString } from '../../regexp/strin
 export const trimCharacters = ({
     doTrimEnd = true,
     doTrimStart = true,
-    pattern = ' ',
+    pattern,
     value,
 }: BaseValue & {
     pattern: string | Array<string>
@@ -41,7 +41,7 @@ export const trimCharacters = ({
 export const batchTrimCharacters = ({
     doTrimEnd = true,
     doTrimStart = true,
-    pattern = ' ',
+    pattern,
     value,
 }: BatchBaseValue & {
     /** This is different. */
@@ -67,7 +67,7 @@ export const batchTrimCharacters = ({
  * @see {@link trimCharacters}
  */
 export const trimCharactersStart = ({
-    pattern = ' ',
+    pattern,
     value,
 }: BaseValue & {
     pattern: string | Array<string>
@@ -88,7 +88,7 @@ export const trimCharactersStart = ({
  * @see {@link trimCharacters}
  */
 export const trimCharactersEnd = ({
-    pattern = ' ',
+    pattern,
     value,
 }: BaseValue & {
     pattern: string | Array<string>
@@ -104,7 +104,7 @@ export const trimCharactersEnd = ({
 const trimCharactersforSinglePattern = function ({
     doTrimEnd = true,
     doTrimStart = true,
-    pattern = ' ',
+    pattern,
     value,
 }: BaseValue & {
     /** This is different. */

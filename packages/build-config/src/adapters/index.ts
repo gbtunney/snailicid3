@@ -10,13 +10,13 @@
  * 3. tscAdapter    — default for everything else
  */
 
-import type { BuildAdapter } from '../build/ports.js'
-import type { BuildPlan, Product, Runtime } from '../build/types.js'
 import { noneAdapter } from './none/index.js'
 import { rollupAdapter } from './rollup/index.js'
 import { tscAdapter } from './tsc/index.js'
+import type { BuildAdapter } from '../build/ports.js'
+import type { BuildPlan } from '../build/types.js'
 
-export const adapters: BuildAdapter[] = [noneAdapter, rollupAdapter, tscAdapter]
+export const adapters: Array<BuildAdapter> = [noneAdapter, rollupAdapter, tscAdapter]
 
 /**
  * Select the appropriate adapter for a plan.
@@ -25,7 +25,7 @@ export const adapters: BuildAdapter[] = [noneAdapter, rollupAdapter, tscAdapter]
  * supports the product. Otherwise the tsc adapter is the fallback.
  */
 export function selectAdapter(plan: BuildPlan): BuildAdapter | undefined {
-    const { runtime, product, buildStrategy } = plan.identity
+    const { buildStrategy, product, runtime } = plan.identity
 
     if (buildStrategy === 'none') return noneAdapter
     if (buildStrategy === 'bundle') {
@@ -36,19 +36,8 @@ export function selectAdapter(plan: BuildPlan): BuildAdapter | undefined {
     return adapters.find((a) => a.supports(runtime, product))
 }
 
-export { noneAdapter } from './none/index.js'
-export {
-    rollupAdapter,
-    toRollupConfig,
-    toPackageExports,
-    getPluginsForPreset,
-    inferPreset,
-} from './rollup/index.js'
-export type { RollupPluginPreset } from './rollup/index.js'
-export { tscAdapter } from './tsc/index.js'
-
-export type { BuildAdapter } from '../build/ports.js'
-
+export { createBanner } from '../build/banner.js'
+export type { BannerPackageMeta } from '../build/banner.js'
 // Re-export plan helpers for convenience
 export {
     defineEntry,
@@ -57,5 +46,16 @@ export {
     normaliseExportKey,
     resolveEntryFilename,
 } from '../build/plan.js'
-export { createBanner } from '../build/banner.js'
-export type { BannerPackageMeta } from '../build/banner.js'
+export type { BuildAdapter } from '../build/ports.js'
+
+export { noneAdapter } from './none/index.js'
+
+export {
+    getPluginsForPreset,
+    inferPreset,
+    rollupAdapter,
+    toPackageExports,
+    toRollupConfig,
+} from './rollup/index.js'
+export type { RollupPluginPreset } from './rollup/index.js'
+export { tscAdapter } from './tsc/index.js'

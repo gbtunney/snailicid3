@@ -1,10 +1,10 @@
 
+import type { LiteralUnion } from 'type-fest'
 import type {
     JSLikeFileExtensions,
     MarkdownFileExtensions,
     PrettierFileExtensions,
 } from './shared.js'
-import type { LiteralUnion } from 'type-fest'
 
 export type AllowedExtensions =
     | JSLikeFileExtensions

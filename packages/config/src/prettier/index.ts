@@ -8,23 +8,20 @@ import type { Options as JsDocOptions } from "prettier-plugin-jsdoc";
 import type { IterableElement, Merge } from "type-fest";
 import {getDefaultOptions,getDefaultOverrides}from './options.js'
 import {getPrettierPluginsBundled,getPrettierPluginsList}from './plugins.js'
-import {ArrayValues}from 'type-fest'
-
-
-export { getScaledWidth, SHARED_FORMATTING_RULES } from "../shared.js";
 
 export type PrettierOptions = Options & JsDocOptions;
+
 export type PrettierOverrides = Array<
   Merge<IterableElement<Config["overrides"]>, { options: PrettierOptions }>
 >;
-
 export type PrettierConfig = Merge<
   Merge<Config, PrettierOptions>,
   {
     overrides: PrettierOverrides;
   }
 >;
-    //SHARED_FORMATTING_RULES.tabWidth,
+
+//SHARED_FORMATTING_RULES.tabWidth,
  
 export const prettierConfiguration = (
   bundled:boolean = true,
@@ -49,8 +46,7 @@ export const prettierConfiguration = (
     plugins: [...(bundled)? getPrettierPluginsBundled():getPrettierPluginsList()]
   };
 };
-
-/** @ignore */
+    /** @ignore */
 export const Prettier: {
   config: PrettierConfig;
   options: PrettierOptions;
@@ -60,3 +56,5 @@ export const Prettier: {
   configuration: prettierConfiguration,
   options: getDefaultOptions()
 };
+
+export { getScaledWidth, SHARED_FORMATTING_RULES } from "../shared.js";

@@ -29,7 +29,7 @@ import type {
  * }
  * ```
  */
-export interface PackageBuildConfig {
+export type PackageBuildConfig = {
     runtime: Runtime
     product: Product
     buildStrategy: BuildStrategy
@@ -67,13 +67,13 @@ export function defineIdentity(
     product: Product,
     buildStrategy: BuildStrategy,
 ): PackageIdentity {
-    return { runtime, product, buildStrategy }
+    return { buildStrategy, product, runtime }
 }
 
 /** Create an {@link EntrySpec} with defaults applied. */
 export function defineEntry(
     key: string,
-    outputKinds: OutputKind[],
+    outputKinds: Array<OutputKind>,
     options: Omit<EntrySpec, 'key' | 'outputKinds'> = {},
 ): EntrySpec {
     return { key, outputKinds, sourcemap: true, ...options }
@@ -84,9 +84,9 @@ export function definePlan(
     identity: PackageIdentity,
     sourceDir: string,
     outputDir: string,
-    entries: EntrySpec[],
+    entries: Array<EntrySpec>,
 ): BuildPlan {
-    return { identity, sourceDir, outputDir, entries }
+    return { entries, identity, outputDir, sourceDir }
 }
 
 /**

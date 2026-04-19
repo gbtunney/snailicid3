@@ -5,8 +5,8 @@
  * @see [typescript-eslint](https://typescript-eslint.io/getting-started/)
  * @see Styleguide: _(rule motivation and reference)_ {@link [TypeScript Style Guide](https://mkosir.github.io/typescript-style-guide/) }
  */
+import {defineConfig}from '@eslint/config-helpers'
 import { flatEslintConfig } from './base.js'
-import {defineConfig,globalIgnores}from '@eslint/config-helpers'
 
 /** @ignore */
 export const EsLint: {

@@ -18,13 +18,9 @@ export { EsLint } from "./eslint/index.js";
 // Do not re-export all types to avoid duplicate identifier error
 export type { EslintConfig, TsConfig } from './eslint/index.js'
 
-/**
- * @namespace Prettier Configuration
- * @see [Prettier - Opinionated Code Formatter](https://prettier.io/)
- */
-export { Prettier } from "./prettier/index.js";
-
-export type { PrettierConfig, PrettierOptions } from "./prettier/index.js";
+export {
+  expandExtensions
+} from './helpers.js'
 
 /**
  * A Node.js command line interface and style checker / lint tool for Markdown files.
@@ -36,6 +32,21 @@ export { markdownlint } from './markdownlint/index.js'
 
 export type * from './markdownlint/index.js'
 
+/**
+ * @namespace Prettier Configuration
+ * @see [Prettier - Opinionated Code Formatter](https://prettier.io/)
+ */
+export { Prettier } from "./prettier/index.js";
+
+export type { PrettierConfig, PrettierOptions } from "./prettier/index.js";
+export {JS_FILE_EXTENSIONS,JSLIKE_FILE_EXTENSIONS,TS_FILE_EXTENSIONS}from './shared.js'
+export type {JSFileExtensions,JSLikeFileExtensions,TSFileExtensions} from './shared.js'
+
+export {PRETTIER_FILE_EXTENSIONS}from './shared.js'
+export type {PrettierFileExtensions}from './shared.js'
+
+export {MARKDOWN_FILE_EXTENSIONS}from './shared.js'
+export type {MarkdownFileExtensions}from './shared.js'
 
 /* *  UTILITIES *  */
 export {
@@ -44,18 +55,6 @@ export {
     isPlainObject,
     safeDeserializeJSON,
 } from './utilities.js'
-export {
-  expandExtensions
-} from './helpers.js'
 export type * from './utilities.js'
-
-export {JSLIKE_FILE_EXTENSIONS,JS_FILE_EXTENSIONS,TS_FILE_EXTENSIONS}from './shared.js'
-export type {JSLikeFileExtensions,JSFileExtensions,TSFileExtensions} from './shared.js'
-
-export {PRETTIER_FILE_EXTENSIONS}from './shared.js'
-export type {PrettierFileExtensions}from './shared.js'
-
-export {MARKDOWN_FILE_EXTENSIONS}from './shared.js'
-export type {MarkdownFileExtensions}from './shared.js'
 
 export { merge } from "ts-deepmerge";

@@ -1,6 +1,6 @@
+import { isValidColor,parseColorToHex} from '@snailicid3/color'
 import { logger } from '@snailicid3/logger'
 import {  stringUtils } from '@snailicid3/utils'
-import { parseColorToHex,isValidColor} from '@snailicid3/color'
 
 import { Merge } from 'type-fest'
 import { z } from 'zod'

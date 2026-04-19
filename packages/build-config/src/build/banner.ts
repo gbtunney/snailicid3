@@ -4,7 +4,7 @@
  * Generates a comment block suitable for prepending to bundled output files.
  */
 
-export interface BannerPackageMeta {
+export type BannerPackageMeta = {
     name: string
     version: string
     description?: string
@@ -41,7 +41,7 @@ function repoUrl(repository: BannerPackageMeta['repository']): string {
 export function createBanner(moduleName: string, meta: BannerPackageMeta): string | undefined {
     if (!meta.name || !meta.version) return undefined
 
-    const lines: string[] = [
+    const lines: Array<string> = [
         ` * ${meta.name} v${meta.version}`,
         ` * Module: ${moduleName}`,
         ` * (c) ${new Date().getFullYear()} ${authorName(meta.author)}`,

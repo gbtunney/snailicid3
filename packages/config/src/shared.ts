@@ -1,5 +1,5 @@
 import type { Config, Options as PrettierOptions } from "prettier";
-import type { Merge,ArrayValues } from "type-fest";
+import type { ArrayValues,Merge } from "type-fest";
 
 export const JS_FILE_EXTENSIONS = ['js', 'mjs', 'cjs', 'jsx'] as const
 export const TS_FILE_EXTENSIONS = ['ts', 'mts', 'cts', 'tsx'] as const

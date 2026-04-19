@@ -1,4 +1,5 @@
 export { execCommand, getExecCommandOutput, quoteShellArgument } from './exec.js'
+export { ensureRepoClean, isRepoClean } from './git.js'
 export {
     getWorkspacePackagesList,
     getWorkspacePackagesLookup,
@@ -8,4 +9,3 @@ export {
     workspacePackagesToArray,
 } from './packages.js'
 export type { WorkspacePackage } from './packages.js'
-export { isRepoClean, ensureRepoClean } from './git.js'

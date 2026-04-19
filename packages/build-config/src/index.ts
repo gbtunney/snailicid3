@@ -1,3 +1,36 @@
+// ── Adapter registry ──────────────────────────────────────────────────────────
+export { adapters, selectAdapter } from './adapters/index.js'
+
+export { noneAdapter } from './adapters/none/index.js'
+
+// ── Rollup adapter ────────────────────────────────────────────────────────────
+export {
+    getPluginsForPreset,
+    inferPreset,
+    rollupAdapter,
+    toPackageExports,
+    toRollupConfig,
+} from './adapters/rollup/index.js'
+export type { RollupPluginPreset } from './adapters/rollup/index.js'
+
+export { tscAdapter } from './adapters/tsc/index.js'
+// ── Banner ────────────────────────────────────────────────────────────────────
+export { createBanner } from './build/banner.js'
+
+export type { BannerPackageMeta } from './build/banner.js'
+// ── Plan helpers ──────────────────────────────────────────────────────────────
+export {
+    defineEntry,
+    defineIdentity,
+    definePlan,
+    identityFromPackage,
+    normaliseExportKey,
+    resolveEntryFilename,
+} from './build/plan.js'
+export type { PackageBuildConfig } from './build/plan.js'
+
+// ── Build port ────────────────────────────────────────────────────────────────
+export type { BuildAdapter } from './build/ports.js'
 /**
  * @snailicid3/build-config
  *
@@ -16,39 +49,6 @@ export type {
     Product,
     Runtime,
 } from './build/types.js'
-
-// ── Build port ────────────────────────────────────────────────────────────────
-export type { BuildAdapter } from './build/ports.js'
-
-// ── Plan helpers ──────────────────────────────────────────────────────────────
-export {
-    defineEntry,
-    defineIdentity,
-    definePlan,
-    identityFromPackage,
-    normaliseExportKey,
-    resolveEntryFilename,
-} from './build/plan.js'
-export type { PackageBuildConfig } from './build/plan.js'
-
-// ── Banner ────────────────────────────────────────────────────────────────────
-export { createBanner } from './build/banner.js'
-export type { BannerPackageMeta } from './build/banner.js'
-
-// ── Adapter registry ──────────────────────────────────────────────────────────
-export { adapters, selectAdapter } from './adapters/index.js'
-export { noneAdapter } from './adapters/none/index.js'
-export { tscAdapter } from './adapters/tsc/index.js'
-
-// ── Rollup adapter ────────────────────────────────────────────────────────────
-export {
-    getPluginsForPreset,
-    inferPreset,
-    rollupAdapter,
-    toPackageExports,
-    toRollupConfig,
-} from './adapters/rollup/index.js'
-export type { RollupPluginPreset } from './adapters/rollup/index.js'
 
 // ── Tool configs ──────────────────────────────────────────────────────────────
 export { vite, viteDocServerConfig } from './vite/index.js'

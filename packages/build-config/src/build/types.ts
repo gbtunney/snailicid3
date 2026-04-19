@@ -28,7 +28,7 @@ export type BuildStrategy = 'transpile' | 'bundle' | 'none'
 export type OutputKind = 'esm' | 'cjs' | 'iife' | 'umd'
 
 /** The three core classification axes for a package. */
-export interface PackageIdentity {
+export type PackageIdentity = {
     runtime: Runtime
     product: Product
     buildStrategy: BuildStrategy
@@ -41,13 +41,13 @@ export interface PackageIdentity {
  * `"./utils"`). Adapters are responsible for translating this into the correct
  * output path and exports field entry.
  */
-export interface EntrySpec {
+export type EntrySpec = {
     /** Export path key (e.g. `"."`, `"./utils"`). */
     key: string
     /** Source file path relative to {@link BuildPlan.sourceDir}. Defaults to the resolved key name. */
     input?: string
     /** Output formats to emit for this entry. */
-    outputKinds: OutputKind[]
+    outputKinds: Array<OutputKind>
     /** Prepend a generated banner comment to outputs. */
     banner?: boolean
     /** Minify the output. */
@@ -61,11 +61,11 @@ export interface EntrySpec {
  *
  * Adapters receive this and translate it into tool-specific configuration.
  */
-export interface BuildPlan {
+export type BuildPlan = {
     identity: PackageIdentity
     /** Directory containing TypeScript source files. */
     sourceDir: string
     /** Directory where compiled output is written. */
     outputDir: string
-    entries: EntrySpec[]
+    entries: Array<EntrySpec>
 }

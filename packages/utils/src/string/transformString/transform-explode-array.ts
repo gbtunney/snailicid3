@@ -8,8 +8,8 @@ import { isArray, isNotUndefined, isString } from '../../typeguard/utility.typeg
 /** Todo: fix these mangled chars */
 export const transformExplodeArray = function ({
     delimiter = ',',
-    prefix = undefined,
-    trim = undefined,
+    prefix,
+    trim,
     value,
 }: BatchBaseValue & {
     delimiter?: string | RegExp
@@ -53,7 +53,7 @@ export const DEFAULT_EXPLODE_REGEX = new RegExp(/[ ,]/g)
 /** This splits a string of windicss classes.? */
 export const explodeCSSClassString = ({
     delimiter = DEFAULT_EXPLODE_REGEX,
-    prefix = undefined,
+    prefix,
     trim = { pattern: TRIM_CHARS_DEFAULT },
     value,
 }: Parameters<typeof transformExplodeArray>[0]): string | Array<string> =>

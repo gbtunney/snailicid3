@@ -2,26 +2,26 @@
  * Translate a {@link BuildPlan} into Rollup configuration objects.
  */
 
-import path from 'path'
 import type { OutputOptions, RollupOptions } from 'rollup'
+import path from 'path'
+import { getPluginsForPreset, inferPreset } from './plugins.js'
 import { createBanner } from '../../build/banner.js'
 import type { BannerPackageMeta } from '../../build/banner.js'
 import { normaliseExportKey, resolveEntryFilename } from '../../build/plan.js'
 import type { BuildPlan, EntrySpec, OutputKind } from '../../build/types.js'
-import { getPluginsForPreset, inferPreset } from './plugins.js'
 
 /** Map OutputKind to Rollup's internal format string. */
 const OUTPUT_KIND_FORMAT: Record<OutputKind, OutputOptions['format']> = {
-    esm: 'es',
     cjs: 'cjs',
+    esm: 'es',
     iife: 'iife',
     umd: 'umd',
 }
 
 /** Map OutputKind to file extension. */
 const OUTPUT_KIND_EXT: Record<OutputKind, string> = {
-    esm: '.js',
     cjs: '.cjs',
+    esm: '.js',
     iife: '-iife.js',
     umd: '-umd.js',
 }
@@ -39,10 +39,10 @@ function buildOutputOptions(
 
     return {
         exports: 'named',
-        sourcemap: entry.sourcemap ?? true,
-        format: OUTPUT_KIND_FORMAT[kind],
         file,
+        format: OUTPUT_KIND_FORMAT[kind],
         name: libraryName,
+        sourcemap: entry.sourcemap ?? true,
         ...(banner ? { banner } : {}),
     }
 }
@@ -61,7 +61,7 @@ export function toRollupConfig(
     plan: BuildPlan,
     libraryName: string,
     packageMeta?: BannerPackageMeta,
-): RollupOptions[] {
+): Array<RollupOptions> {
     return plan.entries.map((entry) => {
         const filename = resolveEntryFilename(entry.key)
         const inputFile = entry.input
@@ -76,17 +76,17 @@ export function toRollupConfig(
             minify: entry.minify,
         })
 
-        const output: OutputOptions[] = entry.outputKinds.map((kind) =>
+        const output: Array<OutputOptions> = entry.outputKinds.map((kind) =>
             buildOutputOptions(entry, kind, plan.outputDir, libraryName, banner),
         )
 
         if (entry.minify) {
             // Add minified variants alongside non-minified outputs
-            const minOutputs: OutputOptions[] = entry.outputKinds.map((kind) => {
+            const minOutputs: Array<OutputOptions> = entry.outputKinds.map((kind) => {
                 const base = buildOutputOptions(entry, kind, plan.outputDir, libraryName, banner)
                 const file = base.file as string
                 const minFile = file.replace(/(\.[a-z]{2,7})$/, '.min$1')
-                return { ...base, file: minFile, sourcemap: false, plugins: [] }
+                return { ...base, file: minFile, plugins: [], sourcemap: false }
             })
             output.push(...minOutputs)
         }

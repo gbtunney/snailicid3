@@ -1,5 +1,5 @@
-import { fmt, formatValue } from '@snailicid3/utils'
 import {  logger } from '@snailicid3/logger'
+import { fmt, formatValue } from '@snailicid3/utils'
 import chalk from 'chalk'
 import yargs from 'yargs'
 import type { Argv, Options } from 'yargs'

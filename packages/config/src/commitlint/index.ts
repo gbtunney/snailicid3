@@ -5,20 +5,20 @@
  * @see [commitlint-config-conventional - Shareable commitlint config](https://www.npmjs.com/package/@commitlint/config-conventional)
  * @see [Commitizen](https://commitizen-tools.github.io/commitizen/)
  */
-import type { UserConfig as CommitlintUserConfig } from '@commitlint/types'
-import type { Writable } from 'type-fest'
 import config_conventional from '@commitlint/config-conventional'
+import type { UserConfig as CommitlintUserConfig } from '@commitlint/types'
 import type {LiteralUnion} from 'type-fest';
 
 export type ConventionalCommitType = keyof typeof config_conventional.prompt.questions.type.enum
-export const COMMIT_TYPES: ConventionalCommitType[] =Object.keys(config_conventional.prompt.questions.type.enum) as ConventionalCommitType[]
+export const COMMIT_TYPES: Array<ConventionalCommitType> =Object.keys(config_conventional.prompt.questions.type.enum) as Array<ConventionalCommitType>
 
-/*[
-    'feat',
-    'fix',
-    'wip',
-    'build',
-    'chore',
+/**
+ *[
+ * 'feat',
+ * 'fix',
+ * 'wip',
+ * 'build',
+    * 'chore',
     'docs',
     'release',
     'ci',
@@ -27,10 +27,11 @@ export const COMMIT_TYPES: ConventionalCommitType[] =Object.keys(config_conventi
     'revert',
     'style',
     'test',
-]*/
+]
+ */
 export const configuration = (
     scope_enum: Array<string> = [],
-    type_enum: Array<LiteralUnion<ConventionalCommitType,string>> = COMMIT_TYPES as ConventionalCommitType[] ,
+    type_enum: Array<LiteralUnion<ConventionalCommitType,string>> = COMMIT_TYPES ,
 ): CommitlintUserConfig => {
     const baseConfig: CommitlintUserConfig = {
         extends: ['@commitlint/config-conventional'],

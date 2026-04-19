@@ -81,7 +81,7 @@ export const getExistingPathType = (value: string): FileType => {
 /** IsFile - if the string is a glob, we do not care if it exists or resolves. */
 export const isFile = (
     value: string,
-    allowedExtention: string | Array<string> | undefined = undefined,
+    allowedExtention?: string | Array<string>  ,
 ): boolean => {
     const extention = path.extname(path.resolve(value))
     const result = extention.length > 1

@@ -19,7 +19,7 @@
         "@snailicid3/config": "workspace:*",
         "@types/node": "^25.6.0",
         "rollup": "^4.60.1",
-        "rollup-plugin-node-externals": "^8.1.2",
+        "rollup-plugin-node-externals": "^9.0.1",
         "tslib": "^2.8.1",
         "typedoc": "^0.28.19",
         "typescript": "^6.0.2",
@@ -44,11 +44,19 @@
             "dev:rollup": {},
             "dev:vite": {},
             "build:ts": {
-                 "cache": true,
-            "dependsOn": ["^build"],
-            "inputs": ["production", "^production"],
-            "outputs": ["{projectRoot}/dist", "{projectRoot}/types"],
-            "command": "tsc --build ./tsconfig.json && tsc --build ./tsconfig.node.json"
+                "cache": true,
+                "dependsOn": [
+                    "^build"
+                ],
+                "inputs": [
+                    "production",
+                    "^production"
+                ],
+                "outputs": [
+                    "{projectRoot}/dist",
+                    "{projectRoot}/types"
+                ],
+                "command": "tsc --build ./tsconfig.json && tsc --build ./tsconfig.node.json"
             },
             "build:rollup": {},
             "build:vite": {},
