@@ -1,9 +1,8 @@
 /**
  * Tool-agnostic build domain model.
  *
- * These types must remain independent from Rollup, Vite, esbuild, and any
- * other bundler. Adapters translate a {@link BuildPlan} into tool-specific
- * configuration.
+ * These types must remain independent from Rollup, Vite, esbuild, and any other bundler. Adapters translate a
+ * {@link BuildPlan} into tool-specific configuration.
  */
 
 /** Where code executes. */
@@ -37,9 +36,8 @@ export type PackageIdentity = {
 /**
  * A single entrypoint in a build plan.
  *
- * `key` maps to an export path in `package.json#exports` (e.g. `"."` or
- * `"./utils"`). Adapters are responsible for translating this into the correct
- * output path and exports field entry.
+ * `key` maps to an export path in `package.json#exports` (e.g. `"."` or `"./utils"`). Adapters are responsible for
+ * translating this into the correct output path and exports field entry.
  */
 export type EntrySpec = {
     /** Export path key (e.g. `"."`, `"./utils"`). */

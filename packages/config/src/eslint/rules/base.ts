@@ -1,8 +1,8 @@
+import { type Config, defineConfig } from '@eslint/config-helpers'
 import pluginJs from '@eslint/js'
-import { defineConfig, type Config } from '@eslint/config-helpers'
 import { SHARED_FORMATTING_RULES } from '../../shared.js'
 
-export const baseRules = (): Config[] =>
+export const baseRules = (): Array<Config> =>
     defineConfig(
         pluginJs.configs.recommended,
         {

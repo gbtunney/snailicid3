@@ -47,7 +47,12 @@
                 ]
             },
             "test:nx": {},
-            "lint": {},
+            "lint": {
+                "command": "prettier --check . --ignore-path ../../.prettierignore",
+                "options": {
+                    "cwd": "{projectRoot}"
+                }
+            },
             "fix": {},
             "clean": {},
             "clean:ts": {},

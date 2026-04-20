@@ -85,7 +85,7 @@
         "check:bk": {
             "cache": true,
             "inputs": ["default", "^default"],
-            "command": "eslint --flag unstable_ts_config .",
+            "command": "eslint .",
             "options": { "cwd": "{projectRoot}" }
         },
         "lint:md": {
@@ -105,13 +105,13 @@
         "lint": {
             "cache": false,
             "dependsOn": ["check:ts"],
-            "command": "prettier --check . && eslint --flag unstable_ts_config .",
+            "command": "prettier --check . --ignore-path ../../.prettierignore && eslint .",
             "options": { "cwd": "{projectRoot}" }
         },
         "fix": {
             "cache": false,
             "dependsOn": ["check:ts"],
-            "command": "prettier --write . && eslint --flag unstable_ts_config . --fix",
+            "command": "prettier --write . --ignore-path ../../.prettierignore && eslint . --fix",
             "options": { "cwd": "{projectRoot}" }
         },
         "clean:ts": {

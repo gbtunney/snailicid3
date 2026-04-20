@@ -5,7 +5,11 @@ import { trim } from 'ramda'
  *
  * @category Replace Characters
  */
-export const insert = (value: string, insert_value: string = '', index: number = 0): string => {
+export const insert = (
+    value: string,
+    insert_value: string = '',
+    index: number = 0,
+): string => {
     return index > 0
         ? `${value.substring(0, index)}${insert_value}${value.substring(index, value.length)}`
         : value
@@ -28,7 +32,9 @@ export const truncate = (
     if (value.length <= maxChars) return value
     value = value.substring(0, maxChars - append.length)
     //crop at last space or remove trailing whitespace
-    value = onlyFullWords ? value.substring(0, value.lastIndexOf(' ')) : trim(value)
+    value = onlyFullWords
+        ? value.substring(0, value.lastIndexOf(' '))
+        : trim(value)
     return `${value}${append}`
 }
 

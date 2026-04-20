@@ -1,8 +1,8 @@
+import { type Config, defineConfig } from '@eslint/config-helpers'
 import jsdoc from 'eslint-plugin-jsdoc'
-import { defineConfig, type Config } from '@eslint/config-helpers'
 import { getScaledWidth } from '../../shared.js'
 
-export const docsRules = (): Config[] =>
+export const docsRules = (): Array<Config> =>
     defineConfig(
         { ...jsdoc.configs['flat/recommended'] },
         /* eslint sort/object-properties:off */
@@ -10,8 +10,15 @@ export const docsRules = (): Config[] =>
             name: 'Docs: JSDoc ERROR',
             rules: {
                 'jsdoc/check-alignment': 'error',
-                'jsdoc/check-indentation': ['error', { excludeTags: ['example'] }],
-                'jsdoc/check-line-alignment': ['error', 'any', { wrapIndent: '  ' }],
+                'jsdoc/check-indentation': [
+                    'error',
+                    { excludeTags: ['example'] },
+                ],
+                'jsdoc/check-line-alignment': [
+                    'error',
+                    'any',
+                    { wrapIndent: '  ' },
+                ],
                 'jsdoc/multiline-blocks': [
                     'error',
                     {
@@ -32,10 +39,11 @@ export const docsRules = (): Config[] =>
                 'jsdoc/no-blank-block-descriptions': 'error',
                 'jsdoc/no-blank-blocks': ['error', { enableFixer: true }],
                 'jsdoc/require-asterisk-prefix': 'error',
-                /**
-                 * @todo jsdoc/no-multi-asterisks is messed up, prettier turns to hyphens
-                 */
-                'jsdoc/no-multi-asterisks': ['error', { allowWhitespace: false }],
+                /** @todo Jsdoc/no-multi-asterisks is messed up, prettier turns to hyphens */
+                'jsdoc/no-multi-asterisks': [
+                    'error',
+                    { allowWhitespace: false },
+                ],
                 'jsdoc/convert-to-jsdoc-comments': [
                     'error',
                     { lineOrBlockStyle: 'both' },

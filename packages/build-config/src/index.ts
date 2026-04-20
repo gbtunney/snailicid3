@@ -34,7 +34,7 @@ export type { BuildAdapter } from './build/ports.js'
 /**
  * @snailicid3/build-config
  *
- * tsc-first, adapter-based build system for the snailicid3 monorepo.
+ * Tsc-first, adapter-based build system for the snailicid3 monorepo.
  *
  * @see ARCHITECTURE.md for design documentation.
  */

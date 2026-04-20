@@ -1,11 +1,11 @@
-import { Prettier } from './src/index.js'
-import { getPrettierPluginsList } from './src/prettier/plugins.js'
 import type { Jsonify, JsonObject } from 'type-fest'
 import { exportJSONFile } from './src/export.json.file.js'
+import { Prettier } from './src/index.js'
 import {
     markdownLintConfigJson,
     MarkdownlintConfiguration,
 } from './src/markdownlint/index.js'
+import { getPrettierPluginsList } from './src/prettier/plugins.js'
 
 /* TODO: outputs a json dump of markdownlint and prettier. this is TEMPORARY till the configs are correct. ideally this should be gotten rid of */
 
@@ -22,7 +22,6 @@ const _prettierConfig = JSON.parse(
 )
 const prettierConfig: Jsonify<typeof _prettierConfig> = _prettierConfig
 
-
 /** As const */
 const JSON_EXPORTS = [
     {
@@ -32,7 +31,7 @@ const JSON_EXPORTS = [
     {
         data: mdConfig,
         filename: 'dist/.markdownlint.json',
-    }
+    },
 ]
 
 exportJSONFile(JSON_EXPORTS, '.')

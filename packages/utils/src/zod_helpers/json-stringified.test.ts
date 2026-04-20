@@ -57,7 +57,8 @@ describe('jsonStringified<T>()', () => {
     it('round-trips cleanly', () => {
         const original = { age: 22, id: 'z' }
         const raw = JsonUser.serialize(original)
-        const parseToVal: InferStringifiedOutput<typeof JsonUser> = JsonUser.parseToValue(raw)
+        const parseToVal: InferStringifiedOutput<typeof JsonUser> =
+            JsonUser.parseToValue(raw)
         const back = JsonUser.deserialize(raw)
         expect(back).toEqual(original)
         expect(back).toEqual(original)

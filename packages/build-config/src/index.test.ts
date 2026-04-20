@@ -17,15 +17,15 @@ describe('@snailicid3/build-config', () => {
         expect(
             identityFromPackage({
                 buildConfig: {
-                    runtime: 'node',
-                    product: 'library',
                     buildStrategy: 'bundle',
+                    product: 'library',
+                    runtime: 'node',
                 },
             }),
         ).toEqual({
-            runtime: 'node',
-            product: 'library',
             buildStrategy: 'bundle',
+            product: 'library',
+            runtime: 'node',
         })
 
         expect(identityFromPackage({})).toBeUndefined()
@@ -50,9 +50,12 @@ describe('@snailicid3/build-config', () => {
     })
 
     test('creates package exports map from plan', () => {
-        const plan = definePlan(defineIdentity('node', 'library', 'bundle'), './src', './dist', [
-            defineEntry('.', ['esm', 'cjs']),
-        ])
+        const plan = definePlan(
+            defineIdentity('node', 'library', 'bundle'),
+            './src',
+            './dist',
+            [defineEntry('.', ['esm', 'cjs'])],
+        )
 
         expect(toPackageExports(plan)).toEqual({
             '.': {
@@ -63,9 +66,12 @@ describe('@snailicid3/build-config', () => {
     })
 
     test('creates rollup config with esm and cjs outputs', () => {
-        const plan = definePlan(defineIdentity('node', 'library', 'bundle'), './src', './dist', [
-            defineEntry('.', ['esm', 'cjs']),
-        ])
+        const plan = definePlan(
+            defineIdentity('node', 'library', 'bundle'),
+            './src',
+            './dist',
+            [defineEntry('.', ['esm', 'cjs'])],
+        )
         const config = toRollupConfig(plan, 'exampleLib')
 
         expect(config).toHaveLength(1)
@@ -89,12 +95,12 @@ describe('@snailicid3/build-config', () => {
 
     test('creates banner content from package metadata', () => {
         const banner = createBanner('exampleLib', {
-            name: '@snailicid3/example-package',
-            version: '1.2.3',
+            author: { name: 'Gillian Tunney' },
             description: 'Example package',
             license: 'MIT',
-            author: { name: 'Gillian Tunney' },
+            name: '@snailicid3/example-package',
             repository: { url: 'https://example.test/repo' },
+            version: '1.2.3',
         })
 
         expect(banner).toContain('@snailicid3/example-package v1.2.3')
@@ -115,9 +121,12 @@ describe('@snailicid3/build-config', () => {
             './dist',
             [defineEntry('.', ['esm'])],
         )
-        const nonePlan = definePlan(defineIdentity('node', 'config', 'none'), './src', './dist', [
-            defineEntry('.', ['esm']),
-        ])
+        const nonePlan = definePlan(
+            defineIdentity('node', 'config', 'none'),
+            './src',
+            './dist',
+            [defineEntry('.', ['esm'])],
+        )
 
         expect(selectAdapter(bundlePlan)?.name).toBe('rollup')
         expect(selectAdapter(transpilePlan)?.name).toBe('tsc')

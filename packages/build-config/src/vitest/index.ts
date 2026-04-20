@@ -8,7 +8,12 @@ import { defineConfig, ViteUserConfig } from 'vitest/config'
 export const viTestConfig = (): ViteUserConfig =>
     defineConfig({
         test: {
-            exclude: ['node_modules', './types/**/*', './dist/**/*', './**/*.test.js'],
+            exclude: [
+                'node_modules',
+                './types/**/*',
+                './dist/**/*',
+                './**/*.test.js',
+            ],
         },
     })
 

@@ -1,6 +1,5 @@
 import type { Chromable, Color, ColorFormat } from 'chroma.ts'
 import * as chroma from 'chroma.ts'
-import { repeat } from 'ramda'
 
 import { isCSSColorSpecial } from './browser/css.js'
 import { tg } from './typeguard/index.js'
@@ -23,14 +22,19 @@ const validate = (value: Chromable): boolean => {
 }
 
 /** @category Validator */
-export const isValidColor = <Type extends Chromable>(value: Type): value is Type => {
+export const isValidColor = <Type extends Chromable>(
+    value: Type,
+): value is Type => {
     return validate(value)
 }
 
 export const getChromaColor = (value: Chromable): Color | undefined =>
     isValidColor(value) ? chroma.color(value) : undefined
 
-export const getColor = (value: Chromable, format: ColorFormat = 'hsl'): Color | undefined => {
+export const getColor = (
+    value: Chromable,
+    format: ColorFormat = 'hsl',
+): Color | undefined => {
     if (isValidColor(value)) {
         return chroma.color(value, format)
     }
@@ -42,17 +46,26 @@ const rotateHueFunction = (hue: number, incrementValue: number): number => {
     return (hue + incrementValue) % 360
 }
 /** RA.rangeStep(5, 0, 20); // => [0, 5, 10, 15] */
-export const complement = (color: Chromable, format: ColorFormat = 'hsl'): Color => {
+export const complement = (
+    color: Chromable,
+    format: ColorFormat = 'hsl',
+): Color => {
     const [hue, sat, luminance]: HSL = chroma.color(color).hsl()
     return chroma.color([rotateHueFunction(hue, 180), sat, luminance], format)
 }
-export const triad = (color: Chromable, format: ColorFormat = 'hsl'): Array<Color> => {
+export const triad = (
+    color: Chromable,
+    format: ColorFormat = 'hsl',
+): Array<Color> => {
     const [hue, sat, luminance]: HSL = chroma.color(color).hsl()
-    return [hue, rotateHueFunction(hue, 120), rotateHueFunction(hue, 240)].map((hue_step) =>
-        chroma.color([hue_step, sat, luminance], format),
+    return [hue, rotateHueFunction(hue, 120), rotateHueFunction(hue, 240)].map(
+        (hue_step) => chroma.color([hue_step, sat, luminance], format),
     )
 }
-export const tetrad = (color: Chromable, format: ColorFormat = 'hsl'): Array<Color> => {
+export const tetrad = (
+    color: Chromable,
+    format: ColorFormat = 'hsl',
+): Array<Color> => {
     const [hue, sat, luminance]: HSL = chroma.color(color).hsl()
     return [
         hue,
@@ -61,16 +74,23 @@ export const tetrad = (color: Chromable, format: ColorFormat = 'hsl'): Array<Col
         rotateHueFunction(hue, 270),
     ].map((hue_step) => chroma.color([hue_step, sat, luminance], format))
 }
-export const splitComplement = (color: Chromable, format: ColorFormat = 'hsl'): Array<Color> => {
+export const splitComplement = (
+    color: Chromable,
+    format: ColorFormat = 'hsl',
+): Array<Color> => {
     const [hue, sat, luminance]: HSL = chroma.color(color).hsl()
-    return [hue, rotateHueFunction(hue, 72), rotateHueFunction(hue, 216)].map((hue_step) =>
-        chroma.color([hue_step, sat, luminance], format),
+    return [hue, rotateHueFunction(hue, 72), rotateHueFunction(hue, 216)].map(
+        (hue_step) => chroma.color([hue_step, sat, luminance], format),
     )
 }
-export const analogous = (color: Chromable, results = 6, slices = 30): Array<Color> => {
+export const analogous = (
+    color: Chromable,
+    results = 6,
+    slices = 30,
+): Array<Color> => {
     const [hue, sat, luminance]: HSL = chroma.color(color).hsl()
-    return [hue, rotateHueFunction(hue, 72), rotateHueFunction(hue, 216)].map((hue_step) =>
-        chroma.color([hue_step, sat, luminance], 'hsl'),
+    return [hue, rotateHueFunction(hue, 72), rotateHueFunction(hue, 216)].map(
+        (hue_step) => chroma.color([hue_step, sat, luminance], 'hsl'),
     )
 }
 
@@ -99,7 +119,10 @@ export const analogous = (color: Chromable, results = 6, slices = 30): Array<Col
     }
 }*/
 
-const chromaColorBrighten = (value: string | undefined, amount: number): Color | undefined => {
+const chromaColorBrighten = (
+    value: string | undefined,
+    amount: number,
+): Color | undefined => {
     if (tg.isUndefined(value) || isCSSColorSpecial(value)) return undefined
     if (tg.isNotUndefined<string>(value)) {
         if (isValidColor(value)) {
@@ -108,55 +131,6 @@ const chromaColorBrighten = (value: string | undefined, amount: number): Color |
         }
     }
     return undefined
-}
-
-/**
- * Inputs: BaseColor, HueVariation
- *
- * Color1 = BaseColor Color2 = ColorFromHSL(Hue(BaseColor) + HueVariation, Saturation(BaseColor), Lightness(BaseColor))
- * Color3 = ColorFromHSL(Hue(BaseColor) - HueVariation, Saturation(BaseColor), Lightness(BaseColor))
- */
-function _analogous(color: Chromable, results: number, slices: number): void {
-    /*results = results || 6;
-        slices = slices || 30;
-
-        var hsl = tinycolor(color).toHsl();
-        var part = 360 / slices;
-        var ret = [tinycolor(color)];
-
-        for (hsl.h = ((hsl.h - (part * results >> 1)) + 720) % 360; --results; ) {
-            hsl.h = (hsl.h + part) % 360;
-            ret.push(tinycolor(hsl));
-        }
-        return ret;*/
-}
-
-function monochromatic(color: Chromable, format?: chroma.ColorFormat, results = 6): void {
-    // const [h,s,v] = chroma.color(color).hsv()
-    const modification = 1 / results
-    const explodeColorByResultsArr = repeat(chroma.color(color).hsv(), results)
-    const [hue, sat, luminance]: HSL = chroma.color(color).hsl()
-
-    const new_luminance = (luminance + modification) % 1
-
-    /*const newexplodeColorByResultsArr = explodeColorByResultsArr.map( (value,index)=>{
-            const [h,s,v] =value
-            const newv = (v + modification) % 1;
-            v = (v + modification) % 1;
-        } )*/
-    //reduce function idk???
-}
-
-function _monochromatic(color: Chromable, results: number): void {
-    /* results = results || 6;
-         var hsv = tinycolor(color).toHsv();
-         var h = hsv.h, s = hsv.s, v = hsv.v;
-         var ret = [];
-         var modification = 1 / results;
-         while (results--) {
-             ret.push(tinycolor({ h: h, s: s, v: v}));
-             v = (v + modification) % 1;
-         }*/
 }
 
 export type ChromaColorPalatte = {

@@ -1,4 +1,8 @@
-export { execCommand, getExecCommandOutput, quoteShellArgument } from './exec.js'
+export {
+    execCommand,
+    getExecCommandOutput,
+    quoteShellArgument,
+} from './exec.js'
 export { ensureRepoClean, isRepoClean } from './git.js'
 export {
     getWorkspacePackagesList,

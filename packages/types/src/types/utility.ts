@@ -1,34 +1,10 @@
 import type {
-    UnknownArray,
-    UnknownRecord,
-    Jsonifiable,
-    Jsonify,
-    JsonValue,
+    Entries,
+    Entry,
     JsonArray,
     JsonObject,
     JsonPrimitive,
-    Entries,
-    Entry,
-} from 'type-fest'
-
-/** TYPEFEST TYPES */
-export type {
-    Primitive,
-    Simplify,
-    SimplifyDeep,
-    Merge,
-    MergeDeep,
-    LiteralUnion,
-    LiteralToPrimitive,
-    LiteralToPrimitiveDeep,
-    ValueOf,
-    Stringified,
-    PartialDeep,
-    Jsonify,KeyAsString,
-    Jsonifiable,
-    Entries,
-    Entry,
-    UnknownRecord,
+    JsonValue,
     UnknownArray,
 } from 'type-fest'
 
@@ -53,6 +29,7 @@ export namespace Json {
     export type Primitive = JsonPrimitive
     export type Value = Exclude<JsonValue, null>
 }
+
 /* * @category Utility Types */
 export type DeepPartial<Type> = Type extends object
     ? {
@@ -71,7 +48,6 @@ export type SuffixProperties<Type extends object, Suffix extends string> = {
         ? Key
         : never}${Suffix}`]: Type[Key]
 }
-
 export type ExtractKeys<
     Type extends ReadonlyArray<unknown> | Record<keyof unknown, unknown>,
 > =
@@ -94,5 +70,27 @@ export type FromEntriesTuples<
 }
 
 export type EntriesOf<Type extends object> = Entries<Type>
+
 export type EntryOf<Type extends object> = Entry<Type>
 export type KeysOf<Type extends object> = keyof Type
+/** TYPEFEST TYPES */
+export type {
+    Entries,
+    Entry,
+    Jsonifiable,
+    Jsonify,
+    KeyAsString,
+    LiteralToPrimitive,
+    LiteralToPrimitiveDeep,
+    LiteralUnion,
+    Merge,
+    MergeDeep,
+    PartialDeep,
+    Primitive,
+    Simplify,
+    SimplifyDeep,
+    Stringified,
+    UnknownArray,
+    UnknownRecord,
+    ValueOf,
+} from 'type-fest'

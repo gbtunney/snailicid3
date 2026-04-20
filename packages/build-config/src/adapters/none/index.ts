@@ -1,8 +1,7 @@
 /**
  * None adapter — for packages with no build step.
  *
- * Used for config-only packages, JSON schemas, and templates where files
- * are shipped as-is without any compilation.
+ * Used for config-only packages, JSON schemas, and templates where files are shipped as-is without any compilation.
  */
 
 import type { BuildAdapter } from '../../build/ports.js'

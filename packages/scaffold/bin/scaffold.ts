@@ -1,27 +1,26 @@
 #!/usr/bin/env tsx
-import { z } from 'zod'
-
 import { initApp } from '@snailicid3/cli-app'
+import { z } from 'zod'
 
 import { scaffoldInputSchema, scaffoldPackage, syncPackage } from '../src/index.js'
 
 const schema = scaffoldInputSchema.extend({
-    sync: z.boolean().default(false).meta({
-        alias: 's',
-        description: 'Sync an existing package instead of creating a new one',
-    }),
     dir: z.string().optional().meta({
         alias: 'd',
         description: '<path> Target output directory (defaults to ./packages/<name>)',
+    }),
+    sync: z.boolean().default(false).meta({
+        alias: 's',
+        description: 'Sync an existing package instead of creating a new one',
     }),
 })
 
 await initApp(
     schema,
     {
+        description: 'Scaffold a new @snailicid3 package',
         name: 'scaffold',
         version: '0.0.0',
-        description: 'Scaffold a new @snailicid3 package',
     },
     (args) => {
         const outDir = args.dir ?? `./packages/${args.name}`

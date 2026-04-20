@@ -14,7 +14,7 @@ import {
 
 /* * CUSTOM ZOD UTILITIES!! * */
 /** @group Zod Schemas */
-export const fsPath = (root?: string  ): z.ZodType<string, string> => {
+export const fsPath = (root?: string): z.ZodType<string, string> => {
     return z
         .string()
         .transform((value) => getFullPath(value, root))
@@ -22,15 +22,17 @@ export const fsPath = (root?: string  ): z.ZodType<string, string> => {
 }
 /** @group Zod Schemas */
 export const fsPathArray = (
-    root?: string  ,
+    root?: string,
     getDirectoryFileContents = false,
 ): z.ZodType<Array<FilePath>, string> => {
-    return fsPath(root).transform((value) => getFilePathArr(value, getDirectoryFileContents))
+    return fsPath(root).transform((value) =>
+        getFilePathArr(value, getDirectoryFileContents),
+    )
 }
 /** @group Zod Schemas */
 export const fsPathExists = (
     exists = true,
-    root?: string  ,
+    root?: string,
     allowedType:
         | (Exclude<FileType, undefined> | Array<Exclude<FileType, undefined>>)
         | 'any' = 'any',
@@ -46,9 +48,11 @@ export const fsPathTypeExists = (
         | (Exclude<FileType, undefined> | Array<Exclude<FileType, undefined>>)
         | 'any'
         | 'none' = 'any',
-    root?: string  ,
+    root?: string,
 ): z.ZodType<string, string> => {
-    const allowedLabel = Array.isArray(allowedType) ? allowedType.join(' | ') : allowedType
+    const allowedLabel = Array.isArray(allowedType)
+        ? allowedType.join(' | ')
+        : allowedType
 
     return fsPath(root).refine(
         (value) => {
@@ -59,7 +63,9 @@ export const fsPathTypeExists = (
                 else if (doesFileExist(value)) _inner_result = true
             } else if (allowedType === 'none') return pathType === undefined
             else {
-                const ALLOWED: Array<FileType> = isString(allowedType) ? [allowedType] : allowedType
+                const ALLOWED: Array<FileType> = isString(allowedType)
+                    ? [allowedType]
+                    : allowedType
                 ALLOWED.forEach((item) => {
                     if (pathType === item) _inner_result = true
                 })
@@ -78,13 +84,17 @@ export const fsPathTypeExists = (
  */
 export const fsPathArrayHasFiles = (
     getDirectoryFileContents = false,
-    root?: string  ,
+    root?: string,
 ): z.ZodType<Array<FilePath>, string> => {
     return fsPathArray(root, getDirectoryFileContents).refine(
         (val: Array<FilePath>) => {
             if (val.length > 0 && val[0] !== undefined) {
                 const _possibleDir: FilePath = val[0]
-                if (!getDirectoryFileContents && _possibleDir.extname.length <= 0) return false
+                if (
+                    !getDirectoryFileContents &&
+                    _possibleDir.extname.length <= 0
+                )
+                    return false
             }
             return val.length > 0
         },
@@ -95,8 +105,10 @@ export const fsPathArrayHasFiles = (
 }
 
 /** @group Zod Schemas */
-export const filePathExists = (): ReturnType<typeof fsPathExists> => fsPathExists(true)
+export const filePathExists = (): ReturnType<typeof fsPathExists> =>
+    fsPathExists(true)
 /** @group Zod Schemas */
-export const filePathDoesNotExist = (): ReturnType<typeof fsPathExists> => fsPathExists(false)
+export const filePathDoesNotExist = (): ReturnType<typeof fsPathExists> =>
+    fsPathExists(false)
 /** @group Zod Schemas */
 export const filePath = (): ReturnType<typeof fsPath> => fsPath()

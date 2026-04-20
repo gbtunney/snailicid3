@@ -22,7 +22,7 @@ export default {
         const files = toFileArgs(staged)
         return [
             `pnpm exec prettier --write ${files}`,
-            `pnpm exec eslint --flag unstable_ts_config --fix ${files}`,
+            `pnpm exec eslint --fix ${files}`,
         ]
     },
 

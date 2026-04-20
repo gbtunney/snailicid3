@@ -1,41 +1,52 @@
-export type TypeGuardFunction = (value: unknown, ...args: Array<unknown>) => value is unknown
+export type TypeGuardFunction = (
+    value: unknown,
+    ...args: Array<unknown>
+) => value is unknown
 
-export type TypeGuardParameters<Guard extends TypeGuardFunction> = Parameters<Guard>
+export type TypeGuardParameters<Guard extends TypeGuardFunction> =
+    Parameters<Guard>
 
-export type TypeGuardInputValue<Guard extends TypeGuardFunction> = TypeGuardParameters<Guard>[0]
+export type TypeGuardInputValue<Guard extends TypeGuardFunction> =
+    TypeGuardParameters<Guard>[0]
 
 export type TypeGuardExtraParameters<Guard extends TypeGuardFunction> =
     TypeGuardParameters<Guard> extends [unknown, ...infer Rest] ? Rest : never
 
-export type TypeGuardNarrowedType<Guard extends TypeGuardFunction> = Guard extends (
-    value: unknown,
-    ...args: Array<unknown>
-) => value is infer Narrowed
-    ? Narrowed
-    : never
+export type TypeGuardNarrowedType<Guard extends TypeGuardFunction> =
+    Guard extends (
+        value: unknown,
+        ...args: Array<unknown>
+    ) => value is infer Narrowed
+        ? Narrowed
+        : never
 
 export type AssertionFunctionFromGuard<Guard extends TypeGuardFunction> = (
     value: TypeGuardInputValue<Guard>,
     ...args: TypeGuardExtraParameters<Guard>
 ) => asserts value is TypeGuardNarrowedType<Guard>
 
-export type BooleanPredicateFunction = (value: unknown, ...args: Array<unknown>) => boolean
+export type BooleanPredicateFunction = (
+    value: unknown,
+    ...args: Array<unknown>
+) => boolean
 
 export type PredicateInputValue<Predicate extends BooleanPredicateFunction> =
     Parameters<Predicate>[0]
 
-export type PredicateExtraParameters<Predicate extends BooleanPredicateFunction> =
-    Parameters<Predicate> extends [unknown, ...infer Rest] ? Rest : never
+export type PredicateExtraParameters<
+    Predicate extends BooleanPredicateFunction,
+> = Parameters<Predicate> extends [unknown, ...infer Rest] ? Rest : never
 
 /**
  * Assertion type derived from a boolean predicate.
  *
- * Preserves the predicate's input type and extra parameters. The narrowed type defaults
- * to the input type since boolean predicates do not carry narrowing information.
+ * Preserves the predicate's input type and extra parameters. The narrowed type defaults to the input type since boolean
+ * predicates do not carry narrowing information.
  */
 export type AssertionFunctionFromPredicate<
     Predicate extends BooleanPredicateFunction,
-    Narrowed extends PredicateInputValue<Predicate> = PredicateInputValue<Predicate>,
+    Narrowed extends PredicateInputValue<Predicate> =
+        PredicateInputValue<Predicate>,
 > = (
     value: PredicateInputValue<Predicate>,
     ...args: PredicateExtraParameters<Predicate>
@@ -55,7 +66,9 @@ export type AssertionFunctionFromPredicate<
  *
  * @group Typeguard
  */
-export function predicateToAssertion<Predicate extends BooleanPredicateFunction>(
+export function predicateToAssertion<
+    Predicate extends BooleanPredicateFunction,
+>(
     predicate: Predicate,
     message = 'Assertion failed',
 ): AssertionFunctionFromPredicate<Predicate> {
@@ -86,7 +99,7 @@ export function predicateToAssertion<Predicate extends BooleanPredicateFunction>
 export function guardToAssertion<Guard extends TypeGuardFunction>(
     guard: Guard,
     message = 'Assertion failed',
-) : AssertionFunctionFromGuard<Guard> {
+): AssertionFunctionFromGuard<Guard> {
     return (
         value: TypeGuardInputValue<Guard>,
         ...args: TypeGuardExtraParameters<Guard>

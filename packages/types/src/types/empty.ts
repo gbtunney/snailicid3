@@ -1,19 +1,14 @@
 /** @group Empty Types */
 import type {
-    UnknownArray,
-    UnknownRecord,
     EmptyObject,
-    NonEmptyString,
 } from 'type-fest'
-
-export type { EmptyObject } from 'type-fest'
 
 /* * EMPTY TYPES  * */
 /** @group Empty Types */
 export type EmptyArray = readonly []
+
 /** @group Empty Types */
 export type EmptyString = ''
-
 /** @group Empty Types */
 export type Falsy = false | 0 | EmptyString | null | undefined | 'Nan'
 
@@ -24,4 +19,6 @@ export type Nullish = null | undefined
 export type NilOrEmpty = EmptyObject | EmptyArray | EmptyString | Nullish
 
 /** @group Empty Types */
-export type NilLike = EmptyString | Nullish //nullish but with empty string
+export type NilLike = EmptyString | Nullish
+
+export type { EmptyObject } from 'type-fest' //nullish but with empty string

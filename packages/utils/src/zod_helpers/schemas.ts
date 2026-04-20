@@ -52,13 +52,19 @@ export const ensureArray = <Type extends z.ZodType>(
  * @category Zod
  * @category Schema
  */
-export const numeric = (): z.ZodType<Numeric | undefined, string | number | bigint> => {
+export const numeric = (): z.ZodType<
+    Numeric | undefined,
+    string | number | bigint
+> => {
     const result = z
         .union([z.string(), z.number(), z.bigint()])
         .transform((value: string | number | bigint): Numeric | undefined => {
             const _value: Numeric | undefined = toNumeric<typeof value>(value)
             return _value
         })
-        .refine((value) => value === undefined, 'Please enter a valid number|bigint|string')
+        .refine(
+            (value) => value === undefined,
+            'Please enter a valid number|bigint|string',
+        )
     return result
 }

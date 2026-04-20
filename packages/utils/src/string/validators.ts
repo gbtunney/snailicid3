@@ -24,7 +24,9 @@ export const startsWithPrefix = (
     value: string,
     prefix: string,
     trimmed: boolean = false,
-): boolean => typeof value === 'string' && (trimmed ? value.trim() : value).startsWith(prefix)
+): boolean =>
+    typeof value === 'string' &&
+    (trimmed ? value.trim() : value).startsWith(prefix)
 /**
  * Checks if a string ends with a given suffix. Optional trim before comparison.
  *
@@ -33,8 +35,13 @@ export const startsWithPrefix = (
  *     endsWithSuffix('hello', 'lo') // true
  *     endsWithSuffix('hello', 'xx') // false
  */
-export const endsWithSuffix = (value: string, suffix: string, trimmed: boolean = false): boolean =>
-    typeof value === 'string' && (trimmed ? value.trim() : value).endsWith(suffix)
+export const endsWithSuffix = (
+    value: string,
+    suffix: string,
+    trimmed: boolean = false,
+): boolean =>
+    typeof value === 'string' &&
+    (trimmed ? value.trim() : value).endsWith(suffix)
 /**
  * Minimatch pattern validation. True when value matches pattern (glob style).
  *
@@ -96,8 +103,14 @@ export const isValidIpAddress = <Type extends string = string>(
     optional: boolean = true,
 ): value is Type => {
     const _regexp: RegExp = !optional
-        ? new RegExp(`${urlScheme(scheme, false).source}${IP_ADDRESS_REG_EXP.source}`, 'm')
-        : new RegExp(`${urlScheme(scheme, true).source}?${IP_ADDRESS_REG_EXP.source}`, 'm')
+        ? new RegExp(
+              `${urlScheme(scheme, false).source}${IP_ADDRESS_REG_EXP.source}`,
+              'm',
+          )
+        : new RegExp(
+              `${urlScheme(scheme, true).source}?${IP_ADDRESS_REG_EXP.source}`,
+              'm',
+          )
     return _regexp.test(value)
 }
 
@@ -155,7 +168,8 @@ export const isValidUrl = <Type extends string = string>(
  *     isValidSemVer('1.2') // false
  *     isValidSemVer('invalid') // false
  */
-export const isValidSemVer = (value: string): boolean => semvervalid(value) !== null
+export const isValidSemVer = (value: string): boolean =>
+    semvervalid(value) !== null
 
 /**
  * If the length of the string is >1 and string contains a number.
@@ -165,8 +179,9 @@ export const isValidSemVer = (value: string): boolean => semvervalid(value) !== 
  *     stringContainsNumber('a1') // true
  *     stringContainsNumber('abc') // false
  */
-export const stringContainsNumber = <Type extends string>(value: Type): value is Type =>
-    value.length >= 1 && /\d/.test(value)
+export const stringContainsNumber = <Type extends string>(
+    value: Type,
+): value is Type => value.length >= 1 && /\d/.test(value)
 
 /**
  * If the length of the string is >1 and the string does not match a letter, return true.
@@ -176,5 +191,6 @@ export const stringContainsNumber = <Type extends string>(value: Type): value is
  *     stringContainsLetter('a1') // true
  *     stringContainsLetter('123') // false
  */
-export const stringContainsLetter = <Type extends string>(value: Type): value is Type =>
-    value.length >= 1 && /[a-z]/i.test(value)
+export const stringContainsLetter = <Type extends string>(
+    value: Type,
+): value is Type => value.length >= 1 && /[a-z]/i.test(value)

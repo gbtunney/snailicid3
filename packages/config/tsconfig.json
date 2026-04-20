@@ -1,11 +1,7 @@
 {
     "extends": "./typescript-config/tsconfig.typecheck.json",
-    "exclude": [
-        "./node_modules"
-    ],
-    "files": [
-        "package.json"
-    ],
+    "exclude": ["./node_modules"],
+    "files": ["package.json"],
     "include": [
         "./*.ts",
         "./*.cts",

@@ -7,7 +7,7 @@
 
 import { defineConfig, UserConfig } from 'vite'
 
-/** TODO call this docs server or something  */
+/** TODO call this docs server or something */
 /** Vite configuration for documentation server */
 export const viteDocServerConfig = (port = 5555): UserConfig => {
     return defineConfig({

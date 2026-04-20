@@ -29,8 +29,13 @@ export type FileType = 'directory' | 'file' | 'symlink' | 'glob' | undefined
  * @param {string} value - Glob Path String - "*.json"
  * @param {boolean} getDirectoryFiles - Get the file contents of directory ( like /mydir/* )
  */
-export const getFilePathArr = (value: string, getDirectoryFiles = false): Array<FilePath> => {
-    const filteredArray = (arr: Array<FilePath | undefined>): arr is Array<FilePath> => {
+export const getFilePathArr = (
+    value: string,
+    getDirectoryFiles = false,
+): Array<FilePath> => {
+    const filteredArray = (
+        arr: Array<FilePath | undefined>,
+    ): arr is Array<FilePath> => {
         return !arr.some((_entry) => _entry === undefined)
     }
     const _value =
@@ -46,7 +51,11 @@ export const getFilePathArr = (value: string, getDirectoryFiles = false): Array<
     return filteredArray(_result) ? _result : []
 }
 
-export const isFileArray = (value: string, exists = true, allowDirectory = false): boolean => {
+export const isFileArray = (
+    value: string,
+    exists = true,
+    allowDirectory = false,
+): boolean => {
     const _path: string = path.resolve(value)
     /* * If we dont care if it exists, test if it is a glob or has no extention.  * */
     if (!exists) {
@@ -81,16 +90,19 @@ export const getExistingPathType = (value: string): FileType => {
 /** IsFile - if the string is a glob, we do not care if it exists or resolves. */
 export const isFile = (
     value: string,
-    allowedExtention?: string | Array<string>  ,
+    allowedExtention?: string | Array<string>,
 ): boolean => {
     const extention = path.extname(path.resolve(value))
     const result = extention.length > 1
     if (result && allowedExtention === undefined) return true
     else if (result && allowedExtention !== undefined) {
         let _inner_result = false
-        const ALLOWED = isString(allowedExtention) ? [allowedExtention] : allowedExtention
+        const ALLOWED = isString(allowedExtention)
+            ? [allowedExtention]
+            : allowedExtention
         ALLOWED.forEach((item: string) => {
-            if (extention.replace('.', '') === item.replace('.', '')) _inner_result = true
+            if (extention.replace('.', '') === item.replace('.', ''))
+                _inner_result = true
         })
         return _inner_result
     }
@@ -106,7 +118,11 @@ export const isGlob = (value: string): boolean => {
 }
 export const getFilePathObj = function (_path: string): FilePath | undefined {
     if (isGlob(_path)) {
-        console.error('the path ', _path, ' is a glob, please use getFilePathArr function instead!')
+        console.error(
+            'the path ',
+            _path,
+            ' is a glob, please use getFilePathArr function instead!',
+        )
         return undefined
     }
     const resolvedPath = path.resolve(_path)
@@ -138,10 +154,15 @@ export const getParentDirectory = (_path: string): string | undefined => {
 }
 export const getFilename = (fullPath: string): string =>
     path.basename(fullPath, path.extname(fullPath))
-export const getExt = (fullPath: string): string => path.extname(fullPath).replace('.', '')
-export const getFullPath = (_value: string, _root: string | undefined): string => {
+export const getExt = (fullPath: string): string =>
+    path.extname(fullPath).replace('.', '')
+export const getFullPath = (
+    _value: string,
+    _root: string | undefined,
+): string => {
     return _root !== undefined ? `${_root}/${_value}` : _value
 }
-export const normalizePath = (value: string): string => path.normalize(path.resolve(value))
+export const normalizePath = (value: string): string =>
+    path.normalize(path.resolve(value))
 
 export const doesFileExist = (path: string): boolean => fs.existsSync(path)

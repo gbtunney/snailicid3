@@ -1,0 +1,10 @@
+# Generated build output
+dist
+types
+
+# Dependencies
+node_modules
+
+# Misc
+.history
+scratch

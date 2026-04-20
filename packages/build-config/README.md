@@ -6,8 +6,8 @@
 
 <!-- @snailicid3:header:end -->
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for the intended design of this package — the tsc-first,
-adapter-based build system it is being refactored toward.
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for the intended design of this package
+— the tsc-first, adapter-based build system it is being refactored toward.
 
 ## What Is Implemented Now
 
@@ -38,9 +38,12 @@ import {
   toRollupConfig,
 } from '@snailicid3/build-config'
 
-const plan = definePlan(defineIdentity('node', 'library', 'bundle'), './src', './dist', [
-  defineEntry('.', ['esm', 'cjs'], { banner: true, sourcemap: true }),
-])
+const plan = definePlan(
+  defineIdentity('node', 'library', 'bundle'),
+  './src',
+  './dist',
+  [defineEntry('.', ['esm', 'cjs'], { banner: true, sourcemap: true })],
+)
 
 const rollupConfig = toRollupConfig(plan, 'myLibrary')
 const exportsMap = toPackageExports(plan)
@@ -59,8 +62,10 @@ const exportsMap = toPackageExports(plan)
 
 ## Current Gaps
 
-- `vite` and `esbuild` adapter implementations are not present yet under `src/adapters`
-- typedoc/vitepress utilities from the previous repo are still intentionally not re-added
+- `vite` and `esbuild` adapter implementations are not present yet under
+  `src/adapters`
+- typedoc/vitepress utilities from the previous repo are still intentionally not
+  re-added
 
 ## Installation
 

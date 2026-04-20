@@ -5,7 +5,10 @@ export type FormatValueOptions = {
     sorted?: boolean | ((a: string, b: string) => number)
 }
 
-export const formatValue = (value: unknown, _opts?: FormatValueOptions): string => {
+export const formatValue = (
+    value: unknown,
+    _opts?: FormatValueOptions,
+): string => {
     switch (typeof value) {
         case 'string':
             return value
@@ -22,7 +25,8 @@ export const formatValue = (value: unknown, _opts?: FormatValueOptions): string 
             return 'undefined'
         case 'object':
             if (value === null) return 'null'
-            if (value instanceof Error) return value.stack ?? `${value.name}: ${value.message}`
+            if (value instanceof Error)
+                return value.stack ?? `${value.name}: ${value.message}`
             try {
                 return JSON.stringify(value, null, 2)
             } catch {
@@ -40,10 +44,15 @@ export const formatArgs = (delimiter = '', ...vals: Array<unknown>): string =>
 /**
  * Tagged template: safely interpolate unknowns without triggering restrict-template-expressions
  *
- * @example fmt`Value: ${myValue}`
+ * @example
+ *     fmt`Value: ${myValue}`
  */
-export const fmt = (strings: TemplateStringsArray, ...values: Array<unknown>): string =>
+export const fmt = (
+    strings: TemplateStringsArray,
+    ...values: Array<unknown>
+): string =>
     strings.reduce((accumulated, chunk, index) => {
-        const interpolated = index < values.length ? formatValue(values[index]) : ''
+        const interpolated =
+            index < values.length ? formatValue(values[index]) : ''
         return accumulated + chunk + interpolated
     }, '')

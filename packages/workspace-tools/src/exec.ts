@@ -10,7 +10,7 @@ export function execCommand(
     trim = true,
     encoding: BufferEncoding = 'utf8',
 ): string {
-    const out = execSync(command, { encoding }).toString()
+    const out = execSync(command, { encoding })
     return trim ? out.trim() : out
 }
 
@@ -20,7 +20,8 @@ export function getExecCommandOutput(command: string): ExecResult {
     } catch (err: unknown) {
         const message =
             err instanceof Error
-                ? ((err as NodeJS.ErrnoException & { stderr?: string }).stderr ?? err.message)
+                ? ((err as NodeJS.ErrnoException & { stderr?: string })
+                      .stderr ?? err.message)
                 : String(err)
         return { result: message, success: false }
     }

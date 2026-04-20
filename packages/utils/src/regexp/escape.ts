@@ -22,7 +22,8 @@ export const escapeStringRegexpInvalid = (
 ): string | undefined => {
     if (isStringValidRegExp(value)) return value
     if (escape && !isStringValidRegExp(value)) {
-        if (isStringValidRegExp(escapeStringRegexp(value))) return escapeStringRegexp(value)
+        if (isStringValidRegExp(escapeStringRegexp(value)))
+            return escapeStringRegexp(value)
     }
     return undefined
 }

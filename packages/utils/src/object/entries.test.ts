@@ -83,7 +83,10 @@ describe('mapObject', () => {
         const input = { a: 1, b: 2 } as const
 
         const result = mapObject(input, ([key, value], index) => {
-            return [`K${index.toString()}_${key.toUpperCase()}`, value * 10] as const
+            return [
+                `K${index.toString()}_${key.toUpperCase()}`,
+                value * 10,
+            ] as const
         })
 
         expect(result).toEqual({

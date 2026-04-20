@@ -1,9 +1,9 @@
+import { type Config, defineConfig } from '@eslint/config-helpers'
 import sortPlugin from 'eslint-plugin-sort'
-import { defineConfig, type Config } from '@eslint/config-helpers'
-import { JSLIKE_FILE_EXTENSIONS } from '../../shared.js'
 import { expandExtensions } from '../../helpers.js'
+import { JSLIKE_FILE_EXTENSIONS } from '../../shared.js'
 
-export const importRules = (): Config[] =>
+export const importRules = (): Array<Config> =>
     defineConfig(
         sortPlugin.configs['flat/recommended'],
         {
@@ -37,7 +37,6 @@ export const importRules = (): Config[] =>
                         pathGroupsExcludedImportTypes: ['internal'],
                     },
                 ],
-                /** Use import plugin for import ordering, not sort plugin */
                 'no-unused-vars': 'off',
                 'sort/destructuring-properties': [
                     'error',
@@ -57,7 +56,9 @@ export const importRules = (): Config[] =>
             },
         },
         {
-            files: [...expandExtensions(JSLIKE_FILE_EXTENSIONS, '**/src/**/*.')],
+            files: [
+                ...expandExtensions(JSLIKE_FILE_EXTENSIONS, '**/src/**/*.'),
+            ],
             name: 'Imports: warn on default exports in src files',
             rules: {
                 'import/no-default-export': 'warn',
