@@ -1,0 +1,42 @@
+{
+    "$schema": "./node_modules/nx/schemas/project-schema.json",
+    "name": "root",
+    "projectType": "library",
+    "targets": {
+        "check:ts": {
+            "cache": true,
+            "inputs": [
+                "{projectRoot}/*.ts",
+                "{projectRoot}/*.mts",
+                "{projectRoot}/*.cts",
+                "{projectRoot}/tsconfig.json",
+                "{workspaceRoot}/packages/config/typescript-config/tsconfig.typecheck.json"
+            ],
+            "outputs": [
+                "{projectRoot}/*.js",
+                "{projectRoot}/*.mjs",
+                "{projectRoot}/*.cjs"
+            ],
+            "command": "tsc --build tsconfig.json",
+            "options": { "cwd": "{projectRoot}" }
+        },
+        "lint": {
+            "cache": false,
+            "dependsOn": ["check:ts"],
+            "command": "prettier --check \"{*,.*}.{ts,tsx,mts,cts,json,yaml,yml,md,sh}\" \".github/**/*.{yaml,yml}\" \".husky/*\" --no-error-on-unmatched-pattern && eslint ./*.ts ./*.mts ./*.cts",
+            "options": { "cwd": "{projectRoot}" }
+        },
+        "fix": {
+            "cache": false,
+            "dependsOn": ["check:ts"],
+            "command": "prettier --write \"{*,.*}.{ts,tsx,mts,cts,json,yaml,yml,md,sh}\" \".github/**/*.{yaml,yml}\" \".husky/*\" --no-error-on-unmatched-pattern && eslint ./*.ts ./*.mts ./*.cts --fix",
+            "options": { "cwd": "{projectRoot}" }
+        },
+        "lint:md": {
+            "cache": true,
+            "inputs": ["{projectRoot}/*.md"],
+            "command": "markdownlint-cli2 \"./*.md\" \"#**/node_modules/**\"",
+            "options": { "cwd": "{projectRoot}" }
+        }
+    }
+}
