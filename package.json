@@ -1,5 +1,5 @@
 {
-    "name": "snailicid3/root",
+    "name": "@snailicid3/root",
     "version": "0.0.0",
     "private": true,
     "description": "snailicid3 monorepo",
@@ -90,6 +90,7 @@
     "devDependencies": {
         "@commitlint/cli": "^20.5.0",
         "@commitlint/config-conventional": "^20.5.0",
+        "@commitlint/cz-commitlint": "^20.5.1",
         "@nx/devkit": "^22.6.5",
         "@snailicid3/config": "workspace:*",
         "@snailicide/build-config": "^1.4.4",
@@ -110,7 +111,7 @@
     },
     "config": {
         "commitizen": {
-            "path": "cz-conventional-changelog"
+            "path": "@commitlint/cz-commitlint"
         }
     }
 }
