@@ -38,14 +38,14 @@
         },
         "lint": {
             "cache": false,
-            "dependsOn": ["check:ts"],
-            "command": "prettier --check \"{*,.*}.{ts,tsx,mts,cts,json,yaml,yml,md,sh}\" \".github/**/*.{yaml,yml}\" \".husky/*\" --no-error-on-unmatched-pattern && eslint ./*.ts ./*.mts ./*.cts",
+            "dependsOn": ["build:ts"],
+            "command": "prettier --check \"{*,.*}.{ts,tsx,mts,cts,json,yaml,yml,md,sh}\" \".github/**/*.{yaml,yml}\" \".husky/*\" --no-error-on-unmatched-pattern && eslint --config eslint.config.ts ./*.ts ./*.mts ./*.cts",
             "options": { "cwd": "{projectRoot}" }
         },
         "fix": {
             "cache": false,
-            "dependsOn": ["check:ts"],
-            "command": "prettier --write \"{*,.*}.{ts,tsx,mts,cts,json,yaml,yml,md,sh}\" \".github/**/*.{yaml,yml}\" \".husky/*\" --no-error-on-unmatched-pattern && eslint ./*.ts ./*.mts ./*.cts --fix",
+            "dependsOn": ["build:ts"],
+            "command": "prettier --write \"{*,.*}.{ts,tsx,mts,cts,json,yaml,yml,md,sh}\" \".github/**/*.{yaml,yml}\" \".husky/*\" --no-error-on-unmatched-pattern && eslint --config eslint.config.ts ./*.ts ./*.mts ./*.cts --fix",
             "options": { "cwd": "{projectRoot}" }
         },
         "lint:md": {
