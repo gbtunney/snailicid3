@@ -105,13 +105,13 @@
         "lint": {
             "cache": false,
             "dependsOn": ["check:ts"],
-            "command": "prettier --check . --ignore-path ../../.prettierignore && eslint .",
+            "command": "prettier --check . && eslint .",
             "options": { "cwd": "{projectRoot}" }
         },
         "fix": {
             "cache": false,
             "dependsOn": ["check:ts"],
-            "command": "prettier --write . --ignore-path ../../.prettierignore && eslint . --fix",
+            "command": "prettier --write . && eslint . --fix",
             "options": { "cwd": "{projectRoot}" }
         },
         "clean:ts": {
