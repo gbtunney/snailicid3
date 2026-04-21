@@ -59,7 +59,6 @@
             "import": "./dist/index.js",
             "types": "./types/index.d.ts"
         },
-        "./tsconfig-base": "./tsconfig-base.json",
         "./tsconfig.base": "./typescript-config/tsconfig.base.json",
         "./tsconfig.library": "./typescript-config/tsconfig.library.json",
         "./tsconfig.typecheck": "./typescript-config/tsconfig.typecheck.json",
@@ -95,6 +94,10 @@
                 "cache": true,
                 "dependsOn": [
                     "build:ts"
+                ],
+                "outputs": [
+                    "{projectRoot}/dist/.prettierrc.json",
+                    "{projectRoot}/dist/.markdownlint.json"
                 ]
             },
             "build": {
