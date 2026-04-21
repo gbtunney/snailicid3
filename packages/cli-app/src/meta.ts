@@ -50,7 +50,7 @@ export const updateMetaForSchema = <Schema extends z.ZodType>(
 
 /** TODO i have no idea what this is */
 export type AppConfigMeta = {
-    logger:  string 
+    logger: string
 }
 
 export const initAppRegistry = (): void => {

@@ -17,7 +17,9 @@ const testInput = scaffoldInputSchema.parse({
 
 describe('scaffoldInputSchema', () => {
     test('accepts valid lowercase hyphenated name', () => {
-        expect(() => scaffoldInputSchema.parse({ name: 'my-pkg' })).not.toThrow()
+        expect(() =>
+            scaffoldInputSchema.parse({ name: 'my-pkg' }),
+        ).not.toThrow()
     })
 
     test('rejects uppercase names', () => {
@@ -141,7 +143,9 @@ describe('scaffoldPackage', () => {
         const outDir = mkdtempSync(join(tmpdir(), 'scaffold-test-'))
         scaffoldPackage(testInput, outDir)
 
-        const pkg = JSON.parse(readFileSync(join(outDir, 'package.json'), 'utf8'))
+        const pkg = JSON.parse(
+            readFileSync(join(outDir, 'package.json'), 'utf8'),
+        )
         expect(pkg.name).toBe('@snailicid3/my-pkg')
     })
 

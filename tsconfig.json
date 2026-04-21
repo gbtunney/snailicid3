@@ -1,13 +1,17 @@
 {
-  /* * TODO : WIP maybe extend child package */
-  
-  "extends": "@snailicid3/config/tsconfig.typecheck",
-  "compilerOptions": {
-    "types": ["node"],
-    "noEmit": false,
-  },
-    "files":["./commitlint.config.ts","./.markdownlint-cli2.mts",".lintstagedrc.mts"],
+    /* * TODO : WIP maybe extend child package */
 
-    "include": ["./*.ts", "./*.mts", "./*.cts" ],
-  "exclude": ["node_modules","scratch"]
+    "extends": "@snailicid3/config/tsconfig.typecheck",
+    "compilerOptions": {
+        "types": ["node"],
+        "noEmit": false
+    },
+    "files": [
+        "./commitlint.config.ts",
+        "./.markdownlint-cli2.mts",
+        ".lintstagedrc.mts"
+    ],
+
+    "include": ["./*.ts", "./*.mts", "./*.cts"],
+    "exclude": ["node_modules", "scratch"]
 }

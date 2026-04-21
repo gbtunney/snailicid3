@@ -1,6 +1,6 @@
-import { isValidColor,parseColorToHex} from '@snailicid3/color'
+import { isValidColor, parseColorToHex } from '@snailicid3/color'
 import { logger } from '@snailicid3/logger'
-import {  stringUtils } from '@snailicid3/utils'
+import { stringUtils } from '@snailicid3/utils'
 
 import { Merge } from 'type-fest'
 import { z } from 'zod'
@@ -21,11 +21,15 @@ export type AppFlagAliases<Schema extends ZodObjectSchema> = DefaultAliases & {
     [Key in keyof z.infer<Schema>]?: string
 }
 
-export type AppHidden<Schema extends ZodObjectSchema> = Array<keyof z.infer<Schema>>
+export type AppHidden<Schema extends ZodObjectSchema> = Array<
+    keyof z.infer<Schema>
+>
 export type AppConfigOut = z.infer<typeof appConfigSchema>
 export type AppConfig = AppConfigOut
 
-export type AppConfigIn<Schema extends ZodObjectSchema = typeof appConfigSchema> = z.input<
+export type AppConfigIn<
+    Schema extends ZodObjectSchema = typeof appConfigSchema,
+> = z.input<
     z.ZodType<
         AppConfig,
         //  z.ZodTypeDef,
@@ -85,12 +89,14 @@ export const appConfigSchema = z.object({
         .meta({ description: 'hide a key from the help menu' }),*/
     name: z
         .string()
-        .transform((value: string): string => stringUtils.hyphenate(value).toLowerCase()),
+        .transform((value: string): string =>
+            stringUtils.hyphenate(value).toLowerCase(),
+        ),
     print: z.boolean().default(true).meta({ description: 'Print the header' }),
     /** Clears the terminal window */
     skip_interactive: z.boolean().default(false),
     title_color: z
-        
+
         .object({
             //TODO make into zod schema
             bg: z
@@ -99,25 +105,26 @@ export const appConfigSchema = z.object({
                 .refine(
                     (value: string) => isValidColor(value),
                     'Must be a valid hex color string',
-                ).transform((value: string)=> parseColorToHex(value)),
+                )
+                .transform((value: string) => parseColorToHex(value)),
             fg: z
                 .string()
                 .default('#d104ff')
                 .refine(
                     (value: string) => isValidColor(value),
                     'Must be a valid hex color string',
-                ).transform((value: string)=> parseColorToHex(value)),
+                )
+                .transform((value: string) => parseColorToHex(value)),
         })
         .default({
             bg: parseColorToHex('#12043A'),
-           fg: parseColorToHex('#d104ff'),
+            fg: parseColorToHex('#d104ff'),
         })
         .meta({
             description:
-
                 /** TODO make all colorjs string colors parse to hex */
                 'Color for the title text and background. Please use a valid hex color value.',
-        }), 
+        }),
     version: z
         .string()
         .default('0.0.0')
@@ -129,7 +136,9 @@ export const appConfigSchema = z.object({
 
 export type AppConfigSchema = typeof appConfigSchema
 
-export const resolveAppConfigSchema = <AppOptionsSchema extends ZodObjectSchema>(
+export const resolveAppConfigSchema = <
+    AppOptionsSchema extends ZodObjectSchema,
+>(
     value: AppConfigIn<AppOptionsSchema>,
     schema: AppConfigSchema, //note : the default parameter errors like: schema:  AppConfigSchema=appConfigSchema
 ): z.infer<AppConfigSchema> | undefined => {
@@ -149,7 +158,9 @@ const packageSchema = wrapSchema<typeof appConfigSchema>(appConfigSchema).pick({
     version: true,
 })
 
-export const parsePackageJson = (pkg: unknown): z.infer<typeof packageSchema> | undefined => {
+export const parsePackageJson = (
+    pkg: unknown,
+): z.infer<typeof packageSchema> | undefined => {
     const _parseResult = packageSchema.safeParse(pkg)
     if (_parseResult.success) {
         return _parseResult.data

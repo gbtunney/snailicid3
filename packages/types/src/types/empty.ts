@@ -1,7 +1,5 @@
 /** @group Empty Types */
-import type {
-    EmptyObject,
-} from 'type-fest'
+import type { EmptyObject } from 'type-fest'
 
 /* * EMPTY TYPES  * */
 /** @group Empty Types */

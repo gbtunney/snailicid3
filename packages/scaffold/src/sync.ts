@@ -14,7 +14,10 @@ export type SyncResult = {
     reason?: string
 }
 
-const syncPackageJson = (input: ScaffoldInput, packageDir: string): SyncResult => {
+const syncPackageJson = (
+    input: ScaffoldInput,
+    packageDir: string,
+): SyncResult => {
     const filePath = join(packageDir, 'package.json')
     const template = generatePackageJson(input)
 
@@ -23,11 +26,20 @@ const syncPackageJson = (input: ScaffoldInput, packageDir: string): SyncResult =
         return { action: 'created', file: 'package.json' }
     }
 
-    const existing = JSON.parse(readFileSync(filePath, 'utf8')) as Record<string, unknown>
+    const existing = JSON.parse(readFileSync(filePath, 'utf8')) as Record<
+        string,
+        unknown
+    >
 
     // Overwrite scripts entirely, merge devDependencies (add missing only)
-    const existingDevDeps = (existing.devDependencies ?? {}) as Record<string, string>
-    const templateDevDeps = (template.devDependencies ?? {}) as Record<string, string>
+    const existingDevDeps = (existing.devDependencies ?? {}) as Record<
+        string,
+        string
+    >
+    const templateDevDeps = (template.devDependencies ?? {}) as Record<
+        string,
+        string
+    >
     const mergedDevDeps: Record<string, string> = { ...existingDevDeps }
     for (const [key, value] of Object.entries(templateDevDeps)) {
         if (!(key in mergedDevDeps)) {
@@ -42,7 +54,11 @@ const syncPackageJson = (input: ScaffoldInput, packageDir: string): SyncResult =
     }
 
     writeFileSync(filePath, JSON.stringify(updated, null, 4) + '\n')
-    return { action: 'updated', file: 'package.json', reason: 'scripts + devDependencies merged' }
+    return {
+        action: 'updated',
+        file: 'package.json',
+        reason: 'scripts + devDependencies merged',
+    }
 }
 
 const syncTsConfig = (input: ScaffoldInput, packageDir: string): SyncResult => {
@@ -54,7 +70,10 @@ const syncTsConfig = (input: ScaffoldInput, packageDir: string): SyncResult => {
         return { action: 'created', file: 'tsconfig.json' }
     }
 
-    const existing = JSON.parse(readFileSync(filePath, 'utf8')) as Record<string, unknown>
+    const existing = JSON.parse(readFileSync(filePath, 'utf8')) as Record<
+        string,
+        unknown
+    >
     const updated = {
         ...existing,
         compilerOptions: {
@@ -64,7 +83,11 @@ const syncTsConfig = (input: ScaffoldInput, packageDir: string): SyncResult => {
     }
 
     writeFileSync(filePath, JSON.stringify(updated, null, 4) + '\n')
-    return { action: 'updated', file: 'tsconfig.json', reason: 'compilerOptions merged' }
+    return {
+        action: 'updated',
+        file: 'tsconfig.json',
+        reason: 'compilerOptions merged',
+    }
 }
 
 const syncReadme = (input: ScaffoldInput, packageDir: string): SyncResult => {
@@ -87,12 +110,20 @@ const syncReadme = (input: ScaffoldInput, packageDir: string): SyncResult => {
             header.trimEnd() +
             existing.slice(endIdx + HEADER_END.length)
         writeFileSync(filePath, updated)
-        return { action: 'updated', file: 'README.md', reason: 'header block replaced' }
+        return {
+            action: 'updated',
+            file: 'README.md',
+            reason: 'header block replaced',
+        }
     }
 
     // Prepend header block
     writeFileSync(filePath, header + '\n' + existing)
-    return { action: 'updated', file: 'README.md', reason: 'header block prepended' }
+    return {
+        action: 'updated',
+        file: 'README.md',
+        reason: 'header block prepended',
+    }
 }
 
 const checkRollupConfig = (packageDir: string): SyncResult => {
@@ -111,7 +142,10 @@ const checkRollupConfig = (packageDir: string): SyncResult => {
     }
 }
 
-export const syncPackage = (input: ScaffoldInput, packageDir: string): Array<SyncResult> => [
+export const syncPackage = (
+    input: ScaffoldInput,
+    packageDir: string,
+): Array<SyncResult> => [
     syncPackageJson(input, packageDir),
     syncTsConfig(input, packageDir),
     syncReadme(input, packageDir),

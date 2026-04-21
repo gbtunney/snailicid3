@@ -18,7 +18,13 @@ export const scaffoldPackage = (input: ScaffoldInput, outDir: string): void => {
         join(outDir, 'tsconfig.json'),
         JSON.stringify(generateTsConfig(input), null, 4) + '\n',
     )
-    writeFileSync(join(outDir, 'rollup.config.mts'), generateRollupConfig(input))
+    writeFileSync(
+        join(outDir, 'rollup.config.mts'),
+        generateRollupConfig(input),
+    )
     writeFileSync(join(outDir, 'README.md'), generateReadme(input))
-    writeFileSync(join(outDir, 'src/index.ts'), `// @snailicid3/${input.name}\n`)
+    writeFileSync(
+        join(outDir, 'src/index.ts'),
+        `// @snailicid3/${input.name}\n`,
+    )
 }
