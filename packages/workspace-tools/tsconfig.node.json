@@ -10,6 +10,7 @@
     ],
     "exclude": ["**/*.test.ts", "**/*.test.mts", "**/*.test.cts"],
     "compilerOptions": {
-        "types": ["node"]
+        "types": ["node"],
+        "rootDir": "."
     }
 }

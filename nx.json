@@ -96,8 +96,7 @@
         },
         "check:ts": {
             "cache": true,
-            "dependsOn": ["build:ts", "^test"],
-
+            "dependsOn": ["build:ts", "^build"],
             "inputs": ["default", "^default"],
             "command": "tsc --build tsconfig.json",
             "options": { "cwd": "{projectRoot}" }
