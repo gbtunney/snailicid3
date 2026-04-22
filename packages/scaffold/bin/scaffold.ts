@@ -2,12 +2,17 @@
 import { initApp } from '@snailicid3/cli-app'
 import { z } from 'zod'
 
-import { scaffoldInputSchema, scaffoldPackage, syncPackage } from '../src/index.js'
+import {
+    scaffoldInputSchema,
+    scaffoldPackage,
+    syncPackage,
+} from '../src/index.js'
 
 const schema = scaffoldInputSchema.extend({
     dir: z.string().optional().meta({
         alias: 'd',
-        description: '<path> Target output directory (defaults to ./packages/<name>)',
+        description:
+            '<path> Target output directory (defaults to ./packages/<name>)',
     }),
     sync: z.boolean().default(false).meta({
         alias: 's',

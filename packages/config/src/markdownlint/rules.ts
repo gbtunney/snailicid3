@@ -172,7 +172,7 @@ export const getMergedRuleConfiguration = (
     })
     const merged: MarkdownlintRuleConfiguration = !useBaseConfig
         ? withDefault
-        : (deepmerge(baseConfig, withDefault) as MarkdownlintRuleConfiguration)
+        : deepmerge(baseConfig, withDefault)
     return merged
 }
 

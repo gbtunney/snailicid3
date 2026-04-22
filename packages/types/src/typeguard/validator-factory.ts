@@ -51,7 +51,7 @@ export function factoryValidator<ValueType, BaseName extends string>(
     const isNotKeyName: IsNotKey<BaseName> = `isNot${pascalCaseName}`
 
     const isFunction: (inputValue: unknown) => boolean = (inputValue) =>
-        (predicateFunction as (v: unknown) => boolean)(inputValue)
+        predicateFunction(inputValue)
     const isNotFunction: (inputValue: unknown) => boolean = (inputValue) =>
         !isFunction(inputValue)
 

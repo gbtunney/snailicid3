@@ -1,4 +1,4 @@
-import type { Entries, Simplify, UnknownRecord, ValueOf } from 'type-fest'
+import type { Simplify, UnknownRecord, ValueOf } from 'type-fest'
 import type {
     EntriesOf,
     FromEntriesTuples,
@@ -6,7 +6,7 @@ import type {
 } from './../types/utility.js'
 export const keysOf = <ObjectType extends UnknownRecord>(
     obj: ObjectType,
-): Array<KeysOf<ObjectType>> => Object.keys(obj) as Array<KeysOf<ObjectType>>
+): Array<KeysOf<ObjectType>> => Object.keys(obj)
 /** TODO : maybe pick, omit, prefix keys. Also see workspace utils to have a search function. */
 export const entriesOf = <ObjectType extends UnknownRecord>(
     obj: ObjectType,
@@ -59,7 +59,7 @@ export const mapObject = <
 ): Record<NewKey, NewValue> => {
     const tuples: Array<readonly [NewKey, NewValue]> = []
     let index = 0
-    for (const entry of entriesOf(object) as Entries<ObjectType>) {
+    for (const entry of entriesOf(object)) {
         const next = mapper(entry as any, index++)
         if (next) tuples.push(next)
     }
@@ -74,22 +74,17 @@ export const mapValues = <ObjectType extends UnknownRecord, MappedValue>(
         index: number,
     ) => MappedValue,
 ): Simplify<{ [Key in keyof ObjectType]: MappedValue }> => {
-    const tuples: ReadonlyArray<readonly [keyof ObjectType, MappedValue]> = (
-        entriesOf(object) as Entries<ObjectType>
-    ).map(
-        ([key, value], index) =>
-            [
-                key,
-                mapper(
-                    value as ObjectType[keyof ObjectType],
-                    key as keyof ObjectType,
-                    index,
-                ),
-            ] as const,
-    )
-    return fromEntriesRecord<keyof ObjectType, MappedValue>(
-        tuples,
-    ) as Simplify<{
-        [Key in keyof ObjectType]: MappedValue
-    }>
+    const tuples: ReadonlyArray<readonly [keyof ObjectType, MappedValue]> =
+        entriesOf(object).map(
+            ([key, value], index) =>
+                [
+                    key,
+                    mapper(
+                        value as ObjectType[keyof ObjectType],
+                        key as keyof ObjectType,
+                        index,
+                    ),
+                ] as const,
+        )
+    return fromEntriesRecord<keyof ObjectType, MappedValue>(tuples)
 }

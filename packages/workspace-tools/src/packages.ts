@@ -47,14 +47,11 @@ export function getWorkspacePackagesObject<R>(
 ): Record<string, R | WorkspacePackage> {
     const pkgs = getWorkspacePackagesList(filter)
     if (!mapValue) {
-        return Object.fromEntries(pkgs.map((pkg) => [pkg.name, pkg])) as Record<
-            string,
-            WorkspacePackage
-        >
+        return Object.fromEntries(pkgs.map((pkg) => [pkg.name, pkg]))
     }
     return Object.fromEntries(
         pkgs.map((pkg, i) => [pkg.name, mapValue(pkg, pkg.name, i)]),
-    ) as Record<string, R>
+    )
 }
 
 export function getWorkspaceRoot(): string {

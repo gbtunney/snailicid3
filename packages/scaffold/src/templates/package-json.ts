@@ -1,6 +1,8 @@
 import type { ScaffoldInput } from '../input.js'
 
-export const generatePackageJson = (input: ScaffoldInput): Record<string, unknown> => ({
+export const generatePackageJson = (
+    input: ScaffoldInput,
+): Record<string, unknown> => ({
     author: {
         email: 'gbtunney@mac.com',
         name: 'Gillian Tunney',
@@ -10,8 +12,8 @@ export const generatePackageJson = (input: ScaffoldInput): Record<string, unknow
     devDependencies: {
         '@snailicid3/config': 'workspace:*',
         '@types/node': '^22.0.0',
-        typescript: '^5.7.0',
-        vitest: '^2.1.0',
+        'typescript': '^5.7.0',
+        'vitest': '^2.1.0',
     },
     exports: {
         '.': {
@@ -31,7 +33,7 @@ export const generatePackageJson = (input: ScaffoldInput): Record<string, unknow
     scripts: {
         '\n========== DEVELOPMENT >> ==========': '',
         '\n========== TEST >> ==========': '',
-        dev: 'tsc --build --watch',
+        'dev': 'tsc --build --watch',
         'test:coverage': 'vitest run --coverage',
         'test:watch': 'vitest watch',
     },

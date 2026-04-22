@@ -90,7 +90,7 @@ describe('typeguards', () => {
     test('numeric', () => {
         assertIsNumeric(2)
         expect(() => {
-            assertIsNumeric('2' as any)
+            assertIsNumeric('2')
         }).toThrow()
         assertIsPossibleNumeric(2)
         expect(() => {

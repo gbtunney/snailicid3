@@ -1,4 +1,4 @@
-import {  logger ,type Logger} from '@snailicid3/logger'
+import { logger, type Logger } from '@snailicid3/logger'
 import { fmt, formatValue } from '@snailicid3/utils'
 import type { ArrayValues, Primitive } from 'type-fest'
 import { Choices, Options as SingleYarg } from 'yargs'
@@ -21,7 +21,8 @@ type YargAppOption = Pick<SingleYarg, 'describe' | 'default' | 'type'>
 type YargAppOptions = Record<string, SingleYarg> // Pick<Options, 'describe' | 'default' | 'type'>
 type YargsEnumOptions = ArrayValues<Choices>
 
-const LOGGER = (): Logger => logger.get().child('zod-schema', { level: 'error' })
+const LOGGER = (): Logger =>
+    logger.get().child('zod-schema', { level: 'error' })
 
 export const getYargsInteractive = (): yargsInteractive.Interactive => {
     return yargsInteractive()
@@ -32,13 +33,18 @@ export const getYargs = (): yargsInteractive.Interactive => {
 }
 
 /** Convert a zod schema to a yargs options object */
-export const getYargAppOptionObject = <AppOptionsSchema extends ZodObjectSchema>(
+export const getYargAppOptionObject = <
+    AppOptionsSchema extends ZodObjectSchema,
+>(
     optionsSchema: AppOptionsSchema,
 ): YargAppOptions => {
-    const option_schema: AppOptionsSchema = wrapSchema<AppOptionsSchema>(optionsSchema)
+    const option_schema: AppOptionsSchema =
+        wrapSchema<AppOptionsSchema>(optionsSchema)
 
     const keyList: Array<string> = Object.keys(option_schema.shape)
-    const rawEntries = Array.from(Object.entries(option_schema.shape) as Array<[string, z.ZodType]>)
+    const rawEntries = Array.from(
+        Object.entries(option_schema.shape) as Array<[string, z.ZodType]>,
+    )
 
     LOGGER().warn(fmt`------KEY LIST IS" , ${keyList.join(', ')}`)
 
@@ -51,9 +57,12 @@ export const getYargAppOptionObject = <AppOptionsSchema extends ZodObjectSchema>
 
             const innerContainerSchema = getValueSchema(value, true)
             /* Set ids to the hash key and get meta*/
-            const optionMeta: CLIAppMeta | undefined = updateMetaForSchema(wrapperSchema, {
-                id: _key,
-            })
+            const optionMeta: CLIAppMeta | undefined = updateMetaForSchema(
+                wrapperSchema,
+                {
+                    id: _key,
+                },
+            )
 
             // ...existing code...
             LOGGER().warn(
@@ -132,7 +141,10 @@ export const getArraySchemaString = (_schema: z.ZodType): string => {
 }
 
 /** Get enum values for help table */
-export const getEnumValues = <Schema extends z.ZodType, Values extends Primitive = Primitive>(
+export const getEnumValues = <
+    Schema extends z.ZodType,
+    Values extends Primitive = Primitive,
+>(
     schema: Schema,
 ): Array<util.EnumValue> | undefined => {
     if (schema instanceof z.ZodEnum && schema.type === 'enum') {
@@ -146,6 +158,8 @@ export const getEnumValues = <Schema extends z.ZodType, Values extends Primitive
     }
     return undefined
 }
-export const getEnumType = (values: Array<util.EnumValue>): YargsEnumOptions => {
+export const getEnumType = (
+    values: Array<util.EnumValue>,
+): YargsEnumOptions => {
     return values.length > 0 ? typeof values[0] : 'string'
 }

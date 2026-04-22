@@ -46,7 +46,7 @@ export const getPrettierPluginsBundled = (): Array<AnyPrettierPlugin> => {
 }
 
 export const getPrettierPluginsList = (): Array<PrettierPluginName> => {
-    return keysOf(PRETTIER_PLUGINS) as Array<PrettierPluginName>
+    return keysOf(PRETTIER_PLUGINS)
 }
 
 export const DEFAULT_PRETTIER_PLUGIN_LIST: Array<PrettierPluginName> =

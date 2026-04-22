@@ -1,4 +1,4 @@
-import {  logger } from '@snailicid3/logger'
+import { logger } from '@snailicid3/logger'
 import { fmt, formatValue } from '@snailicid3/utils'
 import chalk from 'chalk'
 import yargs from 'yargs'
@@ -18,7 +18,9 @@ import { getYargAppOptionObject } from './zod-schema.js'
  * @param {z.infer<AppOptionsSchema>} resolvedFlags - The resolved and validated flags based on the provided schema.
  * @param {string | undefined} help - The help string, if available, otherwise undefined.
  */
-export type InitSuccessCallback<AppOptionsSchema extends ZodObjectSchema = z.ZodObject> = (
+export type InitSuccessCallback<
+    AppOptionsSchema extends ZodObjectSchema = z.ZodObject,
+> = (
     args: z.infer<AppOptionsSchema>,
     config: AppConfig, // or: z.infer<typeof appConfigSchema>
     help: string | undefined,
@@ -51,9 +53,11 @@ export const initApp = async <AppOptionsSchema extends ZodObjectSchema>(
         const LOGGER = logger.get().child('app_init')
         ///LOGGER.setLevel('debug')
 
-        const option_schema: z.ZodObject = wrapSchema<z.ZodObject>(optionsSchema)
+        const option_schema: z.ZodObject =
+            wrapSchema<z.ZodObject>(optionsSchema)
 
-        const yargsAppOptionsConfig: Record<string, Options> = getYargAppOptionObject(option_schema)
+        const yargsAppOptionsConfig: Record<string, Options> =
+            getYargAppOptionObject(option_schema)
 
         const wrapped_app_options = wrapSchema<AppOptionsSchema>(optionsSchema)
 
@@ -67,11 +71,15 @@ export const initApp = async <AppOptionsSchema extends ZodObjectSchema>(
             ? doPrintHeader(getHeader(app_config))
             : fmt`\nWelcome to ${app_config.name} ${getHeader(app_config).divider}`
 
-        const getPlainArgsInstance = (value = process.argv): Argv<Record<string, unknown>> => {
+        const getPlainArgsInstance = (
+            value = process.argv,
+        ): Argv<Record<string, unknown>> => {
             return yargs(value)
         }
         /** Function to Write commander like options from zod descriptions */
-        const getArgsInstance = (value = process.argv): Argv<Record<string, unknown>> => {
+        const getArgsInstance = (
+            value = process.argv,
+        ): Argv<Record<string, unknown>> => {
             const yargs_instance: Argv<Record<string, unknown>> = yargs(value)
             yargs_instance
                 .scriptName(app_config.name)
@@ -119,7 +127,13 @@ export const initApp = async <AppOptionsSchema extends ZodObjectSchema>(
         } else {
             const argParseError = argSuccess.error
 
-            LOGGER.error(prettyErrorLog(argParseError, 'Invalid command line arguments', undefined))
+            LOGGER.error(
+                prettyErrorLog(
+                    argParseError,
+                    'Invalid command line arguments',
+                    undefined,
+                ),
+            )
             /* Respect CLI flag if provided; otherwise fallback to config */
             const interactive_arg = (raw_arguments as any)?.interactive
             const interactive_bool =
@@ -149,7 +163,9 @@ export const initApp = async <AppOptionsSchema extends ZodObjectSchema>(
                                         'Invalid command line arguments',
                                     ),
                                 )
-                                LOGGER.error(`Raw Yargs: \n ${formatValue(raw_arguments)}`)
+                                LOGGER.error(
+                                    `Raw Yargs: \n ${formatValue(raw_arguments)}`,
+                                )
                                 return undefined
                             }
                         } else if (result.errorlist === 'HELP') {
@@ -164,7 +180,13 @@ export const initApp = async <AppOptionsSchema extends ZodObjectSchema>(
     } else
         logger
             .get()
-            .fatal(prettyErrorLog(_appConfigResult.error, 'Invalid app configuration', 'magenta'))
+            .fatal(
+                prettyErrorLog(
+                    _appConfigResult.error,
+                    'Invalid app configuration',
+                    'magenta',
+                ),
+            )
     return undefined
 }
 export const initializeApp = initApp

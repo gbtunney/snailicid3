@@ -1,10 +1,4 @@
-import type {
-    JsonArray,
-    JsonObject,
-    JsonPrimitive,
-    JsonValue,
-    UnknownRecord,
-} from 'type-fest'
+import type { JsonArray, JsonObject, JsonValue, UnknownRecord } from 'type-fest'
 import fs from 'fs'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -80,7 +74,7 @@ export const importJSON = async (
             typeof parsedData === 'number' ||
             typeof parsedData === 'boolean'
         ) {
-            return parsedData as JsonPrimitive
+            return parsedData
         }
 
         return parsedData as JsonValue

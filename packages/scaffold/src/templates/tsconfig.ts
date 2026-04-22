@@ -1,6 +1,8 @@
 import type { ScaffoldInput } from '../input.js'
 
-export const generateTsConfig = (_input: ScaffoldInput): Record<string, unknown> => ({
+export const generateTsConfig = (
+    _input: ScaffoldInput,
+): Record<string, unknown> => ({
     compilerOptions: {
         declaration: true,
         declarationMap: true,

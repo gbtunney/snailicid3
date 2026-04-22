@@ -60,8 +60,9 @@ export const exportJSONFile = (
                 ? path.resolve(outdir, file_name)
                 : path.resolve(file_name)
 
-            const writeFile = (path: string = file_path): void => {
-                fs.writeFileSync(path, prettyPrintJSON(entry.data))
+            const writeFile = (filePath: string = file_path): void => {
+                fs.mkdirSync(path.dirname(filePath), { recursive: true })
+                fs.writeFileSync(filePath, prettyPrintJSON(entry.data))
             }
             const logObject = logData
                 ? `\n${prettyPrintJSON(entry.data, 12)}`

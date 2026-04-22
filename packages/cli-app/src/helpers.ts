@@ -1,22 +1,28 @@
-import {  logger } from '@snailicid3/logger'
+import { logger } from '@snailicid3/logger'
 import { fmt } from '@snailicid3/utils'
 import { MergeExclusive } from 'type-fest'
 import { z } from 'zod'
 // Example: Refactor sichema merging
 export type ZodObjectSchema = z.ZodObject //| z.ZodType<z.ZodObject>  //| z.ZodEffects<z.AnyZodObject>
-export type WrappedSchema<Schema extends ZodObjectSchema> = Schema extends ZodObjectSchema
-    ? Schema
-    : never
+export type WrappedSchema<Schema extends ZodObjectSchema> =
+    Schema extends ZodObjectSchema ? Schema : never
 // Detect effects (transform/refine/preprocess)
 
 /** TODO THIS HAS THE PRETTIFY HELPERS IN IT !!! */
-export const wrapSchema = <Schema extends ZodObjectSchema>(schema: Schema): Schema => {
+export const wrapSchema = <Schema extends ZodObjectSchema>(
+    schema: Schema,
+): Schema => {
     return wrapAnyZodSchema<Schema>(schema)
 }
-export const wrapAnyZodSchema = <Schema extends z.ZodType>(schema: Schema): Schema => {
+export const wrapAnyZodSchema = <Schema extends z.ZodType>(
+    schema: Schema,
+): Schema => {
     return schema
 }
-export const mergeSchemas = <Schema1 extends z.ZodObject, Schema2 extends z.ZodObject>(
+export const mergeSchemas = <
+    Schema1 extends z.ZodObject,
+    Schema2 extends z.ZodObject,
+>(
     schemaA: Schema1,
     schemaB: Schema2,
 ): MergedSchemas<Schema1, Schema2> => {
@@ -27,9 +33,10 @@ export const mergeSchemas = <Schema1 extends z.ZodObject, Schema2 extends z.ZodO
     return _merged
 }
 
-export type MergedSchemas<SchemaA extends z.ZodObject, SchemaB extends z.ZodObject> = z.ZodObject<
-    MergeExclusive<SchemaA['shape'], SchemaB['shape']>
->
+export type MergedSchemas<
+    SchemaA extends z.ZodObject,
+    SchemaB extends z.ZodObject,
+> = z.ZodObject<MergeExclusive<SchemaA['shape'], SchemaB['shape']>>
 
 export const getDefaultValue = <Schema extends z.ZodType>(
     schema: Schema,
@@ -76,7 +83,9 @@ const hasRemoveDefault = (s: unknown): s is z.ZodType & WithRemoveDefault =>
     typeof (s as any)?.removeDefault === 'function'
 
 /** Container is a schema that contains other schemas, like array,object,record,set,map,tuple */
-export const hasContainer = <Schema extends z.ZodType>(schema: Schema): boolean =>
+export const hasContainer = <Schema extends z.ZodType>(
+    schema: Schema,
+): boolean =>
     schema instanceof z.ZodArray ||
     schema instanceof z.ZodObject ||
     schema instanceof z.ZodRecord ||
@@ -84,11 +93,18 @@ export const hasContainer = <Schema extends z.ZodType>(schema: Schema): boolean 
     schema instanceof z.ZodMap ||
     schema instanceof z.ZodTuple
 
-export const hasDefaultValueSet = <Schema extends z.ZodType>(schema: Schema): boolean => {
-    return hasUnwrap(schema) && hasRemoveDefault(schema) && getDefaultValue(schema) !== undefined
+export const hasDefaultValueSet = <Schema extends z.ZodType>(
+    schema: Schema,
+): boolean => {
+    return (
+        hasUnwrap(schema) &&
+        hasRemoveDefault(schema) &&
+        getDefaultValue(schema) !== undefined
+    )
 }
-export const hasZodWrapper = <Schema extends z.ZodType>(schema: Schema): boolean =>
-    schema instanceof z.ZodDefault || schema instanceof z.ZodOptional
+export const hasZodWrapper = <Schema extends z.ZodType>(
+    schema: Schema,
+): boolean => schema instanceof z.ZodDefault || schema instanceof z.ZodOptional
 
 /** Very simple recursive unwrapping: unwrap → removeDefault → innerType */
 export const getValueSchema = <Schema extends z.ZodType>(
@@ -100,10 +116,16 @@ export const getValueSchema = <Schema extends z.ZodType>(
     if (current instanceof z.ZodPipe) {
         /** .type */
         const _outputType = current._zod.def.out._zod.def
-        const _inputType = current._zod.def.in._zod.def ? current._zod.def.in._zod.def : undefined
+        const _inputType = current._zod.def.in._zod.def
+            ? current._zod.def.in._zod.def
+            : undefined
 
         if (!_outputType) {
-            logger.get().warn(`no output detected in pipe; this may cause unexpected behavior.`)
+            logger
+                .get()
+                .warn(
+                    `no output detected in pipe; this may cause unexpected behavior.`,
+                )
         } else if (_outputType.type === 'transform') {
             logger
                 .get()
@@ -122,7 +144,9 @@ export const getValueSchema = <Schema extends z.ZodType>(
                 const myNewType: z.ZodType | undefined = (
                     _inputType as unknown as Record<string, unknown>
                 )['innerType']
-                    ? ((_inputType as unknown as Record<string, unknown>)['innerType'] as z.ZodType)
+                    ? ((_inputType as unknown as Record<string, unknown>)[
+                          'innerType'
+                      ] as z.ZodType)
                     : undefined
                 if (myNewType) {
                     logger

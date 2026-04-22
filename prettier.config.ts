@@ -1,3 +1,3 @@
-import { Prettier } from "@snailicid3/config";
+import { Prettier } from '@snailicid3/config'
 
-export default Prettier.config;
+export default Prettier.config

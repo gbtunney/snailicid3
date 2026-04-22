@@ -1,10 +1,15 @@
-import {  logger } from '@snailicid3/logger'
+import { logger } from '@snailicid3/logger'
 import { fmt } from '@snailicid3/utils'
 import yargsInteractive from 'yargs-interactive'
 import { z } from 'zod'
 import { AppConfig } from './app-config.js'
 import { mergeSchemas } from './helpers.js'
-import { AppConfigIn, commonFlagsSchema, initApp, InitSuccessCallback } from './index.js'
+import {
+    AppConfigIn,
+    commonFlagsSchema,
+    initApp,
+    InitSuccessCallback,
+} from './index.js'
 
 //todo: fix log levels
 const LOGGER = logger.get({
@@ -64,7 +69,9 @@ const initFunc: InitSuccessCallback<typeof my_merged_schema> = async (
     args: z.infer<typeof my_merged_schema>,
     config: AppConfig,
 ): Promise<void> => {
-    logger.get().debug(`Resolved APP ARGS:`, fmt`!!!!!!!Resolved APP ARGS: ${args}`)
+    logger
+        .get()
+        .debug(`Resolved APP ARGS:`, fmt`!!!!!!!Resolved APP ARGS: ${args}`)
     if (!args.interactive) {
         logger.get().info('Non-interactive mode: skipping prompts')
     } else {
