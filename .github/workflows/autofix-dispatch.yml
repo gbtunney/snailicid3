@@ -60,14 +60,12 @@ jobs:
         with:
             mode: abort_on_error
             check_mode: fix
-            run_install: true
             require_lockfile: false
             require_clean_repo: false
             run_build: false
             run_test: false
             run_docs_build: false
             nx_cache_reset: false
-            pnpm_store_reset: false
             upload_workspace_artifact: true
             artifact_name_prefix: autofix-workspace
 

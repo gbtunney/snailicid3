@@ -6,25 +6,11 @@ on:
             mode:
                 description: Failure mode
                 required: true
-                default: report
+                default: abort_on_error
                 type: choice
                 options:
                     - report
                     - abort_on_error
-            check_mode:
-                description: Check routine mode
-                required: true
-                default: check
-                type: choice
-                options:
-                    - fix
-                    - check
-                    - skip
-            run_install:
-                description: Run install diagnostics
-                required: true
-                default: true
-                type: boolean
             require_lockfile:
                 description: Treat frozen lockfile install as required
                 required: true
@@ -35,6 +21,15 @@ on:
                 required: true
                 default: false
                 type: boolean
+            check_mode:
+                description: Check routine mode
+                required: true
+                default: check
+                type: choice
+                options:
+                    - fix
+                    - check
+                    - skip
             run_build:
                 description: Run pnpm build
                 required: true
@@ -55,10 +50,10 @@ on:
                 required: true
                 default: false
                 type: boolean
-            pnpm_store_reset:
-                description: Run pnpm store prune before routines
+            pnpm_cache:
+                description: Control pnpm cache usage (disable with false, default true)
                 required: true
-                default: false
+                default: true
                 type: boolean
             upload_workspace_artifact:
                 description: Upload workspace artifact at end (for debugging / downstream jobs)
@@ -80,14 +75,12 @@ jobs:
         with:
             mode: ${{ inputs.mode }}
             check_mode: ${{ inputs.check_mode }}
-            run_install: ${{ inputs.run_install }}
             require_lockfile: ${{ inputs.require_lockfile }}
             require_clean_repo: ${{ inputs.require_clean_repo }}
             run_build: ${{ inputs.run_build }}
             run_test: ${{ inputs.run_test }}
             run_docs_build: ${{ inputs.run_docs_build }}
             nx_cache_reset: ${{ inputs.nx_cache_reset }}
-            pnpm_store_reset: ${{ inputs.pnpm_store_reset }}
             upload_workspace_artifact: ${{ inputs.upload_workspace_artifact }}
             artifact_name_prefix: ${{ inputs.artifact_name_prefix }}
 
