@@ -31,7 +31,7 @@ export default {
         const ignores = toIgnoreArgs(mdIgnores)
         return [
             `pnpm exec prettier --write ${files}`,
-            `pnpm exec markdownlint-cli2 ${files} ${ignores} || true`,
+            `pnpm exec markdownlint-cli2 --fix ${files} ${ignores} || true`,
         ]
     },
 
