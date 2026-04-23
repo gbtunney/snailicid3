@@ -109,10 +109,12 @@ jobs:
               shell: bash
               run: |
                   ARTIFACT_DIR="${{ runner.temp }}/workspace-artifact"
-                  echo "Artifact contents:"
-                  ls -la "$ARTIFACT_DIR"
-                  rsync -a --delete --exclude='.git/' "$ARTIFACT_DIR"/ "$GITHUB_WORKSPACE"/
-                  echo "✅ Restored artifact"
+                  rsync -a \
+                    --exclude='.git/' \
+                    --exclude='node_modules/' \
+                    --exclude='dist/' \
+                    --exclude='types/' \
+                    "$ARTIFACT_DIR"/ "$GITHUB_WORKSPACE"/
 
             # ── Check if repo is dirty ────────────────────────────────
             - name: 🧼 Check repo status
@@ -143,6 +145,12 @@ jobs:
                   MESSAGE="${TYPE}(style): ${SUBJECT}"
 
                   git add -A
+                    ':!.github/**' \
+                    ':!.gitignore' \
+                    ':!.husky/**' \
+                    ':!.vscode/**' \
+                    ':!**/dist/**' \
+                    ':!**/types/**'
                   git commit -m "$MESSAGE" \
                     -m "Triggered by: @${{ github.actor }} via workflow_dispatch" \
                     -m "Branch: ${{ github.ref_name }}" \
