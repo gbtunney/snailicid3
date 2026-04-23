@@ -97,9 +97,6 @@ jobs:
                   node-version: 'lts/*'
 
             - uses: pnpm/action-setup@v4
-              with:
-                  cache: true
-                  run_install: false
 
             # ── Restore pipeline artifact ────────────────────────────
             - name: 📥 Download workspace artifact
@@ -108,19 +105,14 @@ jobs:
                   name: ${{ needs.pipeline_fix.outputs.workspace_artifact_name }}
                   path: ${{ runner.temp }}/workspace-artifact
 
-            - name: ♻️ Overlay workspace artifact onto checkout
+            - name: ♻️ Overlay artifact onto repo
               shell: bash
               run: |
-                  TAR_PATH="${{ runner.temp }}/workspace-artifact/workspace.tar.gz"
-
-                  if [ ! -f "$TAR_PATH" ]; then
-                    echo "Expected workspace tarball not found: $TAR_PATH"
-                    ls -la "${{ runner.temp }}/workspace-artifact"
-                    exit 1
-                  fi
-
-                  tar -xzf "$TAR_PATH" -C "$GITHUB_WORKSPACE"
-                  echo "✅ Restored artifact onto checkout."
+                  ARTIFACT_DIR="${{ runner.temp }}/workspace-artifact"
+                  echo "Artifact contents:"
+                  ls -la "$ARTIFACT_DIR"
+                  rsync -a --delete --exclude='.git/' "$ARTIFACT_DIR"/ "$GITHUB_WORKSPACE"/
+                  echo "✅ Restored artifact"
 
             # ── Derive commit scope from nx affected ──────────────────
             - name: 🔎 Derive commit scope
