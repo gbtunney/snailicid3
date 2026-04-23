@@ -241,7 +241,7 @@ jobs:
             # ── Artifact upload + outputs ────────────────────────────
             - name: 🏷️ Compute artifact name
               id: artifact_name
-              if: ${{ inputs.upload_workspace_artifact }}
+              if: ${{ inputs.upload_workspace_artifact && steps.repo_dirty.outputs.is_repo_dirty == 'true'}}
               shell: bash
               run: |
                   NAME="${{ inputs.artifact_name_prefix }}-${{ github.repository }}-${{ github.run_id }}-${{ github.run_attempt }}"
@@ -251,7 +251,7 @@ jobs:
 
             - name: 📦 Upload workspace artifact
               id: upload_workspace
-              if: ${{ inputs.upload_workspace_artifact }}
+              if: ${{ inputs.upload_workspace_artifact && steps.repo_dirty.outputs.is_repo_dirty == 'true' }}
               uses: actions/upload-artifact@v4
               with:
                   name: ${{ steps.artifact_name.outputs.name }}
@@ -267,7 +267,7 @@ jobs:
 
             - name: 🧾 Compute artifact_uploaded output
               id: artifact_uploaded
-              if: ${{ always() }}
+              if: ${{ steps.repo_dirty.outputs.is_repo_dirty == 'true'}}
               shell: bash
               run: |
                   if [ "${{ inputs.upload_workspace_artifact }}" != "true" ]; then
