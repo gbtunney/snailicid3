@@ -53,7 +53,7 @@
         "reset": "pnpm run uninstall && pnpm start",
         "registry:start": "pnpm exec verdaccio",
         "prepare": "husky",
-        "postinstall": "echo '\n=== >> Success:: Install complete.'",
+        "postinstall": "pnpm build:self && echo '\n=== >> Success:: Install complete.'",
         "prune": "pnpm store prune",
         "workspace": "pnpm -r",
         "\n========== PUBLISH >> ==========": "",
