@@ -171,9 +171,9 @@ jobs:
               run: pnpm report:prettier
 
             - name: 📚 Report Workspace
-              if: ${{ never() }}
+              if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
-              run: pnpm report:workspace
+              run: echo 'pnpm report:workspace'
 
             # ── Cache resets ─────────────────────────────────────────
             - name: 🧹 Reset Nx Cache
