@@ -32,6 +32,7 @@
         "report:repo": "python3 packages/workspace-tools/bin/python/repo_status.py",
         "report:workspace": "pnpm exec tsx packages/workspace-tools/bin/node/workspace-status.ts",
         "report:prettier": "pnpm exec tsx packages/workspace-tools/bin/node/prettier-status.ts",
+        "report:scope": "pnpm exec packages/workspace-tools/bin/shell/get-scope.sh",
         "\n========== BUILD >> ==========": "",
         "build": "pnpm nx:build",
         "build:self": "pnpm exec nx run root:build",
