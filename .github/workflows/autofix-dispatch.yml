@@ -58,11 +58,11 @@ jobs:
         name: Run autofix pipeline
         uses: ./.github/workflows/pipeline.yml
         with:
-            mode: abort_on_error
+            mode: report
             check_mode: fix
             require_lockfile: false
             require_clean_repo: false
-            run_build: false
+            run_build: true
             run_test: false
             run_docs_build: false
             nx_cache_reset: false
