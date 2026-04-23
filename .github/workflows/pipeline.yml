@@ -115,7 +115,7 @@ jobs:
             - uses: actions/setup-node@v4
               with:
                   node-version: 'lts/*'
-                  cache: ${{ inputs.pnpm_cache }}
+                  cache: true
 
             # ── Input summary ────────────────────────────────────────
             # Note: no native foreach over inputs; keep this explicit.
@@ -171,7 +171,7 @@ jobs:
               run: pnpm report:prettier
 
             - name: 📚 Report Workspace
-              if: ${{ always() }}
+              if: ${{ never() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm report:workspace
 
@@ -184,7 +184,17 @@ jobs:
             - name: 🗑️ Run Uninstall Cleanup
               if: ${{ inputs.nx_cache_reset }}
               continue-on-error: ${{ inputs.mode == 'report' }}
-              run: pnpm run uninstall
+              run: pnpm run nx:reset
+
+            - name: 🏗️ Run Build
+              if: ${{ inputs.run_build }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm build
+
+            - name: 🧪 Run Test
+              if: ${{ inputs.run_test }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm test
 
               # ── Routines ────────────────────────────────────────────
             - name: ✨ Run Fix Routine
@@ -200,16 +210,6 @@ jobs:
             - name: ⏭️ Skip Check Routine
               if: ${{ inputs.check_mode == 'skip' }}
               run: echo "check_mode=skip"
-
-            - name: 🏗️ Run Build
-              if: ${{ inputs.run_build }}
-              continue-on-error: ${{ inputs.mode == 'report' }}
-              run: pnpm build
-
-            - name: 🧪 Run Test
-              if: ${{ inputs.run_test }}
-              continue-on-error: ${{ inputs.mode == 'report' }}
-              run: pnpm test
 
             - name: 📘 Run Docs Build
               if: ${{ inputs.run_docs_build }}
