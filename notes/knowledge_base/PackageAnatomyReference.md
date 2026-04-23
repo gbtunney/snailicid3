@@ -1,10 +1,12 @@
 # Package Anatomy Reference
 
-A framework for reasoning about packages across four independent axes: **runtime** (where code executes),
-**product type** (what the package is for), **output format** (how the artifact is emitted), and **build
-strategy** (how the artifact is produced). Keeping these axes distinct prevents confusion when making build,
-publish, and deployment decisions. They are orthogonal - any combination is possible, and conflating them is
-the source of most packaging confusion.
+A framework for reasoning about packages across four independent axes:
+**runtime** (where code executes), **product type** (what the package is for),
+**output format** (how the artifact is emitted), and **build strategy** (how the
+artifact is produced). Keeping these axes distinct prevents confusion when
+making build, publish, and deployment decisions. They are orthogonal - any
+combination is possible, and conflating them is the source of most packaging
+confusion.
 
 -
 
@@ -35,13 +37,14 @@ the source of most packaging confusion.
 
 ## Definitions
 
-- **Runtime**: _Describes the environment where code executes - the host that provides globals, APIs, and
-  constraints._
-- **Product Type**: _Describes what the package **is for** - how it is consumed or invoked by its users._
-- **Output / Module Format**: _Describes how the built artifact is **emitted** - the file format and module
-  system used by the compiled output._
-- **Build Strategy**: _Describes **how the artifact is produced** - whether the source is transpiled directly,
-  bundled by a tool, or shipped as-is._
+- **Runtime**: _Describes the environment where code executes - the host that
+  provides globals, APIs, and constraints._
+- **Product Type**: _Describes what the package **is for** - how it is consumed
+  or invoked by its users._
+- **Output / Module Format**: _Describes how the built artifact is **emitted** -
+  the file format and module system used by the compiled output._
+- **Build Strategy**: _Describes **how the artifact is produced** - whether the
+  source is transpiled directly, bundled by a tool, or shipped as-is._
 
 -
 
@@ -51,18 +54,18 @@ the source of most packaging confusion.
 
 > **_"Where does this code execute?"_**
 
-**Runtime** is the environment that hosts the running code. It determines which globals and APIs are
-available.
+**Runtime** is the environment that hosts the running code. It determines which
+globals and APIs are available.
 
 - **`node`** - _can use `node:path`, `fs`, `process`, sockets, server APIs_
 - **`browser`** - _can use `window`, `document`, DOM, `fetch`, `localStorage`_
-- **`edge / worker`** - _server-side-ish but not full Node; usually no `fs`, often no raw TCP, different
-  globals_
-- **`neutral / universal`** - _intended to run in multiple runtimes; avoids runtime-specific APIs or isolates
-  them behind adapters_
+- **`edge / worker`** - _server-side-ish but not full Node; usually no `fs`,
+  often no raw TCP, different globals_
+- **`neutral / universal`** - _intended to run in multiple runtimes; avoids
+  runtime-specific APIs or isolates them behind adapters_
 
-> **Key idea**: `runtime: browser` must not depend on Node built-ins like `fs`, `path`, `child_process`.
-> `runtime: node` - Node APIs are allowed.
+> **Key idea**: `runtime: browser` must not depend on Node built-ins like `fs`,
+> `path`, `child_process`. `runtime: node` - Node APIs are allowed.
 
 -
 
@@ -78,7 +81,8 @@ available.
 - **server-app** - _API server or backend service_
 - **worker** - _background process, queue worker, or cron-like runner_
 - **plugin** - _extension for another tool, framework, or bundler_
-- **config package** - _shared config consumed by tools; usually not runtime code_
+- **config package** - _shared config consumed by tools; usually not runtime
+  code_
 - **build tool / codegen tool** - _invoked during development or build_
 - **script / automation** - _one-off or internal runnable code_
 - **component library** - _UI components_
@@ -90,7 +94,8 @@ available.
 - **Express server** - `server-app`, runtime `node`
 - **`bin` in `package.json`** - usually indicates a `cli`
 - **Vite React app** - `web-app`, runtime `browser`
-- **Google Apps Script package** - `script`, targeting a platform-specific runtime
+- **Google Apps Script package** - `script`, targeting a platform-specific
+  runtime
 
 -
 
@@ -98,17 +103,21 @@ available.
 
 > **_"How is the built artifact emitted?"_**
 
-**Output format** is independent of runtime. The same runtime can support multiple formats; the same format
-can target multiple runtimes.
+**Output format** is independent of runtime. The same runtime can support
+multiple formats; the same format can target multiple runtimes.
 
 - **`esm`** - _ES Module; `import` / `export` syntax_
 - **`cjs`** - _CommonJS; `require` / `module.exports`_
-- **`iife`** - _Immediately Invoked Function Expression; browser drop-in scripts_
-- **`umd`** - _Universal Module Definition; works in both browser and Node environments_
-- **unbundled JS** - _emitted directly from `tsc`; module structure stays intact_
+- **`iife`** - _Immediately Invoked Function Expression; browser drop-in
+  scripts_
+- **`umd`** - _Universal Module Definition; works in both browser and Node
+  environments_
+- **unbundled JS** - _emitted directly from `tsc`; module structure stays
+  intact_
 
-> **Note**: _Output format is not the same as runtime._ Node can consume `esm` or `cjs`. Browsers often use
-> `esm` for libraries and `iife` for drop-in scripts. CLIs typically ship `esm` or `cjs`.
+> **Note**: _Output format is not the same as runtime._ Node can consume `esm`
+> or `cjs`. Browsers often use `esm` for libraries and `iife` for drop-in
+> scripts. CLIs typically ship `esm` or `cjs`.
 
 -
 
@@ -116,27 +125,32 @@ can target multiple runtimes.
 
 > **_"How is the artifact produced?"_**
 
-**Build strategy** describes the process used to produce the output artifact. It is decided before choosing a
-specific tool - the strategy drives tool selection, not the other way around.
+**Build strategy** describes the process used to produce the output artifact. It
+is decided before choosing a specific tool - the strategy drives tool selection,
+not the other way around.
 
-- **`transpile`** - _TypeScript compiled directly to JavaScript via `tsc -build`; module structure stays
-  intact; no bundling_
-- **`bundle`** - _source files combined and transformed by a bundler such as Rollup, Vite, or esbuild;
-  required when multiple output formats, tree-shaking, or browser-optimised output is needed_
-- **`none`** - _no build step; files are shipped as-is; typical for JSON schemas, plain config files, or
-  templates_
+- **`transpile`** - _TypeScript compiled directly to JavaScript via
+  `tsc -build`; module structure stays intact; no bundling_
+- **`bundle`** - _source files combined and transformed by a bundler such as
+  Rollup, Vite, or esbuild; required when multiple output formats, tree-shaking,
+  or browser-optimised output is needed_
+- **`none`** - _no build step; files are shipped as-is; typical for JSON
+  schemas, plain config files, or templates_
 
 #### Examples
 
 - **type utility library** - `transpile`; `tsc` is sufficient, no bundler needed
 - **browser CDN drop-in** - `bundle`; needs `iife` output and minification
 - **ESLint config package** - `none`; JavaScript or JSON files shipped directly
-- **CLI tool** - `transpile` or `bundle`; `tsc` often sufficient, esbuild if single-file output is preferred
-- **React component library** - `bundle`; Vite or Rollup for ESM output with optional tree-shaking
+- **CLI tool** - `transpile` or `bundle`; `tsc` often sufficient, esbuild if
+  single-file output is preferred
+- **React component library** - `bundle`; Vite or Rollup for ESM output with
+  optional tree-shaking
 
-> **Note**: _Build strategy is independent of output format. A `transpile` build can still emit `esm` or
-> `cjs`. A `bundle` step is not required just because multiple formats are needed - but it is required when
-> the output must be browser-optimised, minified, or consolidated into a single file._
+> **Note**: _Build strategy is independent of output format. A `transpile` build
+> can still emit `esm` or `cjs`. A `bundle` step is not required just because
+> multiple formats are needed - but it is required when the output must be
+> browser-optimised, minified, or consolidated into a single file._
 
 -
 
@@ -144,8 +158,9 @@ specific tool - the strategy drives tool selection, not the other way around.
 
 ### Public Packages Are Not Always Libraries
 
-Publishing to npm does **not** automatically mean something is a library. Public npm packages can be
-libraries, CLIs, config packages, scaffolding tools, build tools, SDKs, or plugins.
+Publishing to npm does **not** automatically mean something is a library. Public
+npm packages can be libraries, CLIs, config packages, scaffolding tools, build
+tools, SDKs, or plugins.
 
 Example - a CLI published to npm:
 
@@ -163,8 +178,9 @@ The package is **published**, but its product type is **`cli`**, not `library`.
 
 ### The exports Field
 
-The `exports` field in `package.json` is where runtime, product type, and output format intersect in practice.
-It controls which files consumers can import and allows different entrypoints per condition.
+The `exports` field in `package.json` is where runtime, product type, and output
+format intersect in practice. It controls which files consumers can import and
+allows different entrypoints per condition.
 
 A simple library with a single ESM output:
 
@@ -203,9 +219,10 @@ A package exposing both ESM and CJS:
 }
 ```
 
-> **Note**: _Conditions are matched top-to-bottom. `default` should always be last._ Bundlers and runtimes
-> respect different condition sets - `node`, `browser`, `import`, `require`, `development`, `production` are
-> all valid but tooling support varies.
+> **Note**: _Conditions are matched top-to-bottom. `default` should always be
+> last._ Bundlers and runtimes respect different condition sets - `node`,
+> `browser`, `import`, `require`, `development`, `production` are all valid but
+> tooling support varies.
 
 -
 
@@ -229,9 +246,10 @@ These are distinct operations that are often conflated.
 | **server-app**                 | tag                      | Docker image or artifact | server / container / platform | rarely                                              |
 | **internal workspace package** | repo versioning only     | none                     | not applicable                | none                                                |
 
-> **Note**: _A library's code artifact is never deployed, but its generated docs (e.g. TypeDoc to HTML) are
-> web content and may have their own deploy step - separate from npm publish - to static hosting such as
-> GitHub Pages, Netlify, or a shared host. This docs deploy path is independent of the code release._
+> **Note**: _A library's code artifact is never deployed, but its generated docs
+> (e.g. TypeDoc to HTML) are web content and may have their own deploy step -
+> separate from npm publish - to static hosting such as GitHub Pages, Netlify,
+> or a shared host. This docs deploy path is independent of the code release._
 
 -
 
@@ -243,8 +261,9 @@ A package can be built with only:
 tsc -build
 ```
 
-This means TypeScript compiles `.ts` to `.js`, `.d.ts` files are emitted, and the module structure stays
-mostly intact. Consumers import compiled files directly.
+This means TypeScript compiles `.ts` to `.js`, `.d.ts` files are emitted, and
+the module structure stays mostly intact. Consumers import compiled files
+directly.
 
 This approach is often ideal for:
 
@@ -259,8 +278,9 @@ This approach is often ideal for:
 
 ### Dev Runners Are Not Output Formats
 
-Tools like `tsx` and `ts-node` execute TypeScript directly during development. They are **not** distribution
-formats and should not appear in published artifacts.
+Tools like `tsx` and `ts-node` execute TypeScript directly during development.
+They are **not** distribution formats and should not appear in published
+artifacts.
 
 ```sh
 # Development - runs TypeScript directly
@@ -282,8 +302,9 @@ dist/index.js
 
 ### Mixed Runtimes in One Package
 
-Technically possible, but often messy. A split like `./node` and `./browser` entrypoints increases complexity
-across conditional exports, build logic, testing matrix, accidental cross-imports, and type confusion.
+Technically possible, but often messy. A split like `./node` and `./browser`
+entrypoints increases complexity across conditional exports, build logic,
+testing matrix, accidental cross-imports, and type confusion.
 
 Most projects follow a simpler rule:
 
@@ -293,38 +314,46 @@ Most projects follow a simpler rule:
 
 ### Environment Configuration Layers
 
-Environment configuration can exist at multiple layers, each with a distinct responsibility.
+Environment configuration can exist at multiple layers, each with a distinct
+responsibility.
 
-- **Root workspace**: _shared TypeScript base config, shared lint config, shared build helpers, common
-  scripts_
-- **Package level**: _runtime intent, exports, build configuration, dependencies_
+- **Root workspace**: _shared TypeScript base config, shared lint config, shared
+  build helpers, common scripts_
+- **Package level**: _runtime intent, exports, build configuration,
+  dependencies_
 - **Entrypoint level**: _runtime-specific outputs, environment overrides_
 - **Deployment environment**: _dev / staging / production variables, secrets_
 
-Typical pattern: root defines defaults - package declares intent - entrypoints override when necessary.
+Typical pattern: root defines defaults - package declares intent - entrypoints
+override when necessary.
 
 -
 
 ### Generated Docs Delivery
 
-Libraries that generate documentation (e.g. TypeDoc, TSDoc) produce a **secondary artifact** - web content
+Libraries that generate documentation (e.g. TypeDoc, TSDoc) produce a
+**secondary artifact** - web content
 
-- that is entirely separate from the code artifact published to npm. This docs artifact has its own delivery
-  concerns.
+- that is entirely separate from the code artifact published to npm. This docs
+  artifact has its own delivery concerns.
 
 Common patterns:
 
-- **Committed to repo** - TypeDoc generates markdown into `docs/` and it is committed. Always in sync, but
-  produces noisy diffs and git history churn. Particularly painful in monorepos where every version bump
-  cascades into walls of generated diff.
-- **Gitignored and hosted** - Output is gitignored; a CI step builds and deploys to static hosting (GitHub
-  Pages, Netlify, Bluehost). Clean repo, but docs live separately from code and require a deploy pipeline.
-- **Not generated** - No docs site; consumers read source or types directly. Zero overhead.
-- **CI-only** - Never committed, never in the working tree. Built and deployed as part of the release pipeline
-  only.
+- **Committed to repo** - TypeDoc generates markdown into `docs/` and it is
+  committed. Always in sync, but produces noisy diffs and git history churn.
+  Particularly painful in monorepos where every version bump cascades into walls
+  of generated diff.
+- **Gitignored and hosted** - Output is gitignored; a CI step builds and deploys
+  to static hosting (GitHub Pages, Netlify, Bluehost). Clean repo, but docs live
+  separately from code and require a deploy pipeline.
+- **Not generated** - No docs site; consumers read source or types directly.
+  Zero overhead.
+- **CI-only** - Never committed, never in the working tree. Built and deployed
+  as part of the release pipeline only.
 
-> **Key idea**: _If docs are generated as HTML or a Vite-served site, they are web content - not part of the
-> npm artifact - and need their own hosting decision. "Deploy: no" for a library refers to the code only._
+> **Key idea**: _If docs are generated as HTML or a Vite-served site, they are
+> web content - not part of the npm artifact - and need their own hosting
+> decision. "Deploy: no" for a library refers to the code only._
 
 -
 
@@ -344,8 +373,8 @@ Common patterns:
 | `node`    | config package      | none                | JS / JSON               | none or tsc    | tag              | npm sometimes        | no            | no            | minimal          |
 | `edge`    | worker / serverless | bundle              | esm                     | esbuild / Vite | tag              | artifact / platform  | yes           | rarely        | rare             |
 
-> **Note**: _Deploy (docs) refers to generated doc sites (e.g. TypeDoc to HTML). See
-> [Generated Docs Delivery](#generated-docs-delivery)._
+> **Note**: _Deploy (docs) refers to generated doc sites (e.g. TypeDoc to HTML).
+> See [Generated Docs Delivery](#generated-docs-delivery)._
 
 -
 
@@ -359,7 +388,8 @@ Common patterns:
 - **build**: `tsc` or Rollup
 - **publish**: npm optional
 - **deploy (code)**: none
-- **deploy (docs)**: optional - TypeDoc to static hosting if docs site is generated
+- **deploy (docs)**: optional - TypeDoc to static hosting if docs site is
+  generated
 
 #### Type-Only Library - generic / `@snailicid3/types`
 
@@ -369,7 +399,8 @@ Common patterns:
 - **build**: `tsc`
 - **publish**: npm optional
 - **deploy (code)**: none
-- **deploy (docs)**: rarely - type-only packages seldom have a standalone docs site
+- **deploy (docs)**: rarely - type-only packages seldom have a standalone docs
+  site
 
 #### CLI Tool - generic / `@snailicid3/cli-app` / `@snailicid3/workspace-tools`
 
@@ -389,7 +420,8 @@ Common patterns:
 - **build**: Vite or Rollup
 - **publish**: npm
 - **deploy (code)**: none
-- **deploy (docs)**: optional - Storybook or TypeDoc site often hosted separately
+- **deploy (docs)**: optional - Storybook or TypeDoc site often hosted
+  separately
 
 #### React App (Vite) - generic / `apps/web`
 
