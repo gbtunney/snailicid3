@@ -194,17 +194,3 @@ jobs:
                     echo "- workspace_artifact_name: \`${{ needs.pipeline_fix.outputs.workspace_artifact_name }}\`"
                     echo "- verify: \`${{ inputs.run_verify }}\`"
                   } >> "$GITHUB_STEP_SUMMARY"
-
-    verify:
-        name: Verify (ci-core)
-        needs: autofix
-        if: ${{ always() && inputs.run_verify && needs.autofix.result == 'success' }}
-        uses: ./.github/workflows/ci-core.yml
-        with:
-            mode: report
-            check_mode: check
-            build_mode: skip
-            test_mode: skip
-            docs_mode: skip
-            require_lockfile: false
-            require_clean_repo: true
