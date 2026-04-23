@@ -92,13 +92,14 @@ jobs:
                   fetch-depth: 0
                   token: ${{ secrets.GITHUB_TOKEN }}
 
-            - uses: pnpm/action-setup@v4
-              with:
-                  run_install: false
-
             - uses: actions/setup-node@v4
               with:
-                  node-version-file: .nvmrc
+                  node-version: 'lts/*'
+
+            - uses: pnpm/action-setup@v4
+              with:
+                  cache: true
+                  run_install: false
 
             # ── Restore pipeline artifact ────────────────────────────
             - name: 📥 Download workspace artifact
