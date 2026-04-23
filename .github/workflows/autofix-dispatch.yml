@@ -145,12 +145,7 @@ jobs:
                   MESSAGE="${TYPE}(style): ${SUBJECT}"
 
                   git add -A
-                    ':!.github/**' \
-                    ':!.gitignore' \
-                    ':!.husky/**' \
-                    ':!.vscode/**' \
-                    ':!**/dist/**' \
-                    ':!**/types/**'
+                   
                   git commit -m "$MESSAGE" \
                     -m "Triggered by: @${{ github.actor }} via workflow_dispatch" \
                     -m "Branch: ${{ github.ref_name }}" \
