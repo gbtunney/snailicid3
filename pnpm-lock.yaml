@@ -100,9 +100,27 @@ importers:
 
     packages/build-config:
         dependencies:
+            remark-toc:
+                specifier: ^9.0.0
+                version: 9.0.0
             rollup-plugin-polyfill-node:
                 specifier: ^0.13.0
                 version: 0.13.0(rollup@4.60.2)
+            ts-deepmerge:
+                specifier: ^7.0.3
+                version: 7.0.3
+            type-fest:
+                specifier: ^5.6.0
+                version: 5.6.0
+            typedoc-plugin-markdown:
+                specifier: ^4.11.0
+                version: 4.11.0(typedoc@0.28.19(typescript@6.0.3))
+            typedoc-plugin-remark:
+                specifier: ^2.0.1
+                version: 2.0.1(typedoc-plugin-markdown@4.11.0(typedoc@0.28.19(typescript@6.0.3)))
+            unified-prettier:
+                specifier: ^2.0.1
+                version: 2.0.1(prettier@3.8.3)
         devDependencies:
             '@rollup/plugin-commonjs':
                 specifier: ^29.0.2
@@ -2273,6 +2291,12 @@ packages:
                 integrity: sha512-aWK1reDYWxcjgcIIPmQi3u+OQDuYa9b+lr6eIsGWrekJ9vr1NSjr4Eab8oQ1iKuH1ltFHpXGyerAv1a3FMKxzQ==,
             }
 
+    '@types/ungap__structured-clone@1.2.0':
+        resolution:
+            {
+                integrity: sha512-ZoaihZNLeZSxESbk9PUAPZOlSpcKx81I1+4emtULDVmBLkYutTcMlCj2K9VNlf9EWODxdO6gkAqEaLorXwZQVA==,
+            }
+
     '@types/unist@2.0.11':
         resolution:
             {
@@ -2391,6 +2415,12 @@ packages:
                 integrity: sha512-/uejZt4dSere1bx12WLlPfv8GktzcaDtuJ7s42/HEZ5zGj9oxRaD4bj7qwSunXkf+pbAhFt2zjpHYUiT5lHf0Q==,
             }
         engines: { node: ^18.18.0 || ^20.9.0 || >=21.1.0 }
+
+    '@ungap/structured-clone@1.3.0':
+        resolution:
+            {
+                integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==,
+            }
 
     '@unrs/resolver-binding-android-arm-eabi@1.11.1':
         resolution:
@@ -3093,6 +3123,12 @@ packages:
         peerDependenciesMeta:
             react-native-b4a:
                 optional: true
+
+    bail@2.0.2:
+        resolution:
+            {
+                integrity: sha512-0xO6mYd7JB2YesxDKplafRpsiOzPt9V02ddPCLbY1xYGPOX24NTyN50qnUxgCPcSoYMhKpAuBTjQoRZCAkUDRw==,
+            }
 
     balanced-match@1.0.2:
         resolution:
@@ -4506,6 +4542,12 @@ packages:
                 integrity: sha512-GGToxJ/w1x32s/D2EKND7kTil4n8OVk/9mycTc4VDza13lOvpUZTGX3mFSCtV9ksdGBVzvsyAVLM6mHFThxXxw==,
             }
 
+    fault@2.0.1:
+        resolution:
+            {
+                integrity: sha512-WtySTkS4OKev5JtpHXnib4Gxiurzh5NCGvWrFaZ34m6JehfTUhKZvn9njTfw48t6JumVQOmrKqpmGcdwxnhqBQ==,
+            }
+
     fdir@6.5.0:
         resolution:
             {
@@ -4653,6 +4695,13 @@ packages:
             }
         engines: { node: '>= 6' }
 
+    format@0.2.2:
+        resolution:
+            {
+                integrity: sha512-wzsgA6WOq+09wrU1tsJ09udeR/YZRaeArL9e1wPbFg3GG2yDnC2ldKpxs4xunpFF9DgqCqOIra3bc1HWrJ37Ww==,
+            }
+        engines: { node: '>=0.4.x' }
+
     forwarded@0.2.0:
         resolution:
             {
@@ -4774,6 +4823,12 @@ packages:
             }
         engines: { node: '>=18' }
         hasBin: true
+
+    github-slugger@2.0.0:
+        resolution:
+            {
+                integrity: sha512-IaOQ9puYtjrkq7Y0Ygl9KDZnrf/aiUJYUpVf89y8kyaxbRG7Y1SrX/jaumrv81vc61+kiMempujsM3Yw7w5qcw==,
+            }
 
     glob-parent@5.1.2:
         resolution:
@@ -5813,6 +5868,12 @@ packages:
             }
         engines: { node: '>=18' }
 
+    longest-streak@3.1.0:
+        resolution:
+            {
+                integrity: sha512-9Ri+o0JYgehTaVBBDoMqIl8GXtbWg711O3srftcHhZ0dqnETqLaoIK0x17fUw9rFSlK/0NlsKe0Ahhyl5pXE2g==,
+            }
+
     longest@2.0.1:
         resolution:
             {
@@ -5922,10 +5983,34 @@ packages:
                 integrity: sha512-W4mAWTvSlKvf8L6J+VN9yLSqQ9AOAAvHuoDAmPkz4dHf553m5gVj2ejadHJhoJmcmxEnOv6Pa8XJhpxE93kb8Q==,
             }
 
+    mdast-util-frontmatter@2.0.1:
+        resolution:
+            {
+                integrity: sha512-LRqI9+wdgC25P0URIJY9vwocIzCcksduHQ9OF2joxQoyTNVduwLAFUzjoopuRJbJAReaKrNQKAZKL3uCMugWJA==,
+            }
+
+    mdast-util-phrasing@4.1.0:
+        resolution:
+            {
+                integrity: sha512-TqICwyvJJpBwvGAMZjj4J2n0X8QWp21b9l0o7eXyVJ25YNWYbJDVIyD1bZXE6WtV6RmKJVYmQAKWa0zWOABz2w==,
+            }
+
+    mdast-util-to-markdown@2.1.2:
+        resolution:
+            {
+                integrity: sha512-xj68wMTvGXVOKonmog6LwyJKrYXZPvlwabaryTjLh9LuvovB/KAH+kvi8Gjj+7rJjsFi23nkUxRQv1KqSroMqA==,
+            }
+
     mdast-util-to-string@4.0.0:
         resolution:
             {
                 integrity: sha512-0H44vDimn51F0YwvxSJSm0eCDOJTRlmN0R1yBh4HLj9wiV1Dn0QoXGbvFAWj2hSItVTlCmBF1hqKlIyUBVFLPg==,
+            }
+
+    mdast-util-toc@7.1.0:
+        resolution:
+            {
+                integrity: sha512-2TVKotOQzqdY7THOdn2gGzS9d1Sdd66bvxUyw3aNpWfcPXCLYSJCCgfPy30sEtuzkDraJgqF35dzgmz6xlvH/w==,
             }
 
     mdurl@2.0.0:
@@ -5984,6 +6069,12 @@ packages:
         resolution:
             {
                 integrity: sha512-/C2nqVmXXmiseSSuCdItCMho7ybwwop6RrrRPk0KbOHW21JKoCldC+8rFOaundDoRBUWBnJJcxeA/Kvi34WQXg==,
+            }
+
+    micromark-extension-frontmatter@2.0.0:
+        resolution:
+            {
+                integrity: sha512-C4AkuM3dA58cgZha7zVnuVxBhDsbttIMiytjgsM2XbHAB2faRVaHRle40558FBN+DJcrLNCoqG5mlrpdU4cRtg==,
             }
 
     micromark-extension-gfm-autolink-literal@2.1.0:
@@ -6985,6 +7076,36 @@ packages:
             }
         hasBin: true
 
+    remark-frontmatter@5.0.0:
+        resolution:
+            {
+                integrity: sha512-XTFYvNASMe5iPN0719nPrdItC9aU0ssC4v14mH1BCi1u0n1gAocqcujWUrByftZTbLhRtiKRyjYTSIOcr69UVQ==,
+            }
+
+    remark-parse@11.0.0:
+        resolution:
+            {
+                integrity: sha512-FCxlKLNGknS5ba/1lmpYijMUzX2esxW5xQqjWxw2eHFfS2MSdaHVINFmhjo+qN1WhZhNimq0dZATN9pH0IDrpA==,
+            }
+
+    remark-stringify@11.0.0:
+        resolution:
+            {
+                integrity: sha512-1OSmLd3awB/t8qdoEOMazZkNsfVTeY4fTsgzcQFdXNq8ToTN4ZGwrMnlda4K6smTFKD+GRV6O48i6Z4iKgPPpw==,
+            }
+
+    remark-toc@9.0.0:
+        resolution:
+            {
+                integrity: sha512-KJ9txbo33GjDAV1baHFze7ij4G8c7SGYoY8Kzsm2gzFpbhL/bSoVpMMzGa3vrNDSWASNd/3ppAqL7cP2zD6JIA==,
+            }
+
+    remark@15.0.1:
+        resolution:
+            {
+                integrity: sha512-Eht5w30ruCXgFmxVUSlNWQ9iiimq07URKeFS3hNc8cUWy1llX4KDWfyEDZRycMc+znsN9Ux5/tJ/BFdgdOwA3A==,
+            }
+
     require-directory@2.1.1:
         resolution:
             {
@@ -7793,6 +7914,12 @@ packages:
             }
         hasBin: true
 
+    trough@2.2.0:
+        resolution:
+            {
+                integrity: sha512-tmMpK00BjZiUyVyvrBK7knerNgmgvcV/KLVyuma/SC+TQN167GrMRciANTz09+k3zW8L8t60jWO1GpfkZdjTaw==,
+            }
+
     ts-api-utils@2.5.0:
         resolution:
             {
@@ -7897,6 +8024,14 @@ packages:
         peerDependencies:
             typedoc: 0.28.x
 
+    typedoc-plugin-remark@2.0.1:
+        resolution:
+            {
+                integrity: sha512-ZXIt75P2wo/8W4XC3Gs/JdYl8Of2K6MXOaYOsw14DEfery2T3hrM06MB+CpfQlTv+K+4LlI/24Ylzmv1Yo+bRg==,
+            }
+        peerDependencies:
+            typedoc-plugin-markdown: '>=4.6.2'
+
     typedoc@0.28.19:
         resolution:
             {
@@ -7958,10 +8093,42 @@ packages:
             }
         engines: { node: '>=20' }
 
+    unified-prettier@2.0.1:
+        resolution:
+            {
+                integrity: sha512-6KKgdlY8wLsUMdGOFx61RVfCggKF47iE1cFvUcrs5jjH9xbkVMaQ48Qy8MXNjhexzKwxsoBYB/Qc7ZtPw7/Oyg==,
+            }
+        peerDependencies:
+            prettier: ^3.0.0
+
+    unified@11.0.5:
+        resolution:
+            {
+                integrity: sha512-xKvGhPWw3k84Qjh8bI3ZeJjqnyadK+GEFtazSfZv/rKeTkTjOJho6mFqh2SM96iIcZokxiOpg78GazTSg8+KHA==,
+            }
+
+    unist-util-is@6.0.1:
+        resolution:
+            {
+                integrity: sha512-LsiILbtBETkDz8I9p1dQ0uyRUWuaQzd/cuEeS1hoRSyW5E5XGmTzlwY1OrNzzakGowI9Dr/I8HVaw4hTtnxy8g==,
+            }
+
     unist-util-stringify-position@4.0.0:
         resolution:
             {
                 integrity: sha512-0ASV06AAoKCDkS2+xw5RXJywruurpbC4JZSm7nr7MOt1ojAzvyyaO+UxZf18j8FCF6kmzCZKcAgN/yu2gm2XgQ==,
+            }
+
+    unist-util-visit-parents@6.0.2:
+        resolution:
+            {
+                integrity: sha512-goh1s1TBrqSqukSc8wrjwWhL0hiJxgA8m4kFxGlQ+8FYQ3C/m11FcTs4YYem7V664AhHVvgoQLk890Ssdsr2IQ==,
+            }
+
+    unist-util-visit@5.1.0:
+        resolution:
+            {
+                integrity: sha512-m+vIdyeCOpdr/QeQCu2EzxX/ohgS8KbnPDgFni4dQsfSCtpz8UqDyY5GjRru8PDKuYn7Fq19j1CQ+nJSsGKOzg==,
             }
 
     universalify@2.0.1:
@@ -8075,6 +8242,18 @@ packages:
                 integrity: sha512-ZZKSmDAEFOijERBLkmYfJ+vmk3w+7hOLYDNkRCuRuMJGEmqYNCNLyBBFwWKVMhfwaEF3WOd0Zlw86U/WC/+nYw==,
             }
         engines: { '0': node >=0.6.0 }
+
+    vfile-message@4.0.3:
+        resolution:
+            {
+                integrity: sha512-QTHzsGd1EhbZs4AsQ20JX1rC3cOlt/IWJruk893DfLRr57lcnOeMaWG4K0JrRta4mIJZKth2Au3mM3u03/JWKw==,
+            }
+
+    vfile@6.0.3:
+        resolution:
+            {
+                integrity: sha512-KzIbH/9tXat2u30jf+smMwFCsno4wHVdNmzFyL+T/L3UGqqk6JKfVqOFOZEpZSHADH1k40ab6NUIXZq422ov3Q==,
+            }
 
     vite@8.0.10:
         resolution:
@@ -8376,6 +8555,12 @@ packages:
         resolution:
             {
                 integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==,
+            }
+
+    zwitch@2.0.4:
+        resolution:
+            {
+                integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==,
             }
 
 snapshots:
@@ -9314,6 +9499,8 @@ snapshots:
 
     '@types/sprintf-js@1.1.4': {}
 
+    '@types/ungap__structured-clone@1.2.0': {}
+
     '@types/unist@2.0.11': {}
 
     '@types/unist@3.0.3': {}
@@ -9472,6 +9659,8 @@ snapshots:
         dependencies:
             '@typescript-eslint/types': 8.59.0
             eslint-visitor-keys: 5.0.1
+
+    '@ungap/structured-clone@1.3.0': {}
 
     '@unrs/resolver-binding-android-arm-eabi@1.11.1':
         optional: true
@@ -9923,6 +10112,8 @@ snapshots:
             - debug
 
     b4a@1.8.0: {}
+
+    bail@2.0.2: {}
 
     balanced-match@1.0.2: {}
 
@@ -10823,6 +11014,10 @@ snapshots:
         dependencies:
             reusify: 1.1.0
 
+    fault@2.0.1:
+        dependencies:
+            format: 0.2.2
+
     fdir@6.5.0(picomatch@4.0.4):
         optionalDependencies:
             picomatch: 4.0.4
@@ -10905,6 +11100,8 @@ snapshots:
             hasown: 2.0.3
             mime-types: 2.1.35
 
+    format@0.2.2: {}
+
     forwarded@0.2.0: {}
 
     fresh@0.5.2: {}
@@ -10974,6 +11171,8 @@ snapshots:
         transitivePeerDependencies:
             - conventional-commits-filter
             - conventional-commits-parser
+
+    github-slugger@2.0.0: {}
 
     glob-parent@5.1.2:
         dependencies:
@@ -11540,6 +11739,8 @@ snapshots:
             strip-ansi: 7.2.0
             wrap-ansi: 9.0.2
 
+    longest-streak@3.1.0: {}
+
     longest@2.0.1: {}
 
     loupe@3.2.1: {}
@@ -11630,9 +11831,47 @@ snapshots:
         transitivePeerDependencies:
             - supports-color
 
+    mdast-util-frontmatter@2.0.1:
+        dependencies:
+            '@types/mdast': 4.0.4
+            devlop: 1.1.0
+            escape-string-regexp: 5.0.0
+            mdast-util-from-markdown: 2.0.3
+            mdast-util-to-markdown: 2.1.2
+            micromark-extension-frontmatter: 2.0.0
+        transitivePeerDependencies:
+            - supports-color
+
+    mdast-util-phrasing@4.1.0:
+        dependencies:
+            '@types/mdast': 4.0.4
+            unist-util-is: 6.0.1
+
+    mdast-util-to-markdown@2.1.2:
+        dependencies:
+            '@types/mdast': 4.0.4
+            '@types/unist': 3.0.3
+            longest-streak: 3.1.0
+            mdast-util-phrasing: 4.1.0
+            mdast-util-to-string: 4.0.0
+            micromark-util-classify-character: 2.0.1
+            micromark-util-decode-string: 2.0.1
+            unist-util-visit: 5.1.0
+            zwitch: 2.0.4
+
     mdast-util-to-string@4.0.0:
         dependencies:
             '@types/mdast': 4.0.4
+
+    mdast-util-toc@7.1.0:
+        dependencies:
+            '@types/mdast': 4.0.4
+            '@types/ungap__structured-clone': 1.2.0
+            '@ungap/structured-clone': 1.3.0
+            github-slugger: 2.0.0
+            mdast-util-to-string: 4.0.0
+            unist-util-is: 6.0.1
+            unist-util-visit: 5.1.0
 
     mdurl@2.0.0: {}
 
@@ -11676,6 +11915,13 @@ snapshots:
             micromark-util-symbol: 2.0.1
             micromark-util-types: 2.0.2
             parse-entities: 4.0.2
+
+    micromark-extension-frontmatter@2.0.0:
+        dependencies:
+            fault: 2.0.1
+            micromark-util-character: 2.1.1
+            micromark-util-symbol: 2.0.1
+            micromark-util-types: 2.0.2
 
     micromark-extension-gfm-autolink-literal@2.1.0:
         dependencies:
@@ -12313,6 +12559,44 @@ snapshots:
         dependencies:
             jsesc: 3.1.0
 
+    remark-frontmatter@5.0.0:
+        dependencies:
+            '@types/mdast': 4.0.4
+            mdast-util-frontmatter: 2.0.1
+            micromark-extension-frontmatter: 2.0.0
+            unified: 11.0.5
+        transitivePeerDependencies:
+            - supports-color
+
+    remark-parse@11.0.0:
+        dependencies:
+            '@types/mdast': 4.0.4
+            mdast-util-from-markdown: 2.0.3
+            micromark-util-types: 2.0.2
+            unified: 11.0.5
+        transitivePeerDependencies:
+            - supports-color
+
+    remark-stringify@11.0.0:
+        dependencies:
+            '@types/mdast': 4.0.4
+            mdast-util-to-markdown: 2.1.2
+            unified: 11.0.5
+
+    remark-toc@9.0.0:
+        dependencies:
+            '@types/mdast': 4.0.4
+            mdast-util-toc: 7.1.0
+
+    remark@15.0.1:
+        dependencies:
+            '@types/mdast': 4.0.4
+            remark-parse: 11.0.0
+            remark-stringify: 11.0.0
+            unified: 11.0.5
+        transitivePeerDependencies:
+            - supports-color
+
     require-directory@2.1.1: {}
 
     require-from-string@2.0.2: {}
@@ -12804,6 +13088,8 @@ snapshots:
 
     tree-kill@1.2.2: {}
 
+    trough@2.2.0: {}
+
     ts-api-utils@2.5.0(typescript@6.0.3):
         dependencies:
             typescript: 6.0.3
@@ -12856,6 +13142,15 @@ snapshots:
         dependencies:
             typedoc: 0.28.19(typescript@6.0.3)
 
+    typedoc-plugin-remark@2.0.1(typedoc-plugin-markdown@4.11.0(typedoc@0.28.19(typescript@6.0.3))):
+        dependencies:
+            remark: 15.0.1
+            remark-frontmatter: 5.0.0
+            typedoc-plugin-markdown: 4.11.0(typedoc@0.28.19(typescript@6.0.3))
+            vfile: 6.0.3
+        transitivePeerDependencies:
+            - supports-color
+
     typedoc@0.28.19(typescript@6.0.3):
         dependencies:
             '@gerrit0/mini-shiki': 3.23.0
@@ -12891,9 +13186,39 @@ snapshots:
 
     unicorn-magic@0.4.0: {}
 
+    unified-prettier@2.0.1(prettier@3.8.3):
+        dependencies:
+            prettier: 3.8.3
+            unified: 11.0.5
+
+    unified@11.0.5:
+        dependencies:
+            '@types/unist': 3.0.3
+            bail: 2.0.2
+            devlop: 1.1.0
+            extend: 3.0.2
+            is-plain-obj: 4.1.0
+            trough: 2.2.0
+            vfile: 6.0.3
+
+    unist-util-is@6.0.1:
+        dependencies:
+            '@types/unist': 3.0.3
+
     unist-util-stringify-position@4.0.0:
         dependencies:
             '@types/unist': 3.0.3
+
+    unist-util-visit-parents@6.0.2:
+        dependencies:
+            '@types/unist': 3.0.3
+            unist-util-is: 6.0.1
+
+    unist-util-visit@5.1.0:
+        dependencies:
+            '@types/unist': 3.0.3
+            unist-util-is: 6.0.1
+            unist-util-visit-parents: 6.0.2
 
     universalify@2.0.1: {}
 
@@ -13017,6 +13342,16 @@ snapshots:
             assert-plus: 1.0.0
             core-util-is: 1.0.2
             extsprintf: 1.3.0
+
+    vfile-message@4.0.3:
+        dependencies:
+            '@types/unist': 3.0.3
+            unist-util-stringify-position: 4.0.0
+
+    vfile@6.0.3:
+        dependencies:
+            '@types/unist': 3.0.3
+            vfile-message: 4.0.3
 
     vite@8.0.10(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3):
         dependencies:
@@ -13181,3 +13516,5 @@ snapshots:
             zod: 4.3.6
 
     zod@4.3.6: {}
+
+    zwitch@2.0.4: {}

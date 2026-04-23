@@ -50,12 +50,21 @@ export type {
     Runtime,
 } from './build/types.js'
 
+/**
+ * @namespace Typedoc Configuration
+ * @see [  Typedoc - Documentation Generator for TypeScript Projects](https://typedoc.org/)
+ */
+export { typedoc } from './typedoc/index.js'
+export type * from './typedoc/index.js'
+
 // ── Tool configs ──────────────────────────────────────────────────────────────
 export { vite, viteDocServerConfig } from './vite/index.js'
 export type { ViteUserConfig } from './vite/index.js'
 
 export { vitest, viTestConfig } from './vitest/index.js'
 export type { VitestUserConfig } from './vitest/index.js'
+
+export { merge } from 'ts-deepmerge'
 
 // ── TODO: restore removed modules ─────────────────────────────────────────────
 //
