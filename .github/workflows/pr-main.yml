@@ -1,6 +1,5 @@
 # Blocks normal PRs into `main` if the repo is busted.
 name: PR Main
-id: pr_main
 
 on:
     pull_request:
@@ -25,6 +24,7 @@ jobs:
               !startsWith(github.head_ref, 'release/') &&
               !startsWith(github.head_ref, 'changesets/')
             }}
+
 
         uses: ./pipeline.yml
         with:

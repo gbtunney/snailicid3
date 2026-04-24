@@ -1,7 +1,6 @@
 # Blocks `changesets/**` PRs into `main` until docs are rebuilt and committed. This assumes docs generation changes tracked files.
 
 name: PR Changesets Version
-id: pr_changesets_version
 
 on:
     pull_request:

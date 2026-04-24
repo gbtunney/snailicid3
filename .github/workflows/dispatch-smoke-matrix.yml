@@ -1,7 +1,5 @@
 # Use this for compatibility checks without blocking normal work
 name: Smoke Matrix Dispatch
-id: smoke_matrix_dispatch
-
 on:
     workflow_dispatch:
 
