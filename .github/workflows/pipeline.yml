@@ -219,7 +219,7 @@ jobs:
             - name: 📘 Run Docs Build
               if: ${{ inputs.run_docs_build }}
               continue-on-error: ${{ inputs.mode == 'report' }}
-              run: pnpm -r --if-present run docs:build
+              run: pnpm run docs:build
 
             # ── Clean repo gate + dirty output ──────────────────────
             - name: 🧼 Require Clean Repo

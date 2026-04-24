@@ -26,7 +26,7 @@ export const fileSharedOptions = (
         const options: TypedocOptions = {
             /** This uses a "module" format, using the index of each subfolder */
             entryPoints: [path.resolve(`${resolvedDirname}/src/index.ts`)],
-            tsconfig: path.resolve(`${resolvedDirname}/tsconfig.node.json`),
+            tsconfig: path.resolve(`${resolvedDirname}/tsconfig.docs.json`),
             readme: path.resolve(`${resolvedDirname}/README.md`),
             out: path.resolve(`${resolvedDirname}/docs`),
             exclude: [
