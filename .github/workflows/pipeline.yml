@@ -116,7 +116,7 @@ jobs:
             - uses: actions/setup-node@v4
               with:
                   node-version: ${{ inputs.node_version }}
-                  cache: ${{ inputs.pnpm_cache && 'pnpm' || '' }}
+
             - uses: pnpm/action-setup@v4
               with:
                   run_install: false
