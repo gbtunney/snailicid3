@@ -1,6 +1,5 @@
 # Blocks `release/**` PRs into `main`. This is stricter than normal CI.
 name: PR Release
-id: pr_release
 
 on:
     pull_request:
