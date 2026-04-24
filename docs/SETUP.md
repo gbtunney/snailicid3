@@ -54,7 +54,8 @@ pnpm check # lint + prettier --check (read-only)
 
 ## Nx target reference
 
-All targets are defined globally in `nx.json` — packages don't need to repeat them.
+All targets are defined globally in `nx.json` — packages don't need to repeat
+them.
 
 | Target         | Cached | Notes                              |
 | -------------- | ------ | ---------------------------------- |

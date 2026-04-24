@@ -18,31 +18,43 @@
     "targetDefaults": {
         "dev": {
             "cache": false,
-            "command": "tsc --build tsconfig.node.json --watch",
-            "options": { "cwd": "{projectRoot}" }
+            "dependsOn": ["dev:ts"],
+            "options": {
+                "cwd": "{projectRoot}"
+            }
         },
         "dev:ts": {
             "cache": false,
-            "command": "tsc --build tsconfig.node.json --watch",
-            "options": { "cwd": "{projectRoot}" }
+            "command": "tsc --build tsconfig.build.json --watch",
+            "options": {
+                "cwd": "{projectRoot}"
+            }
         },
         "dev:rollup": {
             "cache": false,
             "command": "rollup --watch --config ./rollup.config.mts",
-            "options": { "cwd": "{projectRoot}" }
+            "dependsOn": ["build:ts"],
+            "options": {
+                "cwd": "{projectRoot}"
+            }
         },
         "dev:vite": {
             "cache": false,
             "command": "pnpm exec vite --config ./vite.config.ts",
-            "options": { "cwd": "{projectRoot}" }
+            "dependsOn": ["build:ts"],
+            "options": {
+                "cwd": "{projectRoot}"
+            }
         },
         "build:ts": {
             "cache": true,
             "dependsOn": ["^build"],
             "inputs": ["production", "^production"],
             "outputs": ["{projectRoot}/dist", "{projectRoot}/types"],
-            "command": "tsc --build tsconfig.node.json",
-            "options": { "cwd": "{projectRoot}" }
+            "command": "tsc --build tsconfig.build.json",
+            "options": {
+                "cwd": "{projectRoot}"
+            }
         },
         "build:rollup": {
             "cache": true,
@@ -50,7 +62,9 @@
             "inputs": ["production", "^production"],
             "outputs": ["{projectRoot}/dist"],
             "command": "rollup --config ./rollup.config.mts",
-            "options": { "cwd": "{projectRoot}" }
+            "options": {
+                "cwd": "{projectRoot}"
+            }
         },
         "build:vite": {
             "cache": true,
@@ -58,7 +72,9 @@
             "inputs": ["production", "^production"],
             "outputs": ["{projectRoot}/dist"],
             "command": "vite build",
-            "options": { "cwd": "{projectRoot}" }
+            "options": {
+                "cwd": "{projectRoot}"
+            }
         },
         "build": {
             "cache": true,
@@ -70,71 +86,92 @@
             "dependsOn": ["build", "check:ts", "^test"],
             "inputs": ["default", "^default"],
             "command": "vitest run",
-            "options": { "cwd": "{projectRoot}" }
-        },
-        "test:nx": {
-            "cache": false,
-            "command": "nx run {projectName}:test",
-            "options": { "cwd": "{projectRoot}" }
+            "options": {
+                "cwd": "{projectRoot}"
+            }
         },
         "test:watch": {
             "cache": false,
             "command": "vitest watch",
-            "options": { "cwd": "{projectRoot}" }
+            "dependsOn": ["check:ts"],
+            "options": {
+                "cwd": "{projectRoot}"
+            }
         },
-        "check:bk": {
-            "cache": true,
-            "inputs": ["default", "^default"],
-            "command": "eslint .",
-            "options": { "cwd": "{projectRoot}" }
-        },
+
         "lint:md": {
             "cache": true,
             "inputs": ["default"],
-            "command": "markdownlint-cli2 \"**/*.md\" \"#**/node_modules/**\" \"#**/dist/**\" \"#**/scratch/**\"",
-            "options": { "cwd": "{projectRoot}" }
+            "command": "pnpm exec markdownlint-cli2 \"**/*.md\" \"#**/node_modules/**\" \"#**/dist/**\" \"#**/scratch/**\"",
+            "options": {
+                "cwd": "{projectRoot}"
+            }
         },
         "check:ts": {
             "cache": true,
             "dependsOn": ["build:ts", "^build"],
             "inputs": ["default", "^default"],
             "command": "tsc --build tsconfig.json",
-            "options": { "cwd": "{projectRoot}" }
+            "options": {
+                "cwd": "{projectRoot}"
+            }
         },
         "lint": {
             "cache": false,
             "dependsOn": ["check:ts"],
-            "command": "prettier --check . && eslint .",
-            "options": { "cwd": "{projectRoot}" }
+            "command": "pnpm exec prettier --ignore-path ./.gitignore --check . && eslint .",
+            "options": {
+                "cwd": "{projectRoot}"
+            }
         },
         "fix": {
             "cache": false,
             "dependsOn": ["check:ts"],
-            "command": "prettier --write . && eslint . --fix",
-            "options": { "cwd": "{projectRoot}" }
+            "command": "pnpm exec prettier --ignore-path ./.gitignore --write . && pnpm exec eslint . --fix",
+            "options": {
+                "cwd": "{projectRoot}"
+            }
         },
         "clean:ts": {
             "cache": false,
-            "command": "pnpm exec tsc --build --clean && rm -f src/tsconfig.tsbuildinfo tsconfig.tsbuildinfo",
-            "options": { "cwd": "{projectRoot}" }
+            "command": "pnpm exec tsc --build --clean && tsc --build --clean tsconfig.docs.json && rm -f src/tsconfig.tsbuildinfo tsconfig.tsbuildinfo",
+            "options": {
+                "cwd": "{projectRoot}"
+            }
         },
         "clean:build": {
             "cache": false,
             "command": "rm -rf ./dist ./types",
-            "options": { "cwd": "{projectRoot}" }
+            "options": {
+                "cwd": "{projectRoot}"
+            }
         },
         "clean": {
             "cache": false,
             "dependsOn": ["clean:ts", "clean:build"]
         },
+
+        "docs:build:ts": {
+            "cache": true,
+            "dependsOn": ["build", "^docs:build:ts"],
+            "inputs": ["production", "^production"],
+            "command": "tsc --build tsconfig.docs.json",
+            "options": {
+                "cwd": "{projectRoot}"
+            }
+        },
         "docs:build": {
             "cache": true,
-            "dependsOn": ["build", "^docs:build"],
+            "dependsOn": ["build", "docs:build:ts"],
             "inputs": ["production", "^production"],
             "outputs": ["{projectRoot}/docs"],
-            "command": "typedoc",
-            "options": { "cwd": "{projectRoot}" }
+            "command": "pnpm exec typedoc",
+            "options": {
+                "cwd": "{projectRoot}"
+            }
         }
     },
-    "analytics": true
+    "analytics": true,
+
+    "nxCloudId": "69e9c6762976c23295a58736"
 }

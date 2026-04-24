@@ -1,7 +1,7 @@
 {
     "$schema": "./node_modules/nx/schemas/project-schema.json",
-    "name": "root",
-    "projectType": "library",
+    "name": "@snailicid3/root",
+    "projectType": "application",
     "targets": {
         "build": {
             "dependsOn": ["build:ts"]
@@ -39,13 +39,13 @@
         "lint": {
             "cache": false,
             "dependsOn": ["build:ts"],
-            "command": "prettier --check \"{*,.*}.{ts,tsx,mts,cts,json,yaml,yml,md,sh}\" \".github/**/*.{yaml,yml}\" \".husky/*\" --no-error-on-unmatched-pattern && eslint --config eslint.config.ts ./*.ts ./*.mts ./*.cts --no-error-on-unmatched-pattern",
+            "command": "prettier --check '**/*' '!packages/**' --no-error-on-unmatched-pattern && eslint --config eslint.config.ts ./*.ts ./*.mts ./*.cts --no-error-on-unmatched-pattern",
             "options": { "cwd": "{projectRoot}" }
         },
         "fix": {
             "cache": false,
             "dependsOn": ["build:ts"],
-            "command": "prettier --write \"{*,.*}.{ts,tsx,mts,cts,json,yaml,yml,md,sh}\" \".github/**/*.{yaml,yml}\" \".husky/*\" --no-error-on-unmatched-pattern && eslint --config eslint.config.ts ./*.ts ./*.mts ./*.cts --fix --no-error-on-unmatched-pattern",
+            "command": "pnpm exec prettier --write '**/*' '!packages/**' --no-error-on-unmatched-pattern && pnpm exec eslint --config eslint.config.ts ./*.ts ./*.mts ./*.cts --fix --no-error-on-unmatched-pattern",
             "options": { "cwd": "{projectRoot}" }
         },
         "lint:md": {

@@ -1,0 +1,33 @@
+# Blocks `release/**` PRs into `main`. This is stricter than normal CI.
+name: PR Release
+id: pr_release
+
+on:
+    pull_request:
+        branches:
+            - main
+
+concurrency:
+    group: pr-release-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+
+env:
+    HUSKY: 0
+
+jobs:
+    required:
+        name: required
+        if: ${{ startsWith(github.head_ref, 'release/') }}
+        uses: ./pipeline.yml
+        with:
+            mode: abort_on_error
+            check_mode: check
+            require_lockfile: true
+            require_clean_repo: true
+            run_build: true
+            run_test: true
+            run_docs_build: true
+            pnpm_cache: true

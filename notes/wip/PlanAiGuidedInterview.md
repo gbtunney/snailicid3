@@ -1,8 +1,9 @@
 # Guided Interview Spec
 
-This document defines the conversational, AI-guided interview process used to produce field,object,data specs
-that conform to the general described spec structure. It is not a rigid CLI, schema, or form. It is a
-human-first interview with suggested options and defaults.
+This document defines the conversational, AI-guided interview process used to
+produce field,object,data specs that conform to the general described spec
+structure. It is not a rigid CLI, schema, or form. It is a human-first interview
+with suggested options and defaults.
 
 ## Table of Contents
 
@@ -39,7 +40,8 @@ human-first interview with suggested options and defaults.
 - TypeScript-first output
 - Platform-agnostic
 
-This is guided interview that has 3 phases.All the items can TODO: these are flexible
+This is guided interview that has 3 phases.All the items can TODO: these are
+flexible
 
 ## Interview Flow Overview
 
@@ -99,7 +101,8 @@ Goal: Assist user in outlining attribytes/fields based on 3 type layers:
 - Technical representation changes by **_platform_**
 - UI changes by **_context_**
 
-> _Separating the type layers while designing specifications prevents premature coupling!_
+> _Separating the type layers while designing specifications prevents premature
+> coupling!_
 
 ## Identity Phase
 
@@ -150,8 +153,8 @@ Goal: Assist user in outlining attribytes/fields based on 3 type layers:
 
 ## Transcript Capture (Design Notes)
 
-After an interview completes for design notes (by request), AI should reconstruct an interview transcript
-containing:
+After an interview completes for design notes (by request), AI should
+reconstruct an interview transcript containing:
 
 - Each question asked
 - Each user response

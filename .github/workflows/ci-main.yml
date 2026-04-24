@@ -1,0 +1,32 @@
+# Runs on every push to `main`. This answers: “is main busted after merge?”
+
+name: CI Main
+id: ci_main
+on:
+    push:
+        branches:
+            - main
+
+concurrency:
+    group: ci-main-${{ github.ref }}
+    cancel-in-progress: false
+
+permissions:
+    contents: read
+
+env:
+    HUSKY: 0
+
+jobs:
+    required:
+        name: required
+        uses: ./pipeline.yml
+        with:
+            mode: abort_on_error
+            check_mode: check
+            require_lockfile: true
+            require_clean_repo: true
+            run_build: true
+            run_test: true
+            run_docs_build: false
+            pnpm_cache: true

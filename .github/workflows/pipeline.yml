@@ -25,11 +25,6 @@ on:
                 default: check
                 type: string
 
-            run_install:
-                required: false
-                default: true
-                type: boolean
-
             # If true: frozen-lockfile failure is treated as required.
             # If false: relaxed install is allowed to recover from lockfile mismatch.
             require_lockfile:
@@ -39,7 +34,7 @@ on:
 
             run_build:
                 required: false
-                default: false
+                default: true
                 type: boolean
 
             run_test:
@@ -69,15 +64,20 @@ on:
                 default: workspace
                 type: string
 
+            node_version:
+                description: Node version to run the pipeline with.
+                required: false
+                default: lts/*
+                type: string
             # reset caching options
             nx_cache_reset:
                 required: false
                 default: false
                 type: boolean
 
-            pnpm_store_reset:
+            pnpm_cache:
                 required: false
-                default: false
+                default: true
                 type: boolean
 
         outputs:
@@ -102,7 +102,7 @@ env:
 jobs:
     pipeline:
         runs-on: ubuntu-latest
-
+        name: node-${{ inputs.node_version }}
         outputs:
             is_repo_dirty: ${{ steps.repo_dirty.outputs.is_repo_dirty }}
             workspace_artifact_name: ${{ steps.artifact_name.outputs.name }}
@@ -113,14 +113,14 @@ jobs:
               with:
                   fetch-depth: 0
 
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ inputs.node_version }}
+                  cache: ${{ inputs.pnpm_cache && 'pnpm' || '' }}
             - uses: pnpm/action-setup@v4
               with:
                   run_install: false
-
-            - uses: actions/setup-node@v4
-              with:
-                  node-version-file: .nvmrc
-                  cache: pnpm
+                  cache: ${{ inputs.pnpm_cache }}
 
             # ── Input summary ────────────────────────────────────────
             # Note: no native foreach over inputs; keep this explicit.
@@ -132,14 +132,13 @@ jobs:
                     echo ""
                     echo "- mode: \`${{ inputs.mode }}\`"
                     echo "- check_mode: \`${{ inputs.check_mode }}\`"
-                    echo "- run_install: \`${{ inputs.run_install }}\`"
                     echo "- require_lockfile: \`${{ inputs.require_lockfile }}\`"
                     echo "- require_clean_repo: \`${{ inputs.require_clean_repo }}\`"
                     echo "- run_build: \`${{ inputs.run_build }}\`"
                     echo "- run_test: \`${{ inputs.run_test }}\`"
                     echo "- run_docs_build: \`${{ inputs.run_docs_build }}\`"
                     echo "- nx_cache_reset: \`${{ inputs.nx_cache_reset }}\`"
-                    echo "- pnpm_store_reset: \`${{ inputs.pnpm_store_reset }}\`"
+                    echo "- pnpm_cache: \`${{ inputs.pnpm_cache }}\`"
                     echo "- upload_workspace_artifact: \`${{ inputs.upload_workspace_artifact }}\`"
                     echo "- artifact_name_prefix: \`${{ inputs.artifact_name_prefix }}\`"
                   } | tee -a "$GITHUB_STEP_SUMMARY"
@@ -157,34 +156,16 @@ jobs:
             # ── Install attempts ─────────────────────────────────────
             - name: 📦 Install Attempt 1 Frozen Lockfile
               id: install_frozen
-              if: ${{ inputs.run_install }}
-              continue-on-error: true
+              if: ${{ always() }}
+              continue-on-error: ${{inputs.mode == 'report' }}
               run: pnpm install --frozen-lockfile
-
-            - name: 🚧 Abort on Required Frozen Lockfile Failure
-              if: ${{ inputs.run_install && inputs.require_lockfile && inputs.mode == 'abort_on_error' && steps.install_frozen.outcome == 'failure' }}
-              run: exit 1
-
             - name: 📦 Install Attempt 2 Relaxed Lockfile
               id: install_relaxed
-              if: ${{ inputs.run_install }}
-              continue-on-error: true
+              if: ${{ always() }}
+              continue-on-error: ${{inputs.mode == 'report' }}
               run: pnpm install --no-frozen-lockfile
-
-            - name: 🚧 Abort on Required Relaxed Install Failure
-              if: ${{ inputs.run_install && !inputs.require_lockfile && inputs.mode == 'abort_on_error' && steps.install_relaxed.outcome == 'failure' }}
-              run: exit 1
-
-            - name: 📦 Install Attempt 3 Delete Lockfile and Retry
-              id: install_reset_lockfile
-              if: ${{ inputs.run_install }}
-              continue-on-error: true
-              run: |
-                  rm -f pnpm-lock.yaml
-                  pnpm install --no-frozen-lockfile
-
             - name: 🚨 Validate Install Attempts (fail only if all failed)
-              if: ${{ inputs.run_install && steps.install_frozen.outcome == 'failure' && steps.install_relaxed.outcome == 'failure' && steps.install_reset_lockfile.outcome == 'failure' }}
+              if: ${{steps.install_frozen.outcome == 'failure' && steps.install_relaxed.outcome == 'failure'}}
               run: |
                   echo "All install attempts failed."
                   exit 1
@@ -197,7 +178,7 @@ jobs:
             - name: 📚 Report Workspace
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
-              run: pnpm report:workspace
+              run: echo 'pnpm report:workspace'
 
             # ── Cache resets ─────────────────────────────────────────
             - name: 🧹 Reset Nx Cache
@@ -208,14 +189,19 @@ jobs:
             - name: 🗑️ Run Uninstall Cleanup
               if: ${{ inputs.nx_cache_reset }}
               continue-on-error: ${{ inputs.mode == 'report' }}
-              run: pnpm run uninstall
+              run: pnpm run nx:reset
 
-            - name: 🧺 Prune pnpm Store
-              if: ${{ inputs.pnpm_store_reset }}
+            - name: 🏗️ Run Build
+              if: ${{ inputs.run_build }}
               continue-on-error: ${{ inputs.mode == 'report' }}
-              run: pnpm store prune
+              run: pnpm build
 
-            # ── Routines ────────────────────────────────────────────
+            - name: 🧪 Run Test
+              if: ${{ inputs.run_test }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm test
+
+              # ── Routines ────────────────────────────────────────────
             - name: ✨ Run Fix Routine
               if: ${{ inputs.check_mode == 'fix' }}
               continue-on-error: ${{ inputs.mode == 'report' }}
@@ -229,16 +215,6 @@ jobs:
             - name: ⏭️ Skip Check Routine
               if: ${{ inputs.check_mode == 'skip' }}
               run: echo "check_mode=skip"
-
-            - name: 🏗️ Run Build
-              if: ${{ inputs.run_build }}
-              continue-on-error: ${{ inputs.mode == 'report' }}
-              run: pnpm build
-
-            - name: 🧪 Run Test
-              if: ${{ inputs.run_test }}
-              continue-on-error: ${{ inputs.mode == 'report' }}
-              run: pnpm test
 
             - name: 📘 Run Docs Build
               if: ${{ inputs.run_docs_build }}
@@ -270,7 +246,7 @@ jobs:
             # ── Artifact upload + outputs ────────────────────────────
             - name: 🏷️ Compute artifact name
               id: artifact_name
-              if: ${{ inputs.upload_workspace_artifact }}
+              if: ${{ inputs.upload_workspace_artifact && steps.repo_dirty.outputs.is_repo_dirty == 'true'}}
               shell: bash
               run: |
                   NAME="${{ inputs.artifact_name_prefix }}-${{ github.repository }}-${{ github.run_id }}-${{ github.run_attempt }}"
@@ -280,7 +256,7 @@ jobs:
 
             - name: 📦 Upload workspace artifact
               id: upload_workspace
-              if: ${{ inputs.upload_workspace_artifact }}
+              if: ${{ inputs.upload_workspace_artifact && steps.repo_dirty.outputs.is_repo_dirty == 'true' }}
               uses: actions/upload-artifact@v4
               with:
                   name: ${{ steps.artifact_name.outputs.name }}
@@ -296,7 +272,7 @@ jobs:
 
             - name: 🧾 Compute artifact_uploaded output
               id: artifact_uploaded
-              if: ${{ always() }}
+              if: ${{ steps.repo_dirty.outputs.is_repo_dirty == 'true'}}
               shell: bash
               run: |
                   if [ "${{ inputs.upload_workspace_artifact }}" != "true" ]; then

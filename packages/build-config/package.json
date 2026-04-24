@@ -43,21 +43,7 @@
             "dev:ts": {},
             "dev:rollup": {},
             "dev:vite": {},
-            "build:ts": {
-                "cache": true,
-                "dependsOn": [
-                    "^build"
-                ],
-                "inputs": [
-                    "production",
-                    "^production"
-                ],
-                "outputs": [
-                    "{projectRoot}/dist",
-                    "{projectRoot}/types"
-                ],
-                "command": "tsc --build ./tsconfig.json && tsc --build ./tsconfig.node.json"
-            },
+            "build:ts": {},
             "check:ts": {},
             "build:rollup": {},
             "build:vite": {},
@@ -67,14 +53,12 @@
                 ]
             },
             "test": {},
-            "test:nx": {},
             "test:watch": {},
             "lint": {},
             "fix": {},
             "clean": {},
             "clean:ts": {},
-            "clean:build": {},
-            "docs:build": {}
+            "clean:build": {}
         }
     },
     "type": "module",
@@ -87,9 +71,17 @@
         "type": "git",
         "url": "https://github.com/gbtunney/snailicid3-monorepo"
     },
-    "main": "./dist/index.js",
+    "main": "./src/index.js",
     "types": "./types/index.d.ts",
     "dependencies": {
-        "rollup-plugin-polyfill-node": "^0.13.0"
+        "remark-toc": "^9.0.0",
+        "rollup-plugin-polyfill-node": "^0.13.0",
+        "ts-deepmerge": "^7.0.3",
+        "type-fest": "^5.6.0",
+        "typedoc-material-theme": "^1.4.1",
+        "typedoc-plugin-markdown": "^4.11.0",
+        "typedoc-plugin-remark": "^2.0.1",
+        "typedoc-plugin-zod": "^1.4.3",
+        "unified-prettier": "^2.0.1"
     }
 }

@@ -1,0 +1,38 @@
+# Blocks normal PRs into `main` if the repo is busted.
+name: PR Main
+id: pr_main
+
+on:
+    pull_request:
+        branches:
+            - main
+
+concurrency:
+    group: pr-main-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+
+env:
+    HUSKY: 0
+
+jobs:
+    required:
+        name: required
+        if: >-
+            ${{
+              !startsWith(github.head_ref, 'release/') &&
+              !startsWith(github.head_ref, 'changesets/')
+            }}
+
+        uses: ./pipeline.yml
+        with:
+            mode: abort_on_error
+            check_mode: check
+            require_lockfile: true
+            require_clean_repo: true
+            run_build: true
+            run_test: true
+            run_docs_build: false
+            pnpm_cache: true

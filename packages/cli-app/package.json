@@ -7,13 +7,11 @@
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
-        "\n========== DEVELOPMENT >> ==========": "",
-        "dev": "tsc --build --watch",
-        "\n========== TEST >> ==========": "",
-        "test:watch": "vitest watch",
+        "dev:nx": "nx run $npm_package_name:dev",
         "test:coverage": "vitest run --coverage"
     },
     "dependencies": {
+        "@snailicid3/build-config": "workspace:*",
         "@snailicid3/color": "workspace:*",
         "@snailicid3/logger": "workspace:*",
         "@snailicid3/node-utils": "workspace:*",
@@ -32,6 +30,7 @@
         "@snailicid3/config": "workspace:*",
         "@types/node": "^25.6.0",
         "@types/yargs": "^17.0.35",
+        "typedoc": "^0.28.19",
         "typescript": "^6.0.2",
         "vitest": "^4.1.4"
     },
@@ -69,6 +68,7 @@
             "clean": {},
             "clean:ts": {},
             "clean:build": {},
+            "docs:build:ts": {},
             "docs:build": {}
         }
     },

@@ -1,0 +1,78 @@
+# Runs only after merge to `main`. This is where Changesets should create/update the version PR, or publish after the version PR is merged.
+name: Release
+id: release
+
+# TODO update to call the reusable workflow
+on:
+    push:
+        branches:
+            - main
+
+concurrency:
+    group: release-main
+    cancel-in-progress: false
+
+permissions:
+    contents: write
+    pull-requests: write
+    id-token: write
+
+env:
+    HUSKY: 0
+    NPM_CONFIG_PROVENANCE: true
+
+jobs:
+    release:
+        name: release
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  run_install: false
+
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: lts/*
+                  cache: pnpm
+                  registry-url: https://registry.npmjs.org
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Build
+              run: pnpm build
+
+            - name: Test
+              run: pnpm test
+
+            - name: Build docs
+              run: pnpm -r --if-present run docs:build
+
+            - name: Require clean repository before release action
+              run: |
+                  if [ -n "$(git status --porcelain)" ]; then
+                    echo "Repository became dirty before release. Commit generated docs/version files first."
+                    git status --porcelain
+                    exit 1
+                  fi
+
+            - name: Create version PR or publish packages
+              id: changesets
+              uses: changesets/action@v1
+              with:
+                  version: pnpm changeset version
+                  publish: pnpm changeset publish
+                  title: 'chore(release): version packages'
+                  commit: 'chore(release): version packages'
+                  createGithubReleases: true
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -40,26 +40,20 @@
         "targets": {
             "dev": {},
             "dev:ts": {},
-            "dev:rollup": {},
-            "dev:vite": {},
             "build:ts": {},
             "check:ts": {},
-            "build:rollup": {},
-            "build:vite": {},
             "build": {
                 "dependsOn": [
                     "build:ts"
                 ]
             },
             "test": {},
-            "test:nx": {},
             "test:watch": {},
             "lint": {},
             "fix": {},
             "clean": {},
             "clean:ts": {},
-            "clean:build": {},
-            "docs:build": {}
+            "clean:build": {}
         }
     },
     "type": "module",

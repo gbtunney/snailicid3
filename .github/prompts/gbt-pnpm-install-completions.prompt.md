@@ -1,13 +1,13 @@
 ---
 description:
-  'Install completions and recommended extensions for this workspace. Use `/pnpm-install-completions` to
-  trigger.'
+  'Install completions and recommended extensions for this workspace. Use
+  `/pnpm-install-completions` to trigger.'
 ---
 
 # Install Completions and Extensions
 
-To set up completions and recommended extensions for this workspace, run the following commands in the root
-directory:
+To set up completions and recommended extensions for this workspace, run the
+following commands in the root directory:
 
 ```sh
 # Ensure pnpm is installed and dependencies are set up
@@ -57,8 +57,10 @@ else
 fi
 ```
 
-You can copy and run these commands manually, or ask Copilot Chat to explain or execute them for you.
+You can copy and run these commands manually, or ask Copilot Chat to explain or
+execute them for you.
 
 ---
 
-Type `/pnpm-install-completions` in Copilot Chat to insert these setup instructions.
+Type `/pnpm-install-completions` in Copilot Chat to insert these setup
+instructions.
