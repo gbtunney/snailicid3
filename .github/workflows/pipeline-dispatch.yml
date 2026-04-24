@@ -21,19 +21,10 @@ on:
                 required: true
                 default: false
                 type: boolean
-            check_mode:
-                description: Check routine mode
-                required: true
-                default: check
-                type: choice
-                options:
-                    - fix
-                    - check
-                    - skip
             run_build:
                 description: Run pnpm build
                 required: true
-                default: false
+                default: true
                 type: boolean
             run_test:
                 description: Run pnpm test

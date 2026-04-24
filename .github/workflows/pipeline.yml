@@ -34,7 +34,7 @@ on:
 
             run_build:
                 required: false
-                default: false
+                default: true
                 type: boolean
 
             run_test:
@@ -115,7 +115,7 @@ jobs:
             - uses: pnpm/action-setup@v4
               with:
                   run_install: false
-                  cache: true
+                  cache: ${{ inputs.pnpm_cache == 'check' }}
 
             # ── Input summary ────────────────────────────────────────
             # Note: no native foreach over inputs; keep this explicit.

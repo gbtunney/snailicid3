@@ -62,10 +62,6 @@ jobs:
             check_mode: fix
             require_lockfile: false
             require_clean_repo: false
-            run_build: true
-            run_test: false
-            run_docs_build: false
-            nx_cache_reset: false
             upload_workspace_artifact: true
             artifact_name_prefix: autofix-workspace
 
