@@ -84,6 +84,7 @@
         "uninstall": "pnpm exec packages/workspace-tools/bin/shell/uninstall.sh"
     },
     "devDependencies": {
+        "@changesets/cli": "^2.31.0",
         "@commitlint/cli": "^20.5.0",
         "@commitlint/config-conventional": "^20.5.0",
         "@commitlint/cz-commitlint": "^20.5.1",

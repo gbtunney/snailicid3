@@ -1,7 +1,7 @@
 {
     "name": "@snailicid3/workspace-tools",
     "version": "0.0.0",
-    "private": false,
+    "private": true,
     "description": "pnpm workspace introspection, repo diagnostics and GitHub issue tooling",
     "scripts": {
         "build:nx": "nx run $npm_package_name:build",
@@ -14,11 +14,11 @@
         "test:coverage": "vitest run --coverage"
     },
     "dependencies": {
+        "@nx/devkit": "^22.6.5",
         "@snailicid3/logger": "workspace:*",
         "@snailicid3/utils": "workspace:*"
     },
     "devDependencies": {
-        "@nx/devkit": "^22.6.5",
         "@snailicid3/config": "workspace:*",
         "@types/node": "^25.6.0",
         "typescript": "^6.0.2",
