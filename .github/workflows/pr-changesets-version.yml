@@ -1,0 +1,34 @@
+# Blocks `changesets/**` PRs into `main` until docs are rebuilt and committed. This assumes docs generation changes tracked files.
+
+name: PR Changesets Version
+id: pr_changesets_version
+
+on:
+    pull_request:
+        branches:
+            - main
+
+concurrency:
+    group: pr-changesets-version-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+
+env:
+    HUSKY: 0
+
+jobs:
+    required:
+        name: required
+        if: ${{ startsWith(github.head_ref, 'changesets/') }}
+        uses: ./pipeline.yml
+        with:
+            mode: abort_on_error
+            check_mode: check
+            require_lockfile: true
+            require_clean_repo: true
+            run_build: true
+            run_test: true
+            run_docs_build: true
+            pnpm_cache: true

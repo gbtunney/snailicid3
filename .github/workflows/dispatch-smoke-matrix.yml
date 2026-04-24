@@ -1,0 +1,21 @@
+# Use this for compatibility checks without blocking normal work
+name: Smoke Matrix Dispatch
+id: smoke_matrix_dispatch
+
+on:
+    workflow_dispatch:
+
+jobs:
+    smoke:
+        name: node-${{ matrix.node }}
+        strategy:
+            fail-fast: false
+            matrix:
+                node:
+                    - 20
+                    - 22
+                    - 24
+
+        uses: ./.github/workflows/pipeline.yml
+        with:
+            node_version: ${{ matrix.node }}
