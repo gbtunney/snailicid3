@@ -29,15 +29,17 @@ export const typedoc: Typedoc = {
     materialTheme,
     //  plugin:{load} //todo: triggers error
 }
+export { docServer } from './docServer.js'
 export {
     configMarkdown as typedocMarkdownConfig,
     configVitepress as typedocVitepressConfig,
 } from './markdown.js'
-export type { TypedocConfigFunction, TypedocOptions } from './shared.js'
 
+export type { TypedocConfigFunction, TypedocOptions } from './shared.js'
 export {
     config as typedocStandardConfig,
     materialTheme as typedocMaterialTheme,
 } from './standard.js'
 export type { MaterialThemeOptions, TypedocConfig } from './standard.js'
+
 export type { PluginOptions as MarkdownPluginOptions } from 'typedoc-plugin-markdown'
