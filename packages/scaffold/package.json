@@ -1,7 +1,7 @@
 {
     "name": "@snailicid3/scaffold",
     "version": "0.0.0",
-    "private": false,
+    "private": true,
     "description": "Package scaffolding generator with TypeScript-function-based templates",
     "scripts": {
         "build:nx": "nx run $npm_package_name:build",

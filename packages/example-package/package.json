@@ -1,7 +1,7 @@
 {
     "name": "@snailicid3/example-package",
     "version": "0.0.0",
-    "private": false,
+    "private": true,
     "description": "Example monorepo package",
     "scripts": {
         "build:nx": "nx run $npm_package_name:build",

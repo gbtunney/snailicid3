@@ -1,7 +1,7 @@
 {
     "name": "@snailicid3/cli-app",
     "version": "0.0.0",
-    "private": false,
+    "private": true,
     "description": "Zod-backed CLI app framework",
     "scripts": {
         "build:nx": "nx run $npm_package_name:build",
