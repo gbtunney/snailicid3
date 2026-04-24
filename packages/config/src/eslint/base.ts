@@ -19,6 +19,7 @@ const base_ignores = [
     '**/dist/**/*',
     '**/node_modules/**',
     '**/dist/**',
+    '**/docs/**',
     '**/types/**/*',
     '**/types/**',
     '!packages/types/**',
