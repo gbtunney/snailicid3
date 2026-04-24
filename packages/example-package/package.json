@@ -7,11 +7,7 @@
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
-        "\n========== DEVELOPMENT >> ==========": "",
-        "dev": "tsc --build --watch",
-        "dev:rollup": "rollup --watch --config ./rollup.config.mts",
-        "\n========== TEST >> ==========": "",
-        "test:watch": "vitest watch",
+        "dev:nx": "nx run $npm_package_name:dev",
         "test:coverage": "vitest run --coverage"
     },
     "devDependencies": {
@@ -43,22 +39,14 @@
             "check:ts": {},
             "build:rollup": {},
             "build:vite": {},
-            "build": {
-                "dependsOn": [
-                    "build:ts",
-                    "build:rollup"
-                ]
-            },
-            "typecheck": {},
+            "build": {},
             "test": {},
-            "test:nx": {},
             "test:watch": {},
             "lint": {},
             "fix": {},
             "clean": {},
             "clean:ts": {},
-            "clean:build": {},
-            "docs:build": {}
+            "clean:build": {}
         }
     },
     "type": "module",

@@ -12,6 +12,8 @@
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
+        "docs:nx": "nx run $npm_package_name:docs:build",
+        "docs:serve:nx": "nx run $npm_package_name:docs:serve",
         "\n========== DEVELOPMENT >> ==========": "",
         "dev": "tsc --build --watch",
         "\n========== TEST >> ==========": "",
@@ -40,6 +42,7 @@
     "devDependencies": {
         "@snailicid3/config": "workspace:*",
         "@types/node": "^25.6.0",
+        "typedoc": "^0.28.19",
         "typescript": "^6.0.2",
         "vitest": "^4.1.4"
     },
@@ -59,10 +62,8 @@
             "dev": {},
             "dev:ts": {},
             "dev:rollup": {},
-            "dev:vite": {},
             "build:ts": {},
             "build:rollup": {},
-            "build:vite": {},
             "build": {},
             "check:ts": {},
             "test": {},
@@ -73,7 +74,9 @@
             "clean": {},
             "clean:ts": {},
             "clean:build": {},
-            "docs:build": {}
+            "docs:build": {},
+            "docs:build:ts": {},
+            "docs:serve": {}
         }
     },
     "type": "module",

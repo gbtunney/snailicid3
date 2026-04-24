@@ -153,7 +153,9 @@ dist
 
 #Husky
 .husky/_
-# Allowed javascript source files
+
+# Docs
+docs
 
 # Scratch Files
 scratch

@@ -4,14 +4,11 @@
     "private": false,
     "description": "Shared linting, formatting, and TypeScript config utilities for the snailicid3 monorepo",
     "scripts": {
-        "build:custom": "pnpm exec tsx ./build-temp.ts",
+        "build:exporter": "pnpm exec tsx ./build-exporter.ts",
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
-        "\n========== DEVELOPMENT >> ==========": "",
-        "dev": "tsc --build --watch",
-        "\n========== TEST >> ==========": "",
-        "test:watch": "vitest watch",
+        "dev:nx": "nx run $npm_package_name:dev",
         "test:coverage": "vitest run --coverage"
     },
     "dependencies": {
@@ -64,6 +61,7 @@
         "./tsconfig.base": "./typescript-config/tsconfig.base.json",
         "./tsconfig.library": "./typescript-config/tsconfig.library.json",
         "./tsconfig.typecheck": "./typescript-config/tsconfig.typecheck.json",
+        "./tsconfig.docs": "./typescript-config/tsconfig.docs.json",
         "./markdownlint": "./dist/.markdownlint.json",
         "./prettier": {
             "import": "./dist/prettier/index.js",
@@ -87,12 +85,10 @@
             "dev": {},
             "dev:ts": {},
             "dev:rollup": {},
-            "dev:vite": {},
             "build:ts": {},
             "check:ts": {},
             "build:rollup": {},
-            "build:vite": {},
-            "build:custom": {
+            "build:exporter": {
                 "cache": true,
                 "dependsOn": [
                     "build:ts"
@@ -109,14 +105,12 @@
                 ]
             },
             "test": {},
-            "test:nx": {},
             "test:watch": {},
             "lint": {},
             "fix": {},
             "clean": {},
             "clean:ts": {},
-            "clean:build": {},
-            "docs:build": {}
+            "clean:build": {}
         }
     },
     "type": "module",

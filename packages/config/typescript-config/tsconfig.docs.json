@@ -1,0 +1,10 @@
+{
+    "extends": "./tsconfig.base.json",
+    "compilerOptions": {
+        "tsBuildInfoFile": "${configDir}/node_modules/.tmp/tsconfig.docs.tsbuildinfo",
+        "types": ["node"],
+        "declaration": false,
+        "sourceMap": false,
+        "declarationMap": false
+    }
+}
