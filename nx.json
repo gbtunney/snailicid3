@@ -117,7 +117,7 @@
             }
         },
         "lint": {
-            "cache": false,
+            "cache": true,
             "dependsOn": ["check:ts"],
             "command": "pnpm exec prettier --ignore-path ./.gitignore --check . && eslint .",
             "options": {
