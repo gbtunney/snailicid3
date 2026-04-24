@@ -36,6 +36,17 @@ on:
                 required: true
                 default: false
                 type: boolean
+
+            node_version:
+                description: Node version to run
+                required: true
+                default: lts/*
+                type: choice
+                options:
+                    - 'lts/*'
+                    - '20'
+                    - '22'
+                    - '24'
             nx_cache_reset:
                 description: Run nx cache reset before routines
                 required: true

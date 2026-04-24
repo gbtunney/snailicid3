@@ -64,6 +64,11 @@ on:
                 default: workspace
                 type: string
 
+            node_version:
+                description: Node version to run the pipeline with.
+                required: false
+                default: lts/*
+                type: string
             # reset caching options
             nx_cache_reset:
                 required: false
@@ -97,7 +102,7 @@ env:
 jobs:
     pipeline:
         runs-on: ubuntu-latest
-
+        name: node-${{ inputs.node_version }}
         outputs:
             is_repo_dirty: ${{ steps.repo_dirty.outputs.is_repo_dirty }}
             workspace_artifact_name: ${{ steps.artifact_name.outputs.name }}
@@ -110,8 +115,8 @@ jobs:
 
             - uses: actions/setup-node@v4
               with:
-                  node-version: 'lts/*'
-
+                  node-version: ${{ inputs.node_version }}
+                  cache: ${{ inputs.pnpm_cache && 'pnpm' || '' }}
             - uses: pnpm/action-setup@v4
               with:
                   run_install: false
