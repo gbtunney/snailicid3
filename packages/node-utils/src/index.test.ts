@@ -29,14 +29,11 @@ describe('getFilePathArr getFilePathObj', () => {
             './sample_image/_badurltestimage.jpeg',
         )
         const filePathGlob = './sample_image/*'
-        expect(filePathObj2).toBeDefined()
         expect(filePathObj2?.exists).toEqual(false)
 
-        expect(filePathObj).toBeDefined()
         expect(filePathObj?.filename).toEqual('testimage')
         expect(filePathObj?.extname).toEqual('jpeg')
         expect(filePathObj?.parentdirname).toEqual('sample_image')
-        //expect(getFilePathObj(filePathGlob)).toBeUndefined
         expect(getFilePathArr(filePathGlob).length).toBeGreaterThan(1)
         expect(getFilePathArr('./sample_image/testimage.jpeg').length).toBe(1)
         expect(getFilePathArr('./sample_image').length).toBe(1)
