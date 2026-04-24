@@ -26,7 +26,7 @@ jobs:
             }}
 
 
-        uses: ./pipeline.yml
+        uses: ./.github/workflows/pipeline.yml
         with:
             mode: abort_on_error
             check_mode: check
