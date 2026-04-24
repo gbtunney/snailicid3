@@ -1,7 +1,6 @@
-# Runs only after merge to `main`. This is where Changesets should create/update the version PR, or publish after the version PR is merged.
+# Runs only after merge to `main`. Changesets creates/updates the version PR, or publishes after the version PR is merged.
 name: Release
 
-# TODO update to call the reusable workflow
 on:
     push:
         branches:
@@ -21,9 +20,22 @@ env:
     NPM_CONFIG_PROVENANCE: true
 
 jobs:
+    pipeline:
+        uses: ./.github/workflows/pipeline.yml
+        with:
+            mode: abort_on_error
+            check_mode: check
+            require_lockfile: true
+            require_clean_repo: true
+            run_build: true
+            run_test: true
+            run_docs_build: false
+            pnpm_cache: true
+
     release:
         name: release
         runs-on: ubuntu-latest
+        needs: pipeline
 
         steps:
             - name: Checkout repository
@@ -45,23 +57,6 @@ jobs:
 
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
-
-            - name: Build
-              run: pnpm build
-
-            - name: Test
-              run: pnpm test
-
-            - name: Build docs
-              run: pnpm -r --if-present run docs:build
-
-            - name: Require clean repository before release action
-              run: |
-                  if [ -n "$(git status --porcelain)" ]; then
-                    echo "Repository became dirty before release. Commit generated docs/version files first."
-                    git status --porcelain
-                    exit 1
-                  fi
 
             - name: Create version PR or publish packages
               id: changesets

@@ -11,6 +11,15 @@ on:
                 options:
                     - report
                     - abort_on_error
+            check_mode:
+                description: Check routine mode
+                required: true
+                default: check
+                type: choice
+                options:
+                    - fix
+                    - check
+                    - skip
             require_lockfile:
                 description: Treat frozen lockfile install as required
                 required: true
@@ -82,7 +91,9 @@ jobs:
             run_build: ${{ inputs.run_build }}
             run_test: ${{ inputs.run_test }}
             run_docs_build: ${{ inputs.run_docs_build }}
+            node_version: ${{ inputs.node_version }}
             nx_cache_reset: ${{ inputs.nx_cache_reset }}
+            pnpm_cache: ${{ inputs.pnpm_cache }}
             upload_workspace_artifact: ${{ inputs.upload_workspace_artifact }}
             artifact_name_prefix: ${{ inputs.artifact_name_prefix }}
 
