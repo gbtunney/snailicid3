@@ -1,7 +1,7 @@
 {
     "$schema": "./node_modules/nx/schemas/project-schema.json",
-    "name": "root",
-    "projectType": "library",
+    "name": "@snailicid3/root",
+    "projectType": "application",
     "targets": {
         "build": {
             "dependsOn": ["build:ts"]

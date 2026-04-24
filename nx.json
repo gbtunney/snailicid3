@@ -25,7 +25,7 @@
         },
         "dev:ts": {
             "cache": false,
-            "command": "tsc --build tsconfig.node.json --watch",
+            "command": "tsc --build tsconfig.build.json --watch",
             "options": {
                 "cwd": "{projectRoot}"
             }
@@ -51,7 +51,7 @@
             "dependsOn": ["^build"],
             "inputs": ["production", "^production"],
             "outputs": ["{projectRoot}/dist", "{projectRoot}/types"],
-            "command": "tsc --build tsconfig.node.json",
+            "command": "tsc --build tsconfig.build.json",
             "options": {
                 "cwd": "{projectRoot}"
             }
@@ -134,7 +134,7 @@
         },
         "clean:ts": {
             "cache": false,
-            "command": "pnpm exec tsc --build --clean && rm -f src/tsconfig.tsbuildinfo tsconfig.tsbuildinfo",
+            "command": "pnpm exec tsc --build --clean && tsc --build --clean tsconfig.docs.json && rm -f src/tsconfig.tsbuildinfo tsconfig.tsbuildinfo",
             "options": {
                 "cwd": "{projectRoot}"
             }
@@ -150,17 +150,28 @@
             "cache": false,
             "dependsOn": ["clean:ts", "clean:build"]
         },
+
+        "docs:build:ts": {
+            "cache": true,
+            "dependsOn": ["build", "^docs:build:ts"],
+            "inputs": ["production", "^production"],
+            "command": "tsc --build tsconfig.docs.json",
+            "options": {
+                "cwd": "{projectRoot}"
+            }
+        },
         "docs:build": {
             "cache": true,
-            "dependsOn": ["build", "^docs:build"],
+            "dependsOn": ["build", "docs:build:ts"],
             "inputs": ["production", "^production"],
             "outputs": ["{projectRoot}/docs"],
-            "command": "typedoc",
+            "command": "pnpm exec typedoc",
             "options": {
                 "cwd": "{projectRoot}"
             }
         }
     },
     "analytics": true,
+
     "nxCloudId": "69e9c6762976c23295a58736"
 }
