@@ -18,7 +18,7 @@
     "targetDefaults": {
         "dev": {
             "cache": false,
-            "command": "tsc --build tsconfig.node.json --watch",
+            "dependsOn": ["dev:ts"],
             "options": {
                 "cwd": "{projectRoot}"
             }
@@ -33,6 +33,7 @@
         "dev:rollup": {
             "cache": false,
             "command": "rollup --watch --config ./rollup.config.mts",
+            "dependsOn": ["build:ts"],
             "options": {
                 "cwd": "{projectRoot}"
             }
@@ -40,6 +41,7 @@
         "dev:vite": {
             "cache": false,
             "command": "pnpm exec vite --config ./vite.config.ts",
+            "dependsOn": ["build:ts"],
             "options": {
                 "cwd": "{projectRoot}"
             }
@@ -88,32 +90,19 @@
                 "cwd": "{projectRoot}"
             }
         },
-        "test:nx": {
-            "cache": false,
-            "command": "nx run {projectName}:test",
-            "options": {
-                "cwd": "{projectRoot}"
-            }
-        },
         "test:watch": {
             "cache": false,
             "command": "vitest watch",
+            "dependsOn": ["check:ts"],
             "options": {
                 "cwd": "{projectRoot}"
             }
         },
-        "check:bk": {
-            "cache": true,
-            "inputs": ["default", "^default"],
-            "command": "eslint .",
-            "options": {
-                "cwd": "{projectRoot}"
-            }
-        },
+
         "lint:md": {
             "cache": true,
             "inputs": ["default"],
-            "command": "markdownlint-cli2 \"**/*.md\" \"#**/node_modules/**\" \"#**/dist/**\" \"#**/scratch/**\"",
+            "command": "pnpm exec markdownlint-cli2 \"**/*.md\" \"#**/node_modules/**\" \"#**/dist/**\" \"#**/scratch/**\"",
             "options": {
                 "cwd": "{projectRoot}"
             }
