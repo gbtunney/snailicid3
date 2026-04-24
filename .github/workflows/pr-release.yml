@@ -20,7 +20,7 @@ jobs:
     required:
         name: required
         if: ${{ startsWith(github.head_ref, 'release/') }}
-        uses: ./pipeline.yml
+        uses: ./.github/workflows/pipeline.yml
         with:
             mode: abort_on_error
             check_mode: check

@@ -1,0 +1,178 @@
+name: Build Docs & Commit
+
+# ─────────────────────────────────────────────────────────────
+# Manually triggered workflow for building docs and committing changes
+# without opening a Codespace.
+#
+# Flow:
+# - Refuses to run on main.
+# - Runs the reusable pipeline in check/build-docs mode.
+# - Downloads the pipeline workspace artifact and overlays it onto checkout.
+# - Commits only if the restored workspace differs from the checked out branch.
+# - Optional verify job controlled by input `run_verify`.
+# ─────────────────────────────────────────────────────────────
+
+on:
+    workflow_dispatch:
+        inputs:
+            commit_message_type:
+                description: Conventional commit type prefix
+                required: false
+                default: docs
+                type: choice
+                options: [chore, fix, docs, build]
+
+            commit_message_subject:
+                description: Commit subject (without type/scope). Default is "autofix".
+                required: false
+                default: Documentation update
+                type: string
+
+            commit_user_name:
+                description: Git author name + email local-part (email becomes "<name>@<domain>")
+                required: false
+                default: github-actions[bot]
+                type: string
+
+            commit_user_domain:
+                description: Git author email domain (email becomes "<name>@<domain>")
+                required: false
+                default: users.noreply.github.com
+                type: string
+
+            run_verify:
+                description: Run ci-core verify job (report mode) after committing
+                required: false
+                default: true
+                type: boolean
+
+permissions:
+    contents: write
+    actions: read
+
+env:
+    HUSKY: 0
+
+jobs:
+    pipeline_build_docs:
+        name: Run Doc pipeline
+        uses: ./.github/workflows/pipeline.yml
+        with:
+            mode: abort_on_error
+            check_mode: check
+            require_lockfile: true
+            run_build: true
+            run_test: true
+            run_docs_build: true
+            require_clean_repo: false
+            upload_workspace_artifact: true
+            artifact_name_prefix: build-docs-workspace
+
+    docs_commit:
+        name: Apply artifact and commit
+        runs-on: ubuntu-latest
+        needs: pipeline_build_docs
+        if: ${{ needs.pipeline_build_docs.result == 'success' && needs.pipeline_build_docs.outputs.artifact_uploaded == 'true' }}
+
+        steps:
+            # ── Guard: refuse to run on main ─────────────────────────
+            - name: 🚫 Refuse to run on main
+              shell: bash
+              run: |
+                  if [ "${{ github.ref_name }}" = "main" ]; then
+                    echo "❌ Document build cannot run on main. Checkout a feature or fix branch first."
+                    exit 1
+                  fi
+                  echo "✅ Branch: ${{ github.ref_name }}"
+
+            # ── Checkout ──────────────────────────────────────────────
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  token: ${{ secrets.GITHUB_TOKEN }}
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 'lts/*'
+
+            - uses: pnpm/action-setup@v4
+
+            # ── Restore pipeline artifact ────────────────────────────
+            - name: 📥 Download workspace artifact
+              uses: actions/download-artifact@v4
+              with:
+                  name: ${{ needs.pipeline_build_docs.outputs.workspace_artifact_name }}
+                  path: ${{ runner.temp }}/workspace-artifact
+
+            - name: ♻️ Overlay artifact onto repo
+              shell: bash
+              run: |
+                  ARTIFACT_DIR="${{ runner.temp }}/workspace-artifact"
+                  rsync -a \
+                    --exclude='.git/' \
+                    --exclude='node_modules/' \
+                    --exclude='dist/' \
+                    --exclude='types/' \
+                    "$ARTIFACT_DIR"/ "$GITHUB_WORKSPACE"/
+
+            # ── Check if repo is dirty ────────────────────────────────
+            - name: 🧼 Check repo status
+              id: dirty
+              shell: bash
+              run: |
+                  STATUS=$(git status --porcelain)
+                  if [ -n "$STATUS" ]; then
+                    echo "dirty=true" >> "$GITHUB_OUTPUT"
+                    echo "⚠️ Repo is dirty. Files to commit:"
+                    echo "$STATUS"
+                  else
+                    echo "dirty=false" >> "$GITHUB_OUTPUT"
+                    echo "✅ Nothing to commit."
+                  fi
+
+            # ── Commit and push ───────────────────────────────────────
+            - name: 📝 Commit changes
+              if: ${{ steps.dirty.outputs.dirty == 'true' }}
+              shell: bash
+              run: |
+                  git config user.name  "${{ inputs.commit_user_name }}"
+                  git config user.email "${{ inputs.commit_user_name }}@${{ inputs.commit_user_domain }}"
+
+                  TYPE="${{ inputs.commit_message_type }}"
+                  SUBJECT="${{ inputs.commit_message_subject }}"
+
+                  MESSAGE="${TYPE}(root): ${SUBJECT}"
+
+                  git add -A
+                   
+                  git commit -m "$MESSAGE" \
+                    -m "Triggered by: @${{ github.actor }} via workflow_dispatch" \
+                    -m "Branch: ${{ github.ref_name }}" \
+                    -m "Pipeline artifact: ${{ needs.pipeline_build_docs.outputs.workspace_artifact_name }}" \
+                    -m "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+                  echo "✅ Committed: $MESSAGE"
+
+            - name: 🚀 Push
+              if: ${{ steps.dirty.outputs.dirty == 'true' }}
+              run: git push origin ${{ github.ref_name }}
+
+            - name: ℹ️ Nothing to commit
+              if: ${{ steps.dirty.outputs.dirty == 'false' }}
+              run: echo "No changes detected — skipping commit and push."
+
+            - name: 🧾 Summary
+              if: ${{ always() }}
+              shell: bash
+              run: |
+                  {
+                    echo "## Autofix summary"
+                    echo ""
+                    echo "- branch: \`${{ github.ref_name }}\`"
+                    echo "- scope: \`${{ steps.scope.outputs.scope }}\`"
+                    echo "- dirty: \`${{ steps.dirty.outputs.dirty }}\`"
+                    echo "- pipeline result: \`${{ needs.pipeline_build_docs.result }}\`"
+                    echo "- artifact_uploaded: \`${{ needs.pipeline_build_docs.outputs.artifact_uploaded }}\`"
+                    echo "- workspace_artifact_name: \`${{ needs.pipeline_build_docs.outputs.workspace_artifact_name }}\`"
+                    echo "- verify: \`${{ inputs.run_verify }}\`"
+                  } >> "$GITHUB_STEP_SUMMARY"

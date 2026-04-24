@@ -117,7 +117,7 @@
             }
         },
         "lint": {
-            "cache": false,
+            "cache": true,
             "dependsOn": ["check:ts"],
             "command": "pnpm exec prettier --ignore-path ./.gitignore --check . && eslint .",
             "options": {
@@ -172,6 +172,5 @@
         }
     },
     "analytics": true,
-
     "nxCloudId": "69e9c6762976c23295a58736"
 }

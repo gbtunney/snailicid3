@@ -1,7 +1,7 @@
 {
     "extends": "@snailicid3/config/tsconfig.docs",
     "files": ["./typedoc.config.ts"],
-    "include": ["./*.ts", "./*.cts", "./*.mts"],
+    "include": ["**/*.ts", "**/*.cts", "*.mts"],
     "exclude": ["**/*.test.ts", "**/*.test.mts", "**/*.test.cts"],
-    "references": [{ "path": "./tsconfig.node.json" }]
+    "references": [{ "path": "./tsconfig.build.json" }]
 }
