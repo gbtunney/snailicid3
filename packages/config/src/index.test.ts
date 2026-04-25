@@ -6,8 +6,8 @@ import {
     JS_FILE_EXTENSIONS,
     JSLIKE_FILE_EXTENSIONS,
     markdownlint,
-    PRETTIER_FILE_EXTENSIONS,
     Prettier,
+    PRETTIER_FILE_EXTENSIONS,
     TS_FILE_EXTENSIONS,
 } from './index.js'
 

@@ -2,8 +2,8 @@ import { describe, expect, test } from 'vitest'
 import {
     isRepoClean,
     setPackageKeys,
-    workspacePackagesToArray,
     type WorkspacePackage,
+    workspacePackagesToArray,
 } from './index.js'
 
 const makePkg = (name: string): WorkspacePackage => ({
