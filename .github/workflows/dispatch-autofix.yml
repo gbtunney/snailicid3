@@ -166,7 +166,6 @@ jobs:
                     echo "## Autofix summary"
                     echo ""
                     echo "- branch: \`${{ github.ref_name }}\`"
-                    echo "- scope: \`${{ steps.scope.outputs.scope }}\`"
                     echo "- dirty: \`${{ steps.dirty.outputs.dirty }}\`"
                     echo "- pipeline result: \`${{ needs.pipeline_fix.result }}\`"
                     echo "- artifact_uploaded: \`${{ needs.pipeline_fix.outputs.artifact_uploaded }}\`"

@@ -101,6 +101,36 @@ importers:
                 specifier: ^4.1.4
                 version: 4.1.5(@types/node@25.6.0)(vite@8.0.10(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3))
 
+    node_modules/.tmp/tmp-36525-3X7oY4hIHznR:
+        devDependencies:
+            nx:
+                specifier: ^22.6.5
+                version: 22.6.5
+
+    node_modules/.tmp/tmp-37470-6jqHGShAVSxz:
+        devDependencies:
+            nx:
+                specifier: ^22.6.5
+                version: 22.6.5
+
+    node_modules/.tmp/tmp-37670-cNXZmNqNY5E9:
+        devDependencies:
+            nx:
+                specifier: ^22.6.5
+                version: 22.6.5
+
+    node_modules/.tmp/tmp-37854-ebMxhVn9e010:
+        devDependencies:
+            nx:
+                specifier: ^22.6.5
+                version: 22.6.5
+
+    node_modules/.tmp/tmp-38361-ATmpB5TbgcvA:
+        devDependencies:
+            nx:
+                specifier: ^22.6.5
+                version: 22.6.5
+
     packages/build-config:
         dependencies:
             '@rollup/plugin-commonjs':
@@ -12632,7 +12662,7 @@ snapshots:
             bl: 4.1.0
             chalk: 4.1.2
             cli-cursor: 3.1.0
-            cli-spinners: 2.6.1
+            cli-spinners: 2.9.2
             is-interactive: 1.0.0
             log-symbols: 4.1.0
             strip-ansi: 6.0.1

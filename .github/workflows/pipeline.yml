@@ -113,14 +113,14 @@ jobs:
               with:
                   fetch-depth: 0
 
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: ${{ inputs.node_version }}
-
             - uses: pnpm/action-setup@v4
               with:
                   run_install: false
-                  cache: ${{ inputs.pnpm_cache }}
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ inputs.node_version }}
+                  cache: ${{ inputs.pnpm_cache && 'pnpm' || '' }}
 
             # ── Input summary ────────────────────────────────────────
             # Note: no native foreach over inputs; keep this explicit.
@@ -154,20 +154,20 @@ jobs:
               run: pnpm report:repo
 
             # ── Install attempts ─────────────────────────────────────
-            - name: 📦 Install Attempt 1 Frozen Lockfile
+            - name: 📦 Install Frozen Lockfile
               id: install_frozen
-              if: ${{ always() }}
-              continue-on-error: ${{inputs.mode == 'report' }}
+              continue-on-error: true
               run: pnpm install --frozen-lockfile
-            - name: 📦 Install Attempt 2 Relaxed Lockfile
+
+            - name: 📦 Install Relaxed Lockfile (fallback)
               id: install_relaxed
-              if: ${{ always() }}
-              continue-on-error: ${{inputs.mode == 'report' }}
+              if: ${{ steps.install_frozen.outcome == 'failure' && !inputs.require_lockfile }}
               run: pnpm install --no-frozen-lockfile
-            - name: 🚨 Validate Install Attempts (fail only if all failed)
-              if: ${{steps.install_frozen.outcome == 'failure' && steps.install_relaxed.outcome == 'failure'}}
+
+            - name: 🚨 Validate Install
+              if: ${{ steps.install_frozen.outcome == 'failure' && (inputs.require_lockfile || steps.install_relaxed.outcome == 'failure') }}
               run: |
-                  echo "All install attempts failed."
+                  echo "Install failed. Frozen lockfile install failed and either require_lockfile=true or relaxed install also failed."
                   exit 1
 
             - name: 🎀 Report Prettier
@@ -185,11 +185,6 @@ jobs:
               if: ${{ inputs.nx_cache_reset }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm nx:reset
-
-            - name: 🗑️ Run Uninstall Cleanup
-              if: ${{ inputs.nx_cache_reset }}
-              continue-on-error: ${{ inputs.mode == 'report' }}
-              run: pnpm run nx:reset
 
             - name: 🏗️ Run Build
               if: ${{ inputs.run_build }}
