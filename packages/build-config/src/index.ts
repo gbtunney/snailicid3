@@ -57,8 +57,8 @@ export type {
 export { docServer, typedoc } from './typedoc/index.js'
 export type * from './typedoc/index.js'
 
-export { vitest, viTestConfig } from './vitest/index.js'
-export type { VitestUserConfig } from './vitest/index.js'
+export { vitest } from './vitest/index.js'
+export type { VitestConfig } from './vitest/index.js'
 
 export { merge } from 'ts-deepmerge'
 

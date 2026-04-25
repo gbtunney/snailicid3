@@ -5,22 +5,22 @@
  */
 import { defineConfig, ViteUserConfig } from 'vitest/config'
 
-export const viTestConfig = (): ViteUserConfig =>
+export type VitestConfig = ViteUserConfig
+
+export const viTestConfig = (): VitestConfig =>
     defineConfig({
         test: {
-            exclude: [
-                'node_modules',
-                './types/**/*',
-                './dist/**/*',
-                './**/*.test.js',
-            ],
+            coverage: {
+                provider: 'v8',
+                reporter: ['text'],
+            },
+            exclude: ['node_modules', './dist/**/*', './**/*.test.js'],
         },
     })
 
 /** @ignore */
 export const vitest = {
-    config: viTestConfig,
+    config: (): VitestConfig => viTestConfig(),
 }
 
 // Vitest v2+: avoid missing 'UserConfig' export by deriving the type
-export type VitestUserConfig = Parameters<typeof defineConfig>[0]

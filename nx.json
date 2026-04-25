@@ -85,7 +85,7 @@
             "cache": true,
             "dependsOn": ["build", "check:ts", "^test"],
             "inputs": ["default", "^default"],
-            "command": "vitest run",
+            "command": "vitest run --coverage",
             "options": {
                 "cwd": "{projectRoot}"
             }

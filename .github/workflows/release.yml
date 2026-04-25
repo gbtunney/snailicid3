@@ -58,15 +58,39 @@ jobs:
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
 
-            - name: Create version PR or publish packages
-              id: changesets
+            # Count pending .changeset/*.md files (excludes README.md)
+            - name: Check for pending changesets
+              id: has_changesets
+              shell: bash
+              run: |
+                  count=$(find .changeset -name "*.md" ! -name "README.md" | wc -l)
+                  echo "count=$count" >> "$GITHUB_OUTPUT"
+                  echo "has=$( [ "$count" -gt 0 ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
+                  echo "Pending changesets: $count"
+
+            # Phase 1 — open/update the version PR when changesets are present.
+            # Never publishes; that is handled below only after the version commit lands.
+            - name: Create or update version PR
+              if: steps.has_changesets.outputs.has == 'true'
               uses: changesets/action@v1
               with:
                   version: pnpm changeset version
-                  publish: pnpm changeset publish
                   title: 'chore(release): version packages'
                   commit: 'chore(release): version packages'
+                  createGithubReleases: false
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            # Phase 2 — publish only when the version PR commit is the trigger.
+            # This prevents accidental publish on unrelated main pushes.
+            - name: Publish packages and create GitHub releases
+              if: |
+                  steps.has_changesets.outputs.has == 'false' &&
+                  startsWith(github.event.head_commit.message, 'chore(release):')
+              uses: changesets/action@v1
+              with:
+                  publish: pnpm changeset publish
                   createGithubReleases: true
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
