@@ -1,5 +1,4 @@
 import { markdownlint } from '@snailicid3/config'
-export const mdlint = { config: markdownlint.config.get({ config: {} }) }
 // @ts-check
 
 const options = {
@@ -35,5 +34,6 @@ const options = {
         'no-multiple-blanks': false,
     },
 }
+export const mdlint = { config: markdownlint.config.get(options) }
 
-export default { mdlint, ...options }
+export default mdlint

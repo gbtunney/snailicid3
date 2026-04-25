@@ -1,16 +1,12 @@
 // Lint-staged is still necessary: it scopes pre-commit linting to staged files
 // only, making commits fast regardless of repo size.
 
+import { markdownlint } from '@snailicid3/config'
+
 const JS_EXTS = '{js,mjs,cjs,jsx,ts,mts,cts,tsx}'
 const PRETTIER_EXTS = '{json,xml,php,html,css,sh,yaml,yml,graphql}'
 
-const mdIgnores = [
-    '#**/node_modules/**',
-    '#**/.changeset/**',
-    '#**/docs/**',
-    '#**/scratch/**',
-    '#packages/cli-template/templates/**/*',
-]
+const mdIgnores: Array<string> = markdownlint.ignores()
 
 const quoteArg = (p: string) => `"${p.replaceAll('"', '\\"')}"`
 const toFileArgs = (staged: string | Array<string>) =>

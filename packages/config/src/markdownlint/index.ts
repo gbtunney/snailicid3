@@ -26,6 +26,19 @@ import {
 } from './schema.js'
 import { isPlainObject, safeDeserializeJSON } from '../utilities.js'
 
+const base_ignores = [
+    '**/node_modules/**',
+    '**/{.changeset,docs,.history,scratch,}/**',
+]
+const getIgnores = (
+    overrides: Array<string> = [],
+    base: Array<string> = base_ignores,
+): Array<string> => {
+    const ignores = [...base, ...overrides]
+    return ignores.map((ignore: string) =>
+        !ignore.startsWith('#') ? `#${ignore}` : ignore,
+    )
+}
 /** TODO Figure out how these ignores should work */
 //gitignore: true,
 //  ignores: [*/
@@ -46,6 +59,7 @@ export type MarkdownlintAPI = {
         build: typeof processRuleConfiguration
         baseConfig: typeof getBaseConfig
     }
+    ignores: typeof getIgnores
     config: {
         get: typeof getConfiguration
         validate: typeof validateFullConfiguration
@@ -59,6 +73,7 @@ export const markdownlint: MarkdownlintAPI = {
         get: getConfiguration,
         validate: validateFullConfiguration,
     },
+    ignores: getIgnores,
     rules: {
         baseConfig: getBaseConfig,
         build: processRuleConfiguration,
