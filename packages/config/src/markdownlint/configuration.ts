@@ -10,6 +10,7 @@ import {
     type MarkdownlintOptsOutput,
     markdownlintOptsSchema,
     MarkdownlintProcessedResult,
+    type MarkdownlintRuleConfiguration,
     MDLINT_CLI2_JSON_SCHEMA,
     parseOptionsSchema,
 } from './schema.js'
@@ -100,20 +101,20 @@ export const processConfiguration = async (
 }
 
 export const getConfiguration = async (
-    config: MarkdownlintConfiguration,
+    config: MarkdownlintRuleConfiguration,
     opts: MarkdownlintOpts = DEFAULT_OPTS,
 ): Promise<MarkdownlintConfiguration | undefined> => {
     const { throwOnError }: MarkdownlintOptsOutput = parseOptionsSchema(
         markdownlintOptsSchema,
         opts,
     )
-    const _result = await processConfiguration(config, opts)
+    const _result = await processConfiguration({ config }, opts)
     if (!_result.valid && throwOnError)
         throw new Error('Configuration is invalid')
     else if (!_result.valid && !throwOnError)
         logger().error('Configuration is invalid')
     else if (_result.valid) {
-        return _result.config
+        return _result
     }
     return undefined
 }
