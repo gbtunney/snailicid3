@@ -1,56 +1,5 @@
-import type { MarkdownlintConfigurationSchema } from './markdownlint.config.js'
-
 import { getScaledWidth, SHARED_FORMATTING_RULES } from '../prettier/index.js'
-
-type MarkdownlintRuleConfiguration = MarkdownlintConfigurationSchema
-
-export type MarkdownlintRuleConfigurationNoAliases = Omit<
-    MarkdownlintRuleConfiguration,
-    | '$schema'
-    | 'extends'
-    | 'heading-increment'
-    | 'heading-style'
-    | 'ul-style'
-    | 'list-indent'
-    | 'ul-indent'
-    | 'no-trailing-spaces'
-    | 'no-hard-tabs'
-    | 'no-reversed-links'
-    | 'no-multiple-blanks'
-    | 'line-length'
-    | 'headings'
-    | 'bullet'
-    | 'ul'
-    | 'indentation'
-    | 'whitespace'
-    | 'hard_tab'
-    | 'links'
-    | 'blank_lines'
-    | 'line_length'
-    | 'code'
-    | 'atx'
-    | 'spaces'
-    | 'atx_closed'
-    | 'blockquote'
-    | 'ol'
-    | 'html'
-    | 'url'
-    | 'hr'
-    | 'emphasis'
-    | 'language'
-    | 'spelling'
-    | 'accessibility'
-    | 'images'
-    | 'table'
-    | 'commands-show-output'
-    | 'no-missing-space-atx'
-    | 'no-multiple-space-atx'
-    | 'no-missing-space-closed-atx'
-    | 'no-multiple-space-closed-atx'
-> & {
-    /** Force presence of default for “strict” usage */
-    default: boolean
-}
+import type { MarkdownlintRuleConfiguration } from './schema.js'
 
 /** As MarkdownlintRuleConfiguration; */
 export const getBaseConfig = (): MarkdownlintRuleConfiguration => {

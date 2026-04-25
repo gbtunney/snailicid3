@@ -17,8 +17,10 @@ export const markdownlint = {
         }),
     },
     ignores: (overrides: string[] = []): string[] => [...BASE_IGNORES, ...overrides],
-    getBaseConfig,
+    rules: {
+        merge: getMergedRuleConfiguration,
+        baseConfig: getBaseConfig,
+    },
 }
 
-export type { MarkdownlintCli2ConfigurationSchema, MarkdownlintConfigurationSchema } from './markdownlint.config.js'
 export type { MarkdownlintConfiguration, MarkdownlintRuleConfiguration } from './schema.js'

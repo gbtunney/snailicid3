@@ -1,10 +1,6 @@
-import type { OmitIndexSignature, SetRequired } from 'type-fest'
-import type {
-    MarkdownlintCli2ConfigurationSchema,
-    MarkdownlintConfigurationSchema,
-} from './markdownlint.config.js'
-
-export type MarkdownlintRuleConfiguration = MarkdownlintConfigurationSchema
-export type MarkdownlintConfiguration = OmitIndexSignature<
-    SetRequired<MarkdownlintCli2ConfigurationSchema, 'config'>
->
+export type MarkdownlintRuleConfiguration = Record<string, boolean | Record<string, unknown>>
+export type MarkdownlintConfiguration = {
+    config: MarkdownlintRuleConfiguration
+    ignores?: string[]
+    globs?: string[]
+}
