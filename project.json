@@ -52,16 +52,13 @@
         "lint:md": {
             "cache": true,
             "inputs": ["{projectRoot}/**/*.md"],
-            "command": "pnpm exec markdownlint-cli2 './**/*.md'  \"#**/{node_modules,dist,.changeset,docs,.history,scratch}/**\"",
-            "options": {
-                "cwd": "{workspaceRoot}",
-                "config": "{workspaceRoot}/.markdownlint-cli2.mjs"
-            }
+            "command": "pnpm exec markdownlint-cli2",
+            "options": { "cwd": "{workspaceRoot}" }
         },
         "fix:md": {
             "cache": true,
             "inputs": ["{projectRoot}/**/*.md"],
-            "command": "pnpm exec prettier './**/*.md' --write &&  pnpm exec markdownlint-cli2 --fix '**/*.md'  \"#**/{node_modules,dist,.changeset,docs,.history,scratch}/**\"",
+            "command": "pnpm exec prettier './**/*.md' --write &&  pnpm exec markdownlint-cli2 --fix",
             "options": { "cwd": "{projectRoot}" }
         }
     }

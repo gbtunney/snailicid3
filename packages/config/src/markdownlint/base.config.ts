@@ -1,5 +1,5 @@
-import { getScaledWidth, SHARED_FORMATTING_RULES } from '../prettier/index.js'
 import type { MarkdownlintRuleConfiguration } from './schema.js'
+import { getScaledWidth, SHARED_FORMATTING_RULES } from '../prettier/index.js'
 
 /** As MarkdownlintRuleConfiguration; */
 export const getBaseConfig = (): MarkdownlintRuleConfiguration => {
@@ -65,7 +65,7 @@ export const getBaseConfig = (): MarkdownlintRuleConfiguration => {
             line_length: getScaledWidth('markdown'),
             stern: false,
             strict: false,
-            tables: true,
+            tables: false,
         },
 
         // MD014 commands-show-output

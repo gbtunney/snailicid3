@@ -1,7 +1,9 @@
 import { markdownlint } from '@snailicid3/config'
 
-export default {
-    ...markdownlint.config.get({
+export default markdownlint.config() //{
+// ...markdownlint.config(
+
+/*{
         MD001: false,
         MD013: {
             code_block_line_length: 140,
@@ -18,6 +20,4 @@ export default {
         MD032: true,
         'no-multiple-blanks': false,
     }),
-    ignores: markdownlint.ignores(),
-    globs: ['**/*.md'],
-}
+    ignores: markdownlint.ignores(),*/

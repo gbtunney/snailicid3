@@ -1,26 +1,41 @@
 import { getBaseConfig } from './base.config.js'
 import { getMergedRuleConfiguration } from './rules.js'
-import type { MarkdownlintConfiguration, MarkdownlintRuleConfiguration } from './schema.js'
+import type {
+    MarkdownlintConfiguration,
+    MarkdownlintRuleConfiguration,
+} from './schema.js'
 
 const BASE_IGNORES = [
     '**/node_modules/**',
-    '**/{.changeset,docs,.history,scratch,}/**',
+    '**/dist/**',
+    '**/build/**',
+    '**/coverage/**',
+    '**/.history/**',
+    '**/.changeset/**',
+    '**/docs/**',
+    '**/scratch/**',
+    // '**/{.changeset,docs,.history,scratch}/**',
 ]
 
 export const markdownlint = {
-    config: {
-        get: (
-            overrides: MarkdownlintRuleConfiguration = {},
-            useBaseConfig = true,
-        ): MarkdownlintConfiguration => ({
-            config: getMergedRuleConfiguration(overrides, useBaseConfig),
-        }),
-    },
-    ignores: (overrides: string[] = []): string[] => [...BASE_IGNORES, ...overrides],
+    config: (
+        option_overrides: MarkdownlintRuleConfiguration = {},
+        ignore_overrides: Array<string> = [],
+        includes: Array<string> = ['**/*.md'],
+        useBaseConfig: boolean = true,
+    ): MarkdownlintConfiguration => ({
+        config: getMergedRuleConfiguration(option_overrides, useBaseConfig),
+        globs: includes,
+        ignores: [...BASE_IGNORES, ...ignore_overrides],
+    }),
+
     rules: {
-        merge: getMergedRuleConfiguration,
         baseConfig: getBaseConfig,
+        merge: getMergedRuleConfiguration,
     },
 }
 
-export type { MarkdownlintConfiguration, MarkdownlintRuleConfiguration } from './schema.js'
+export type {
+    MarkdownlintConfiguration,
+    MarkdownlintRuleConfiguration,
+} from './schema.js'
