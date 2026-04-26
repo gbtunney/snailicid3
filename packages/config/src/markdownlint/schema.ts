@@ -1,6 +1,9 @@
-export type MarkdownlintRuleConfiguration = Record<string, boolean | Record<string, unknown>>
+export type MarkdownlintRuleConfiguration = Record<
+    string,
+    boolean | Record<string, unknown>
+>
 export type MarkdownlintConfiguration = {
     config: MarkdownlintRuleConfiguration
-    ignores?: string[]
-    globs?: string[]
+    ignores?: Array<string>
+    globs?: Array<string>
 }

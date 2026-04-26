@@ -1,6 +1,9 @@
 import { describe, expect, test } from 'vitest'
 import { getBaseConfig } from './base.config.js'
-import { getMergedRuleConfiguration, type MarkdownlintRuleConfiguration } from './rules.js'
+import {
+    getMergedRuleConfiguration,
+    type MarkdownlintRuleConfiguration,
+} from './rules.js'
 
 describe('markdownlint rule configuration', () => {
     test('merges overrides with base config', () => {

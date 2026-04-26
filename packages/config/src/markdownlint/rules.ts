@@ -7,7 +7,7 @@ export const getMergedRuleConfiguration = (
     useBaseConfig = true,
 ): MarkdownlintRuleConfiguration => {
     if (!useBaseConfig) return overrides
-    return merge(getBaseConfig(), overrides) as MarkdownlintRuleConfiguration
+    return merge(getBaseConfig(), overrides)
 }
 
 export type { MarkdownlintRuleConfiguration } from './schema.js'
