@@ -7,8 +7,6 @@ description: |
   This prompt offers a guided menu and step-by-step instructions for syncing and auditing files between your repository and a template repository, making it easy to keep your project up-to-date or customized as needed.
 ---
 
-# Template Sync
-
 This skill provides a reusable workflow for auditing and syncing files between
 your current repository and a template repository.
 

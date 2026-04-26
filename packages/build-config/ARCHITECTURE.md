@@ -37,15 +37,15 @@ Core principles:
 
 Architecture pattern:
 
-```
+```sh
 BuildPlan → BuildPort → Adapter → Tool
 ```
 
 Examples:
 
-```
+```sh
 BuildPlan → RollupAdapter → Rollup config
-BuildPlan → TscAdapter    → run tsc --build
+BuildPlan → TscAdapter → run tsc --build
 ```
 
 ---
@@ -69,7 +69,7 @@ Where the code executes.
 
 Defines what the package represents.
 
-```
+```sh
 library · cli · config · build_tool · plugin
 web_app · server_app · worker · script
 ```
@@ -162,7 +162,7 @@ Vite types directly.
 
 Adapters live in:
 
-```
+```text
 packages/build-config/src/adapters/
   rollup/
   vite/
@@ -301,7 +301,7 @@ export function selectAdapter(plan: BuildPlan): BuildAdapter | undefined {
 
 ## 9. Target Folder Structure
 
-```
+```text
 packages/build-config/src/
 
 build/

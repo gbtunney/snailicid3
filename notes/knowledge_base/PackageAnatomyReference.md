@@ -16,7 +16,7 @@ confusion.
 - [Core Axes](#core-axes)
   - [Runtime](#runtime)
   - [Product Type](#product-type)
-  - [Output / Module Format](#output-module-format)
+  - [Output Module Format](#output-module-format)
   - [Build Strategy](#build-strategy)
 - [Packaging and Delivery](#packaging-and-delivery)
   - [Public Packages Are Not Always Libraries](#public-packages-are-not-always-libraries)
@@ -99,7 +99,7 @@ globals and APIs are available.
 
 -
 
-### Output / Module Format
+### Output Module Format
 
 > **_"How is the built artifact emitted?"_**
 
