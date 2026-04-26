@@ -88,7 +88,8 @@ describe('Prettier export', () => {
 describe('markdownlint export', () => {
     test('has a config object', () => {
         expect(markdownlint).toHaveProperty('config')
-        expect(typeof markdownlint.config).toBe('object')
+        expect(typeof markdownlint.config).toBe('function')
+        expect(typeof markdownlint.config()).toBe('object')
     })
 
     test('has a rules object', () => {

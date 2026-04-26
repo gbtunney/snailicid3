@@ -1,56 +1,5 @@
-import type { MarkdownlintConfigurationSchema } from './markdownlint.config.js'
-
+import type { MarkdownlintRuleConfiguration } from './schema.js'
 import { getScaledWidth, SHARED_FORMATTING_RULES } from '../prettier/index.js'
-
-type MarkdownlintRuleConfiguration = MarkdownlintConfigurationSchema
-
-export type MarkdownlintRuleConfigurationNoAliases = Omit<
-    MarkdownlintRuleConfiguration,
-    | '$schema'
-    | 'extends'
-    | 'heading-increment'
-    | 'heading-style'
-    | 'ul-style'
-    | 'list-indent'
-    | 'ul-indent'
-    | 'no-trailing-spaces'
-    | 'no-hard-tabs'
-    | 'no-reversed-links'
-    | 'no-multiple-blanks'
-    | 'line-length'
-    | 'headings'
-    | 'bullet'
-    | 'ul'
-    | 'indentation'
-    | 'whitespace'
-    | 'hard_tab'
-    | 'links'
-    | 'blank_lines'
-    | 'line_length'
-    | 'code'
-    | 'atx'
-    | 'spaces'
-    | 'atx_closed'
-    | 'blockquote'
-    | 'ol'
-    | 'html'
-    | 'url'
-    | 'hr'
-    | 'emphasis'
-    | 'language'
-    | 'spelling'
-    | 'accessibility'
-    | 'images'
-    | 'table'
-    | 'commands-show-output'
-    | 'no-missing-space-atx'
-    | 'no-multiple-space-atx'
-    | 'no-missing-space-closed-atx'
-    | 'no-multiple-space-closed-atx'
-> & {
-    /** Force presence of default for “strict” usage */
-    default: boolean
-}
 
 /** As MarkdownlintRuleConfiguration; */
 export const getBaseConfig = (): MarkdownlintRuleConfiguration => {
@@ -112,11 +61,11 @@ export const getBaseConfig = (): MarkdownlintRuleConfiguration => {
             code_block_line_length: getScaledWidth('comments'),
             code_blocks: true,
             heading_line_length: getScaledWidth('markdown'),
-            headings: true,
+            headings: false,
             line_length: getScaledWidth('markdown'),
             stern: false,
             strict: false,
-            tables: true,
+            tables: false,
         },
 
         // MD014 commands-show-output
@@ -178,7 +127,8 @@ export const getBaseConfig = (): MarkdownlintRuleConfiguration => {
         MD035: { style: 'consistent' },
 
         // MD036 no-emphasis-as-heading
-        MD036: { punctuation: '.,;:!?。，；：！？' },
+        MD036: false,
+        //{ punctuation: '.,;:!?。，；：！？' },
 
         // MD037 no-space-in-emphasis
         MD037: true,

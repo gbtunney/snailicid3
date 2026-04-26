@@ -1,14 +1,9 @@
----
-tags:”
-  - development
-  - dx
-——-
-
 # DX Developer Experience Info
 
 ## Concise Checklist
-Use this to judge **any dev library in ~5 minutes**.
-Translation: *“Would Future‑Me curse Present‑Me for choosing this?”*
+
+Use this to judge **any dev library in ~5 minutes**. Translation: _“Would
+Future‑Me curse Present‑Me for choosing this?”_
 
 ---
 

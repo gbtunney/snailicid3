@@ -98,15 +98,6 @@
                 "cwd": "{projectRoot}"
             }
         },
-
-        "lint:md": {
-            "cache": true,
-            "inputs": ["default"],
-            "command": "pnpm exec markdownlint-cli2 \"**/*.md\" \"#**/node_modules/**\" \"#**/dist/**\" \"#**/scratch/**\"",
-            "options": {
-                "cwd": "{projectRoot}"
-            }
-        },
         "check:ts": {
             "cache": true,
             "dependsOn": ["build:ts", "^build"],
