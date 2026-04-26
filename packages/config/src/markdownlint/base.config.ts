@@ -61,7 +61,7 @@ export const getBaseConfig = (): MarkdownlintRuleConfiguration => {
             code_block_line_length: getScaledWidth('comments'),
             code_blocks: true,
             heading_line_length: getScaledWidth('markdown'),
-            headings: true,
+            headings: false,
             line_length: getScaledWidth('markdown'),
             stern: false,
             strict: false,
@@ -127,7 +127,8 @@ export const getBaseConfig = (): MarkdownlintRuleConfiguration => {
         MD035: { style: 'consistent' },
 
         // MD036 no-emphasis-as-heading
-        MD036: { punctuation: '.,;:!?。，；：！？' },
+        MD036: false,
+        //{ punctuation: '.,;:!?。，；：！？' },
 
         // MD037 no-space-in-emphasis
         MD037: true,

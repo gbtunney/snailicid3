@@ -51,12 +51,14 @@
         },
         "lint:md": {
             "cache": true,
+            "dependsOn": ["build:ts"],
             "inputs": ["{projectRoot}/**/*.md"],
             "command": "pnpm exec markdownlint-cli2",
             "options": { "cwd": "{workspaceRoot}" }
         },
         "fix:md": {
             "cache": true,
+            "dependsOn": ["build:ts"],
             "inputs": ["{projectRoot}/**/*.md"],
             "command": "pnpm exec prettier './**/*.md' --write &&  pnpm exec markdownlint-cli2 --fix",
             "options": { "cwd": "{projectRoot}" }
