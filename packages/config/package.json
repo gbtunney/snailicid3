@@ -3,13 +3,36 @@
     "version": "0.0.0",
     "private": false,
     "description": "Shared linting, formatting, and TypeScript config utilities for the snailicid3 monorepo",
+    "bin": {
+        "snail-sh": "./bin/snail-sh-logger.sh",
+        "gbt-uninstall": "./bin/uninstall.sh"
+    },
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "types": "./types/index.d.ts"
+        },
+        "./sh/logger": "./bin/snail-sh-logger.sh",
+        "./sh/uninstall": "./bin/uninstall.sh",
+        "./prettier": "./dist/.prettierrc.json",
+        "./markdownlint": "./dist/.markdownlint.json",
+        "./tsconfig/base": "./typescript-config/tsconfig.base.json",
+        "./tsconfig/library": "./typescript-config/tsconfig.library.json",
+        "./tsconfig/typecheck": "./typescript-config/tsconfig.typecheck.json",
+        "./tsconfig/docs": "./typescript-config/tsconfig.docs.json",
+        "./tsconfig.base": "./typescript-config/tsconfig.base.json",
+        "./tsconfig.library": "./typescript-config/tsconfig.library.json",
+        "./tsconfig.typecheck": "./typescript-config/tsconfig.typecheck.json",
+        "./tsconfig.docs": "./typescript-config/tsconfig.docs.json"
+    },
     "scripts": {
         "build:exporter": "pnpm exec tsx ./build-exporter.ts",
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
         "dev:nx": "nx run $npm_package_name:dev",
-        "test:coverage": "vitest run --coverage"
+        "demo:logger": "pnpm exec ./bin/snail-sh-test.sh",
+        "demo:2": "pnpm exec snail-sh header '🐌 SNAIL BUILD' '50%'  '~'"
     },
     "dependencies": {
         "@apidevtools/json-schema-ref-parser": "^15.3.5",
@@ -53,26 +76,12 @@
     },
     "main": "./dist/index.js",
     "types": "./types/index.d.ts",
-    "exports": {
-        ".": {
-            "import": "./dist/index.js",
-            "types": "./types/index.d.ts"
-        },
-        "./tsconfig.base": "./typescript-config/tsconfig.base.json",
-        "./tsconfig.library": "./typescript-config/tsconfig.library.json",
-        "./tsconfig.typecheck": "./typescript-config/tsconfig.typecheck.json",
-        "./tsconfig.docs": "./typescript-config/tsconfig.docs.json",
-        "./markdownlint": "./dist/.markdownlint.json",
-        "./prettier": {
-            "import": "./dist/prettier/index.js",
-            "types": "./types/prettier/index.d.ts"
-        }
-    },
     "files": [
         "CHANGELOG.md",
         "dist",
         "types",
-        "tsconfig-base.json"
+        "typescript-config",
+        "bin"
     ],
     "keywords": [
         "eslint",
@@ -101,7 +110,7 @@
             "build": {
                 "dependsOn": [
                     "build:ts",
-                    "build:custom"
+                    "build:exporter"
                 ]
             },
             "test": {},

@@ -53,6 +53,7 @@
         "inspect:vitest": "pnpm exec vitest --ui",
         "\n========== LIFECYCLE >> ==========": "",
         "start": "pnpm install && pnpm build",
+        "uninstall": "pnpm exec gbt-uninstall",
         "reset": "pnpm run uninstall && pnpm start",
         "registry:start": "pnpm exec verdaccio",
         "prepare": "husky",
@@ -79,9 +80,7 @@
         "clean": "pnpm clean:self && pnpm nx:clean",
         "clean:self": "pnpm exec nx run root:clean:ts",
         "nx:clean": "pnpm exec nx run-many -t clean",
-        "clean:all": "pnpm nx:clean",
-        "\n========== UNINSTALL >> ==========": "",
-        "uninstall": "pnpm exec packages/workspace-tools/bin/shell/uninstall.sh"
+        "clean:all": "pnpm nx:clean"
     },
     "devDependencies": {
         "@changesets/cli": "^2.31.0",
