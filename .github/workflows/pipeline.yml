@@ -147,12 +147,12 @@ jobs:
             - name: 🩺 Report Environment
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
-              run: pnpm report:env
+              run: bash .github/scripts/report-env.sh
 
             - name: 🗂️ Report Repository
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
-              run: pnpm report:repo
+              run: bash .github/scripts/report-repo.sh
 
             # ── Install attempts ─────────────────────────────────────
             - name: 📦 Install Frozen Lockfile
@@ -174,12 +174,12 @@ jobs:
             - name: 🎀 Report Prettier
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
-              run: pnpm report:prettier
+              run: bash .github/scripts/report-prettier.sh
 
             - name: 📚 Report Workspace
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
-              run: echo 'pnpm report:workspace'
+              run: bash .github/scripts/report-workspace.sh
 
             # ── Cache resets ─────────────────────────────────────────
             - name: 🧹 Reset Nx Cache
