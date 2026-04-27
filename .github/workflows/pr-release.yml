@@ -23,10 +23,13 @@ jobs:
         uses: ./.github/workflows/pipeline.yml
         with:
             mode: abort_on_error
-            check_mode: check
+            check_mode: skip
             require_lockfile: true
             require_clean_repo: true
-            run_build: true
-            run_test: true
+            run_build: false
+            run_test: false
             run_docs_build: true
             pnpm_cache: true
+            use_nx_affected: true
+            nx_targets: lint test build
+            nx_fix_ci: true

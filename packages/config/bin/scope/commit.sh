@@ -33,6 +33,8 @@ get_commit_scope() {
     local scope_format="csv"
     local keep_prefix="false"
     local dry_run="false"
+    local validate_only="false"
+    local run_commit_before="false"
     local commit_type=""
     local commit_subject=""
     local repo_root=""
@@ -66,6 +68,15 @@ get_commit_scope() {
                 dry_run="true"
                 shift
                 ;;
+            --validate-type | --validate | --check-type)
+                validate_only="true"
+                shift
+                ;;
+            --checked-commit | --commit-checked)
+                output_mode="commit"
+                run_commit_before="true"
+                shift
+                ;;
             --message | --m)
                 output_mode="message"
                 shift
@@ -78,17 +89,21 @@ get_commit_scope() {
                 cat << 'EOF'
 Usage:
   pnpm exec scope-commit [--staged|--all] [--csv|--list] [--keep-prefix] [file ...]
+  pnpm exec scope-commit --validate-type <type>
   pnpm exec scope-commit --message <type> <subject> [--staged|--all] [--keep-prefix] [file ...]
   pnpm exec scope-commit --commit <type> <subject> [--staged|--all] [--keep-prefix] [--dry-run] [file ...]
+  pnpm exec scope-commit --checked-commit <type> <subject> [--staged|--all] [--keep-prefix] [--dry-run] [file ...]
 
 Examples:
   pnpm exec scope-commit
   pnpm exec scope-commit --all
   pnpm exec scope-commit --list
   pnpm exec scope-commit --csv --keep-prefix
+  pnpm exec scope-commit --validate-type chore
   pnpm exec scope-commit --message chore autofix
   pnpm exec scope-commit --commit --dry-run chore autofix
   pnpm exec scope-commit --commit chore autofix
+  pnpm exec scope-commit --checked-commit chore autofix
   pnpm exec scope-commit .github/workflows/pipeline.yml
 EOF
                 return 0
@@ -104,7 +119,14 @@ EOF
         esac
     done
 
-    if [[ "$output_mode" == "message" || "$output_mode" == "commit" ]]; then
+    if [[ "$validate_only" == "true" ]]; then
+        if [[ "${#positionals[@]}" -lt 1 ]]; then
+            echo "Error: --validate-type requires <type>." >&2
+            return 1
+        fi
+
+        commit_type="${positionals[0]}"
+    elif [[ "$output_mode" == "message" || "$output_mode" == "commit" ]]; then
         if [[ "${#positionals[@]}" -lt 2 ]]; then
             echo "Error: --$output_mode requires <type> and <subject>." >&2
             return 1
@@ -161,8 +183,17 @@ EOF
         return 1
     }
 
-    if [[ "$output_mode" == "message" || "$output_mode" == "commit" ]]; then
+    if [[ "$validate_only" == "true" || "$output_mode" == "message" || "$output_mode" == "commit" ]]; then
         validate_commit_type "$commit_type" || return 1
+    fi
+
+    if [[ "$validate_only" == "true" ]]; then
+        return 0
+    fi
+
+    if [[ "$run_commit_before" == "true" ]]; then
+        # Keep the expensive pre-commit checks behind commit-type validation.
+        pnpm commit:before || return 1
     fi
 
     repo_root="$(git rev-parse --show-toplevel 2> /dev/null || pwd)"

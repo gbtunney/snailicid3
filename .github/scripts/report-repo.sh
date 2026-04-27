@@ -43,6 +43,7 @@ fi
 
 snail_sh kv_pair "branch" "${branch:-detached}"
 snail_sh kv_pair "origin" "${origin:-none}"
+snail_sh kv_pair "timestamp" "May 05,2000 at 10pm"
 snail_sh status_pair "repo status" "$repo_status"
 snail_sh kv_pair "total tracked files" "$(printf '%s\n' "$tracked" | grep -c '.' || true)"
 snail_sh kv_pair "staged files" "$(printf '%s\n' "$staged" | grep -c '.' || true)"
@@ -72,3 +73,4 @@ if [[ "$repo_status" == "dirty" ]]; then
         snail_sh log "working tree changed, but no preview was available" grey
     fi
 fi
+snail-sh spacer 1

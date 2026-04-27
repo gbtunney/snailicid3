@@ -698,6 +698,7 @@ section() {
 
     printf '\n'
     kabob "$title" "$width" "$color" "$invert" "$marker" "$padding" "$newline" "$text_style"
+    spacer 1
 }
 
 # todo see test file
@@ -736,8 +737,8 @@ kv_pair() {
     local value_color
     local key_color
 
-    value_color="$(resolve_style "${4:-magenta}")"
-    key_color="$(resolve_style "${5:-grey}")"
+    value_color="$(resolve_style "${4:-grey}")"
+    key_color="$(resolve_style "${5:-bold-mid-grey}")"
 
     printf '%b%-24s%b %b%b%b\n' "$key_color" "${key}" "$RESET" "${delimiter}${value_color}" "$value" "$RESET"
 }

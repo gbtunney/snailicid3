@@ -80,6 +80,24 @@ on:
                 default: true
                 type: boolean
 
+            use_nx_affected:
+                description: If true, run Nx affected CI targets instead of the full workspace build/test/check flow.
+                required: false
+                default: false
+                type: boolean
+
+            nx_targets:
+                description: Space-delimited Nx targets to run in affected mode.
+                required: false
+                default: lint test build
+                type: string
+
+            nx_fix_ci:
+                description: If true, run `nx fix-ci` after Nx affected mode.
+                required: false
+                default: false
+                type: boolean
+
         outputs:
             is_repo_dirty:
                 description: Whether repository is dirty at end ('true'|'false')
@@ -94,6 +112,7 @@ on:
                 value: ${{ jobs.pipeline.outputs.artifact_uploaded }}
 
 permissions:
+    actions: read
     contents: read
 
 env:
@@ -138,6 +157,9 @@ jobs:
                   pnpm exec snail-sh kv_pair "run_docs_build" "${{ inputs.run_docs_build }}"
                   pnpm exec snail-sh kv_pair "nx_cache_reset" "${{ inputs.nx_cache_reset }}"
                   pnpm exec snail-sh kv_pair "pnpm_cache" "${{ inputs.pnpm_cache }}"
+                  pnpm exec snail-sh kv_pair "use_nx_affected" "${{ inputs.use_nx_affected }}"
+                  pnpm exec snail-sh kv_pair "nx_targets" "${{ inputs.nx_targets }}"
+                  pnpm exec snail-sh kv_pair "nx_fix_ci" "${{ inputs.nx_fix_ci }}"
                   pnpm exec snail-sh kv_pair "upload_workspace_artifact" "${{ inputs.upload_workspace_artifact }}"
                   pnpm exec snail-sh kv_pair "artifact_name_prefix" "${{ inputs.artifact_name_prefix }}"
 
@@ -153,6 +175,9 @@ jobs:
                     echo "- run_docs_build: \`${{ inputs.run_docs_build }}\`"
                     echo "- nx_cache_reset: \`${{ inputs.nx_cache_reset }}\`"
                     echo "- pnpm_cache: \`${{ inputs.pnpm_cache }}\`"
+                    echo "- use_nx_affected: \`${{ inputs.use_nx_affected }}\`"
+                    echo "- nx_targets: \`${{ inputs.nx_targets }}\`"
+                    echo "- nx_fix_ci: \`${{ inputs.nx_fix_ci }}\`"
                     echo "- upload_workspace_artifact: \`${{ inputs.upload_workspace_artifact }}\`"
                     echo "- artifact_name_prefix: \`${{ inputs.artifact_name_prefix }}\`"
                   } | tee -a "$GITHUB_STEP_SUMMARY"
@@ -183,6 +208,10 @@ jobs:
                   echo "Install failed. Frozen lockfile install failed and either require_lockfile=true or relaxed install also failed."
                   exit 1
 
+            - name: 🧭 Set Nx SHAs
+              if: ${{ inputs.use_nx_affected }}
+              uses: nrwl/nx-set-shas@v4
+
             - name: 🎀 Report Prettier
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
@@ -200,29 +229,39 @@ jobs:
               run: pnpm nx:reset
 
             - name: 🏗️ Run Build
-              if: ${{ inputs.run_build }}
+              if: ${{ inputs.run_build && !inputs.use_nx_affected }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm build
 
             - name: 🧪 Run Test
-              if: ${{ inputs.run_test }}
+              if: ${{ inputs.run_test && !inputs.use_nx_affected }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm test
 
               # ── Routines ────────────────────────────────────────────
             - name: ✨ Run Fix Routine
-              if: ${{ inputs.check_mode == 'fix' }}
+              if: ${{ inputs.check_mode == 'fix' && !inputs.use_nx_affected }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm fix
 
             - name: ✅ Run Check Routine
-              if: ${{ inputs.check_mode == 'check' }}
+              if: ${{ inputs.check_mode == 'check' && !inputs.use_nx_affected }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm check
 
             - name: ⏭️ Skip Check Routine
-              if: ${{ inputs.check_mode == 'skip' }}
+              if: ${{ inputs.check_mode == 'skip' && !inputs.use_nx_affected }}
               run: echo "check_mode=skip"
+
+            - name: 🎯 Run Nx Affected Targets
+              if: ${{ inputs.use_nx_affected }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm exec nx affected -t ${{ inputs.nx_targets }}
+
+            - name: 🩹 Run Nx Fix CI
+              if: ${{ always() && inputs.use_nx_affected && inputs.nx_fix_ci }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm exec nx fix-ci
 
             - name: 📘 Run Docs Build
               if: ${{ inputs.run_docs_build }}
@@ -298,6 +337,11 @@ jobs:
               if: ${{ always() }}
               shell: bash
               run: |
+                  pnpm exec snail-sh section "Pipeline Outputs"
+                  pnpm exec snail-sh kv_pair "is_repo_dirty" "${{ steps.repo_dirty.outputs.is_repo_dirty }}"
+                  pnpm exec snail-sh kv_pair "artifact_uploaded" "${{ steps.artifact_uploaded.outputs.artifact_uploaded }}"
+                  pnpm exec snail-sh kv_pair "workspace_artifact_name" "${{ steps.artifact_name.outputs.name }}"
+
                   {
                     echo ""
                     echo "## Outputs"

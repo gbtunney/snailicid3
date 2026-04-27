@@ -10,7 +10,6 @@ snail_sh() {
 }
 
 snail_sh section "Prettier"
-snail_sh spacer 2
 
 if output="$(pnpm exec prettier "**/*" '!**/docs/**' '!**/*.{py,jpg,jpeg,gif,webp,bin,codex}' --no-error-on-unmatched-pattern --check 2>&1)"; then
     snail_sh status_pair "status" "clean" "success"
@@ -22,4 +21,4 @@ else
         snail_sh log "$output" "dim-yellow"
     fi
 fi
-snail_sh spacer 2
+snail_sh spacer 1

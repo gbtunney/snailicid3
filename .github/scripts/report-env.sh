@@ -20,17 +20,16 @@ snail_sh() {
 }
 
 snail_sh section "Environment"
-snail_sh kv_pair "timestamp" "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+snail_sh kv_pair "timestamp" "May 05,2000 at 10pm"
 snail_sh kv_pair "cwd" "$(pwd)"
 snail_sh kv_pair "os" "$(uname -a)"
 snail_sh kv_pair "shell" "${SHELL:-unknown}"
 
 snail_sh section "Tool Versions"
-snail_sh kv_pair "package" "snailicid3" ":" bg-bright-cyan bright-cyan
-snail_sh kv_pair "node" "$(command_version node -v)" "|" magenta
+snail_sh kv_pair "node" "$(command_version node -v)"
 snail_sh kv_pair "pnpm" "$(command_version pnpm -v)"
 snail_sh kv_pair "git" "$(command_version git --version)"
 snail_sh kv_pair "gh" "$(command_version gh --version)"
 snail_sh kv_pair "python" "$(command_version python3 --version)"
 
-snail_sh hrule
+snail_sh spacer 1
