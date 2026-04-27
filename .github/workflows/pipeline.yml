@@ -142,26 +142,43 @@ jobs:
                   node-version: ${{ inputs.node_version }}
                   cache: ${{ inputs.pnpm_cache && 'pnpm' || '' }}
 
+            # ── Install attempts ─────────────────────────────────────
+            - name: 📦 Install Frozen Lockfile
+              id: install_frozen
+              continue-on-error: true
+              run: pnpm install --frozen-lockfile
+
+            - name: 📦 Install Relaxed Lockfile (fallback)
+              id: install_relaxed
+              if: ${{ steps.install_frozen.outcome == 'failure' && !inputs.require_lockfile }}
+              run: pnpm install --no-frozen-lockfile
+
+            - name: 🚨 Validate Install
+              if: ${{ steps.install_frozen.outcome == 'failure' && (inputs.require_lockfile || steps.install_relaxed.outcome == 'failure') }}
+              run: |
+                  echo "Install failed. Frozen lockfile install failed and either require_lockfile=true or relaxed install also failed."
+                  exit 1
+
             # ── Input summary ────────────────────────────────────────
             # Note: no native foreach over inputs; keep this explicit.
             - name: 🌸 Input Summary
               shell: bash
               run: |
-                  pnpm exec snail-sh section "Pipeline Inputs"
-                  pnpm exec snail-sh kv_pair "mode" "${{ inputs.mode }}"
-                  pnpm exec snail-sh kv_pair "check_mode" "${{ inputs.check_mode }}"
-                  pnpm exec snail-sh kv_pair "require_lockfile" "${{ inputs.require_lockfile }}"
-                  pnpm exec snail-sh kv_pair "require_clean_repo" "${{ inputs.require_clean_repo }}"
-                  pnpm exec snail-sh kv_pair "run_build" "${{ inputs.run_build }}"
-                  pnpm exec snail-sh kv_pair "run_test" "${{ inputs.run_test }}"
-                  pnpm exec snail-sh kv_pair "run_docs_build" "${{ inputs.run_docs_build }}"
-                  pnpm exec snail-sh kv_pair "nx_cache_reset" "${{ inputs.nx_cache_reset }}"
-                  pnpm exec snail-sh kv_pair "pnpm_cache" "${{ inputs.pnpm_cache }}"
-                  pnpm exec snail-sh kv_pair "use_nx_affected" "${{ inputs.use_nx_affected }}"
-                  pnpm exec snail-sh kv_pair "nx_targets" "${{ inputs.nx_targets }}"
-                  pnpm exec snail-sh kv_pair "nx_fix_ci" "${{ inputs.nx_fix_ci }}"
-                  pnpm exec snail-sh kv_pair "upload_workspace_artifact" "${{ inputs.upload_workspace_artifact }}"
-                  pnpm exec snail-sh kv_pair "artifact_name_prefix" "${{ inputs.artifact_name_prefix }}"
+                  bash ./packages/config/bin/snail-sh-logger.sh section "Pipeline Inputs"
+                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "mode" "${{ inputs.mode }}"
+                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "check_mode" "${{ inputs.check_mode }}"
+                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "require_lockfile" "${{ inputs.require_lockfile }}"
+                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "require_clean_repo" "${{ inputs.require_clean_repo }}"
+                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "run_build" "${{ inputs.run_build }}"
+                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "run_test" "${{ inputs.run_test }}"
+                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "run_docs_build" "${{ inputs.run_docs_build }}"
+                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "nx_cache_reset" "${{ inputs.nx_cache_reset }}"
+                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "pnpm_cache" "${{ inputs.pnpm_cache }}"
+                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "use_nx_affected" "${{ inputs.use_nx_affected }}"
+                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "nx_targets" "${{ inputs.nx_targets }}"
+                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "nx_fix_ci" "${{ inputs.nx_fix_ci }}"
+                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "upload_workspace_artifact" "${{ inputs.upload_workspace_artifact }}"
+                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "artifact_name_prefix" "${{ inputs.artifact_name_prefix }}"
 
                   {
                     echo "## Pipeline inputs"
@@ -181,6 +198,7 @@ jobs:
                     echo "- upload_workspace_artifact: \`${{ inputs.upload_workspace_artifact }}\`"
                     echo "- artifact_name_prefix: \`${{ inputs.artifact_name_prefix }}\`"
                   } | tee -a "$GITHUB_STEP_SUMMARY"
+
             - name: 🩺 Report Environment
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
@@ -190,23 +208,6 @@ jobs:
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: bash .github/scripts/report-repo.sh
-
-            # ── Install attempts ─────────────────────────────────────
-            - name: 📦 Install Frozen Lockfile
-              id: install_frozen
-              continue-on-error: true
-              run: pnpm install --frozen-lockfile
-
-            - name: 📦 Install Relaxed Lockfile (fallback)
-              id: install_relaxed
-              if: ${{ steps.install_frozen.outcome == 'failure' && !inputs.require_lockfile }}
-              run: pnpm install --no-frozen-lockfile
-
-            - name: 🚨 Validate Install
-              if: ${{ steps.install_frozen.outcome == 'failure' && (inputs.require_lockfile || steps.install_relaxed.outcome == 'failure') }}
-              run: |
-                  echo "Install failed. Frozen lockfile install failed and either require_lockfile=true or relaxed install also failed."
-                  exit 1
 
             - name: 🧭 Set Nx SHAs
               if: ${{ inputs.use_nx_affected }}
@@ -337,10 +338,10 @@ jobs:
               if: ${{ always() }}
               shell: bash
               run: |
-                  pnpm exec snail-sh section "Pipeline Outputs"
-                  pnpm exec snail-sh kv_pair "is_repo_dirty" "${{ steps.repo_dirty.outputs.is_repo_dirty }}"
-                  pnpm exec snail-sh kv_pair "artifact_uploaded" "${{ steps.artifact_uploaded.outputs.artifact_uploaded }}"
-                  pnpm exec snail-sh kv_pair "workspace_artifact_name" "${{ steps.artifact_name.outputs.name }}"
+                  bash ./packages/config/bin/snail-sh-logger.sh section "Pipeline Outputs"
+                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "is_repo_dirty" "${{ steps.repo_dirty.outputs.is_repo_dirty }}"
+                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "artifact_uploaded" "${{ steps.artifact_uploaded.outputs.artifact_uploaded }}"
+                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "workspace_artifact_name" "${{ steps.artifact_name.outputs.name }}"
 
                   {
                     echo ""

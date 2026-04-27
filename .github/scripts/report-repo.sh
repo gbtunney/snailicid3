@@ -8,7 +8,7 @@ git_output() {
 }
 
 snail_sh() {
-    pnpm exec snail-sh "$@"
+    bash "$ROOT_DIR/packages/config/bin/snail-sh-logger.sh" "$@"
 }
 
 log_lines() {
