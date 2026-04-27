@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+ROOT_DIR="$(git rev-parse --show-toplevel 2> /dev/null || pwd)"
+
 command_version() {
     local command_name="$1"
     local version_flag="${2:---version}"
@@ -19,8 +21,10 @@ snail_sh() {
     bash "$ROOT_DIR/packages/config/bin/snail-sh-logger.sh" "$@"
 }
 
+timestamp="$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+
 snail_sh section "Environment"
-snail_sh kv_pair "timestamp" "May 05,2000 at 10pm"
+snail_sh kv_pair "timestamp" "$timestamp"
 snail_sh kv_pair "cwd" "$(pwd)"
 snail_sh kv_pair "os" "$(uname -a)"
 snail_sh kv_pair "shell" "${SHELL:-unknown}"

@@ -11,7 +11,7 @@ snail_sh() {
 
 snail_sh section "Prettier"
 
-if output="$(pnpm exec prettier "**/*" '!**/docs/**' '!**/*.{py,jpg,jpeg,gif,webp,bin,codex}' --no-error-on-unmatched-pattern --check 2>&1)"; then
+if output="$(pnpm exec prettier . --ignore-path ./.gitignore --no-error-on-unmatched-pattern --check 2>&1)"; then
     snail_sh status_pair "status" "clean" "success"
     snail_sh spacer 1
 else

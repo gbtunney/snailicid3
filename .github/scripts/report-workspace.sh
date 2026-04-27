@@ -78,4 +78,4 @@ else
         snail_sh log "$output" grey
     fi
 fi
-snail-sh spacer 1
+snail_sh spacer 1
