@@ -145,13 +145,11 @@ jobs:
                   git config user.name  "${{ inputs.commit_user_name }}"
                   git config user.email "${{ inputs.commit_user_name }}@${{ inputs.commit_user_domain }}"
 
+                  git add -A
+
                   TYPE="${{ inputs.commit_message_type }}"
                   SUBJECT="${{ inputs.commit_message_subject }}"
-
-                  MESSAGE="${TYPE}(style): ${SUBJECT}"
-
-                  git add -A
-                   
+                  MESSAGE="$(pnpm exec scope-commit --staged --message "$TYPE" "$SUBJECT")"
                   git commit -m "$MESSAGE" \
                     -m "Triggered by: @${{ github.actor }} via workflow_dispatch" \
                     -m "Branch: ${{ github.ref_name }}" \

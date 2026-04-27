@@ -21,6 +21,7 @@
         "naumovs.color-highlight",
         "christian-kohler.npm-intellisense",
         "redhat.vscode-yaml",
-        "anseki.vscode-color"
+        "anseki.vscode-color",
+        "openai.chatgpt"
     ]
 }

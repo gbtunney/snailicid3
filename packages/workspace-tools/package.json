@@ -71,8 +71,6 @@
     "bin": {
         "wt-nx-status": "./bin/node/nx-status.ts",
         "wt-prettier-status": "./bin/node/prettier-status.ts",
-        "wt-workspace-status": "./bin/node/workspace-status.ts",
-        "wt-repo-status": "./bin/python/repo_status.py",
-        "wt-env-diagnostics": "./bin/python/env_diagnostics.py"
+        "wt-workspace-status": "./bin/node/workspace-status.ts"
     }
 }
