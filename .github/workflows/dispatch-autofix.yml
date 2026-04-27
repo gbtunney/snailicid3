@@ -149,7 +149,7 @@ jobs:
 
                   TYPE="${{ inputs.commit_message_type }}"
                   SUBJECT="${{ inputs.commit_message_subject }}"
-                  MESSAGE="$(pnpm exec scope-commit --staged --message ${TYPE} ${SUBJECT} )"
+                  MESSAGE="$(pnpm exec scope-commit --staged --message "$TYPE" "$SUBJECT")"
                   git commit -m "$MESSAGE" \
                     -m "Triggered by: @${{ github.actor }} via workflow_dispatch" \
                     -m "Branch: ${{ github.ref_name }}" \

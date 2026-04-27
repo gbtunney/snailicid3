@@ -69,11 +69,8 @@
     "main": "./dist/index.js",
     "types": "./types/index.d.ts",
     "bin": {
-        "wt-commit-scope": "./bin/shell/get-commit-scope.sh",
         "wt-nx-status": "./bin/node/nx-status.ts",
         "wt-prettier-status": "./bin/node/prettier-status.ts",
-        "wt-workspace-status": "./bin/node/workspace-status.ts",
-        "wt-repo-status": "./bin/shell/report-repo.sh",
-        "wt-env-diagnostics": "./bin/shell/report-env.sh"
+        "wt-workspace-status": "./bin/node/workspace-status.ts"
     }
 }

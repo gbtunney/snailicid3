@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
 
 # ─────────────────────────────────────────────────────────────
-# get-affected-scope.sh
-#
 # Derives a conventional commit scope string from:
 # - nx affected projects
-# - scripts/ directory (if any changes live there: committed, staged, unstaged, or untracked)
+# - repo-level dirty paths that should map to scopes even outside Nx
 #
 # Usage (standalone):
-#   bash packages/workspace-tools/bin/shell/get-affected-scope.sh
+#   pnpm exec scope-affected
+#   pnpm exec scope-affected --list
+#   pnpm exec scope-affected --since v1.0.0
+#   pnpm exec scope-affected --keep-prefix --base v1.0.0 --head HEAD
+#   pnpm exec scope-affected --nx-only --base main
 #
 # Usage (sourced):
-#   source packages/workspace-tools/bin/shell/get-affected-scope.sh
+#   source packages/config/bin/scope/affected.sh
 #   SCOPE=$(get_affected_scope)
 #
 # Output:
@@ -22,8 +24,19 @@
 # ─────────────────────────────────────────────────────────────
 
 get_affected_scope() {
+    local scope_format="csv"
+    local keep_prefix="false"
+    local include_repo_scopes="true"
+    local nx_base="main"
+    local nx_head=""
+
     shorten_scope_name() {
         local scope_name="$1"
+
+        if [[ "$keep_prefix" == "true" ]]; then
+            printf '%s\n' "$scope_name"
+            return 0
+        fi
 
         case "$scope_name" in
             @snailicid3/*)
@@ -35,30 +48,110 @@ get_affected_scope() {
         esac
     }
 
-    # ── Parse args ──────────────────────────────────────────────
-    if [[ $# -gt 0 ]]; then
-        echo "Unknown argument: $1" >&2
-        return 1
-    fi
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --csv)
+                scope_format="csv"
+                shift
+                ;;
+            --list)
+                scope_format="list"
+                shift
+                ;;
+            --keep-prefix | --full-scope)
+                keep_prefix="true"
+                shift
+                ;;
+            --nx-only)
+                include_repo_scopes="false"
+                shift
+                ;;
+            --include-repo-scopes)
+                include_repo_scopes="true"
+                shift
+                ;;
+            --base | --since)
+                if [[ $# -lt 2 ]]; then
+                    echo "Error: $1 requires a ref." >&2
+                    return 1
+                fi
+                nx_base="$2"
+                shift 2
+                ;;
+            --head)
+                if [[ $# -lt 2 ]]; then
+                    echo "Error: --head requires a ref." >&2
+                    return 1
+                fi
+                nx_head="$2"
+                shift 2
+                ;;
+            --help | -h)
+                cat << 'EOF'
+Usage:
+  pnpm exec scope-affected [--csv|--list] [--keep-prefix] [--nx-only|--include-repo-scopes] [--base <ref>|--since <ref>] [--head <ref>]
+
+Examples:
+  pnpm exec scope-affected
+  pnpm exec scope-affected --list
+  pnpm exec scope-affected --since v1.0.0
+  pnpm exec scope-affected --keep-prefix
+  pnpm exec scope-affected --nx-only
+  pnpm exec scope-affected
+  pnpm exec scope-affected --base v1.0.0 --head HEAD
+EOF
+                return 0
+                ;;
+            --*)
+                echo "Unknown argument: $1" >&2
+                return 1
+                ;;
+            *)
+                echo "Unknown argument: $1" >&2
+                return 1
+                ;;
+        esac
+    done
 
     # ── nx affected projects (Nx decides base/head) ──────────────
     local AFFECTED=""
-    AFFECTED="$(pnpm nx show projects --affected 2> /dev/null || true)"
+    local -a nx_args=(show projects --affected)
 
-    # ── scripts/ directory changes (include local dirty/untracked) ─
-    local SCRIPTS_DIRTY=""
-    if (
-        git diff --name-only --cached 2> /dev/null
-        git diff --name-only 2> /dev/null
-        git ls-files --others --exclude-standard 2> /dev/null
-    ) | grep -q '^scripts/'; then
-        SCRIPTS_DIRTY="scripts"
+    nx_args+=(--base "$nx_base")
+
+    if [[ -n "$nx_head" ]]; then
+        nx_args+=(--head "$nx_head")
+    fi
+
+    AFFECTED="$(pnpm nx "${nx_args[@]}" 2> /dev/null || true)"
+
+    # ── extra dirty path scopes (include local dirty/untracked) ─────
+    local extra_output=""
+    if [[ "$include_repo_scopes" == "true" ]]; then
+        local EXTRA_SCOPES=""
+        EXTRA_SCOPES="$(
+            git diff --name-only --cached 2> /dev/null
+            git diff --name-only 2> /dev/null
+            git ls-files --others --exclude-standard 2> /dev/null
+        )"
+
+        if printf '%s\n' "$EXTRA_SCOPES" | grep -q '^scripts/'; then
+            extra_output="${extra_output}scripts"$'\n'
+        fi
+
+        if printf '%s\n' "$EXTRA_SCOPES" | grep -Eq '^\.github/(workflows|actions|scripts)/'; then
+            extra_output="${extra_output}actions"$'\n'
+        fi
+
+        if printf '%s\n' "$EXTRA_SCOPES" | grep -q '^notes/'; then
+            extra_output="${extra_output}notes"$'\n'
+        fi
     fi
 
     # ── Combine and deduplicate ──────────────────────────────────
     local ALL
     ALL="$(
-        printf '%s\n%s\n' "$AFFECTED" "$SCRIPTS_DIRTY" \
+        printf '%s\n%s' "$AFFECTED" "$extra_output" \
             | sed 's/\r$//' \
             | while IFS= read -r scope_name; do
                 [[ -n "$scope_name" ]] || continue
@@ -69,14 +162,26 @@ get_affected_scope() {
     )"
 
     # ── Build scope string ───────────────────────────────────────
-    local SCOPE=""
     if [[ -z "$ALL" ]]; then
-        SCOPE="workspace"
-    else
-        SCOPE="$(printf '%s\n' "$ALL" | paste -sd ',' - | sed 's/,/, /g')"
+        case "$scope_format" in
+            list)
+                printf '%s\n' "workspace"
+                ;;
+            *)
+                printf '%s\n' "workspace"
+                ;;
+        esac
+        return 0
     fi
 
-    printf '%s\n' "$SCOPE"
+    case "$scope_format" in
+        list)
+            printf '%s\n' "$ALL"
+            ;;
+        *)
+            printf '%s\n' "$ALL" | paste -sd ',' - | sed 's/,/, /g'
+            ;;
+    esac
 }
 # ── Run directly if not being sourced ─────────────────────────
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

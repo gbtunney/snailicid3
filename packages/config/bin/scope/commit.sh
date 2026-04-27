@@ -1,20 +1,22 @@
 #!/usr/bin/env bash
 
 # ─────────────────────────────────────────────────────────────
-# get-commit-scope.sh
-#
 # Maps changed files to commit scopes based on the nearest workspace
 # package.json name. GitHub workflow/action files map to `action`.
 # Repo-level files fall back to `root`.
 #
 # Usage (standalone):
 #  pnpm exec scope-commit
-#  pnpm exec scope-commit  --all
-#  pnpm exec scope-commit  --message chore autofix
-#  pnpm exec scope-commit  path/to/file.ts
+#  pnpm exec scope-commit --all
+#  pnpm exec scope-commit --list
+#  pnpm exec scope-commit --csv --keep-prefix
+#  pnpm exec scope-commit --message chore autofix
+#  pnpm exec scope-commit --commit --dry-run chore autofix
+#  pnpm exec scope-commit --commit chore autofix
+#  pnpm exec scope-commit path/to/file.ts
 #
 # Usage (sourced):
-#   source packages/workspace-tools/bin/shell/get-commit-scope.sh
+#   source packages/config/bin/scope/commit.sh
 #   SCOPE="$(get_commit_scope --staged)"
 #
 # Output:
@@ -25,22 +27,18 @@
 #     root
 # ─────────────────────────────────────────────────────────────
 
-# Needs function callable like    Pnpm exec scope-commit <type> <subject>
-# ^ mode for that
-# ^ commit mode type(scope): subject - ideally it should throw if not a type from the commitlint type list
-#- Csv mode
-# - List mode ( maybe option to colorize w logger sh functions?
-# So then I can call it like I do pnpm commit:sh <type> <subject>
-# this currently works.
-
-# TODO this needs to have flag to get scope from staged files
 get_commit_scope() {
     local mode="staged"
     local output_mode="scope"
+    local scope_format="csv"
+    local keep_prefix="false"
+    local dry_run="false"
     local commit_type=""
     local commit_subject=""
     local repo_root=""
     local -a input_paths=()
+    local -a positionals=()
+    local -a allowed_commit_types=()
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -52,27 +50,46 @@ get_commit_scope() {
                 mode="all"
                 shift
                 ;;
+            --csv)
+                scope_format="csv"
+                shift
+                ;;
+            --list)
+                scope_format="list"
+                shift
+                ;;
+            --keep-prefix | --full-scope)
+                keep_prefix="true"
+                shift
+                ;;
+            --dry-run | --dry | -n)
+                dry_run="true"
+                shift
+                ;;
             --message | --m)
                 output_mode="message"
-                if [[ $# -lt 3 ]]; then
-                    echo "Error: --message requires <type> and <subject>." >&2
-                    return 1
-                fi
-                commit_type="$2"
-                commit_subject="$3"
-                shift 3
+                shift
+                ;;
+            --commit | --c)
+                output_mode="commit"
+                shift
                 ;;
             --help | -h)
                 cat << 'EOF'
 Usage:
-  pnpm exec scope-commit [--staged|--all] [file ...]
- pnpm exec scope-commit  --message <type> <subject> [--staged|--all] [file ...]
+  pnpm exec scope-commit [--staged|--all] [--csv|--list] [--keep-prefix] [file ...]
+  pnpm exec scope-commit --message <type> <subject> [--staged|--all] [--keep-prefix] [file ...]
+  pnpm exec scope-commit --commit <type> <subject> [--staged|--all] [--keep-prefix] [--dry-run] [file ...]
 
 Examples:
- pnpm exec scope-commit 
- pnpm exec scope-commit  --all
- pnpm exec scope-commit  --message chore autofix
- pnpm exec scope-commit  packages/workspace-tools/bin/shell/get-affected-scope.sh
+  pnpm exec scope-commit
+  pnpm exec scope-commit --all
+  pnpm exec scope-commit --list
+  pnpm exec scope-commit --csv --keep-prefix
+  pnpm exec scope-commit --message chore autofix
+  pnpm exec scope-commit --commit --dry-run chore autofix
+  pnpm exec scope-commit --commit chore autofix
+  pnpm exec scope-commit .github/workflows/pipeline.yml
 EOF
                 return 0
                 ;;
@@ -81,11 +98,72 @@ EOF
                 return 1
                 ;;
             *)
-                input_paths+=("$1")
+                positionals+=("$1")
                 shift
                 ;;
         esac
     done
+
+    if [[ "$output_mode" == "message" || "$output_mode" == "commit" ]]; then
+        if [[ "${#positionals[@]}" -lt 2 ]]; then
+            echo "Error: --$output_mode requires <type> and <subject>." >&2
+            return 1
+        fi
+
+        commit_type="${positionals[0]}"
+        commit_subject="${positionals[1]}"
+
+        if [[ "${#positionals[@]}" -gt 2 ]]; then
+            input_paths=("${positionals[@]:2}")
+        fi
+    else
+        input_paths=("${positionals[@]}")
+    fi
+
+    load_commit_types() {
+        local output=""
+
+        output="$(
+            pnpm exec node --input-type=module -e "
+                import config_conventional from '@commitlint/config-conventional';
+                const commitTypes = Object.keys(config_conventional.prompt.questions.type.enum || {});
+                process.stdout.write(commitTypes.join('\n'));
+            " 2> /dev/null || true
+        )"
+
+        if [[ -z "$output" ]]; then
+            return 1
+        fi
+
+        mapfile -t allowed_commit_types < <(printf '%s\n' "$output" | sed '/^$/d')
+        [[ "${#allowed_commit_types[@]}" -gt 0 ]]
+    }
+
+    validate_commit_type() {
+        local requested_type="$1"
+        local allowed_type=""
+
+        load_commit_types || {
+            echo "Error: unable to load commitlint commit types for validation." >&2
+            return 1
+        }
+
+        for allowed_type in "${allowed_commit_types[@]}"; do
+            if [[ "$allowed_type" == "$requested_type" ]]; then
+                return 0
+            fi
+        done
+
+        {
+            echo "Error: invalid commit type '$requested_type'."
+            echo "Allowed types: $(printf '%s' "${allowed_commit_types[0]}")$(printf ', %s' "${allowed_commit_types[@]:1}")"
+        } >&2
+        return 1
+    }
+
+    if [[ "$output_mode" == "message" || "$output_mode" == "commit" ]]; then
+        validate_commit_type "$commit_type" || return 1
+    fi
 
     repo_root="$(git rev-parse --show-toplevel 2> /dev/null || pwd)"
 
@@ -97,6 +175,11 @@ EOF
 
     shorten_scope_name() {
         local scope_name="$1"
+
+        if [[ "$keep_prefix" == "true" ]]; then
+            printf '%s\n' "$scope_name"
+            return 0
+        fi
 
         case "$scope_name" in
             @snailicid3/*)
@@ -136,7 +219,7 @@ EOF
 
         rel_path="$(normalize_repo_path "$raw_path")" || return 1
 
-        if [[ "$rel_path" == .github/workflows/* || "$rel_path" == .github/actions/* ]]; then
+        if [[ "$rel_path" == .github/workflows/* || "$rel_path" == .github/actions/* || "$rel_path" == .github/scripts/* ]]; then
             printf '%s\n' "actions"
             return 0
         fi
@@ -207,6 +290,35 @@ EOF
     local path=""
     local scope=""
     local result=""
+    local inline_result=""
+
+    format_inline_scopes() {
+        local -a values=("$@")
+
+        if [[ "${#values[@]}" -eq 0 ]]; then
+            printf '%s\n' "root"
+            return 0
+        fi
+
+        printf '%s\n' "${values[@]}" | paste -sd ',' - | sed 's/,/, /g'
+    }
+
+    format_scope_output() {
+        local -a values=("$@")
+
+        if [[ "${#values[@]}" -eq 0 ]]; then
+            values=("root")
+        fi
+
+        case "$scope_format" in
+            list)
+                printf '%s\n' "${values[@]}"
+                ;;
+            *)
+                format_inline_scopes "${values[@]}"
+                ;;
+        esac
+    }
 
     if [[ "${#input_paths[@]}" -gt 0 ]]; then
         paths=("${input_paths[@]}")
@@ -215,8 +327,25 @@ EOF
     fi
 
     if [[ "${#paths[@]}" -eq 0 ]]; then
-        printf '%s\n' "root"
-        return 0
+        inline_result="root"
+        case "$output_mode" in
+            message)
+                printf '%s(%s): %s\n' "$commit_type" "$inline_result" "$commit_subject"
+                return 0
+                ;;
+            commit)
+                if [[ "$dry_run" == "true" ]]; then
+                    printf '%s(%s): %s\n' "$commit_type" "$inline_result" "$commit_subject"
+                    return 0
+                fi
+                git commit -m "$(printf '%s(%s): %s' "$commit_type" "$inline_result" "$commit_subject")"
+                return 0
+                ;;
+            *)
+                format_scope_output "root"
+                return 0
+                ;;
+        esac
     fi
 
     while IFS= read -r scope; do
@@ -228,18 +357,23 @@ EOF
         done | sort -u
     )
 
-    if [[ "${#scopes[@]}" -eq 0 ]]; then
-        result="root"
-    else
-        result="$(printf '%s\n' "${scopes[@]}" | paste -sd ',' - | sed 's/,/, /g')"
-    fi
+    inline_result="$(format_inline_scopes "${scopes[@]}")"
 
-    if [[ "$output_mode" == "message" ]]; then
-        printf '%s(%s): %s\n' "$commit_type" "$result" "$commit_subject"
-        return 0
-    fi
-
-    printf '%s\n' "$result"
+    case "$output_mode" in
+        message)
+            printf '%s(%s): %s\n' "$commit_type" "$inline_result" "$commit_subject"
+            ;;
+        commit)
+            if [[ "$dry_run" == "true" ]]; then
+                printf '%s(%s): %s\n' "$commit_type" "$inline_result" "$commit_subject"
+                return 0
+            fi
+            git commit -m "$(printf '%s(%s): %s' "$commit_type" "$inline_result" "$commit_subject")"
+            ;;
+        *)
+            format_scope_output "${scopes[@]}"
+            ;;
+    esac
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

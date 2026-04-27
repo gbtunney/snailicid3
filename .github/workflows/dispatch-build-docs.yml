@@ -141,7 +141,6 @@ jobs:
                   fi
 
             # ── Commit and push ───────────────────────────────────────
-            # TODO look at autofix file and use the script scope-commit
             - name: 📝 Commit changes
               if: ${{ steps.dirty.outputs.dirty == 'true' }}
               shell: bash
@@ -152,9 +151,8 @@ jobs:
                   TYPE="${{ inputs.commit_message_type }}"
                   SUBJECT="${{ inputs.commit_message_subject }}"
 
-                  MESSAGE="${TYPE}(root): ${SUBJECT}"
-
                   git add -A
+                  MESSAGE="$(pnpm exec scope-commit --staged --message "$TYPE" "$SUBJECT")"
                    
                   git commit -m "$MESSAGE" \
                     -m "Triggered by: @${{ github.actor }} via workflow_dispatch" \
