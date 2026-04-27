@@ -7984,10 +7984,10 @@ packages:
             }
         engines: { node: '>=20' }
 
-    string-width@8.2.0:
+    string-width@8.2.1:
         resolution:
             {
-                integrity: sha512-6hJPQ8N0V0P3SNmP6h2J99RLuzrWz2gvT7VnK5tKvrNqJoyS9W4/Fb8mo31UiPvy00z7DQXkP2hnKBVav76thw==,
+                integrity: sha512-IIaP0g3iy9Cyy18w3M9YcaDudujEAVHKt3a3QJg1+sr/oX96TbaGUubG0hJyCjCBThFH+tFpcIyoUHUn1ogaLA==,
             }
         engines: { node: '>=20' }
 
@@ -10791,7 +10791,7 @@ snapshots:
     cli-truncate@5.2.0:
         dependencies:
             slice-ansi: 8.0.0
-            string-width: 8.2.0
+            string-width: 8.2.1
 
     cli-width@3.0.0: {}
 
@@ -13567,7 +13567,7 @@ snapshots:
             get-east-asian-width: 1.5.0
             strip-ansi: 7.2.0
 
-    string-width@8.2.0:
+    string-width@8.2.1:
         dependencies:
             get-east-asian-width: 1.5.0
             strip-ansi: 7.2.0

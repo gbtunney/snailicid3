@@ -6,7 +6,7 @@ ROOT_DIR="$(git rev-parse --show-toplevel 2> /dev/null || pwd)"
 cd "$ROOT_DIR"
 
 snail_sh() {
-    pnpm exec snail-sh "$@"
+    bash "$ROOT_DIR/packages/config/bin/snail-sh-logger.sh" "$@"
 }
 
 snail_sh section "Prettier"
