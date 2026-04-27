@@ -145,11 +145,24 @@ EOF
     load_commit_types() {
         local output=""
 
+        # Try loading from the resolved commitlint config first (respects custom types).
+        # Falls back to @commitlint/config-conventional if load fails.
         output="$(
             pnpm exec node --input-type=module -e "
-                import config_conventional from '@commitlint/config-conventional';
-                const commitTypes = Object.keys(config_conventional.prompt.questions.type.enum || {});
-                process.stdout.write(commitTypes.join('\n'));
+                import load from '@commitlint/load';
+                try {
+                    const cfg = await load({}, { cwd: process.cwd() });
+                    const rule = cfg.rules['type-enum'];
+                    const types = (rule && rule[2]) ? rule[2] : [];
+                    if (types.length > 0) {
+                        process.stdout.write(types.join('\n'));
+                        process.exit(0);
+                    }
+                } catch (_) {}
+                // fallback
+                const { default: conventional } = await import('@commitlint/config-conventional');
+                const types = Object.keys(conventional.prompt.questions.type.enum || {});
+                process.stdout.write(types.join('\n'));
             " 2> /dev/null || true
         )"
 
