@@ -1,0 +1,33 @@
+name: Require Branch Up To Date
+description: Fail if branch is not up to date with main (optionally only when changesets exist)
+
+inputs:
+    base-branch:
+        required: false
+        default: main
+    require-changeset:
+        required: false
+        default: 'false'
+
+runs:
+    using: composite
+    steps:
+        - run: git fetch origin ${{ inputs.base-branch }}
+          shell: bash
+
+        - run: |
+              BASE=$(git merge-base HEAD origin/${{ inputs.base-branch }})
+              MAIN=$(git rev-parse origin/${{ inputs.base-branch }})
+
+              if [ "$BASE" != "$MAIN" ]; then
+                if [ "${{ inputs.require-changeset }}" = "true" ]; then
+                  if ls .changeset/*.md 1> /dev/null 2>&1; then
+                    echo "Branch is stale AND contains changesets"
+                    exit 1
+                  fi
+                else
+                  echo "Branch is not up to date with ${{ inputs.base-branch }}"
+                  exit 1
+                fi
+              fi
+          shell: bash

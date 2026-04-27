@@ -143,16 +143,18 @@ jobs:
                     echo "- upload_workspace_artifact: \`${{ inputs.upload_workspace_artifact }}\`"
                     echo "- artifact_name_prefix: \`${{ inputs.artifact_name_prefix }}\`"
                   } | tee -a "$GITHUB_STEP_SUMMARY"
-
+              # TODO: use `pnpm exec snail-sh` styles and make cute pls
             - name: 🩺 Report Environment
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm report:env
+              # TODO packages/workspace-tools/bin/shell/report-env.sh replzce
 
             - name: 🗂️ Report Repository
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm report:repo
+              # TODO packages/workspace-tools/bin/shell/report-repo.sh
 
             # ── Install attempts ─────────────────────────────────────
             - name: 📦 Install Frozen Lockfile
@@ -175,11 +177,17 @@ jobs:
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm report:prettier
+              # TODO remove from package and directly use this file here -
+              # packages/workspace-tools/bin/shell/report-prettier.sh
+              # maybe make a standalone step idk?
 
             - name: 📚 Report Workspace
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: echo 'pnpm report:workspace'
+              # TODO remove from package and directly use this file here -
+              # packages/workspace-tools/bin/shell/report-workspace.sh
+              # maybe do some relevant stats like list changed packages or all with status in table? idk??
 
             # ── Cache resets ─────────────────────────────────────────
             - name: 🧹 Reset Nx Cache
@@ -294,7 +302,7 @@ jobs:
                     echo "- artifact_uploaded: \`${{ steps.artifact_uploaded.outputs.artifact_uploaded }}\`"
                     echo "- workspace_artifact_name: \`${{ steps.artifact_name.outputs.name }}\`"
                   } >> "$GITHUB_STEP_SUMMARY"
-
+            # TODO: use `pnpm exec snail-sh` styles and make cute pls
             - name: 🌈 Done
               if: ${{ always() }}
               run: echo "Pipeline workflow completed."

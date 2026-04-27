@@ -20,15 +20,11 @@ rule "="
 echo ${RESET}
 
 echo ${ORANGE}
-rule "-" 25% 1 false
-printf "  ${REVERSE} I AM A${BOLD} SECTION ${RESET}${ORANGE} "
-rule "-" 25% 1
+kabob "I AM A${BOLD} SECTION${RESET}" 50% orange true "-"
 
 #PERCENT WIDTH HRULE
 echo ${ORANGE}
-rule "-" 25% 1 false
-printf "  ${REVERSE} I AM A${BOLD} SECTION ${RESET}${ORANGE} "
-rule "-" 25% 1
+kabob "I AM A${BOLD} SECTION${RESET}" 50% orange true "-"
 printf '%b' ${RESET}
 
 #FIXED WIDTH HRULE
@@ -39,10 +35,7 @@ INVERT=$REVERSE # can this be a boolean?
 DELIMITER=" : "
 PREFIX="SECTION"
 CONTENT_TEXT="Colors and Stuff"
-printf ${RESET}${COLOR}
-rule "-" $WIDTH $HEIGHT false
-printf "  ${INVERT}  ${PREFIX}${DELIMITER}${CONTENT_TEXT}  ${RESET}  ${COLOR}"
-rule "-" $WIDTH $HEIGHT
+kabob "${PREFIX}${DELIMITER}${CONTENT_TEXT}" "$WIDTH" "$COLOR" true "-"
 printf '%b' ${RESET}
 
 #FIXED WIDTH HRULE
@@ -51,10 +44,7 @@ WIDTH=8
 HEIGHT=1
 INVERT=""
 CONTENT_TEXT=" I AM A${BOLD} KITTEN "
-printf ${RESET}${COLOR}
-rule "-" $WIDTH $HEIGHT false
-printf "  ${INVERT}${CONTENT_TEXT} ${RESET}${COLOR}"
-rule "-" $WIDTH $HEIGHT
+kabob "${CONTENT_TEXT}" "$WIDTH" "$COLOR" false "-"
 printf '%b' ${RESET}
 
 # LR padding - hspacer
@@ -190,11 +180,12 @@ echo $GREY_RAMP
 #MID_GREY
 
 #printf '%b' ${REVERSE}${MAGENTA}
+#TODO lets make this the new 'subheader? i dont know how the width is set, is it possible to use the dim option?'
 WIDTH=40%
 HEIGHT=1 #should be .5xw maybe to compensate for char aspect ratio?
 COLOR=$MAGENTA
 INVERT=""
-TEXT_CONTENT="I am an underlined magenta line"
+TEXT_CONTENT="I am an underlined first magenta line"
 NEWLINE=true
 printf "${RESET}${COLOR}${UNDERLINE}${TEXT_CONTENT}"
 rule " " $WIDTH 1 $NEWLINE
@@ -237,8 +228,37 @@ rule "=" 40 2
 rule "=" 50% 1
 
 header "GBTBuild" "50%" bright-cyan "="
-rule "-|" "50%"  bg-cyan
-rule "-|" "50%" 3 bg-cyan
+section "Default Section"
+section "Flexible Section" 50% bright-cyan "=" true 2
+section "Short Marker Section" green "-|"
+spacer 2
+rule "-|" "50%" bg-cyan
+rule "-|" "50%" 3 true bg-bright-orange
 
 line "-|" "50%" bg-cyan
+line "-|" "50%" bg-red 3
 
+header "Key Value Pairs" "25%" bright-green "-"
+kv_pair "package" "snailicid3" "  :" bright-cyan grey
+kv_pair "package" "snailicid3" "  :" bg-bright-cyan bright-cyan
+
+kv_pair "version" "0.0.0-dev" "=" yellow grey
+kv_pair "install path" "$PACKAGE_DIR" ":  " magenta grey
+status_pair "workspace" "dirty"
+status_pair "workspace" "dirty" warn
+status_pair "shell tests" "clean"
+status_pair "pnpm" "pnpm not installed"
+
+COLOR=$GREEN
+WIDTH='20'
+HEIGHT=1
+INVERT=true
+CONTENT_TEXT=" I AM A${BOLD} KITTEN "
+kabob "${CONTENT_TEXT}" "$WIDTH" "$COLOR" true "--|" 2
+
+#reverse option
+kabob "${CONTENT_TEXT}" "30" "$COLOR" true "----|" 2
+
+kabob "${CONTENT_TEXT}" "50" "$COLOR" true "--|" 2
+
+section "Flexible Section" 50% bright-cyan "=" true 4

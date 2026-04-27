@@ -5,6 +5,9 @@
     "description": "Shared linting, formatting, and TypeScript config utilities for the snailicid3 monorepo",
     "bin": {
         "snail-sh": "./bin/snail-sh-logger.sh",
+        "scope-commit": "./bin/scope/commit.sh",
+        "scope-affected": "./bin/scope/affected.sh",
+        "gbt-setup": "./bin/completions/install-pnpm.sh",
         "gbt-uninstall": "./bin/uninstall.sh"
     },
     "exports": {
@@ -14,6 +17,8 @@
         },
         "./sh/logger": "./bin/snail-sh-logger.sh",
         "./sh/uninstall": "./bin/uninstall.sh",
+        "./completions/bash": "./completions/snail-sh.bash",
+        "./completions/zsh": "./completions/_snail-sh",
         "./prettier": "./dist/.prettierrc.json",
         "./markdownlint": "./dist/.markdownlint.json",
         "./tsconfig/base": "./typescript-config/tsconfig.base.json",
@@ -81,7 +86,8 @@
         "dist",
         "types",
         "typescript-config",
-        "bin"
+        "bin",
+        "completions"
     ],
     "keywords": [
         "eslint",

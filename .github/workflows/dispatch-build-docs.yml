@@ -141,6 +141,7 @@ jobs:
                   fi
 
             # ── Commit and push ───────────────────────────────────────
+            # TODO look at autofix file and use the script scope-commit
             - name: 📝 Commit changes
               if: ${{ steps.dirty.outputs.dirty == 'true' }}
               shell: bash

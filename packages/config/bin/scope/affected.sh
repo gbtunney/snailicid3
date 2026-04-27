@@ -1,43 +1,45 @@
 #!/usr/bin/env bash
 
 # ─────────────────────────────────────────────────────────────
-# get-scope.sh
+# get-affected-scope.sh
 #
 # Derives a conventional commit scope string from:
 # - nx affected projects
 # - scripts/ directory (if any changes live there: committed, staged, unstaged, or untracked)
 #
 # Usage (standalone):
-#   bash scripts/get-scope.sh
-#   bash scripts/get-scope.sh --max 3
+#   bash packages/workspace-tools/bin/shell/get-affected-scope.sh
 #
 # Usage (sourced):
-#   source scripts/get-scope.sh
-#   SCOPE=$(get_scope)
+#   source packages/workspace-tools/bin/shell/get-affected-scope.sh
+#   SCOPE=$(get_affected_scope)
 #
 # Output:
 #   Prints the scope string to stdout, e.g:
-#     operator-core, operator-ui
+#     workspace-tools, playground
 #     scripts
 #     workspace
 # ─────────────────────────────────────────────────────────────
 
-get_scope() {
-    local MAX_NAMED=3
+get_affected_scope() {
+    shorten_scope_name() {
+        local scope_name="$1"
 
-    # ── Parse args ──────────────────────────────────────────────
-    while [[ $# -gt 0 ]]; do
-        case "$1" in
-            --max)
-                MAX_NAMED="$2"
-                shift 2
+        case "$scope_name" in
+            @snailicid3/*)
+                printf '%s\n' "${scope_name#@snailicid3/}"
                 ;;
             *)
-                echo "Unknown argument: $1" >&2
-                return 1
+                printf '%s\n' "$scope_name"
                 ;;
         esac
-    done
+    }
+
+    # ── Parse args ──────────────────────────────────────────────
+    if [[ $# -gt 0 ]]; then
+        echo "Unknown argument: $1" >&2
+        return 1
+    fi
 
     # ── nx affected projects (Nx decides base/head) ──────────────
     local AFFECTED=""
@@ -58,26 +60,25 @@ get_scope() {
     ALL="$(
         printf '%s\n%s\n' "$AFFECTED" "$SCRIPTS_DIRTY" \
             | sed 's/\r$//' \
+            | while IFS= read -r scope_name; do
+                [[ -n "$scope_name" ]] || continue
+                shorten_scope_name "$scope_name"
+            done \
             | sort -u \
             | grep -v '^$' || true
     )"
 
-    local COUNT
-    COUNT="$(printf '%s\n' "$ALL" | grep -c '.' || true)"
-
     # ── Build scope string ───────────────────────────────────────
     local SCOPE=""
-    if [[ "$COUNT" -eq 0 ]]; then
+    if [[ -z "$ALL" ]]; then
         SCOPE="workspace"
-    elif [[ "$COUNT" -le "$MAX_NAMED" ]]; then
-        SCOPE="$(printf '%s\n' "$ALL" | paste -sd ',' - | sed 's/,/, /g')"
     else
-        SCOPE="workspace"
+        SCOPE="$(printf '%s\n' "$ALL" | paste -sd ',' - | sed 's/,/, /g')"
     fi
 
     printf '%s\n' "$SCOPE"
 }
 # ── Run directly if not being sourced ─────────────────────────
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    get_scope "$@"
+    get_affected_scope "$@"
 fi
