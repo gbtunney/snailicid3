@@ -235,3 +235,10 @@ rule " " 50% 4
 rule "+" "" 3
 rule "=" 40 2
 rule "=" 50% 1
+
+header "GBTBuild" "50%" bright-cyan "="
+rule "-|" "50%"  bg-cyan
+rule "-|" "50%" 3 bg-cyan
+
+line "-|" "50%" bg-cyan
+
