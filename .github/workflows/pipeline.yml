@@ -80,24 +80,6 @@ on:
                 default: true
                 type: boolean
 
-            use_nx_affected:
-                description: If true, run Nx affected CI targets instead of the full workspace build/test/check flow.
-                required: false
-                default: false
-                type: boolean
-
-            nx_targets:
-                description: Space-delimited Nx targets to run in affected mode.
-                required: false
-                default: lint test build
-                type: string
-
-            nx_fix_ci:
-                description: If true, run `nx fix-ci` after Nx affected mode.
-                required: false
-                default: false
-                type: boolean
-
         outputs:
             is_repo_dirty:
                 description: Whether repository is dirty at end ('true'|'false')
@@ -112,7 +94,6 @@ on:
                 value: ${{ jobs.pipeline.outputs.artifact_uploaded }}
 
 permissions:
-    actions: read
     contents: read
 
 env:
@@ -142,6 +123,37 @@ jobs:
                   node-version: ${{ inputs.node_version }}
                   cache: ${{ inputs.pnpm_cache && 'pnpm' || '' }}
 
+            # ── Input summary ────────────────────────────────────────
+            # Note: no native foreach over inputs; keep this explicit.
+            - name: 🌸 Input Summary
+              shell: bash
+              run: |
+                  {
+                    echo "## Pipeline inputs"
+                    echo ""
+                    echo "- mode: \`${{ inputs.mode }}\`"
+                    echo "- check_mode: \`${{ inputs.check_mode }}\`"
+                    echo "- require_lockfile: \`${{ inputs.require_lockfile }}\`"
+                    echo "- require_clean_repo: \`${{ inputs.require_clean_repo }}\`"
+                    echo "- run_build: \`${{ inputs.run_build }}\`"
+                    echo "- run_test: \`${{ inputs.run_test }}\`"
+                    echo "- run_docs_build: \`${{ inputs.run_docs_build }}\`"
+                    echo "- nx_cache_reset: \`${{ inputs.nx_cache_reset }}\`"
+                    echo "- pnpm_cache: \`${{ inputs.pnpm_cache }}\`"
+                    echo "- upload_workspace_artifact: \`${{ inputs.upload_workspace_artifact }}\`"
+                    echo "- artifact_name_prefix: \`${{ inputs.artifact_name_prefix }}\`"
+                  } | tee -a "$GITHUB_STEP_SUMMARY"
+
+            - name: 🩺 Report Environment
+              if: ${{ always() }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm report:env
+
+            - name: 🗂️ Report Repository
+              if: ${{ always() }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm report:repo
+
             # ── Install attempts ─────────────────────────────────────
             - name: 📦 Install Frozen Lockfile
               id: install_frozen
@@ -159,69 +171,15 @@ jobs:
                   echo "Install failed. Frozen lockfile install failed and either require_lockfile=true or relaxed install also failed."
                   exit 1
 
-            # ── Input summary ────────────────────────────────────────
-            # Note: no native foreach over inputs; keep this explicit.
-            - name: 🌸 Input Summary
-              shell: bash
-              run: |
-                  bash ./packages/config/bin/snail-sh-logger.sh section "Pipeline Inputs"
-                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "mode" "${{ inputs.mode }}"
-                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "check_mode" "${{ inputs.check_mode }}"
-                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "require_lockfile" "${{ inputs.require_lockfile }}"
-                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "require_clean_repo" "${{ inputs.require_clean_repo }}"
-                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "run_build" "${{ inputs.run_build }}"
-                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "run_test" "${{ inputs.run_test }}"
-                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "run_docs_build" "${{ inputs.run_docs_build }}"
-                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "nx_cache_reset" "${{ inputs.nx_cache_reset }}"
-                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "pnpm_cache" "${{ inputs.pnpm_cache }}"
-                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "use_nx_affected" "${{ inputs.use_nx_affected }}"
-                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "nx_targets" "${{ inputs.nx_targets }}"
-                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "nx_fix_ci" "${{ inputs.nx_fix_ci }}"
-                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "upload_workspace_artifact" "${{ inputs.upload_workspace_artifact }}"
-                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "artifact_name_prefix" "${{ inputs.artifact_name_prefix }}"
-
-                  {
-                    echo "## Pipeline inputs"
-                    echo ""
-                    echo "- mode: \`${{ inputs.mode }}\`"
-                    echo "- check_mode: \`${{ inputs.check_mode }}\`"
-                    echo "- require_lockfile: \`${{ inputs.require_lockfile }}\`"
-                    echo "- require_clean_repo: \`${{ inputs.require_clean_repo }}\`"
-                    echo "- run_build: \`${{ inputs.run_build }}\`"
-                    echo "- run_test: \`${{ inputs.run_test }}\`"
-                    echo "- run_docs_build: \`${{ inputs.run_docs_build }}\`"
-                    echo "- nx_cache_reset: \`${{ inputs.nx_cache_reset }}\`"
-                    echo "- pnpm_cache: \`${{ inputs.pnpm_cache }}\`"
-                    echo "- use_nx_affected: \`${{ inputs.use_nx_affected }}\`"
-                    echo "- nx_targets: \`${{ inputs.nx_targets }}\`"
-                    echo "- nx_fix_ci: \`${{ inputs.nx_fix_ci }}\`"
-                    echo "- upload_workspace_artifact: \`${{ inputs.upload_workspace_artifact }}\`"
-                    echo "- artifact_name_prefix: \`${{ inputs.artifact_name_prefix }}\`"
-                  } | tee -a "$GITHUB_STEP_SUMMARY"
-
-            - name: 🩺 Report Environment
-              if: ${{ always() }}
-              continue-on-error: ${{ inputs.mode == 'report' }}
-              run: bash .github/scripts/report-env.sh
-
-            - name: 🗂️ Report Repository
-              if: ${{ always() }}
-              continue-on-error: ${{ inputs.mode == 'report' }}
-              run: bash .github/scripts/report-repo.sh
-
-            - name: 🧭 Set Nx SHAs
-              if: ${{ inputs.use_nx_affected }}
-              uses: nrwl/nx-set-shas@v4
-
             - name: 🎀 Report Prettier
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
-              run: bash .github/scripts/report-prettier.sh
+              run: pnpm report:prettier
 
             - name: 📚 Report Workspace
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
-              run: bash .github/scripts/report-workspace.sh
+              run: echo 'pnpm report:workspace'
 
             # ── Cache resets ─────────────────────────────────────────
             - name: 🧹 Reset Nx Cache
@@ -230,39 +188,29 @@ jobs:
               run: pnpm nx:reset
 
             - name: 🏗️ Run Build
-              if: ${{ inputs.run_build && !inputs.use_nx_affected }}
+              if: ${{ inputs.run_build }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm build
 
             - name: 🧪 Run Test
-              if: ${{ inputs.run_test && !inputs.use_nx_affected }}
+              if: ${{ inputs.run_test }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm test
 
               # ── Routines ────────────────────────────────────────────
             - name: ✨ Run Fix Routine
-              if: ${{ inputs.check_mode == 'fix' && !inputs.use_nx_affected }}
+              if: ${{ inputs.check_mode == 'fix' }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm fix
 
             - name: ✅ Run Check Routine
-              if: ${{ inputs.check_mode == 'check' && !inputs.use_nx_affected }}
+              if: ${{ inputs.check_mode == 'check' }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm check
 
             - name: ⏭️ Skip Check Routine
-              if: ${{ inputs.check_mode == 'skip' && !inputs.use_nx_affected }}
+              if: ${{ inputs.check_mode == 'skip' }}
               run: echo "check_mode=skip"
-
-            - name: 🎯 Run Nx Affected Targets
-              if: ${{ inputs.use_nx_affected }}
-              continue-on-error: ${{ inputs.mode == 'report' }}
-              run: pnpm exec nx affected -t ${{ inputs.nx_targets }}
-
-            - name: 🩹 Run Nx Fix CI
-              if: ${{ always() && inputs.use_nx_affected && inputs.nx_fix_ci }}
-              continue-on-error: ${{ inputs.mode == 'report' }}
-              run: pnpm exec nx fix-ci
 
             - name: 📘 Run Docs Build
               if: ${{ inputs.run_docs_build }}
@@ -338,11 +286,6 @@ jobs:
               if: ${{ always() }}
               shell: bash
               run: |
-                  bash ./packages/config/bin/snail-sh-logger.sh section "Pipeline Outputs"
-                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "is_repo_dirty" "${{ steps.repo_dirty.outputs.is_repo_dirty }}"
-                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "artifact_uploaded" "${{ steps.artifact_uploaded.outputs.artifact_uploaded }}"
-                  bash ./packages/config/bin/snail-sh-logger.sh kv_pair "workspace_artifact_name" "${{ steps.artifact_name.outputs.name }}"
-
                   {
                     echo ""
                     echo "## Outputs"
@@ -351,6 +294,7 @@ jobs:
                     echo "- artifact_uploaded: \`${{ steps.artifact_uploaded.outputs.artifact_uploaded }}\`"
                     echo "- workspace_artifact_name: \`${{ steps.artifact_name.outputs.name }}\`"
                   } >> "$GITHUB_STEP_SUMMARY"
+
             - name: 🌈 Done
               if: ${{ always() }}
               run: echo "Pipeline workflow completed."

@@ -66,21 +66,6 @@ on:
                 required: true
                 default: true
                 type: boolean
-            use_nx_affected:
-                description: Run Nx affected CI targets instead of full workspace routines
-                required: true
-                default: false
-                type: boolean
-            nx_targets:
-                description: Space-delimited Nx targets for affected mode
-                required: true
-                default: lint test build
-                type: string
-            nx_fix_ci:
-                description: Run `nx fix-ci` after affected mode
-                required: true
-                default: false
-                type: boolean
             upload_workspace_artifact:
                 description: Upload workspace artifact at end (for debugging / downstream jobs)
                 required: true
@@ -109,9 +94,6 @@ jobs:
             node_version: ${{ inputs.node_version }}
             nx_cache_reset: ${{ inputs.nx_cache_reset }}
             pnpm_cache: ${{ inputs.pnpm_cache }}
-            use_nx_affected: ${{ inputs.use_nx_affected }}
-            nx_targets: ${{ inputs.nx_targets }}
-            nx_fix_ci: ${{ inputs.nx_fix_ci }}
             upload_workspace_artifact: ${{ inputs.upload_workspace_artifact }}
             artifact_name_prefix: ${{ inputs.artifact_name_prefix }}
 
