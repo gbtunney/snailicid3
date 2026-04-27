@@ -80,6 +80,25 @@ on:
                 default: true
                 type: boolean
 
+            # Nx Cloud / affected options
+            use_nx_affected:
+                description: Run nx affected instead of full workspace build/test/check routines.
+                required: false
+                default: false
+                type: boolean
+
+            nx_targets:
+                description: Space-delimited Nx targets for affected mode.
+                required: false
+                default: lint test build
+                type: string
+
+            nx_fix_ci:
+                description: Run nx fix-ci after main steps (Nx Cloud self-healing CI).
+                required: false
+                default: false
+                type: boolean
+
         outputs:
             is_repo_dirty:
                 description: Whether repository is dirty at end ('true'|'false')
@@ -142,6 +161,9 @@ jobs:
                     echo "- pnpm_cache: \`${{ inputs.pnpm_cache }}\`"
                     echo "- upload_workspace_artifact: \`${{ inputs.upload_workspace_artifact }}\`"
                     echo "- artifact_name_prefix: \`${{ inputs.artifact_name_prefix }}\`"
+                    echo "- use_nx_affected: \`${{ inputs.use_nx_affected }}\`"
+                    echo "- nx_targets: \`${{ inputs.nx_targets }}\`"
+                    echo "- nx_fix_ci: \`${{ inputs.nx_fix_ci }}\`"
                   } | tee -a "$GITHUB_STEP_SUMMARY"
 
             - name: 🩺 Report Environment
@@ -171,6 +193,9 @@ jobs:
                   echo "Install failed. Frozen lockfile install failed and either require_lockfile=true or relaxed install also failed."
                   exit 1
 
+            # ── Nx affected SHA detection ────────────────────────────
+            - uses: nrwl/nx-set-shas@v4
+
             - name: 🎀 Report Prettier
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
@@ -187,33 +212,40 @@ jobs:
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm nx:reset
 
+            # ── Nx affected mode ─────────────────────────────────────
+            - name: 🎯 Run Nx Affected
+              if: ${{ inputs.use_nx_affected }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm exec nx affected -t ${{ inputs.nx_targets }}
+
+            # ── Full workspace routines (skipped when use_nx_affected) ─
             - name: 🏗️ Run Build
-              if: ${{ inputs.run_build }}
+              if: ${{ inputs.run_build && !inputs.use_nx_affected }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm build
 
             - name: 🧪 Run Test
-              if: ${{ inputs.run_test }}
+              if: ${{ inputs.run_test && !inputs.use_nx_affected }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm test
 
               # ── Routines ────────────────────────────────────────────
             - name: ✨ Run Fix Routine
-              if: ${{ inputs.check_mode == 'fix' }}
+              if: ${{ inputs.check_mode == 'fix' && !inputs.use_nx_affected }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm fix
 
             - name: ✅ Run Check Routine
-              if: ${{ inputs.check_mode == 'check' }}
+              if: ${{ inputs.check_mode == 'check' && !inputs.use_nx_affected }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm check
 
             - name: ⏭️ Skip Check Routine
-              if: ${{ inputs.check_mode == 'skip' }}
+              if: ${{ inputs.check_mode == 'skip' && !inputs.use_nx_affected }}
               run: echo "check_mode=skip"
 
             - name: 📘 Run Docs Build
-              if: ${{ inputs.run_docs_build }}
+              if: ${{ inputs.run_docs_build && !inputs.use_nx_affected }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm run docs:build
 
@@ -294,6 +326,12 @@ jobs:
                     echo "- artifact_uploaded: \`${{ steps.artifact_uploaded.outputs.artifact_uploaded }}\`"
                     echo "- workspace_artifact_name: \`${{ steps.artifact_name.outputs.name }}\`"
                   } >> "$GITHUB_STEP_SUMMARY"
+
+            # ── Nx Cloud self-healing CI ─────────────────────────────
+            - name: 🔧 Nx Cloud Fix CI
+              if: ${{ always() && inputs.nx_fix_ci }}
+              continue-on-error: true
+              run: pnpm exec nx fix-ci
 
             - name: 🌈 Done
               if: ${{ always() }}
