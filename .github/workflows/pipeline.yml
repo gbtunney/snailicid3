@@ -195,6 +195,7 @@ jobs:
 
             # ── Nx affected SHA detection ────────────────────────────
             - uses: nrwl/nx-set-shas@v4
+              if: ${{ inputs.use_nx_affected }}
 
             - name: 🎀 Report Prettier
               if: ${{ always() }}
