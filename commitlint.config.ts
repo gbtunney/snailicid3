@@ -19,7 +19,6 @@ const configuration: CommitlintUserConfig = commitlint.configuration([
     'node-utils',
     'scaffold',
     'example-package',
-    'workspace-tools' /** This is deprecated */,
     'playground',
 ])
 export default configuration

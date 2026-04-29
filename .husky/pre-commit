@@ -48,5 +48,4 @@ fi
 
 # LINT_STAGED: run on all commits (including direct git commit)
 printf "\nRunning lint-staged...\n\n"
-#pnpm exec lint-staged --relative
-exit 0
+pnpm exec lint-staged --relative
