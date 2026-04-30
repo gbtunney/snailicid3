@@ -1,6 +1,6 @@
 {
     "name": "@snailicid3/build-config",
-    "version": "0.0.0",
+    "version": "0.0.1",
     "private": false,
     "description": "Shared rollup, vite, vitest and typedoc build tool configs",
     "scripts": {
