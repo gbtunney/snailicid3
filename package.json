@@ -48,7 +48,7 @@
         "postinstall": "pnpm build:self && echo '\n=== >> Success:: Install complete.'",
         "\n========== PUBLISH >> ==========": "",
         "create:changeset": "pnpm pre:changeset && pnpm changeset",
-        "pre:changeset": "pnpm run fix && pnpm run test && pnpm run docs:build && pnpm exec gbt-changeset && pnpm release:archive",
+        "pre:changeset": "pnpm run fix && pnpm run test && pnpm docs:build && pnpm exec gbt-changeset && pnpm release:archive",
         "release:archive": "pnpm -r exec mkdir -p ./releases &&  pnpm -r exec npm pack --pack-destination='./releases'",
         "prerelease": "pnpm exec pnpm run build && pnpm run fix && pnpm run check && pnpm test",
         "registry:start": "pnpm exec verdaccio",
