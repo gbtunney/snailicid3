@@ -21,5 +21,4 @@ const configuration: CommitlintUserConfig = commitlint.configuration([
     'example-package',
     'playground',
 ])
-console.log('lint staged ', configuration.rules?.['type-enum'])
 export default configuration
