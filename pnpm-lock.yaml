@@ -4282,10 +4282,10 @@ packages:
         engines: { node: '>=0.12.18' }
         hasBin: true
 
-    electron-to-chromium@1.5.344:
+    electron-to-chromium@1.5.345:
         resolution:
             {
-                integrity: sha512-4MxfbmNDm+KPh066EZy+eUnkcDPcZ35wNmOWzFuh/ijvHsve6kbLTLURy88uCNK5FbpN+yk2nQY6BYh1GEt+wg==,
+                integrity: sha512-F9JXQGiMrz6yVNPI2qOVPvB9HzjH5cGzhs8oJ6A28V5L/YnzN/0KsuiibqF+F1Fd9qxFzD1BUnYSd8JfULxTwg==,
             }
 
     emoji-regex@10.6.0:
@@ -10839,7 +10839,7 @@ snapshots:
         dependencies:
             baseline-browser-mapping: 2.10.24
             caniuse-lite: 1.0.30001791
-            electron-to-chromium: 1.5.344
+            electron-to-chromium: 1.5.345
             node-releases: 2.0.38
             update-browserslist-db: 1.2.3(browserslist@4.28.2)
 
@@ -11284,7 +11284,7 @@ snapshots:
 
     ejs@5.0.1: {}
 
-    electron-to-chromium@1.5.344: {}
+    electron-to-chromium@1.5.345: {}
 
     emoji-regex@10.6.0: {}
 
