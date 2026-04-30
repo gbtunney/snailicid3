@@ -54,8 +54,22 @@ env:
     HUSKY: 0
 
 jobs:
+    guard:
+        name: Guard — refuse main
+        runs-on: ubuntu-latest
+        steps:
+            - name: 🚫 Refuse to run on main
+              shell: bash
+              run: |
+                  if [ "${{ github.ref_name }}" = "main" ]; then
+                    echo "❌ Build Docs cannot run on main. Checkout a feature or fix branch first."
+                    exit 1
+                  fi
+                  echo "✅ Branch: ${{ github.ref_name }}"
+
     pipeline_build_docs:
         name: Run Doc pipeline
+        needs: guard
         uses: ./.github/workflows/pipeline.yml
         with:
             mode: abort_on_error
@@ -75,16 +89,6 @@ jobs:
         if: ${{ needs.pipeline_build_docs.result == 'success' && needs.pipeline_build_docs.outputs.artifact_uploaded == 'true' }}
 
         steps:
-            # ── Guard: refuse to run on main ─────────────────────────
-            - name: 🚫 Refuse to run on main
-              shell: bash
-              run: |
-                  if [ "${{ github.ref_name }}" = "main" ]; then
-                    echo "❌ Document build cannot run on main. Checkout a feature or fix branch first."
-                    exit 1
-                  fi
-                  echo "✅ Branch: ${{ github.ref_name }}"
-
             # ── Checkout ──────────────────────────────────────────────
             # Use GH_PAT so the push below triggers downstream PR workflows.
             # GITHUB_TOKEN pushes are silently blocked from triggering CI.

@@ -1,4 +1,5 @@
-# Runs only after merge to `main`. Changesets creates/updates the version PR, or publishes after the version PR is merged.
+# Runs only after merge to `main`. Phase 1: creates/updates a version PR (release/main → main)
+# with a scoped commit message. Phase 2: publishes to npm after the version PR merges.
 name: Release
 
 on:
@@ -31,6 +32,7 @@ jobs:
             run_test: true
             run_docs_build: false
             pnpm_cache: true
+            upload_built_artifact: true
 
     release:
         name: release
@@ -58,6 +60,20 @@ jobs:
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
 
+            # ── Restore built output from pipeline ───────────────────────
+            - name: 📥 Download built output artifact
+              uses: actions/download-artifact@v4
+              with:
+                  name: ${{ needs.pipeline.outputs.built_artifact_name }}
+                  path: ${{ runner.temp }}/built-output
+
+            - name: ♻️ Overlay built output onto workspace
+              shell: bash
+              run: |
+                  rsync -a \
+                    --exclude='.git/' \
+                    "${{ runner.temp }}/built-output"/ "$GITHUB_WORKSPACE"/
+
             # Count pending .changeset/*.md files (excludes README.md)
             - name: Check for pending changesets
               id: has_changesets
@@ -68,25 +84,57 @@ jobs:
                   echo "has=$( [ "$count" -gt 0 ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
                   echo "Pending changesets: $count"
 
-            # Phase 1 — open/update the version PR when changesets are present.
-            # Never publishes; that is handled below only after the version commit lands.
+            # ── Phase 1 — version PR ──────────────────────────────────────
+            # Bump versions, compute scoped commit message, push to release/main, create/update PR.
+            - name: Version packages
+              if: steps.has_changesets.outputs.has == 'true'
+              run: pnpm changeset version
+
+            - name: Stage and compute scoped commit message
+              id: version_msg
+              if: steps.has_changesets.outputs.has == 'true'
+              shell: bash
+              run: |
+                  git add -A
+                  MSG="$(pnpm exec scope-commit --staged --message chore "version packages" \
+                          2>/dev/null || echo "chore(release): version packages")"
+                  echo "message=$MSG" >> "$GITHUB_OUTPUT"
+                  echo "Commit message: $MSG"
+
+            - name: Commit version changes
+              if: steps.has_changesets.outputs.has == 'true'
+              shell: bash
+              run: |
+                  git config user.name  "github-actions[bot]"
+                  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                  git commit -m "${{ steps.version_msg.outputs.message }}"
+
+            - name: Push to release/main branch
+              if: steps.has_changesets.outputs.has == 'true'
+              run: git push origin HEAD:refs/heads/release/main --force
+
             - name: Create or update version PR
               if: steps.has_changesets.outputs.has == 'true'
-              uses: changesets/action@v1
-              with:
-                  version: pnpm changeset version
-                  title: 'chore(release): version packages'
-                  commit: 'chore(release): version packages'
-                  createGithubReleases: false
+              shell: bash
+              run: |
+                  TITLE="${{ steps.version_msg.outputs.message }}"
+                  BODY="Automated version bump. Merge this PR to publish packages to npm."
+                  PR=$(gh pr list --head release/main --base main --state open \
+                          --json number -q '.[0].number' 2>/dev/null || true)
+                  if [ -z "$PR" ]; then
+                    gh pr create --head release/main --base main --title "$TITLE" --body "$BODY"
+                  else
+                    gh pr edit "$PR" --title "$TITLE" --body "$BODY"
+                  fi
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            # Phase 2 — publish only when the version PR commit is the trigger.
-            # This prevents accidental publish on unrelated main pushes.
+            # ── Phase 2 — publish ─────────────────────────────────────────
+            # Publishes only when: no pending changesets AND the triggering commit is a version bump.
             - name: Publish packages and create GitHub releases
               if: |
                   steps.has_changesets.outputs.has == 'false' &&
-                  startsWith(github.event.head_commit.message, 'chore(release):')
+                  contains(github.event.head_commit.message, ': version packages')
               uses: changesets/action@v1
               with:
                   publish: pnpm changeset publish

@@ -2,7 +2,7 @@
 
 # ─────────────────────────────────────────────────────────────
 # Maps changed files to commit scopes based on the nearest workspace
-# package.json name. GitHub workflow/action files map to `action`.
+# package.json name. GitHub workflow/action files map to `actions`.
 # Repo-level files fall back to `root`.
 #
 # Usage (standalone):
@@ -10,9 +10,11 @@
 #  pnpm exec scope-commit --all
 #  pnpm exec scope-commit --list
 #  pnpm exec scope-commit --csv --keep-prefix
+#  pnpm exec scope-commit --validate-type chore
 #  pnpm exec scope-commit --message chore autofix
 #  pnpm exec scope-commit --commit --dry-run chore autofix
 #  pnpm exec scope-commit --commit chore autofix
+#  pnpm exec scope-commit --checked-commit chore autofix
 #  pnpm exec scope-commit path/to/file.ts
 #
 # Usage (sourced):
@@ -21,7 +23,7 @@
 #
 # Output:
 #   Prints a comma-separated scope list to stdout, e.g:
-#     action
+#     actions
 #     workspace-tools
 #     config, workspace-tools
 #     root
@@ -40,7 +42,18 @@ get_commit_scope() {
     local repo_root=""
     local -a input_paths=()
     local -a positionals=()
-    local -a allowed_commit_types=()
+
+    repo_root="$(git rev-parse --show-toplevel 2> /dev/null || pwd)"
+
+    validate_commit_message() {
+        local message="$1"
+
+        printf '%s\n' "$message" | pnpm exec commitlint --cwd "$repo_root" > /dev/null || {
+            echo "Error: invalid commit message:" >&2
+            echo "  $message" >&2
+            return 1
+        }
+    }
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -126,6 +139,8 @@ EOF
         fi
 
         commit_type="${positionals[0]}"
+        validate_commit_message "$(printf '%s(root): test' "$commit_type")" || return 1
+        return 0
     elif [[ "$output_mode" == "message" || "$output_mode" == "commit" ]]; then
         if [[ "${#positionals[@]}" -lt 2 ]]; then
             echo "Error: --$output_mode requires <type> and <subject>." >&2
@@ -142,74 +157,10 @@ EOF
         input_paths=("${positionals[@]}")
     fi
 
-    load_commit_types() {
-        local output=""
-
-        # Try loading from the resolved commitlint config first (respects custom types).
-        # Falls back to @commitlint/config-conventional if load fails.
-        output="$(
-            pnpm exec node --input-type=module -e "
-                import load from '@commitlint/load';
-                try {
-                    const cfg = await load({}, { cwd: process.cwd() });
-                    const rule = cfg.rules['type-enum'];
-                    const types = (rule && rule[2]) ? rule[2] : [];
-                    if (types.length > 0) {
-                        process.stdout.write(types.join('\n'));
-                        process.exit(0);
-                    }
-                } catch (_) {}
-                // fallback
-                const { default: conventional } = await import('@commitlint/config-conventional');
-                const types = Object.keys(conventional.prompt.questions.type.enum || {});
-                process.stdout.write(types.join('\n'));
-            " 2> /dev/null || true
-        )"
-
-        if [[ -z "$output" ]]; then
-            return 1
-        fi
-
-        mapfile -t allowed_commit_types < <(printf '%s\n' "$output" | sed '/^$/d')
-        [[ "${#allowed_commit_types[@]}" -gt 0 ]]
-    }
-
-    validate_commit_type() {
-        local requested_type="$1"
-        local allowed_type=""
-
-        load_commit_types || {
-            echo "Error: unable to load commitlint commit types for validation." >&2
-            return 1
-        }
-
-        for allowed_type in "${allowed_commit_types[@]}"; do
-            if [[ "$allowed_type" == "$requested_type" ]]; then
-                return 0
-            fi
-        done
-
-        {
-            echo "Error: invalid commit type '$requested_type'."
-            echo "Allowed types: $(printf '%s' "${allowed_commit_types[0]}")$(printf ', %s' "${allowed_commit_types[@]:1}")"
-        } >&2
-        return 1
-    }
-
-    if [[ "$validate_only" == "true" || "$output_mode" == "message" || "$output_mode" == "commit" ]]; then
-        validate_commit_type "$commit_type" || return 1
-    fi
-
-    if [[ "$validate_only" == "true" ]]; then
-        return 0
-    fi
-
     if [[ "$run_commit_before" == "true" ]]; then
-        # Keep the expensive pre-commit checks behind commit-type validation.
+        # Keep the expensive pre-commit checks behind final commit-message validation below.
         pnpm commit:before || return 1
     fi
-
-    repo_root="$(git rev-parse --show-toplevel 2> /dev/null || pwd)"
 
     read_package_name() {
         local package_json="$1"
@@ -333,8 +284,8 @@ EOF
     local -a scopes=()
     local path=""
     local scope=""
-    local result=""
     local inline_result=""
+    local message=""
 
     format_inline_scopes() {
         local -a values=("$@")
@@ -364,6 +315,27 @@ EOF
         esac
     }
 
+    handle_message_or_commit() {
+        local scope_value="$1"
+
+        message="$(printf '%s(%s): %s' "$commit_type" "$scope_value" "$commit_subject")"
+        validate_commit_message "$message" || return 1
+
+        case "$output_mode" in
+            message)
+                printf '%s\n' "$message"
+                ;;
+            commit)
+                if [[ "$dry_run" == "true" ]]; then
+                    printf '%s\n' "$message"
+                    return 0
+                fi
+
+                git commit -m "$message"
+                ;;
+        esac
+    }
+
     if [[ "${#input_paths[@]}" -gt 0 ]]; then
         paths=("${input_paths[@]}")
     else
@@ -372,18 +344,11 @@ EOF
 
     if [[ "${#paths[@]}" -eq 0 ]]; then
         inline_result="root"
+
         case "$output_mode" in
-            message)
-                printf '%s(%s): %s\n' "$commit_type" "$inline_result" "$commit_subject"
-                return 0
-                ;;
-            commit)
-                if [[ "$dry_run" == "true" ]]; then
-                    printf '%s(%s): %s\n' "$commit_type" "$inline_result" "$commit_subject"
-                    return 0
-                fi
-                git commit -m "$(printf '%s(%s): %s' "$commit_type" "$inline_result" "$commit_subject")"
-                return 0
+            message | commit)
+                handle_message_or_commit "$inline_result"
+                return $?
                 ;;
             *)
                 format_scope_output "root"
@@ -404,15 +369,8 @@ EOF
     inline_result="$(format_inline_scopes "${scopes[@]}")"
 
     case "$output_mode" in
-        message)
-            printf '%s(%s): %s\n' "$commit_type" "$inline_result" "$commit_subject"
-            ;;
-        commit)
-            if [[ "$dry_run" == "true" ]]; then
-                printf '%s(%s): %s\n' "$commit_type" "$inline_result" "$commit_subject"
-                return 0
-            fi
-            git commit -m "$(printf '%s(%s): %s' "$commit_type" "$inline_result" "$commit_subject")"
+        message | commit)
+            handle_message_or_commit "$inline_result"
             ;;
         *)
             format_scope_output "${scopes[@]}"

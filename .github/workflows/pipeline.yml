@@ -64,6 +64,13 @@ on:
                 default: workspace
                 type: string
 
+            # When true, upload a separate artifact containing dist/ and types/ output
+            # (not conditioned on is_repo_dirty, so it works even when nothing is dirty).
+            upload_built_artifact:
+                required: false
+                default: false
+                type: boolean
+
             node_version:
                 description: Node version to run the pipeline with.
                 required: false
@@ -112,6 +119,10 @@ on:
                 description: Whether artifact upload ran successfully ('true'|'false')
                 value: ${{ jobs.pipeline.outputs.artifact_uploaded }}
 
+            built_artifact_name:
+                description: Name of the built-output artifact (dist/types), or empty if not uploaded
+                value: ${{ jobs.pipeline.outputs.built_artifact_name }}
+
 permissions:
     contents: read
 
@@ -126,6 +137,7 @@ jobs:
             is_repo_dirty: ${{ steps.repo_dirty.outputs.is_repo_dirty }}
             workspace_artifact_name: ${{ steps.artifact_name.outputs.name }}
             artifact_uploaded: ${{ steps.artifact_uploaded.outputs.artifact_uploaded }}
+            built_artifact_name: ${{ steps.built_artifact_name.outputs.name }}
 
         steps:
             - uses: actions/checkout@v4
@@ -161,6 +173,7 @@ jobs:
                     echo "- pnpm_cache: \`${{ inputs.pnpm_cache }}\`"
                     echo "- upload_workspace_artifact: \`${{ inputs.upload_workspace_artifact }}\`"
                     echo "- artifact_name_prefix: \`${{ inputs.artifact_name_prefix }}\`"
+                    echo "- upload_built_artifact: \`${{ inputs.upload_built_artifact }}\`"
                     echo "- use_nx_affected: \`${{ inputs.use_nx_affected }}\`"
                     echo "- nx_targets: \`${{ inputs.nx_targets }}\`"
                     echo "- nx_fix_ci: \`${{ inputs.nx_fix_ci }}\`"
@@ -224,6 +237,29 @@ jobs:
               if: ${{ inputs.run_build && !inputs.use_nx_affected }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm build
+
+            # ── Built output artifact (for release — not conditioned on dirty) ──
+            - name: 🏷️ Compute built artifact name
+              id: built_artifact_name
+              if: ${{ inputs.upload_built_artifact && inputs.run_build }}
+              shell: bash
+              run: |
+                  NAME="built-output-${{ github.repository }}-${{ github.run_id }}-${{ github.run_attempt }}"
+                  NAME="${NAME//\//-}"
+                  echo "name=$NAME" >> "$GITHUB_OUTPUT"
+                  echo "Built artifact name: $NAME"
+
+            - name: 📦 Upload built output artifact
+              id: upload_built
+              if: ${{ inputs.upload_built_artifact && inputs.run_build }}
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ${{ steps.built_artifact_name.outputs.name }}
+                  if-no-files-found: warn
+                  path: |
+                      **/dist/**
+                      **/types/**
+                      !**/node_modules/**
 
             - name: 🧪 Run Test
               if: ${{ inputs.run_test && !inputs.use_nx_affected }}

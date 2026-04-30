@@ -11,17 +11,22 @@ import type { LiteralUnion } from 'type-fest'
 
 export type ConventionalCommitType =
     keyof typeof config_conventional.prompt.questions.type.enum
-export const COMMIT_TYPES: Array<ConventionalCommitType> = Object.keys(
-    config_conventional.prompt.questions.type.enum,
-) as Array<ConventionalCommitType>
+export const CONVENTIONAL_COMMIT_TYPES: Array<ConventionalCommitType> =
+    Object.keys(config_conventional.prompt.questions.type.enum).filter(
+        (_key: string): boolean => {
+            return _key === 'ci' || _key === 'perf' ? false : true
+        },
+    ) as Array<ConventionalCommitType>
 
+export const COMMIT_TYPES: Array<LiteralUnion<ConventionalCommitType, string>> =
+    [...CONVENTIONAL_COMMIT_TYPES, 'wip', 'release'] as const
 /** [ 'feat', 'fix', 'wip', 'build', 'chore', 'docs', 'release', 'ci', 'perf', 'refactor', 'revert', 'style', 'test', ] */
 export const configuration = (
     scope_enum: Array<string> = [],
-    type_enum: Array<
-        LiteralUnion<ConventionalCommitType, string>
-    > = COMMIT_TYPES,
+    append_type_enum: Array<LiteralUnion<ConventionalCommitType, string>> = [],
 ): CommitlintUserConfig => {
+    const type_enum = [...COMMIT_TYPES, ...append_type_enum]
+
     const baseConfig: CommitlintUserConfig = {
         extends: ['@commitlint/config-conventional'],
         prompt: {

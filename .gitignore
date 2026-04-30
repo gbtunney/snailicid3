@@ -148,6 +148,9 @@ dist
 *.d.cts.map
 *.map
 
+# Docs
+docs
+
 # Un-ignore the @snailicid3/types source package
 !packages/types/
 # Un-ignore src/types/ subdirectories (source code, not declarations)

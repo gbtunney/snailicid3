@@ -54,8 +54,22 @@ env:
     HUSKY: 0
 
 jobs:
+    guard:
+        name: Guard — refuse main
+        runs-on: ubuntu-latest
+        steps:
+            - name: 🚫 Refuse to run on main
+              shell: bash
+              run: |
+                  if [ "${{ github.ref_name }}" = "main" ]; then
+                    echo "❌ Autofix cannot run on main. Checkout a feature or fix branch first."
+                    exit 1
+                  fi
+                  echo "✅ Branch: ${{ github.ref_name }}"
+
     pipeline_fix:
         name: Run autofix pipeline
+        needs: guard
         uses: ./.github/workflows/pipeline.yml
         with:
             mode: report
@@ -72,16 +86,6 @@ jobs:
         if: ${{ needs.pipeline_fix.result == 'success' && needs.pipeline_fix.outputs.artifact_uploaded == 'true' }}
 
         steps:
-            # ── Guard: refuse to run on main ─────────────────────────
-            - name: 🚫 Refuse to run on main
-              shell: bash
-              run: |
-                  if [ "${{ github.ref_name }}" = "main" ]; then
-                    echo "❌ Autofix cannot run on main. Checkout a feature or fix branch first."
-                    exit 1
-                  fi
-                  echo "✅ Branch: ${{ github.ref_name }}"
-
             # ── Checkout ──────────────────────────────────────────────
             # Use GH_PAT so the push below triggers downstream PR workflows.
             # GITHUB_TOKEN pushes are silently blocked from triggering CI.
