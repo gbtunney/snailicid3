@@ -2,7 +2,7 @@
 set -euo pipefail
 
 BASE_BRANCH="${BASE_BRANCH:-main}"
-PREFIX="${PREFIX:-changeset}"
+PREFIX="${PREFIX:-changesets}"
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
