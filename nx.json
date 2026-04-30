@@ -116,7 +116,7 @@
             }
         },
         "fix": {
-            "cache": false,
+            "cache": true,
             "dependsOn": ["check:ts"],
             "command": "pnpm exec prettier --ignore-path ./.gitignore --write . && pnpm exec eslint . --fix",
             "options": {
