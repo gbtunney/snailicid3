@@ -22,11 +22,11 @@ export const PRETTIER_FILE_EXTENSIONS = [
 ] as const
 
 export type JSFileExtensions = ArrayValues<typeof JS_FILE_EXTENSIONS>
-export type TSFileExtensions = ArrayValues<typeof TS_FILE_EXTENSIONS>
 export type JSLikeFileExtensions = ArrayValues<typeof JSLIKE_FILE_EXTENSIONS>
 export type PrettierFileExtensions = ArrayValues<
     typeof PRETTIER_FILE_EXTENSIONS
 >
+export type TSFileExtensions = ArrayValues<typeof TS_FILE_EXTENSIONS>
 
 export const MARKDOWN_FILE_EXTENSIONS = ['md', 'markdown'] as const
 export type MarkdownFileExtensions = ArrayValues<
@@ -44,8 +44,8 @@ const PRETTIER_WIDTH_SCALE = {
 export const SHARED_FORMATTING_RULES: Merge<
     PrettierOptions,
     {
-        maxEmptyLines: number
         markdownTabWidth: number
+        maxEmptyLines: number
     }
 > = {
     markdownTabWidth: 2,

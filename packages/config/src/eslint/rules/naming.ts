@@ -3,8 +3,8 @@ import { expandExtensions } from '../../helpers.js'
 import { TS_FILE_EXTENSIONS } from '../../shared.js'
 
 /**
- * Naming: symbol naming conventions (variables, functions, types, enums) via
- * \`@typescript-eslint/naming-convention\`, and filename/folder conventions via \`check-file\`.
+ * Naming: symbol naming conventions (variables, functions, types, enums) via `@typescript-eslint/naming-convention`,
+ * and filename/folder conventions via `check-file`.
  */
 export const namingRules = (error: boolean = true): Array<Config> =>
     defineConfig(

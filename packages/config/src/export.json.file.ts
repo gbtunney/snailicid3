@@ -1,16 +1,16 @@
 /** TODO: Remove this pls this is temporary */
 import {
-    JsonArray,
-    Jsonifiable,
-    JsonObject,
-    JsonPrimitive,
-    JsonValue,
+    type JsonArray,
+    type Jsonifiable,
+    type JsonObject,
+    type JsonPrimitive,
+    type JsonValue,
 } from 'type-fest'
-import fs from 'fs'
-import path from 'path'
+import fs from 'node:fs'
+import path from 'node:path'
 export namespace Json {
-    export type Object = JsonObject
     export type Array = JsonArray
+    export type Object = JsonObject
     export type Primitive = JsonPrimitive
     export type Value = Exclude<JsonValue, null>
 }
@@ -31,14 +31,14 @@ export const prettyPrintJSON = <Type extends Jsonifiable>(
     )
 }
 
+export type JSONExportConfig = Array<JSONExportEntry>
+
 export type JSONExportEntry<
     Type extends Jsonifiable = JsonValue, //  ? Type : never
 > = {
     data: Type
     filename: string
 }
-
-export type JSONExportConfig = Array<JSONExportEntry>
 
 /** Throws error if file save fails */
 export const exportJSONFile = (
@@ -48,9 +48,9 @@ export const exportJSONFile = (
     overwrite: boolean = true,
     logData: boolean = false,
 ): boolean => {
-    const result_status = config.reduce<Record<string, true | string>>(
+    const result_status = config.reduce<Record<string, string | true>>(
         (acc, entry: JSONExportEntry) => {
-            let success: true | string = true
+            let success: string | true = true
             const file_name =
                 entry.filename.endsWith('.json') ||
                 entry.filename.endsWith('json')

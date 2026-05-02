@@ -7,8 +7,8 @@ import type {
 
 export type AllowedExtensions =
     | JSLikeFileExtensions
-    | PrettierFileExtensions
     | MarkdownFileExtensions
+    | PrettierFileExtensions
 
 const ensureTrailingDot = (value: string): string => {
     if (value.length === 0 || value.endsWith('.')) {

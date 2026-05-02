@@ -1,9 +1,8 @@
 import { type Config, defineConfig } from '@eslint/config-helpers'
-import unicornPlugin from 'eslint-plugin-unicorn'
 
 /**
- * Code Style: modern JS best-practices via eslint-plugin-unicorn — immutability, ES2021+ APIs,
- * readability, and module hygiene. Also covers general formatting guards like empty lines.
+ * Code Style: modern JS best-practices via eslint-plugin-unicorn — immutability, ES2021+ APIs, readability, and module
+ * hygiene. Also covers general formatting guards like empty lines.
  *
  * @see [eslint-plugin-unicorn](https://github.com/sindresorhus/eslint-plugin-unicorn)
  */
@@ -13,15 +12,15 @@ export const codeStyleRules = (): Array<Config> =>
         {
             name: 'Code Style: Array / immutability',
             rules: {
+                'unicorn/no-array-for-each': 'off',
                 'unicorn/no-array-method-this-argument': 'error',
-                'unicorn/no-instanceof-array': 'error',
                 'unicorn/no-array-reduce': 'warn',
                 'unicorn/no-array-reverse': 'warn',
                 'unicorn/no-array-sort': 'warn',
+                'unicorn/no-instanceof-array': 'error',
                 'unicorn/no-unnecessary-array-flat-depth': 'warn',
                 'unicorn/no-unnecessary-array-splice-count': 'warn',
                 'unicorn/no-unreadable-array-destructuring': 'warn',
-                'unicorn/no-array-for-each': 'off',
             },
         },
 
@@ -29,8 +28,8 @@ export const codeStyleRules = (): Array<Config> =>
         {
             name: 'Code Style: Async / control flow',
             rules: {
-                'unicorn/no-unnecessary-await': 'warn',
                 'unicorn/no-for-loop': 'off',
+                'unicorn/no-unnecessary-await': 'warn',
             },
         },
 
@@ -54,9 +53,9 @@ export const codeStyleRules = (): Array<Config> =>
         {
             name: 'Code Style: Module / import hygiene',
             rules: {
-                'unicorn/relative-url-style': ['error', 'always'],
                 'unicorn/prefer-export-from': 'warn',
                 'unicorn/prefer-node-protocol': 'warn',
+                'unicorn/relative-url-style': ['error', 'always'],
             },
         },
 
@@ -70,7 +69,7 @@ export const codeStyleRules = (): Array<Config> =>
                 /**
                  * @example
                  *     'unicorn/prevent-abbreviations': ['warn', {
-                 *         replacements: { t: { type: true }, k: { key: true } },
+                 *     replacements: { t: { type: true }, k: { key: true } },
                  *     }]
                  */
                 'unicorn/prevent-abbreviations': 'off',
@@ -78,4 +77,4 @@ export const codeStyleRules = (): Array<Config> =>
         },
     )
 
-export { unicornPlugin }
+export { default as unicornPlugin } from 'eslint-plugin-unicorn'

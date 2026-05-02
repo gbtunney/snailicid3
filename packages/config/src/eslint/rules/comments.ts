@@ -1,6 +1,6 @@
 import { type Config, defineConfig } from '@eslint/config-helpers'
 import jsdoc from 'eslint-plugin-jsdoc'
-import { getScaledWidth } from '../../shared.js'
+import { getScaledWidth } from './../../shared.js'
 
 /**
  * Comments: JSDoc documentation structure, tag validity, indentation, and formatting.
@@ -45,7 +45,7 @@ export const commentsRules = (): Array<Config> =>
                 ],
                 'jsdoc/no-blank-block-descriptions': 'error',
                 'jsdoc/no-blank-blocks': ['error', { enableFixer: true }],
-                /** @todo jsdoc/no-multi-asterisks is messed up — prettier turns to hyphens */
+                /** @todo Jsdoc/no-multi-asterisks is messed up — prettier turns to hyphens */
                 'jsdoc/no-multi-asterisks': [
                     'error',
                     { allowWhitespace: false },
@@ -58,8 +58,11 @@ export const commentsRules = (): Array<Config> =>
             name: 'Comments: JSDoc OFF',
             rules: {
                 'jsdoc/lines-before-block': 'off',
+                'jsdoc/no-undefined-types': 'error',
                 'jsdoc/require-jsdoc': 'off',
                 'jsdoc/require-param': 'off',
+                /* keep to warn for now til i see how typedoc handles param types */
+                'jsdoc/require-param-type': 'warn',
                 'jsdoc/require-property-description': 'off',
                 'jsdoc/require-returns': 'off',
             },

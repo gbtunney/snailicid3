@@ -3,21 +3,21 @@
  *
  * @see [Prettier - Opinionated Code Formatter](https://prettier.io/)
  */
-import { Config, Options } from 'prettier'
+import { type Config, type Options } from 'prettier'
 import type { Options as JsDocOptions } from 'prettier-plugin-jsdoc'
 import type { IterableElement, Merge } from 'type-fest'
 import { getScaledWidth, SHARED_FORMATTING_RULES } from '../shared.js'
-
-export type PrettierOptions = Options & JsDocOptions
-export type PrettierOverrides = Array<
-    Merge<IterableElement<Config['overrides']>, { options: PrettierOptions }>
->
 
 export type PrettierConfig = Merge<
     Merge<Config, PrettierOptions>,
     {
         overrides: PrettierOverrides
     }
+>
+export type PrettierOptions = JsDocOptions & Options
+
+export type PrettierOverrides = Array<
+    Merge<IterableElement<Config['overrides']>, { options: PrettierOptions }>
 >
 
 export const getDefaultOptions = (): PrettierOptions => {

@@ -1,5 +1,5 @@
-import { type Config, defineConfig, type Plugin } from '@eslint/config-helpers'
 import eslintCommentsPlugin from '@eslint-community/eslint-plugin-eslint-comments'
+import { type Config, defineConfig, type Plugin } from '@eslint/config-helpers'
 import vitestPlugin from '@vitest/eslint-plugin'
 import checkFilePlugin from 'eslint-plugin-check-file'
 import importPlugin from 'eslint-plugin-import-x'

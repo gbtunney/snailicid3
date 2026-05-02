@@ -1,6 +1,5 @@
 import { type Configuration } from 'lint-staged'
 
-
 // Lint-staged is still necessary: it scopes pre-commit linting to staged files
 // only, making commits fast regardless of repo size.
 
@@ -9,13 +8,20 @@ const PRETTIER_EXTS = '{json,xml,php,html,css,sh,yaml,yml,graphql}'
 
 //const mdIgnores: Array<string> = markdownlint.ignores()
 
-const quoteArg = (p: string) => `"${p.replaceAll('"', '\\"')}"`
-const toFileArgs = (staged: string | readonly string[]) =>
+export const quoteArg = (p: string): string => `"${p.replaceAll('"', '\\"')}"`
+export const toFileArgs = (staged: ReadonlyArray<string> | string): string =>
     (Array.isArray(staged) ? staged : [staged]).map(quoteArg).join(' ')
 //const toIgnoreArgs = (ignores: Array<string>) => ignores.map(quoteArg).join(' ')
 
 export const lintStagedConfig: Configuration = {
-    [`*.${JS_EXTS}`]: (staged: readonly string[]) => {
+    '.gitignore': 'pnpm exec prettier --write .gitignore',
+
+    '.husky/**/*': (staged: ReadonlyArray<string>) => {
+        const files = toFileArgs(staged)
+        return `pnpm exec prettier --write ${files}`
+    },
+
+    [`*.${JS_EXTS}`]: (staged: ReadonlyArray<string>) => {
         const files = toFileArgs(staged)
         return [
             `pnpm exec prettier --write ${files}`,
@@ -23,7 +29,12 @@ export const lintStagedConfig: Configuration = {
         ]
     },
 
-    [`*.md`]: (staged: readonly string[]) => {
+    [`*.${PRETTIER_EXTS}`]: (staged: ReadonlyArray<string>) => {
+        const files = toFileArgs(staged)
+        return `pnpm exec prettier --write ${files}`
+    },
+
+    [`*.md`]: (staged: ReadonlyArray<string>) => {
         const files = toFileArgs(staged)
         //  const ignores = toIgnoreArgs(mdIgnores)
         return [
@@ -31,16 +42,11 @@ export const lintStagedConfig: Configuration = {
             `pnpm exec markdownlint-cli2 --fix ${files}  || true`,
         ]
     },
-
-    [`*.${PRETTIER_EXTS}`]: (staged: readonly string[]) => {
-        const files = toFileArgs(staged)
-        return `pnpm exec prettier --write ${files}`
-    },
-
-    '.gitignore': 'pnpm exec prettier --write .gitignore',
-
-    '.husky/**/*': (staged: readonly string[]) => {
-        const files = toFileArgs(staged)
-        return `pnpm exec prettier --write ${files}`
-    },
 }
+
+export const lintStaged = {
+    configuration: lintStagedConfig,
+    quoteArg,
+    toFileArgs,
+}
+export type LintStagedConfiguration = Configuration
