@@ -1,7 +1,13 @@
-/** Re-exports color utilities from @snailicid3/color for use within logger. */
+/** Re-exports color utilities from the snailicid3 color package for use within logger. */
+import {
+    type parseColorJS,
+    type parseColorToHexStrict,
+} from '@snailicid3/color'
+
+export type ColorJS = ReturnType<typeof parseColorJS>
+export type HexColor = ReturnType<typeof parseColorToHexStrict>
+
 export {
-    type ColorJS,
-    type HexColor,
     parseColorJS,
     parseColorToHexStrict,
     readableTextHex,

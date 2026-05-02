@@ -23,9 +23,8 @@ const base_ignores = [
     '**/dist/**',
     '**/docs/**',
     '**/coverage/**',
-    '**/types/**/*',
-    '**/types/**',
-    '!packages/types/**',
+    '**/types/**/*.d.ts',
+    '**/types/**/*.d.ts.map',
     '**/.history/**',
     '**/scratch/**',
     '**/.venv/**',
@@ -38,37 +37,39 @@ const base_ignores = [
 ]
 
 export const flatEslintConfig = (__dirname: string): Array<Config> => {
-    const EslintConfig: Array<Config> = defineConfig(
-        { files: base_files, name: 'Base: included file extensions' },
+    const EslintConfig: Array<Config> = [
         { ignores: base_ignores, name: 'Base: ignored paths' },
-        {
-            languageOptions: {
-                globals: { ...globals.browser, ...globals.node },
-                parserOptions: {
-                    projectService: true,
-                    tsconfigRootDir: __dirname,
+        ...defineConfig(
+            { files: base_files, name: 'Base: included file extensions' },
+            {
+                languageOptions: {
+                    globals: { ...globals.browser, ...globals.node },
+                    parserOptions: {
+                        projectService: true,
+                        tsconfigRootDir: __dirname,
+                    },
                 },
+                name: 'Base: globals and projectService',
             },
-            name: 'Base: globals and projectService',
-        },
-        ...pluginsConfig(),
+            ...pluginsConfig(),
 
-        /** Global defaults */
-        ...baseRules(),
+            /** Global defaults */
+            ...baseRules(),
 
-        /** Concern-based rules */
-        ...typescriptRules(),
-        ...importRules(),
-        ...namingRules(),
-        ...commentsRules(),
-        ...codeStyleRules(),
-        ...safetyRules(),
-        ...reactRules(),
-        ...testingRules(),
+            /** Concern-based rules */
+            ...typescriptRules(),
+            ...importRules(),
+            ...namingRules(),
+            ...commentsRules(),
+            ...codeStyleRules(),
+            ...safetyRules(),
+            ...reactRules(),
+            ...testingRules(),
 
-        /** File-pattern overrides — all exceptions in one place */
-        ...filePatternOverrides(),
-    )
+            /** File-pattern overrides — all exceptions in one place */
+            ...filePatternOverrides(),
+        ),
+    ]
     return EslintConfig
 }
 
