@@ -1,7 +1,7 @@
 /** Capitalizes only the first letter of the string and LEAVES THE REST OF CHARACTERSS */
 export const modifyCaseIndexedLetter = (
     str: string,
-    _case: 'upper' | 'lower',
+    _case: 'lower' | 'upper',
     index: number = 0,
 ): string => {
     if (str.length >= 0 && str.length >= index + 1 && str[index]) {

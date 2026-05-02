@@ -1,8 +1,8 @@
 import type { Tagged } from 'type-fest'
-import fs from 'fs'
-import path from 'path'
+import fs from 'node:fs'
+import path from 'node:path'
 
-export type ImageMimeType = 'jpeg' | 'png' | 'gif' | 'svg' | 'bmp'
+export type ImageMimeType = 'bmp' | 'gif' | 'jpeg' | 'png' | 'svg'
 
 //todo: finish this type
 type Base64 = Tagged<string, 'base64'>

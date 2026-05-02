@@ -1,25 +1,25 @@
 import { globSync } from 'glob'
 import _isGlob from 'is-glob'
 import { isString } from 'ramda-adjunct'
-import fs from 'fs'
-import path from 'path'
+import fs from 'node:fs'
+import path from 'node:path'
 
 export type FilePath = {
+    /** Absolute Path */
+    absolute: string
     basename: string
+    /** Array of parent directories */
+    dirarray: Array<string>
     dirname: string
-    /** Parent directory name */
-    parentdirname: string | undefined
+    /** Does path exist? */
+    exists: boolean
     /** Extension */
     extname: string
     filename: string
-    /** Absolute Path */
-    absolute: string
-    /** Array of parent directories */
-    dirarray: Array<string>
-    /** Does path exist? */
-    exists: boolean
+    /** Parent directory name */
+    parentdirname: string | undefined
 }
-export type FileType = 'directory' | 'file' | 'symlink' | 'glob' | undefined
+export type FileType = 'directory' | 'file' | 'glob' | 'symlink' | undefined
 /**
  * Get Array of FilePaths from a glob string
  *
@@ -63,7 +63,7 @@ export const isFileArray = (
         else if (allowDirectory && isDirectory(_path)) return true
     } else {
         /* * If we dont care if it exists, test if it is a glob or has no extention.  * */
-        const newglob: undefined | string = isGlob(_path)
+        const newglob: string | undefined = isGlob(_path)
             ? _path
             : allowDirectory && isDirectory(_path)
               ? //make a glob.
@@ -90,7 +90,7 @@ export const getExistingPathType = (value: string): FileType => {
 /** IsFile - if the string is a glob, we do not care if it exists or resolves. */
 export const isFile = (
     value: string,
-    allowedExtention?: string | Array<string>,
+    allowedExtention?: Array<string> | string,
 ): boolean => {
     const extention = path.extname(path.resolve(value))
     const result = extention.length > 1

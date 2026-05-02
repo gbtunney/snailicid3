@@ -3,22 +3,22 @@
  * (e.g. transparent, currentColor).
  */
 export type CSSColorSpecial =
-    | 'transparent'
     | 'currentColor'
     | 'currentcolor'
     | 'inherit'
     | 'initial'
-    | 'unset'
     | 'revert'
+    | 'transparent'
+    | 'unset'
 
 const CSS_COLOR_SPECIAL: ReadonlySet<string> = new Set<CSSColorSpecial>([
-    'transparent',
     'currentColor',
     'currentcolor',
     'inherit',
     'initial',
-    'unset',
     'revert',
+    'transparent',
+    'unset',
 ])
 
 export const isCSSColorSpecial = (value: string): value is CSSColorSpecial =>

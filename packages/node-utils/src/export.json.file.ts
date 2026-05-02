@@ -1,6 +1,8 @@
 import { type Json, type Jsonifiable, prettyPrintJSON } from '@snailicid3/utils'
-import fs from 'fs'
-import path from 'path'
+import fs from 'node:fs'
+import path from 'node:path'
+
+export type JSONExportConfig = Array<JSONExportEntry>
 
 export type JSONExportEntry<
     Type = Json.Value,
@@ -10,14 +12,12 @@ export type JSONExportEntry<
     filename: string
 }
 
-export type JSONExportConfig = Array<JSONExportEntry>
-
 /** Throws error if file save fails */
 export const exportJSONFile = (
     config: JSONExportConfig,
     outdir?: string,
     /** File overwrite mode if exists */
-    overwrite: 'ON' | 'ERROR' | 'WARN' = 'ON',
+    overwrite: 'ERROR' | 'ON' | 'WARN' = 'ON',
 ): void => {
     config.forEach((entry) => {
         const file_name =

@@ -2,7 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getLogger, logger } from './index.js'
 
 // Long descriptive key union for console methods under test
-type ConsoleLoggerMethodNameKey = 'debug' | 'info' | 'warn' | 'error'
+type ConsoleLoggerMethodNameKey = 'debug' | 'error' | 'info' | 'warn'
+
+type ConsoleSpyCollectionRecord = Record<
+    ConsoleLoggerMethodNameKey,
+    LooseVitestConsoleSpyInstance
+>
 
 // Loosely typed spy instance to avoid constructor/function overload mismatch
 type LooseVitestConsoleSpyInstance = {
@@ -11,11 +16,6 @@ type LooseVitestConsoleSpyInstance = {
         ...args: Array<unknown>
     ) => LooseVitestConsoleSpyInstance
 }
-
-type ConsoleSpyCollectionRecord = Record<
-    ConsoleLoggerMethodNameKey,
-    LooseVitestConsoleSpyInstance
->
 
 let consoleSpyCollectionRecord: ConsoleSpyCollectionRecord
 
