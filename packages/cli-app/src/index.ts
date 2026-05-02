@@ -1,5 +1,3 @@
-export type { InitSuccessCallback } from './app.js'
-export { initApp, initializeApp } from './app.js'
 export type {
     AppConfig,
     AppConfigIn,
@@ -16,5 +14,7 @@ export type {
     CommonFlagsOutput,
     CommonFlagsSchema,
 } from './app-options.js'
+export type { InitSuccessCallback } from './app.js'
+export { initApp, initializeApp } from './app.js'
 export { wrapSchema } from './helpers.js'
 export type { WrappedSchema, ZodObjectSchema } from './helpers.js'

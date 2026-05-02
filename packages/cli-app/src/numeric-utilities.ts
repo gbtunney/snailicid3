@@ -20,15 +20,15 @@ export const mapRange = (
     const t = (value - fromMin) / (fromMax - fromMin)
     return toMin + t * (toMax - toMin)
 }
+export function clampRange(value: number, [min, max]: Range): number {
+    return Math.min(max, Math.max(min, value))
+}
+
 export function wrapRange(value: number, [min, max]: Range): number {
     const span = max - min
     if (span <= 0)
         throw new Error(fmt`Invalid range: max(${max}) <= min(${min})`)
     return ((((value - min) % span) + span) % span) + min
-}
-
-export function clampRange(value: number, [min, max]: Range): number {
-    return Math.min(max, Math.max(min, value))
 }
 export const roundToDecimals = (
     value: number,
