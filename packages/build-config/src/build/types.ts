@@ -4,6 +4,8 @@
  * These types must remain independent from Rollup, Vite, esbuild, and any other bundler. Adapters translate a
  * {@link BuildPlan} into tool-specific configuration.
  */
+export type { BuildStrategy, OutputKind, PackageIdentity, Product, Runtime } from './schema.js'
+import type { OutputKind, PackageIdentity } from './schema.js'
 
 /**
  * A tool-agnostic description of how to build a package.
@@ -18,9 +20,6 @@ export type BuildPlan = {
     /** Directory containing TypeScript source files. */
     sourceDir: string
 }
-
-/** How the artifact is produced. */
-export type BuildStrategy = 'bundle' | 'none' | 'transpile'
 
 /**
  * A single entrypoint in a build plan.
@@ -45,27 +44,3 @@ export type EntrySpec = {
     sourcemap?: boolean
 }
 
-/** How the built artifact is emitted. */
-export type OutputKind = 'cjs' | 'esm' | 'iife' | 'umd'
-
-/** The three core classification axes for a package. */
-export type PackageIdentity = {
-    buildStrategy: BuildStrategy
-    product: Product
-    runtime: Runtime
-}
-
-/** What the package is for — how it is consumed or invoked. */
-export type Product =
-    | 'build_tool'
-    | 'cli'
-    | 'config'
-    | 'library'
-    | 'plugin'
-    | 'script'
-    | 'server_app'
-    | 'web_app'
-    | 'worker'
-
-/** Where code executes. */
-export type Runtime = 'browser' | 'edge' | 'node' | 'universal'

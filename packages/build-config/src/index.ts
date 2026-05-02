@@ -23,9 +23,9 @@ export { toTsdownConfig, tsdownAdapter } from './adapters/tsdown/index.js'
 export { toViteConfig, viteAdapter } from './adapters/vite/index.js'
 
 // ── Banner ────────────────────────────────────────────────────────────────────
-export { createBanner } from './build/banner.js'
-
+export { bannerPackageMetaSchema, createBanner } from './build/banner.js'
 export type { BannerPackageMeta } from './build/banner.js'
+
 // ── Plan helpers ──────────────────────────────────────────────────────────────
 export {
     defineEntry,
@@ -36,11 +36,27 @@ export {
     resolveEntryFilename,
     toPackageExports,
 } from './build/plan.js'
-
 export type { PackageBuildConfig } from './build/plan.js'
 
 // ── Build port ────────────────────────────────────────────────────────────────
 export type { BuildAdapter } from './build/ports.js'
+
+// ── Schema ────────────────────────────────────────────────────────────────────
+export {
+    basePackage,
+    BUILD_STRATEGY,
+    buildStrategySchema,
+    OUTPUT_KINDS,
+    outputKindSchema,
+    packageIdentitySchema,
+    packageJsonIdentitySchema,
+    pkgSchema,
+    PRODUCT_KINDS,
+    productSchema,
+    RUNTIME_KINDS,
+    runtimeSchema,
+    schemaRequiredScripts,
+} from './build/schema.js'
 
 /** Adapter-based build system for the snailicid3 monorepo. */
 

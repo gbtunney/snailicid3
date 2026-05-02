@@ -1,6 +1,7 @@
 /** BuildPlan helpers and constructors. */
 
 import path from 'node:path'
+import { packageIdentitySchema, packageJsonIdentitySchema } from './schema.js'
 import type {
     BuildPlan,
     BuildStrategy,
@@ -63,8 +64,12 @@ export function definePlan(
 }
 
 /**
- * Read a {@link PackageIdentity} from a `package.json` object's `buildConfig` field. Returns `undefined` if the field is
- * absent.
+ * Read a {@link PackageIdentity} from a `package.json` object's `buildConfig` field.
+ *
+ * Always returns an identity.
+ *
+ * If `buildConfig` is absent, defaults from `packageIdentitySchema` are used.
+ * Throws if provided `buildConfig` does not match the required schema.
  *
  * Intended for use in `rollup.config.mts` files so the identity is defined once in `package.json` rather than repeated
  * in every config file.
@@ -74,17 +79,18 @@ export function definePlan(
  *     import pkg from './package.json' with { type: 'json' }
  *     import { identityFromPackage, defineIdentity } from '@snailicid3/build-config'
  *
- *     const identity = identityFromPackage(pkg) ?? defineIdentity('node', 'library', 'bundle')
+ *     const identity = identityFromPackage(pkg)
  *     ```
  */
-export function identityFromPackage(pkg: {
-    buildConfig?: { buildStrategy: string; product: string; runtime: string }
-}): PackageIdentity | undefined {
-    if (!pkg.buildConfig) return undefined
+export function identityFromPackage(pkg: unknown): PackageIdentity {
+    const parsedPackage = packageJsonIdentitySchema.parse(pkg)
+    const resolvedBuildConfig = packageIdentitySchema.parse(
+        parsedPackage.buildConfig ?? {},
+    )
     return defineIdentity(
-        pkg.buildConfig.runtime as Runtime,
-        pkg.buildConfig.product as Product,
-        pkg.buildConfig.buildStrategy as BuildStrategy,
+        resolvedBuildConfig.runtime,
+        resolvedBuildConfig.product,
+        resolvedBuildConfig.buildStrategy,
     )
 }
 

@@ -67,6 +67,11 @@
     "main": "./src/index.js",
     "types": "./types/index.d.ts",
     "dependencies": {
+
+
+
+
+        
         "@rollup/plugin-commonjs": "^29.0.2",
         "@rollup/plugin-json": "^6.1.0",
         "@rollup/plugin-node-resolve": "^16.0.3",
@@ -85,6 +90,7 @@
         "typedoc-plugin-remark": "^2.0.1",
         "typedoc-plugin-zod": "^1.4.3",
         "unified-prettier": "^2.0.1",
-        "vite-plugin-dts": "^4.5.4"
+        "vite-plugin-dts": "^4.5.4",
+        "zod": "^4.4.2"
     }
 }

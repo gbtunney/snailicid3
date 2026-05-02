@@ -3,7 +3,7 @@
 import type { build } from 'tsdown'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import { createBanner } from '../../build/banner.js'
+import { bannerPackageMetaSchema, createBanner } from '../../build/banner.js'
 import type { BannerPackageMeta } from '../../build/banner.js'
 import { resolveEntryFilename } from '../../build/plan.js'
 import type { BuildPlan, OutputKind } from '../../build/types.js'
@@ -67,23 +67,9 @@ function inferPackageMeta(plan: BuildPlan): BannerPackageMeta | undefined {
     if (!existsSync(candidate)) return undefined
 
     try {
-        const pkg = JSON.parse(readFileSync(candidate, 'utf8')) as {
-            author?: string | { email?: string; name: string }
-            description?: string
-            license?: string
-            name?: string
-            repository?: string | { url: string }
-            version?: string
-        }
-        if (!pkg.name || !pkg.version) return undefined
-        return {
-            author: pkg.author,
-            description: pkg.description,
-            license: pkg.license,
-            name: pkg.name,
-            repository: pkg.repository,
-            version: pkg.version,
-        }
+        const raw: unknown = JSON.parse(readFileSync(candidate, 'utf8'))
+        const result = bannerPackageMetaSchema.safeParse(raw)
+        return result.success ? result.data : undefined
     } catch {
         return undefined
     }
