@@ -61,7 +61,8 @@ export const importRules = (): Array<Config> =>
             ],
             name: 'Imports: warn on default exports in src files',
             rules: {
-                'import/no-default-export': 'warn',
+                //TODO 'import-x/prefer-default-export': 'warn',
+                'import/no-default-export': 'off',
             },
         },
     )

@@ -63,7 +63,8 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/gbtunney/snailicid3-monorepo"
+        "url": "https://github.com/gbtunney/snailicid3-monorepo",
+        "directory": "packages/build-config"
     },
     "main": "./src/index.js",
     "types": "./types/index.d.ts",
