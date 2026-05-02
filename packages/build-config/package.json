@@ -24,20 +24,17 @@
     "buildConfig": {
         "runtime": "node",
         "product": "build_tool",
-        "buildStrategy": "bundle"
+        "buildStrategy": "transpile"
     },
     "nx": {
         "targets": {
             "dev": {},
             "dev:ts": {},
-            "dev:tsdown": {},
             "build:ts": {},
             "check:ts": {},
-            "build:tsdown": {},
             "build": {
                 "dependsOn": [
-                    "build:ts",
-                    "build:tsdown"
+                    "build:ts"
                 ]
             },
             "test": {},
@@ -59,7 +56,6 @@
         ".": {
             "types": "./dist/index.d.ts",
             "import": "./dist/index.js",
-            "require": "./dist/index.cjs",
             "default": "./dist/index.js"
         }
     },
