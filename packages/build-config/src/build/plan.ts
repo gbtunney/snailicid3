@@ -1,5 +1,6 @@
 /** BuildPlan helpers and constructors. */
 
+import path from 'node:path'
 import type {
     BuildPlan,
     BuildStrategy,
@@ -28,9 +29,37 @@ import type {
  *     ```
  */
 export type PackageBuildConfig = {
-    runtime: Runtime
-    product: Product
     buildStrategy: BuildStrategy
+    product: Product
+    runtime: Runtime
+}
+
+/** Create an {@link EntrySpec} with defaults applied. */
+export function defineEntry(
+    key: string,
+    outputKinds: Array<OutputKind>,
+    options: Omit<EntrySpec, 'key' | 'outputKinds'> = {},
+): EntrySpec {
+    return { key, outputKinds, sourcemap: true, ...options }
+}
+
+/** Create a {@link PackageIdentity}. */
+export function defineIdentity(
+    runtime: Runtime,
+    product: Product,
+    buildStrategy: BuildStrategy,
+): PackageIdentity {
+    return { buildStrategy, product, runtime }
+}
+
+/** Create a {@link BuildPlan}. */
+export function definePlan(
+    identity: PackageIdentity,
+    sourceDir: string,
+    outputDir: string,
+    entries: Array<EntrySpec>,
+): BuildPlan {
+    return { entries, identity, outputDir, sourceDir }
 }
 
 /**
@@ -49,7 +78,7 @@ export type PackageBuildConfig = {
  *     ```
  */
 export function identityFromPackage(pkg: {
-    buildConfig?: { runtime: string; product: string; buildStrategy: string }
+    buildConfig?: { buildStrategy: string; product: string; runtime: string }
 }): PackageIdentity | undefined {
     if (!pkg.buildConfig) return undefined
     return defineIdentity(
@@ -59,32 +88,16 @@ export function identityFromPackage(pkg: {
     )
 }
 
-/** Create a {@link PackageIdentity}. */
-export function defineIdentity(
-    runtime: Runtime,
-    product: Product,
-    buildStrategy: BuildStrategy,
-): PackageIdentity {
-    return { buildStrategy, product, runtime }
-}
-
-/** Create an {@link EntrySpec} with defaults applied. */
-export function defineEntry(
-    key: string,
-    outputKinds: Array<OutputKind>,
-    options: Omit<EntrySpec, 'key' | 'outputKinds'> = {},
-): EntrySpec {
-    return { key, outputKinds, sourcemap: true, ...options }
-}
-
-/** Create a {@link BuildPlan}. */
-export function definePlan(
-    identity: PackageIdentity,
-    sourceDir: string,
-    outputDir: string,
-    entries: Array<EntrySpec>,
-): BuildPlan {
-    return { entries, identity, outputDir, sourceDir }
+/**
+ * Normalise an entry key to always start with `"./"` (or `"."` for the root).
+ *
+ * - `"."` stays `"."`
+ * - `"utils"` → `"./utils"`
+ * - `"./utils"` stays `"./utils"`
+ */
+export function normaliseExportKey(key: string): string {
+    if (key === '.' || key === '*' || key === 'main') return '.'
+    return key.startsWith('./') ? key : `./${key}`
 }
 
 /**
@@ -99,14 +112,80 @@ export function resolveEntryFilename(key: string): string {
     return key.replace(/^\.\//, '')
 }
 
-/**
- * Normalise an entry key to always start with `"./"` (or `"."` for the root).
- *
- * - `"."` stays `"."`
- * - `"utils"` → `"./utils"`
- * - `"./utils"` stays `"./utils"`
- */
-export function normaliseExportKey(key: string): string {
-    if (key === '.' || key === '*' || key === 'main') return '.'
-    return key.startsWith('./') ? key : `./${key}`
+/** File extensions for each output kind. */
+const OUTPUT_KIND_EXT: Record<OutputKind, string> = {
+    cjs: '.cjs',
+    esm: '.js',
+    iife: '-iife.js',
+    umd: '-umd.js',
 }
+
+/**
+ * Generate a `package.json` `exports` field from a {@link BuildPlan}.
+ *
+ * Conditions are ordered per Node.js spec (most-specific first): `types` → `import` → `require` → `browser` →
+ * `default`.
+ *
+ * - `iife` and `umd` both map to the `"browser"` condition; `iife` takes priority.
+ * - A `"default"` fallback is always added when any JS output is present.
+ * - When an entry has `dts: true`, a `"types"` condition is prepended.
+ */
+export function toPackageExports(
+    plan: BuildPlan,
+): Record<string, Record<string, string>> {
+    const result: Record<string, Record<string, string>> = {}
+    const outDir = path.posix.join(
+        ...path.relative('.', plan.outputDir).split(path.sep),
+    )
+
+    for (const entry of plan.entries) {
+        const exportKey = normaliseExportKey(entry.key)
+        const filename = resolveEntryFilename(entry.key)
+        const conditions: Record<string, string> = {}
+
+        // types — must be first per TypeScript resolution order
+        if (entry.dts) {
+            conditions['types'] = `./${outDir}/${filename}.d.ts`
+        }
+
+        // import (ESM)
+        if (entry.outputKinds.includes('esm')) {
+            conditions['import'] =
+                `./${outDir}/${filename}${OUTPUT_KIND_EXT.esm}`
+        }
+
+        // require (CJS)
+        if (entry.outputKinds.includes('cjs')) {
+            conditions['require'] =
+                `./${outDir}/${filename}${OUTPUT_KIND_EXT.cjs}`
+        }
+
+        // browser — iife takes priority over umd
+        const browserKind = entry.outputKinds.includes('iife')
+            ? 'iife'
+            : entry.outputKinds.includes('umd')
+              ? 'umd'
+              : null
+        if (browserKind !== null) {
+            conditions['browser'] =
+                `./${outDir}/${filename}${OUTPUT_KIND_EXT[browserKind]}`
+        }
+
+        // default fallback — esm preferred, then cjs, then browser format
+        const defaultFile = entry.outputKinds.includes('esm')
+            ? `./${outDir}/${filename}${OUTPUT_KIND_EXT.esm}`
+            : entry.outputKinds.includes('cjs')
+              ? `./${outDir}/${filename}${OUTPUT_KIND_EXT.cjs}`
+              : browserKind !== null
+                ? `./${outDir}/${filename}${OUTPUT_KIND_EXT[browserKind]}`
+                : null
+        if (defaultFile !== null) {
+            conditions['default'] = defaultFile
+        }
+
+        result[exportKey] = conditions
+    }
+
+    return result
+}
+export default defineIdentity

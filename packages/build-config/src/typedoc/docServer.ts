@@ -5,7 +5,7 @@
  * @see [Vite - Next Generation Frontend Tooling](https://vitejs.dev/)
  */
 
-import { defineConfig, UserConfig as ViteDocConfig } from 'vite'
+import { defineConfig, type UserConfig as ViteDocConfig } from 'vite'
 
 /** Vite configuration for documentation server */
 export const docServer = (port = 5555): ViteDocConfig => {

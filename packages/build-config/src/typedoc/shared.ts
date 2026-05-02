@@ -1,40 +1,39 @@
-import { TypeDocOptions } from 'typedoc'
-import fs from 'fs'
-import path from 'path'
+import { type TypeDocOptions } from 'typedoc'
+import fs from 'node:fs'
+import path from 'node:path'
 
-export type TypedocOptions<Type extends object = object> = Partial<
-    TypeDocOptions & Type
->
 export type TypedocConfigFunction<Type extends object = object> = (
     __dirname: string,
     _options?: TypedocOptions<Type>,
-) => undefined | TypedocOptions<Type>
-
+) => TypedocOptions<Type> | undefined
 export type TypedocFileOptions = Pick<
     TypeDocOptions,
-    'entryPoints' | 'tsconfig' | 'readme' | 'out' | 'exclude' | 'gitRevision'
+    'entryPoints' | 'exclude' | 'gitRevision' | 'out' | 'readme' | 'tsconfig'
+>
+
+export type TypedocOptions<Type extends object = object> = Partial<
+    Type & TypeDocOptions
 >
 export const fileSharedOptions = (
     __dirname: string,
-): undefined | TypedocOptions => {
+): TypedocOptions | undefined => {
     const resolvedDirname = path.resolve(__dirname)
     if (!fs.existsSync(resolvedDirname)) {
         console.error('The directory ', resolvedDirname, ' does not exist.')
         return undefined
     } else {
-        /* eslint sort/object-properties:off */
         const options: TypedocOptions = {
             /** This uses a "module" format, using the index of each subfolder */
             entryPoints: [path.resolve(`${resolvedDirname}/src/index.ts`)],
-            tsconfig: path.resolve(`${resolvedDirname}/tsconfig.docs.json`),
-            readme: path.resolve(`${resolvedDirname}/README.md`),
-            out: path.resolve(`${resolvedDirname}/docs`),
             exclude: [
                 '**/*.test.ts',
                 'node_modules/**/*',
                 '**/node_modules/**/*',
             ],
             gitRevision: 'master',
+            out: path.resolve(`${resolvedDirname}/docs`),
+            readme: path.resolve(`${resolvedDirname}/README.md`),
+            tsconfig: path.resolve(`${resolvedDirname}/tsconfig.docs.json`),
         }
         return options
     }

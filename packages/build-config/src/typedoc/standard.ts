@@ -1,7 +1,6 @@
 import { merge as deepmerge } from 'ts-deepmerge'
-import { TypeDocOptions } from 'typedoc'
+import { type TypeDocOptions } from 'typedoc'
 import { fileSharedOptions } from './shared.js'
-
 import type { TypedocConfigFunction, TypedocOptions } from './shared.js'
 
 export type MaterialThemeOptions = {
@@ -17,7 +16,6 @@ export const config: TypedocConfigFunction = (__dirname, _options) => {
 
     if (_fileOptions !== undefined) {
         const fileOptions = _fileOptions
-        /* eslint sort/object-properties:off */
         const options: TypedocOptions = {
             ...fileOptions,
             excludeExternals: false,

@@ -5,22 +5,12 @@
  */
 
 export type BannerPackageMeta = {
-    name: string
-    version: string
+    author?: string | { email?: string; name: string }
     description?: string
     license?: string
-    author?: string | { name: string; email?: string }
+    name: string
     repository?: string | { url: string }
-}
-
-function authorName(author: BannerPackageMeta['author']): string {
-    if (!author) return ''
-    return typeof author === 'string' ? author : author.name
-}
-
-function repoUrl(repository: BannerPackageMeta['repository']): string {
-    if (!repository) return ''
-    return typeof repository === 'string' ? repository : repository.url
+    version: string
 }
 
 /**
@@ -57,4 +47,14 @@ export function createBanner(
     lines.push(` * Build: ${new Date().toLocaleString()}`)
 
     return `/*\n${lines.join('\n')}\n */`
+}
+
+function authorName(author: BannerPackageMeta['author']): string {
+    if (!author) return ''
+    return typeof author === 'string' ? author : author.name
+}
+
+function repoUrl(repository: BannerPackageMeta['repository']): string {
+    if (!repository) return ''
+    return typeof repository === 'string' ? repository : repository.url
 }

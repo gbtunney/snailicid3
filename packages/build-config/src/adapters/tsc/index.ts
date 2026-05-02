@@ -5,7 +5,7 @@
  * Produces compiled JS and `.d.ts` declarations while preserving the module structure.
  */
 
-import { execSync } from 'child_process'
+import { execSync } from 'node:child_process'
 import type { BuildAdapter } from '../../build/ports.js'
 import type { BuildPlan, Product, Runtime } from '../../build/types.js'
 
