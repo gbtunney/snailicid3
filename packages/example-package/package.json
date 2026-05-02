@@ -15,6 +15,7 @@
         "@snailicid3/config": "workspace:*",
         "@types/node": "^25.6.0",
         "rollup": "^4.60.1",
+        "tsdown": "^0.21.10",
         "typescript": "^6.0.2",
         "vitest": "^4.1.4"
     },
@@ -33,11 +34,11 @@
         "targets": {
             "dev": {},
             "dev:ts": {},
-            "dev:rollup": {},
+            "dev:tsdown": {},
             "dev:vite": {},
             "build:ts": {},
             "check:ts": {},
-            "build:rollup": {},
+            "build:tsdown": {},
             "build:vite": {},
             "build": {},
             "test": {},
@@ -62,7 +63,7 @@
     "main": "./dist/index.js",
     "types": "./types/index.d.ts",
     "buildConfig": {
-        "runtime": "node",
+        "runtime": "universal",
         "product": "library",
         "buildStrategy": "bundle"
     }

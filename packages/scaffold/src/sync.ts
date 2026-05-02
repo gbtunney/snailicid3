@@ -6,11 +6,11 @@ import { generatePackageJson } from './templates/package-json.js'
 import { generateReadme, HEADER_END, HEADER_START } from './templates/readme.js'
 import { generateTsConfig } from './templates/tsconfig.js'
 
-export type SyncAction = 'created' | 'updated' | 'skipped' | 'needs-review'
+export type SyncAction = 'created' | 'needs-review' | 'skipped' | 'updated'
 
 export type SyncResult = {
-    file: string
     action: SyncAction
+    file: string
     reason?: string
 }
 
