@@ -2,12 +2,12 @@ import { describe, expect, test } from 'vitest'
 import {
     getValidIPAddress,
     getValidUrl,
-    IPAddress,
+    type IPAddress,
     isValidIpAddress,
     isValidUrl,
-    URL,
-    URLDomainExtention,
-    URLScheme,
+    type URL,
+    type URLDomainExtention,
+    type URLScheme,
 } from './validators.js'
 import { isNotUndefined } from '../typeguard/utility.typeguards.js'
 

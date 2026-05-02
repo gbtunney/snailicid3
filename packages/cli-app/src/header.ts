@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 import figlet from 'figlet'
-import { AppConfig } from './app-config.js'
+import { type AppConfig } from './app-config.js'
 
 export type PrintHeader = AppConfig & {
     app_title: string

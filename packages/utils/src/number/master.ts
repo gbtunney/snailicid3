@@ -4,7 +4,7 @@ import { numericPatterns } from './patterns.js'
 export const cleanupNumericSeparators = (str: string): string =>
     str.replace(/_/g, '').trim()
 
-export function parseMaster(rawValue: string): number | bigint | undefined {
+export function parseMaster(rawValue: string): bigint | number | undefined {
     const trimmed = rawValue.trim()
     // Validate underscore placement against the raw trimmed value BEFORE stripping
     if (!numericPatterns.master.test(trimmed)) return undefined
@@ -13,10 +13,10 @@ export function parseMaster(rawValue: string): number | bigint | undefined {
 
     let detectedKind: keyof typeof numericFormats
     if (/n$/i.test(trimmed)) detectedKind = 'bigint'
-    else if (/^[-+]?0b/i.test(trimmed)) detectedKind = 'binary'
-    else if (/^[-+]?0o/i.test(trimmed)) detectedKind = 'octal'
-    else if (/^[-+]?0x/i.test(trimmed)) detectedKind = 'hex'
-    else if (/[eE][+-]?\d/.test(trimmed))
+    else if (/^[+-]?0b/i.test(trimmed)) detectedKind = 'binary'
+    else if (/^[+-]?0o/i.test(trimmed)) detectedKind = 'octal'
+    else if (/^[+-]?0x/i.test(trimmed)) detectedKind = 'hex'
+    else if (/[Ee][+-]?\d/.test(trimmed))
         detectedKind = trimmed.includes('.') ? 'scientific' : 'exponential'
     else detectedKind = 'decimal'
 

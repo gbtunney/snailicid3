@@ -3,15 +3,15 @@ import * as chroma from 'chroma.ts'
 
 import { isCSSColorSpecial } from './browser/css.js'
 import { tg } from './typeguard/index.js'
+type HSL = [HueDegrees, Saturation, Luminance]
 /** TODO get rid of all this in favor of color.js */
 /**
  * @see https://en.wikipedia.org/wiki/HSL_and_HSV
  * [hueDegrees, saturation1, value1]
  */
 type HueDegrees = number
-type Saturation = number
 type Luminance = number
-type HSL = [HueDegrees, Saturation, Luminance]
+type Saturation = number
 const validate = (value: Chromable): boolean => {
     try {
         chroma.color(value)
@@ -134,17 +134,17 @@ const chromaColorBrighten = (
 }
 
 export type ChromaColorPalatte = {
+    analogous: Array<Color>
     chroma: Color
-    textColor: Color
-    hue: number
-    saturation: number
-    lightness: number
-    luminance: number
-    temperature: number
     /** Palattes. */
     complement: Color
+    hue: number
+    lightness: number
+    luminance: number
+    saturation: number
     split_complement: Array<Color>
-    triad: Array<Color>
+    temperature: number
     tetrad: Array<Color>
-    analogous: Array<Color>
+    textColor: Color
+    triad: Array<Color>
 }

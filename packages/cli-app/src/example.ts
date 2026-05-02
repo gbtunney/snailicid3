@@ -2,13 +2,13 @@ import { logger } from '@snailicid3/logger'
 import { fmt } from '@snailicid3/utils'
 import yargsInteractive from 'yargs-interactive'
 import { z } from 'zod'
-import { AppConfig } from './app-config.js'
+import { type AppConfig } from './app-config.js'
 import { mergeSchemas } from './helpers.js'
 import {
-    AppConfigIn,
+    type AppConfigIn,
     commonFlagsSchema,
     initApp,
-    InitSuccessCallback,
+    type InitSuccessCallback,
 } from './index.js'
 
 //todo: fix log levels
@@ -109,7 +109,7 @@ const exampleAppConfigOptions: AppConfigIn = {
     version: '0.0.0',
 }
 /** Initialize App */
-const initialize = async (): Promise<'SUCCESS' | 'ERROR'> => {
+const initialize = async (): Promise<'ERROR' | 'SUCCESS'> => {
     const instance_yargs = await initApp<typeof my_merged_schema>(
         my_merged_schema,
         exampleAppConfigOptions,

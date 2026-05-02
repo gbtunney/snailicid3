@@ -3,16 +3,39 @@
     "version": "0.0.1",
     "private": false,
     "description": "Pure TypeScript types, utility types and typeguards",
+    "scripts": {
+        "build:nx": "nx run $npm_package_name:build",
+        "test:nx": "nx run $npm_package_name:test",
+        "clean:nx": "nx run $npm_package_name:clean"
+    },
+    "buildConfig": {
+        "runtime": "universal",
+        "product": "library",
+        "buildStrategy": "bundle"
+    },
+    "nx": {
+        "targets": {
+            "build:ts": {},
+            "check:ts": {},
+            "build:tsdown": {},
+            "build": {
+                "dependsOn": [
+                    "build:ts",
+                    "build:tsdown"
+                ]
+            },
+            "test": {},
+            "lint": {},
+            "fix": {},
+            "clean": {},
+            "clean:ts": {},
+            "clean:build": {}
+        }
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "type": "module",
-    "author": {
-        "name": "Gillian Tunney",
-        "email": "gbtunney@mac.com"
-    },
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/gbtunney/snailicid3-monorepo"
-    },
     "main": "./dist/index.js",
     "types": "./types/index.d.ts",
     "exports": {
@@ -26,30 +49,15 @@
         "dist",
         "types"
     ],
-    "nx": {
-        "targets": {
-            "build:ts": {},
-            "check:ts": {},
-            "build": {
-                "dependsOn": [
-                    "build:ts"
-                ]
-            },
-            "test": {},
-            "lint": {},
-            "fix": {},
-            "clean": {},
-            "clean:ts": {},
-            "clean:build": {}
-        }
+    "author": {
+        "name": "Gillian Tunney",
+        "email": "gbtunney@mac.com"
     },
-    "scripts": {
-        "build:nx": "nx run $npm_package_name:build",
-        "test:nx": "nx run $npm_package_name:test",
-        "clean:nx": "nx run $npm_package_name:clean",
-        "\n========== TEST >> ==========": "",
-        "test:watch": "vitest watch",
-        "test:coverage": "vitest run --coverage"
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/gbtunney/snailicid3-monorepo",
+        "directory": "packages/types"
     },
     "dependencies": {
         "ramda": "^0.32.0",
@@ -57,13 +65,12 @@
         "type-fest": "^5.5.0"
     },
     "devDependencies": {
+        "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
         "@types/node": "^25.6.0",
         "@types/ramda": "^0.31.1",
+        "tsdown": "^0.21.10",
         "typescript": "^6.0.2",
         "vitest": "^4.1.4"
-    },
-    "publishConfig": {
-        "access": "public"
     }
 }

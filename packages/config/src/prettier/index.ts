@@ -3,17 +3,12 @@
  *
  * @see [Prettier - Opinionated Code Formatter](https://prettier.io/)
  */
-import { Config, Options } from 'prettier'
+import { type Config, type Options } from 'prettier'
 import type { Options as JsDocOptions } from 'prettier-plugin-jsdoc'
 import type { IterableElement, Merge } from 'type-fest'
 import { getDefaultOptions, getDefaultOverrides } from './options.js'
 import { getPrettierPluginsBundled, getPrettierPluginsList } from './plugins.js'
 
-export type PrettierOptions = Options & JsDocOptions
-
-export type PrettierOverrides = Array<
-    Merge<IterableElement<Config['overrides']>, { options: PrettierOptions }>
->
 export type PrettierConfig = Merge<
     Merge<Config, PrettierOptions>,
     {
@@ -21,10 +16,15 @@ export type PrettierConfig = Merge<
     }
 >
 
+export type PrettierOptions = JsDocOptions & Options
+export type PrettierOverrides = Array<
+    Merge<IterableElement<Config['overrides']>, { options: PrettierOptions }>
+>
+
 //SHARED_FORMATTING_RULES.tabWidth,
 
 export const prettierConfiguration = (
-    bundled: boolean = true,
+    isBundled: boolean = true,
     _options?: PrettierOptions,
     _overrides?: PrettierOverrides,
 ): PrettierConfig => {
@@ -43,7 +43,7 @@ export const prettierConfiguration = (
         ...myoption,
         overrides: __overrides, //(overrides !== undefined ? { overrides } : []),
         plugins: [
-            ...(bundled
+            ...(isBundled
                 ? getPrettierPluginsBundled()
                 : getPrettierPluginsList()),
         ],
@@ -52,8 +52,8 @@ export const prettierConfiguration = (
 /** @ignore */
 export const Prettier: {
     config: PrettierConfig
-    options: PrettierOptions
     configuration: typeof prettierConfiguration
+    options: PrettierOptions
 } = {
     config: prettierConfiguration(),
     configuration: prettierConfiguration,

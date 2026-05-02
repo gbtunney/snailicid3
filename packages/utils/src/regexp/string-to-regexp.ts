@@ -15,7 +15,7 @@ import { isArray, isRegExp } from '../typeguard/utility.typeguards.js'
 export const stringToRegexp = (
     value: string,
     escape: boolean = false,
-    flag: Flag | Array<Flag> | undefined = 'global',
+    flag: Array<Flag> | Flag | undefined = 'global',
 ): RegExp | undefined => {
     if (escape) {
         return isStringValidRegExp(escapeStringRegexp(value))
@@ -34,16 +34,16 @@ export const stringToRegexp = (
  * @returns - A joined list
  */
 export const stringListToRegexp = (
-    _value: string | Array<string>,
-    flag: Flag | Array<Flag> | undefined = 'global',
+    _value: Array<string> | string,
+    flag: Array<Flag> | Flag | undefined = 'global',
 ): RegExp => {
     return new RegExp(stringListJoinRegexp(_value), mapFlags(flag))
 }
 
 /** Turn a string or strings into a regexp to trim the start and finish */
 export const getRegExpTrim = (
-    _value: string | Array<string>,
-    flag: Flag | Array<Flag> | undefined = 'global',
+    _value: Array<string> | string,
+    flag: Array<Flag> | Flag | undefined = 'global',
 ): RegExp => {
     const start: string = getRegExpStartOfString(_value, flag).source
     const end: string = getRegExpEndOfString(_value, flag).source
@@ -57,8 +57,8 @@ export const getRegExpTrim = (
  * @see {@link getRegExpEndOfString}
  */
 export const getRegExpStartOfString = (
-    _value: RegExp | string | Array<string>,
-    flag: Flag | Array<Flag> | undefined = 'global',
+    _value: Array<string> | RegExp | string,
+    flag: Array<Flag> | Flag | undefined = 'global',
 ): RegExp => {
     return isRegExp(_value)
         ? new RegExp(`^${_value.source}`, mapFlags(flag))
@@ -73,8 +73,8 @@ export const getRegExpStartOfString = (
  * @see {@link getRegExpStartOfString}
  */
 export const getRegExpEndOfString = (
-    _value: RegExp | string | Array<string>,
-    flag: Flag | Array<Flag> | undefined = 'global',
+    _value: Array<string> | RegExp | string,
+    flag: Array<Flag> | Flag | undefined = 'global',
 ): RegExp => {
     return isRegExp(_value)
         ? new RegExp(`${_value.source}$`, mapFlags(flag))
@@ -84,7 +84,7 @@ export const getRegExpEndOfString = (
 }
 
 const stringListJoinRegexp = (
-    _value: string | Array<string>,
+    _value: Array<string> | string,
     useParenthesis: boolean = false,
 ): string => {
     const value: Array<string> = ensureArray(_value)
@@ -107,14 +107,14 @@ export type Flag = keyof typeof flagMap
 export type FlagAlias = ValueOf<typeof flagMap>
 
 const mapFlags = (
-    flags?: Flag | FlagAlias | Array<FlagAlias | Flag>,
+    flags?: Array<Flag | FlagAlias> | Flag | FlagAlias,
 ): string => {
     if (flags === undefined) return ''
     else {
         const flagArr = ensureArray(flags).map((value: Flag | FlagAlias) => {
             // @ts-expect-error: this is an ongoing issue i keep having TODO: find solution
             if (flagMap[value] !== undefined) return flagMap[value]
-            const _foundAlias: ValueOf<typeof flagMap> | undefined = Array.from(
+            const _foundAlias: undefined | ValueOf<typeof flagMap> = Array.from(
                 Object.values(flagMap),
             ).find((flagAliases: string) => value)
             if (_foundAlias !== undefined) {

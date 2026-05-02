@@ -1,31 +1,21 @@
 import type { PascalCase } from 'type-fest'
 
+export type BoolPredicate = (inputValue: unknown) => boolean
 export type Predicate<Type = unknown> = (
     inputValue: unknown,
 ) => inputValue is Type
-export type BoolPredicate = (inputValue: unknown) => boolean
 
 /** Split on delimiters & camelCase transitions, then PascalCase. */
 const toPascal = (rawName: string): string => {
     const parts: Array<string> = rawName
-        .replace(/[_\s-]+/g, ' ')
+        .replace(/[\s_-]+/g, ' ')
         .trim()
         .split(' ')
         .filter(Boolean)
         .flatMap(
-            (segment) =>
-                segment.match(/[A-Z]?[a-z0-9]+|[A-Z]+(?![a-z])/g) ?? [],
+            (segment) => segment.match(/[A-Z]?[\da-z]+|[A-Z]+(?![a-z])/g) ?? [],
         )
     return parts.map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join('')
-}
-
-type IsKey<BaseName extends string> = `is${PascalCase<BaseName>}`
-type IsNotKey<BaseName extends string> = `isNot${PascalCase<BaseName>}`
-
-export type ValidatorResult<Type, BaseName extends string> = {
-    [Key in IsKey<BaseName>]: (inputValue: unknown) => inputValue is Type
-} & {
-    [Key in IsNotKey<BaseName>]: (inputValue: unknown) => boolean
 }
 
 export type BoolValidatorResult<BaseName extends string> = {
@@ -33,6 +23,15 @@ export type BoolValidatorResult<BaseName extends string> = {
 } & {
     [Key in IsNotKey<BaseName>]: BoolPredicate
 }
+export type ValidatorResult<Type, BaseName extends string> = {
+    [Key in IsKey<BaseName>]: (inputValue: unknown) => inputValue is Type
+} & {
+    [Key in IsNotKey<BaseName>]: (inputValue: unknown) => boolean
+}
+
+type IsKey<BaseName extends string> = `is${PascalCase<BaseName>}`
+
+type IsNotKey<BaseName extends string> = `isNot${PascalCase<BaseName>}`
 
 export function factoryValidator<Type, BaseName extends string>(
     predicateFunction: Predicate<Type>,
@@ -43,9 +42,9 @@ export function factoryValidator<BaseName extends string>(
     baseName: BaseName,
 ): BoolValidatorResult<BaseName>
 export function factoryValidator<ValueType, BaseName extends string>(
-    predicateFunction: Predicate<ValueType> | BoolPredicate,
+    predicateFunction: BoolPredicate | Predicate<ValueType>,
     baseName: BaseName,
-): ValidatorResult<ValueType, BaseName> | BoolValidatorResult<BaseName> {
+): BoolValidatorResult<BaseName> | ValidatorResult<ValueType, BaseName> {
     const pascalCaseName = toPascal(baseName) as PascalCase<BaseName>
     const isKeyName: IsKey<BaseName> = `is${pascalCaseName}`
     const isNotKeyName: IsNotKey<BaseName> = `isNot${pascalCaseName}`
@@ -58,5 +57,5 @@ export function factoryValidator<ValueType, BaseName extends string>(
     return {
         [isKeyName]: isFunction,
         [isNotKeyName]: isNotFunction,
-    } as ValidatorResult<ValueType, BaseName> | BoolValidatorResult<BaseName>
+    } as BoolValidatorResult<BaseName> | ValidatorResult<ValueType, BaseName>
 }

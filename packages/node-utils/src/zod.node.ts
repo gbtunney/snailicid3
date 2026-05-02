@@ -4,8 +4,8 @@ import { z } from 'zod'
 
 import {
     doesFileExist,
-    FilePath,
-    FileType,
+    type FilePath,
+    type FileType,
     getExistingPathType,
     getFilePathArr,
     getFullPath,
@@ -34,8 +34,11 @@ export const fsPathExists = (
     exists = true,
     root?: string,
     allowedType:
-        | (Exclude<FileType, undefined> | Array<Exclude<FileType, undefined>>)
-        | 'any' = 'any',
+        | 'any'
+        | (
+              | Array<Exclude<FileType, undefined>>
+              | Exclude<FileType, undefined>
+          ) = 'any',
 ): ReturnType<typeof fsPathTypeExists> => {
     if (!exists) {
         return fsPathTypeExists('none', root)
@@ -45,9 +48,12 @@ export const fsPathExists = (
 /** @group Zod Schemas */
 export const fsPathTypeExists = (
     allowedType:
-        | (Exclude<FileType, undefined> | Array<Exclude<FileType, undefined>>)
         | 'any'
-        | 'none' = 'any',
+        | 'none'
+        | (
+              | Array<Exclude<FileType, undefined>>
+              | Exclude<FileType, undefined>
+          ) = 'any',
     root?: string,
 ): z.ZodType<string, string> => {
     const allowedLabel = Array.isArray(allowedType)

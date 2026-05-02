@@ -1,17 +1,17 @@
 export type Numeric = bigint | number
 
-export type PossibleNumeric = number | bigint | string
+export type NumericString<Kind extends NumericStringKind> = string & {
+    readonly _numericKind: Kind
+}
 
 export type NumericStringKind =
+    | 'bigint'
+    | 'binary'
     | 'decimal'
-    | 'scientific'
     | 'exponential'
     | 'hex'
     | 'octal'
-    | 'binary'
-    | 'bigint'
+    | 'scientific'
     | undefined
 
-export type NumericString<K extends NumericStringKind> = string & {
-    readonly _numericKind: K
-}
+export type PossibleNumeric = bigint | number | string

@@ -23,6 +23,6 @@ export const commonFlagsSchema = z.object({
    .meta({ description: '<dir> Set Root Directory' ,alias:'r'
    }),*/
 })
-export type CommonFlagsSchema = typeof commonFlagsSchema
-export type CommonFlagsOutput = z.infer<typeof commonFlagsSchema>
 export type CommonFlagsInput = z.input<typeof commonFlagsSchema>
+export type CommonFlagsOutput = z.infer<typeof commonFlagsSchema>
+export type CommonFlagsSchema = typeof commonFlagsSchema

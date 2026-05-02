@@ -4,24 +4,20 @@
  * Generates a comment block suitable for prepending to bundled output files.
  */
 
-export type BannerPackageMeta = {
-    name: string
-    version: string
-    description?: string
-    license?: string
-    author?: string | { name: string; email?: string }
-    repository?: string | { url: string }
-}
+import type { infer as Infer } from 'zod'
 
-function authorName(author: BannerPackageMeta['author']): string {
-    if (!author) return ''
-    return typeof author === 'string' ? author : author.name
-}
+import { basePackage } from './schema.js'
 
-function repoUrl(repository: BannerPackageMeta['repository']): string {
-    if (!repository) return ''
-    return typeof repository === 'string' ? repository : repository.url
-}
+export const bannerPackageMetaSchema = basePackage.pick({
+    author: true,
+    description: true,
+    license: true,
+    name: true,
+    repository: true,
+    version: true,
+})
+
+export type BannerPackageMeta = Infer<typeof bannerPackageMetaSchema>
 
 /**
  * Generate a banner comment block from package metadata.
@@ -38,23 +34,55 @@ function repoUrl(repository: BannerPackageMeta['repository']): string {
  *     //  * /
  *     ```
  */
+export function createBanner(meta: BannerPackageMeta): string | undefined
 export function createBanner(
     moduleName: string,
     meta: BannerPackageMeta,
+): string | undefined
+export function createBanner(
+    moduleNameOrMeta: BannerPackageMeta | string,
+    metaMaybe?: BannerPackageMeta,
 ): string | undefined {
-    if (!meta.name || !meta.version) return undefined
+    const [moduleNameInput, meta] =
+        typeof moduleNameOrMeta === 'string'
+            ? [moduleNameOrMeta, metaMaybe]
+            : [undefined, moduleNameOrMeta]
+
+    const parsedMeta = bannerPackageMetaSchema.safeParse(meta)
+    if (!parsedMeta.success) return undefined
+
+    const validMeta = parsedMeta.data
+    const moduleName =
+        moduleNameInput && moduleNameInput.trim().length > 0
+            ? moduleNameInput
+            : moduleNameFromPackageName(validMeta.name)
 
     const lines: Array<string> = [
-        ` * ${meta.name} v${meta.version}`,
+        ` * ${validMeta.name} v${validMeta.version}`,
         ` * Module: ${moduleName}`,
-        ` * (c) ${String(new Date().getFullYear())} ${authorName(meta.author)}`,
+        ` * (c) ${String(new Date().getFullYear())} ${validMeta.author.name}`,
     ]
 
-    if (meta.description) lines.push(` * ${meta.description}`)
-    if (meta.repository) lines.push(` * ${repoUrl(meta.repository)}`)
-    if (meta.license)
-        lines.push(` * Released under the ${meta.license} License.`)
+    if (validMeta.description) lines.push(` * ${validMeta.description}`)
+    if (validMeta.repository) {
+        lines.push(
+            ` * ${typeof validMeta.repository === 'string' ? validMeta.repository : validMeta.repository.url}`,
+        )
+    }
+    lines.push(` * Released under the ${validMeta.license} License.`)
     lines.push(` * Build: ${new Date().toLocaleString()}`)
 
     return `/*\n${lines.join('\n')}\n */`
+}
+
+function moduleNameFromPackageName(packageName: string): string {
+    const nameWithoutScope = packageName.startsWith('@snailicid3/')
+        ? packageName.slice('@snailicid3/'.length)
+        : packageName.replace(/^@[^/]+\//, '')
+
+    const words = nameWithoutScope
+        .split(/[\s._-]+/)
+        .filter((word) => word.length > 0)
+
+    return words.map((word) => word[0].toUpperCase() + word.slice(1)).join(' ')
 }

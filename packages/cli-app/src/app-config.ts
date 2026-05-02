@@ -1,10 +1,9 @@
 import { isValidColor, parseColorToHex } from '@snailicid3/color'
 import { logger } from '@snailicid3/logger'
 import { stringUtils } from '@snailicid3/utils'
-
-import { Merge } from 'type-fest'
+import { type Merge } from 'type-fest'
 import { z } from 'zod'
-import { tgZodSchema, wrapSchema, ZodObjectSchema } from './helpers.js'
+import { tgZodSchema, wrapSchema, type ZodObjectSchema } from './helpers.js'
 export type DefaultAliases = {
     help?: string
     version?: string
@@ -16,15 +15,6 @@ const default_aliases: DefaultAliases = {
     help: 'h',
     version: 'v',
 }
-/** This type is used to autocomplete the yargs aliases property. This creates shorthand values for option flags. */
-export type AppFlagAliases<Schema extends ZodObjectSchema> = DefaultAliases & {
-    [Key in keyof z.infer<Schema>]?: string
-}
-
-export type AppHidden<Schema extends ZodObjectSchema> = Array<
-    keyof z.infer<Schema>
->
-export type AppConfigOut = z.infer<typeof appConfigSchema>
 export type AppConfig = AppConfigOut
 
 export type AppConfigIn<
@@ -36,11 +26,20 @@ export type AppConfigIn<
         Merge<
             z.input<AppConfigSchema>,
             {
-                hidden?: AppHidden<Schema>
                 flag_aliases?: AppFlagAliases<Schema>
+                hidden?: AppHidden<Schema>
             }
         >
     >
+>
+export type AppConfigOut = z.infer<typeof appConfigSchema>
+/** This type is used to autocomplete the yargs aliases property. This creates shorthand values for option flags. */
+export type AppFlagAliases<Schema extends ZodObjectSchema> = DefaultAliases & {
+    [Key in keyof z.infer<Schema>]?: string
+}
+
+export type AppHidden<Schema extends ZodObjectSchema> = Array<
+    keyof z.infer<Schema>
 >
 /**
  * This is the schema used to configure the Cli Application, these should NOT used in cli arguments when running the
@@ -141,7 +140,7 @@ export const resolveAppConfigSchema = <
 >(
     value: AppConfigIn<AppOptionsSchema>,
     schema: AppConfigSchema, //note : the default parameter errors like: schema:  AppConfigSchema=appConfigSchema
-): z.infer<AppConfigSchema> | undefined => {
+): undefined | z.infer<AppConfigSchema> => {
     if (tgZodSchema(schema, value)) {
         return schema.parse(value)
     } else {
@@ -160,7 +159,7 @@ const packageSchema = wrapSchema<typeof appConfigSchema>(appConfigSchema).pick({
 
 export const parsePackageJson = (
     pkg: unknown,
-): z.infer<typeof packageSchema> | undefined => {
+): undefined | z.infer<typeof packageSchema> => {
     const _parseResult = packageSchema.safeParse(pkg)
     if (_parseResult.success) {
         return _parseResult.data

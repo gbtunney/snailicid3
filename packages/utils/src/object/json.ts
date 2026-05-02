@@ -1,8 +1,7 @@
-import { Jsonifiable, Tagged } from 'type-fest'
-
-import { z } from 'zod'
+import { type Jsonifiable, type Tagged } from 'type-fest'
+import { type z } from 'zod'
 import { isJsonifiable, isJsonValue } from '../typeguard/json.typeguards.js'
-import { Json } from '../types/utility.js'
+import { type Json } from '../types/utility.js'
 
 //TODO: integrate with stringified stuff
 type THeValue = z.infer<ReturnType<typeof z.json>>

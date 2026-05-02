@@ -51,9 +51,10 @@
         "eslint-plugin-check-file": "^3.3.1",
         "eslint-plugin-import-x": "^4.16.2",
         "eslint-plugin-jsdoc": "^62.9.0",
+        "eslint-plugin-perfectionist": "^5.9.0",
+        "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "7.1.1",
         "eslint-plugin-react-refresh": "^0.5.2",
-        "eslint-plugin-sort": "^4.0.0",
         "eslint-plugin-storybook": "^10.3.5",
         "eslint-plugin-unicorn": "^64.0.0",
         "eslint-plugin-unused-imports": "^4.4.1",
@@ -133,6 +134,7 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/gbtunney/snailicid3-monorepo"
+        "url": "https://github.com/gbtunney/snailicid3-monorepo",
+        "directory": "packages/config"
     }
 }

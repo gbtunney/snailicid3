@@ -1,4 +1,4 @@
-import { Numeric, PossibleNumeric } from './numeric.js'
+import { type Numeric, type PossibleNumeric } from './numeric.js'
 import { toStringNumeric } from './transform.js'
 import { isPossibleNumeric, isStringNumeric } from './validators.js'
 import {

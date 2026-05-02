@@ -9,7 +9,7 @@ import { isNotNull } from './../typeguard/utility.typeguards.js'
  * @category Remove Characters
  */
 export const removeNonWord = (value: string): string =>
-    replace(/[^0-9a-zA-Z\xC0-\xFF -]/g, '', value)
+    replace(/[^\d A-Za-z\xC0-\xFF-]/g, '', value)
 
 /** Generates a UUID v4 string. */
 export const uuidv4 = (): string => {
@@ -44,25 +44,25 @@ export const replaceAccents = (value: string): string => {
     if (value.search(/[\xC0-\xFF]/g) == -1) return value
     return value
         .replace(/[\xC0-\xC5]/g, 'A')
-        .replace(/[\xC6]/g, 'AE')
-        .replace(/[\xC7]/g, 'C')
+        .replace(/\xC6/g, 'AE')
+        .replace(/\xC7/g, 'C')
         .replace(/[\xC8-\xCB]/g, 'E')
         .replace(/[\xCC-\xCF]/g, 'I')
-        .replace(/[\xD0]/g, 'D')
-        .replace(/[\xD1]/g, 'N')
+        .replace(/\xD0/g, 'D')
+        .replace(/\xD1/g, 'N')
         .replace(/[\xD2-\xD6\xD8]/g, 'O')
         .replace(/[\xD9-\xDC]/g, 'U')
-        .replace(/[\xDD]/g, 'Y')
-        .replace(/[\xDE]/g, 'P')
+        .replace(/\xDD/g, 'Y')
+        .replace(/\xDE/g, 'P')
         .replace(/[\xE0-\xE5]/g, 'a')
-        .replace(/[\xE6]/g, 'ae')
-        .replace(/[\xE7]/g, 'c')
+        .replace(/\xE6/g, 'ae')
+        .replace(/\xE7/g, 'c')
         .replace(/[\xE8-\xEB]/g, 'e')
         .replace(/[\xEC-\xEF]/g, 'i')
-        .replace(/[\xF1]/g, 'n')
+        .replace(/\xF1/g, 'n')
         .replace(/[\xF2-\xF6\xF8]/g, 'o')
         .replace(/[\xF9-\xFC]/g, 'u')
-        .replace(/[\xFE]/g, 'p')
+        .replace(/\xFE/g, 'p')
         .replace(/[\xFD\xFF]/g, 'y')
 }
 

@@ -11,11 +11,11 @@ const metaSchema = z.object({
     id: z.string().optional(),
 })
 
+export type CLIAppMeta = MetaOutput
+export type MetaSchema = typeof metaSchema
+
 type MetaInput = z.input<typeof metaSchema>
 type MetaOutput = z.output<typeof metaSchema>
-
-export type MetaSchema = typeof metaSchema
-export type CLIAppMeta = MetaOutput
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions, @typescript-eslint/no-empty-object-type */
 declare module 'zod' {
@@ -25,7 +25,7 @@ declare module 'zod' {
 const parseMeta = <Schema extends MetaSchema = MetaSchema>(
     data: unknown,
     schema: Schema,
-): z.output<Schema> | undefined => {
+): undefined | z.output<Schema> => {
     const _parsed = schema.safeParse(data)
     return _parsed.success ? _parsed.data : undefined
 }

@@ -1,7 +1,7 @@
-import { Jsonifiable } from 'type-fest'
+import { type Jsonifiable } from 'type-fest'
 import { RA } from './ramdaimports.js'
 import { isNotUndefined } from '../typeguard/utility.typeguards.js'
-import { Json, PlainObject } from '../types/utility.js'
+import { type Json, type PlainObject } from '../types/utility.js'
 
 /**
  * Checks if a value is Jsonifiable.
@@ -45,9 +45,9 @@ export const isJsonValue = <Type extends Json.Value>(
  * @category Object
  * @category Json
  */
-export const isJsonifiableObjectLike = <Type extends Json.Object | Json.Array>(
+export const isJsonifiableObjectLike = <Type extends Json.Array | Json.Object>(
     value: Type,
-): value is Type extends Json.Object | Json.Array ? Type : never => {
+): value is Type extends Json.Array | Json.Object ? Type : never => {
     return RA.isObjectLike(value)
 }
 

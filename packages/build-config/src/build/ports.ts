@@ -8,15 +8,6 @@
 import type { BuildPlan, Product, Runtime } from './types.js'
 
 export type BuildAdapter = {
-    /** Human-readable adapter name (e.g. `"rollup"`, `"tsc"`). */
-    name: string
-
-    /**
-     * Returns true if this adapter can handle the given runtime and product combination. Used by {@link selectAdapter}
-     * to pick the right adapter.
-     */
-    supports(runtime: Runtime, product: Product): boolean
-
     /** Execute the build described by `plan`. */
     build(plan: BuildPlan): Promise<void>
 
@@ -25,4 +16,10 @@ export type BuildAdapter = {
      * build. Useful for inspecting or exporting config.
      */
     createConfig?(plan: BuildPlan): unknown
+
+    /** Human-readable adapter name (e.g. `"rollup"`, `"tsc"`). */
+    name: string
+
+    /** Returns true if this adapter can handle the given runtime and product combination. to pick the right adapter. */
+    supports(runtime: Runtime, product: Product): boolean
 }

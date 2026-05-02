@@ -2,19 +2,19 @@ import type { EmptyObject } from 'type-fest'
 // Extract all (?<name> ...) group names from a pattern literal
 export type ExtractGroupNames<Str extends string> =
     Str extends `${string}(?<${infer Name}>${infer Rest}`
-        ? Record<Name, string> & ExtractGroupNames<Rest>
+        ? ExtractGroupNames<Rest> & Record<Name, string>
         : EmptyObject
+
+export type MakeTypedRegexpReturn<PatternString extends string> = RegExp & {
+    execTyped(inputText: string): null | TypedRegexpMatch<PatternString>
+}
 
 // Full typed match result
 export type TypedRegexpMatch<Pattern extends string> = {
     0: string
+    groups: ExtractGroupNames<Pattern>
     index: number
     input: string
-    groups: ExtractGroupNames<Pattern>
-}
-
-export type MakeTypedRegexpReturn<PatternString extends string> = RegExp & {
-    execTyped(inputText: string): TypedRegexpMatch<PatternString> | null
 }
 
 /** Remove whitespace + comments from annotated regex */
@@ -42,8 +42,8 @@ export const typedRegexp = <PatternString extends string>(
     )
 
     return Object.assign(compiledRegularExpression, {
-        execTyped(inputText: string): TypedRegexpMatch<PatternString> | null {
-            const matchResult: RegExpExecArray | null =
+        execTyped(inputText: string): null | TypedRegexpMatch<PatternString> {
+            const matchResult: null | RegExpExecArray =
                 compiledRegularExpression.exec(inputText)
 
             if (matchResult === null) {

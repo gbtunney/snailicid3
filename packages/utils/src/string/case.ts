@@ -30,7 +30,7 @@ export const capitalizeWords = (value: string): string =>
  * @category Case
  */
 export const camelCase = (value: string): string => {
-    value = replaceAll(/[-_]/g, ' ', pipe(replaceAccents, removeNonWord)(value))
+    value = replaceAll(/[_-]/g, ' ', pipe(replaceAccents, removeNonWord)(value))
     if (/[a-z]/.test(value) && /^|\s[A-Z]+\s|$/.test(value)) {
         // we convert any word that isn't all caps into lowercase
         // value = value.replace(/\s(\w+)/g, function(word, m) {

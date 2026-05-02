@@ -1,25 +1,24 @@
 import { logger, type Logger } from '@snailicid3/logger'
 import { fmt, formatValue } from '@snailicid3/utils'
 import type { ArrayValues, Primitive } from 'type-fest'
-import { Choices, Options as SingleYarg } from 'yargs'
+import { type Choices, type Options as SingleYarg } from 'yargs'
 import yargsInteractive from 'yargs-interactive'
-import { util, z } from 'zod'
+import { type util, z } from 'zod'
 import {
     getDefaultValue,
     getValueSchema,
     isOptionalType,
     wrapAnyZodSchema,
     wrapSchema,
-    ZodObjectSchema,
+    type ZodObjectSchema,
 } from './helpers.js'
-import { CLIAppMeta, updateMetaForSchema } from './meta.js'
-
+import { type CLIAppMeta, updateMetaForSchema } from './meta.js'
 import { wrapString } from './string-utils.js'
 
-type YargsType = SingleYarg['type']
-type YargAppOption = Pick<SingleYarg, 'describe' | 'default' | 'type'>
+type YargAppOption = Pick<SingleYarg, 'default' | 'describe' | 'type'>
 type YargAppOptions = Record<string, SingleYarg> // Pick<Options, 'describe' | 'default' | 'type'>
 type YargsEnumOptions = ArrayValues<Choices>
+type YargsType = SingleYarg['type']
 
 const LOGGER = (): Logger =>
     logger.get().child('zod-schema', { level: 'error' })

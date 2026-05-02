@@ -45,7 +45,7 @@ export function escapeUnicode(
     value: string,
     shouldEscapePrintable = false,
 ): string {
-    return value.replace(/[\s\S]/g, function (ch) {
+    return value.replace(/[\S\s]/g, function (ch) {
         // skip printable ASCII chars if we should not escape them
         if (!shouldEscapePrintable && /[\x20-\x7E]/.test(ch)) {
             return ch

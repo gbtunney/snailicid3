@@ -15,10 +15,10 @@ import nodeExternals from 'rollup-plugin-node-externals'
 import nodePolyfills from 'rollup-plugin-polyfill-node'
 
 export type RollupPluginPreset =
-    | 'node_library'
     | 'browser_library'
     | 'cli'
     | 'iife'
+    | 'node_library'
 /**
  * TypeScript plugin config shared across all presets.
  *
@@ -54,15 +54,6 @@ export function getPluginsForPreset(
     options: { minify?: boolean } = {},
 ): Array<Plugin> {
     switch (preset) {
-        case 'node_library':
-            return [
-                tsPlugin(),
-                nodeExternals(),
-                nodeResolve({ preferBuiltins: true }),
-                commonjs({ requireReturnsDefault: 'auto' }),
-                json(),
-            ]
-
         case 'browser_library':
             return [
                 tsPlugin(),
@@ -87,6 +78,15 @@ export function getPluginsForPreset(
                 commonjs({ requireReturnsDefault: 'auto' }),
                 json(),
                 ...(options.minify ? [terser()] : []),
+            ]
+
+        case 'node_library':
+            return [
+                tsPlugin(),
+                nodeExternals(),
+                nodeResolve({ preferBuiltins: true }),
+                commonjs({ requireReturnsDefault: 'auto' }),
+                json(),
             ]
     }
 }

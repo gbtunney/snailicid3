@@ -1,11 +1,11 @@
 import { logger } from '@snailicid3/logger'
 import { fmt } from '@snailicid3/utils'
-import { MergeExclusive } from 'type-fest'
+import { type MergeExclusive } from 'type-fest'
 import { z } from 'zod'
-// Example: Refactor sichema merging
-export type ZodObjectSchema = z.ZodObject //| z.ZodType<z.ZodObject>  //| z.ZodEffects<z.AnyZodObject>
 export type WrappedSchema<Schema extends ZodObjectSchema> =
     Schema extends ZodObjectSchema ? Schema : never
+// Example: Refactor sichema merging
+export type ZodObjectSchema = z.ZodObject //| z.ZodType<z.ZodObject>  //| z.ZodEffects<z.AnyZodObject>
 // Detect effects (transform/refine/preprocess)
 
 /** TODO THIS HAS THE PRETTIFY HELPERS IN IT !!! */
@@ -40,7 +40,7 @@ export type MergedSchemas<
 
 export const getDefaultValue = <Schema extends z.ZodType>(
     schema: Schema,
-): z.infer<Schema> | undefined => {
+): undefined | z.infer<Schema> => {
     const _parsed = schema.safeParse(undefined)
     if (_parsed.success) {
         return _parsed.data
@@ -56,7 +56,7 @@ export const tgZodSchema = <Schema extends z.ZodType>(
 /** Get the inner schema of an array (e.g., z.array(z.number()) -> z.number()) */
 export const getArrayElementSchema = <Schema extends z.ZodType>(
     schema: Schema,
-): z.ZodType | undefined => {
+): undefined | z.ZodType => {
     const base = getValueSchema(schema)
     return base instanceof z.ZodArray && base.element
         ? wrapAnyZodSchema(base.element as z.ZodType)
@@ -71,15 +71,15 @@ export const isRequiredStrict = (schema: z.ZodType): boolean => {
     return !isOptionalType(schema) && getDefaultValue(schema) !== undefined
 }
 
-type WithUnwrap = { unwrap: () => z.ZodType }
 type WithInnerType = { innerType: () => z.ZodType }
 type WithRemoveDefault = { removeDefault: () => z.ZodType }
+type WithUnwrap = { unwrap: () => z.ZodType }
 
-const hasUnwrap = (s: unknown): s is z.ZodType & WithUnwrap =>
+const hasUnwrap = (s: unknown): s is WithUnwrap & z.ZodType =>
     typeof (s as any)?.unwrap === 'function'
-const hasInnerType = (s: unknown): s is z.ZodType & WithInnerType =>
+const hasInnerType = (s: unknown): s is WithInnerType & z.ZodType =>
     typeof (s as any)?.innerType === 'function'
-const hasRemoveDefault = (s: unknown): s is z.ZodType & WithRemoveDefault =>
+const hasRemoveDefault = (s: unknown): s is WithRemoveDefault & z.ZodType =>
     typeof (s as any)?.removeDefault === 'function'
 
 /** Container is a schema that contains other schemas, like array,object,record,set,map,tuple */
@@ -141,7 +141,7 @@ export const getValueSchema = <Schema extends z.ZodType>(
                     )
 
                 //attempt to coerce inner type ( STUPID ZOD)
-                const myNewType: z.ZodType | undefined = (
+                const myNewType: undefined | z.ZodType = (
                     _inputType as unknown as Record<string, unknown>
                 )['innerType']
                     ? ((_inputType as unknown as Record<string, unknown>)[

@@ -1,11 +1,11 @@
 import { minimatch } from 'minimatch'
 import semvervalid from 'semver/functions/valid.js'
-import { ValueOf, Writable } from 'type-fest'
+import { type ValueOf, type Writable } from 'type-fest'
 import z from 'zod'
 import {
     IP_ADDRESS_REG_EXP,
     URL,
-    URL_DOMAIN_EXTENSION,
+    type URL_DOMAIN_EXTENSION,
     URL_SCHEME,
     urlScheme,
 } from '../regexp/dictionary.js'
@@ -52,18 +52,18 @@ export const endsWithSuffix = (
 export const getValidMinimatch = (value: string, pattern: string): boolean => {
     return minimatch(value, pattern)
 }
-/** @category URL */
-export type URLScheme = ValueOf<typeof URL_SCHEME>
-
-/** @category URL */
-export type URLDomainExtention = ValueOf<typeof URL_DOMAIN_EXTENSION>
-
 /**
  * @category URL
  * @category IPAddress
  * @category Validators
  */
 export type IPAddress = z.BRAND<'IPAddress'>
+
+/** @category URL */
+export type URLDomainExtention = ValueOf<typeof URL_DOMAIN_EXTENSION>
+
+/** @category URL */
+export type URLScheme = ValueOf<typeof URL_SCHEME>
 
 /**
  * Validates an IP address string (optionally with scheme). Returns branded IPAddress or undefined.
@@ -75,7 +75,7 @@ export type IPAddress = z.BRAND<'IPAddress'>
  */
 export const getValidIPAddress = <Type extends string>(
     value: Type,
-    scheme: string | Array<string> = URL_SCHEME as Writable<typeof URL_SCHEME>,
+    scheme: Array<string> | string = URL_SCHEME as Writable<typeof URL_SCHEME>,
     optional: boolean = true,
 ): IPAddress | undefined => {
     const _schema = z
@@ -99,7 +99,7 @@ export const getValidIPAddress = <Type extends string>(
  */
 export const isValidIpAddress = <Type extends string = string>(
     value: Type,
-    scheme: string | Array<string> = URL_SCHEME as Writable<typeof URL_SCHEME>,
+    scheme: Array<string> | string = URL_SCHEME as Writable<typeof URL_SCHEME>,
     optional: boolean = true,
 ): value is Type => {
     const _regexp: RegExp = !optional
@@ -126,9 +126,9 @@ export type URL = z.BRAND<'URL'>
  */
 export const getValidUrl = <Type extends string>(
     value: Type,
-    scheme: string | Array<string> = URL_SCHEME as Writable<typeof URL_SCHEME>,
+    scheme: Array<string> | string = URL_SCHEME as Writable<typeof URL_SCHEME>,
     optional: boolean = true,
-): URL | undefined => {
+): undefined | URL => {
     const _schema = z
         .string()
         .refine((value: string) => isValidUrl(value, scheme, optional))
@@ -150,7 +150,7 @@ export const getValidUrl = <Type extends string>(
  */
 export const isValidUrl = <Type extends string = string>(
     value: Type,
-    scheme: string | Array<string> = URL_SCHEME as Writable<typeof URL_SCHEME>,
+    scheme: Array<string> | string = URL_SCHEME as Writable<typeof URL_SCHEME>,
     optional: boolean = true,
 ): value is Type => {
     const _regexp: RegExp = !optional

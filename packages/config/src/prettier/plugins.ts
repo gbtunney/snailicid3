@@ -1,6 +1,6 @@
 import * as phpPlugin from '@prettier/plugin-php'
 import xmlPlugin from '@prettier/plugin-xml'
-import { Plugin as PrettierPlugin } from 'prettier'
+import { type Plugin as PrettierPlugin } from 'prettier'
 import * as unResolvedJsdocPlugin from 'prettier-plugin-jsdoc'
 import * as shPlugin from 'prettier-plugin-sh'
 import type { UnknownRecord } from 'type-fest'
@@ -12,15 +12,15 @@ export const keysOf = <ObjectType extends UnknownRecord>(
 
 type AnyPrettierPlugin = PrettierPlugin
 
+type PrettierPluginName =
+    | '@prettier/plugin-php'
+    | '@prettier/plugin-xml'
+    | 'prettier-plugin-jsdoc'
+    | 'prettier-plugin-sh'
+
 type UnresolvedPrettierPlugin<
     Type extends AnyPrettierPlugin = AnyPrettierPlugin,
 > = Type | { default: Type }
-
-type PrettierPluginName =
-    | '@prettier/plugin-xml'
-    | '@prettier/plugin-php'
-    | 'prettier-plugin-jsdoc'
-    | 'prettier-plugin-sh'
 
 const jsDocPlugin: UnresolvedPrettierPlugin = {
     ...unResolvedJsdocPlugin,

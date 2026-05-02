@@ -4,8 +4,8 @@ type IntegerInRange = Finite<ReturnType<typeof parseInt>>
 
 /** Return a random integer between min and max */
 export const randomIntInRange = <Min extends number, Max extends number>(
-    min: Integer<Min> | 0 = 0,
-    max: Integer<Max> | 100 = 100,
+    min: 0 | Integer<Min> = 0,
+    max: 100 | Integer<Max> = 100,
 ): IntegerInRange => {
     return parseInt(
         Math.floor(Math.random() * (max - min + 1) + min).toString(),
@@ -17,7 +17,7 @@ export const getNumberRoundedToDecimal = <
     Multiplier extends number,
 >(
     value: Finite<Value>,
-    multiplier: Integer<Multiplier> | 100 = 100,
+    multiplier: 100 | Integer<Multiplier> = 100,
 ): number => {
     if (multiplier === 0) return value
     return Math.round((value + Number.EPSILON) * multiplier) / multiplier

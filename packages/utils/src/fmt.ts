@@ -1,8 +1,8 @@
 export type FormatValueOptions = {
-    depth?: number
     compact?: boolean | number
+    depth?: number
     maxArrayLength?: number
-    sorted?: boolean | ((a: string, b: string) => number)
+    sorted?: ((a: string, b: string) => number) | boolean
 }
 
 export const formatValue = (
@@ -10,17 +10,17 @@ export const formatValue = (
     _opts?: FormatValueOptions,
 ): string => {
     switch (typeof value) {
-        case 'string':
-            return value
-        case 'number':
-        case 'boolean':
-            return String(value)
         case 'bigint':
             return `${value.toString()}n`
-        case 'symbol':
-            return value.toString()
+        case 'boolean':
+        case 'number':
+            return String(value)
         case 'function':
             return value.name ? `[Function ${value.name}]` : '[Function]'
+        case 'string':
+            return value
+        case 'symbol':
+            return value.toString()
         case 'undefined':
             return 'undefined'
         case 'object':

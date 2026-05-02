@@ -1,4 +1,4 @@
-import z from 'zod'
+import type z from 'zod'
 import { ensureArray, numeric, resolveRegExpSchema } from './schemas.js'
 
 /**
@@ -51,7 +51,7 @@ export const wrapSchema = <Schema extends z.ZodType>(
 export const parseZodData = <Schema extends z.ZodType>(
     value: unknown,
     schema: Schema,
-): z.infer<Schema> | undefined => {
+): undefined | z.infer<Schema> => {
     return isZodParsable<Schema>(value, schema)
         ? schema.parse(value)
         : undefined
@@ -79,7 +79,7 @@ export const isZodParsable = <Schema extends z.ZodType>(
 
 export const parseFactory =
     <Schema extends z.ZodType>(schema: Schema) =>
-    (data: unknown): z.infer<Schema> | undefined => {
+    (data: unknown): undefined | z.infer<Schema> => {
         if (isZodParsable<Schema>(data, schema)) {
             return schema.parse(data)
         }
