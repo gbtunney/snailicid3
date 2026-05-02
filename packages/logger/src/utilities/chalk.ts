@@ -1,6 +1,6 @@
 import chalk, {
-    BackgroundColorName,
-    ChalkInstance,
+    type BackgroundColorName,
+    type ChalkInstance,
     type ColorName,
     colorNames,
     type ForegroundColorName,
@@ -8,18 +8,21 @@ import chalk, {
     modifierNames,
 } from 'chalk'
 import {
-    type ColorJS,
-    HexColor,
+    //type ColorJS,
+    //  type HexColor,
     parseColorJS,
     parseColorToHexStrict,
     readableTextHex,
 } from './color.js'
 import { lowerCaseFirstLetter, upperCaseFirstLetter } from './string.js'
 
-export type ChalkForegroundColor = ForegroundColorName
 export type ChalkBackgroundColor = BackgroundColorName
-export type ChalkColorPreset = ColorName
 export type ChalkColor = ChalkColorPreset | HexColor // LoggerRecord< ChalkInstance|ChalkColor|HexColor>
+
+export type ChalkColorPreset = ColorName
+export type ChalkForegroundColor = ForegroundColorName
+type ColorJS = ReturnType<typeof parseColorJS>
+type HexColor = ReturnType<typeof parseColorToHexStrict>
 
 /** Replace the guard to use Chalk's canonical list */
 export const isChalkColorPreset = (
@@ -80,18 +83,6 @@ export const toBright = (
 export const stripBright = (color: ChalkColorPreset): ChalkColorPreset =>
     toBright(color, true)
 
-/** Converts any color to its foreground variant (strips bg + optional Bright) */
-export function toForeground(
-    color: ChalkColorPreset,
-    removeBright = false,
-): ChalkColorPreset {
-    const _color: string = lowerCaseFirstLetter(
-        isBackground(color) ? stripBg(color) : color,
-    )
-    assertChalkColorPreset(_color, 'toForeground')
-    return removeBright ? stripBright(_color) : _color
-}
-
 /** Converts any color to its background variant (adds bg + preserves/removes Bright) */
 export function toBackground(
     color: ChalkColorPreset,
@@ -102,6 +93,18 @@ export function toBackground(
         lowerCaseFirstLetter(isBackground(color) ? stripBg(color) : color),
     )
     assertChalkColorPreset(_color, 'toBackground')
+    return removeBright ? stripBright(_color) : _color
+}
+
+/** Converts any color to its foreground variant (strips bg + optional Bright) */
+export function toForeground(
+    color: ChalkColorPreset,
+    removeBright = false,
+): ChalkColorPreset {
+    const _color: string = lowerCaseFirstLetter(
+        isBackground(color) ? stripBg(color) : color,
+    )
+    assertChalkColorPreset(_color, 'toForeground')
     return removeBright ? stripBright(_color) : _color
 }
 
@@ -147,7 +150,7 @@ export const chalkPresetToColorJS = (color: ChalkColorPreset): ColorJS => {
 export const wrapColorChalkInstanceText = (
     value: string,
     color: ChalkColor,
-    theme: 'fg' | 'bg' = 'fg',
+    theme: 'bg' | 'fg' = 'fg',
 ): string => {
     const _chalkInstance = getColorChalkInstance(color, theme)
     return _chalkInstance(value)

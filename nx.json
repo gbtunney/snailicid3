@@ -30,6 +30,13 @@
                 "cwd": "{projectRoot}"
             }
         },
+        "dev:tsdown": {
+            "cache": false,
+            "command": "tsdown --watch",
+            "options": {
+                "cwd": "{projectRoot}"
+            }
+        },
         "dev:rollup": {
             "cache": false,
             "command": "rollup --watch --config ./rollup.config.mts",
@@ -76,9 +83,19 @@
                 "cwd": "{projectRoot}"
             }
         },
+        "build:tsdown": {
+            "cache": true,
+            "dependsOn": ["^build"],
+            "inputs": ["production", "^production"],
+            "outputs": ["{projectRoot}/dist"],
+            "command": "tsdown",
+            "options": {
+                "cwd": "{projectRoot}"
+            }
+        },
         "build": {
             "cache": true,
-            "dependsOn": ["build:ts", "build:rollup"],
+            "dependsOn": ["build:ts", "build:tsdown"],
             "inputs": ["production", "^production"]
         },
         "test": {
@@ -109,7 +126,7 @@
         },
         "lint": {
             "cache": true,
-            "dependsOn": ["check:ts"],
+            "dependsOn": ["check:ts", "build"],
             "command": "pnpm exec prettier --ignore-path ./.gitignore --check . && eslint .",
             "options": {
                 "cwd": "{projectRoot}"
@@ -117,7 +134,7 @@
         },
         "fix": {
             "cache": true,
-            "dependsOn": ["check:ts"],
+            "dependsOn": ["check:ts", "build"],
             "command": "pnpm exec prettier --ignore-path ./.gitignore --write . && pnpm exec eslint . --fix",
             "options": {
                 "cwd": "{projectRoot}"

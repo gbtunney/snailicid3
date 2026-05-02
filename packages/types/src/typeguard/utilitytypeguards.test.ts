@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { EmptyArray } from './../types/empty.js'
+import { type EmptyArray } from './../types/empty.js'
 import {
     isBigInt,
     isEmptyObject,
@@ -22,7 +22,7 @@ describe('typeguards', () => {
         const testEmptyObj = {}
         expect(isNonEmptyArray<Array<string>>(test2)).toBe(true)
 
-        const gbt: string | number | bigint = '2'
+        const gbt: bigint | number | string = '2'
         if (isNotNumber(gbt)) {
             const testMe: string = gbt
         }

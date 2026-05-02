@@ -55,7 +55,7 @@ export const mapObject = <
     mapper: <Key extends keyof ObjectType>(
         entry: readonly [Key, ObjectType[Key]],
         index: number,
-    ) => readonly [NewKey, NewValue] | null | undefined,
+    ) => null | readonly [NewKey, NewValue] | undefined,
 ): Record<NewKey, NewValue> => {
     const tuples: Array<readonly [NewKey, NewValue]> = []
     let index = 0

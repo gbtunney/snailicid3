@@ -8,6 +8,9 @@ import type {
     UnknownArray,
 } from 'type-fest'
 
+/* * @category Utility Types */
+export type IsArray<Type> = Type extends UnknownArray ? true : false
+
 /* * UTILITY TYPES
  * @category Utility Types
  * */
@@ -16,16 +19,13 @@ export type PlainObject = {
     [y: number]: never
 }
 
-/* * @category Utility Types */
-export type IsArray<Type> = Type extends UnknownArray ? true : false
-
 /*
  * @category Utility Types
  * @category Json
  *  */
 export namespace Json {
-    export type Object = JsonObject
     export type Array = JsonArray
+    export type Object = JsonObject
     export type Primitive = JsonPrimitive
     export type Value = Exclude<JsonValue, null>
 }
@@ -36,6 +36,31 @@ export type DeepPartial<Type> = Type extends object
           [Prop in keyof Type]?: DeepPartial<Type[Prop]>
       }
     : Type
+export type EntriesOf<Type extends object> = Entries<Type>
+export type EntryOf<Type extends object> = Entry<Type>
+/** Builds a Record<K, V> where K is inferred from array or object T. Enforces exhaustiveness: no extra or missing keys. */
+export type ExhaustiveRecordFrom<
+    Type extends ReadonlyArray<unknown> | Record<keyof unknown, unknown>,
+    Value = unknown,
+> = Record<ExtractKeys<Type>, Value>
+
+export type ExtractKeys<
+    Type extends ReadonlyArray<unknown> | Record<keyof unknown, unknown>,
+> =
+    Type extends ReadonlyArray<infer U>
+        ? Extract<U, PropertyKey>
+        : Type extends Record<keyof any, unknown>
+          ? keyof Type
+          : never
+
+export type FromEntriesTuples<
+    TupleArrayType extends ReadonlyArray<readonly [PropertyKey, unknown]>,
+> = {
+    [Tuple in TupleArrayType[number] as PropertyKey & Tuple[0]]: Tuple[1]
+}
+
+export type KeysOf<Type extends object> = keyof Type
+
 /* * @category Utility Types */
 export type PrefixProperties<Type extends object, Prefix extends string> = {
     [Key in keyof Type as `${Prefix}${Key extends string
@@ -48,31 +73,6 @@ export type SuffixProperties<Type extends object, Suffix extends string> = {
         ? Key
         : never}${Suffix}`]: Type[Key]
 }
-export type ExtractKeys<
-    Type extends ReadonlyArray<unknown> | Record<keyof unknown, unknown>,
-> =
-    Type extends ReadonlyArray<infer U>
-        ? Extract<U, PropertyKey>
-        : Type extends Record<keyof any, unknown>
-          ? keyof Type
-          : never
-
-/** Builds a Record<K, V> where K is inferred from array or object T. Enforces exhaustiveness: no extra or missing keys. */
-export type ExhaustiveRecordFrom<
-    Type extends ReadonlyArray<unknown> | Record<keyof unknown, unknown>,
-    Value = unknown,
-> = Record<ExtractKeys<Type>, Value>
-
-export type FromEntriesTuples<
-    TupleArrayType extends ReadonlyArray<readonly [PropertyKey, unknown]>,
-> = {
-    [Tuple in TupleArrayType[number] as Tuple[0] & PropertyKey]: Tuple[1]
-}
-
-export type EntriesOf<Type extends object> = Entries<Type>
-
-export type EntryOf<Type extends object> = Entry<Type>
-export type KeysOf<Type extends object> = keyof Type
 /** TYPEFEST TYPES */
 export type {
     Entries,

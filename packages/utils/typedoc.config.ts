@@ -1,7 +1,7 @@
 import { merge, typedoc } from '@snailicid3/build-config'
-import { TypeDocOptions } from 'typedoc'
+import { type TypeDocOptions } from 'typedoc'
+import path from 'node:path'
 import url from 'node:url'
-import path from 'path'
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
 //import { Options as OptionsVitepress }from 'typedoc-vitepress-theme'
 

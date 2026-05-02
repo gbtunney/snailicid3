@@ -7,7 +7,6 @@ import {
     getColorChalkInstance,
     wrapColorChalkInstanceText,
 } from './utilities/chalk.js'
-
 import { parseColorToHexStrict } from './utilities/color.js'
 
 export type LogLevelColors = ChalkColor
@@ -21,7 +20,18 @@ export const LEVEL_NAMES = [
     'fatal',
     'silent',
 ] as const
+export type LoggerRecord<Value> = ExhaustiveRecordFrom<
+    typeof LEVEL_NAMES,
+    Value
+>
+
 export type LogLevelName = (typeof LEVEL_NAMES)[number]
+
+/** Builds a Record<K, V> where K is inferred from array or object T. Enforces exhaustiveness: no extra or missing keys. */
+type ExhaustiveRecordFrom<
+    Type extends ReadonlyArray<unknown> | Record<keyof unknown, unknown>,
+    Value = unknown,
+> = Record<ExtractKeys<Type>, Value>
 
 type ExtractKeys<
     Type extends ReadonlyArray<unknown> | Record<keyof unknown, unknown>,
@@ -31,17 +41,6 @@ type ExtractKeys<
         : Type extends Record<keyof any, unknown>
           ? keyof Type
           : never
-
-/** Builds a Record<K, V> where K is inferred from array or object T. Enforces exhaustiveness: no extra or missing keys. */
-type ExhaustiveRecordFrom<
-    Type extends ReadonlyArray<unknown> | Record<keyof unknown, unknown>,
-    Value = unknown,
-> = Record<ExtractKeys<Type>, Value>
-
-export type LoggerRecord<Value> = ExhaustiveRecordFrom<
-    typeof LEVEL_NAMES,
-    Value
->
 
 export const LOG_LEVELS: LoggerRecord<number> = {
     debug: 35,
@@ -80,15 +79,15 @@ function colorizeBrowser(
 
 function pickConsole(level: LogLevelName): (...args: Array<unknown>) => void {
     switch (level) {
+        case 'debug':
+            return console.debug.bind(console)
         case 'error':
         case 'fatal':
             return console.error.bind(console)
-        case 'warn':
-            return console.warn.bind(console)
         case 'info':
             return console.info.bind(console)
-        case 'debug':
-            return console.debug.bind(console)
+        case 'warn':
+            return console.warn.bind(console)
         default:
             return console.log.bind(console)
     }
@@ -110,19 +109,19 @@ const schemaLoggerOpts = z.object({
 })
 
 export type Logger = {
-    readonly name: string | undefined
-    readonly level: LogLevelName
-    setLevel: (level: LogLevelName) => void
     child: (
         name: string,
         overrides?: Partial<z.input<typeof schemaLoggerOpts>>,
     ) => Logger
-    trace: <Type extends Array<unknown>>(...a: Type) => void
     debug: <Type extends Array<unknown>>(...a: Type) => void
-    info: <Type extends Array<unknown>>(...a: Type) => void
-    warn: <Type extends Array<unknown>>(...a: Type) => void
     error: <Type extends Array<unknown>>(...a: Type) => void
     fatal: <Type extends Array<unknown>>(...a: Type) => void
+    info: <Type extends Array<unknown>>(...a: Type) => void
+    readonly level: LogLevelName
+    readonly name: string | undefined
+    setLevel: (level: LogLevelName) => void
+    trace: <Type extends Array<unknown>>(...a: Type) => void
+    warn: <Type extends Array<unknown>>(...a: Type) => void
 }
 
 export type LoggerOpts = z.input<typeof schemaLoggerOpts>

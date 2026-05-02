@@ -4,10 +4,14 @@ import chalk from 'chalk'
 import yargs from 'yargs'
 import type { Argv, Options } from 'yargs'
 import yargsInteractive from 'yargs-interactive'
-import { z } from 'zod'
-import { AppConfig, AppConfigIn, appConfigSchema } from './app-config.js'
+import { type z } from 'zod'
+import {
+    type AppConfig,
+    type AppConfigIn,
+    appConfigSchema,
+} from './app-config.js'
 import { doPrintHeader, getHeader } from './header.js'
-import { wrapSchema, ZodObjectSchema } from './helpers.js'
+import { wrapSchema, type ZodObjectSchema } from './helpers.js'
 import { prettyErrorLog, removeAnsi } from './string-utils.js'
 import { getYargAppOptionObject } from './zod-schema.js'
 
@@ -24,7 +28,7 @@ export type InitSuccessCallback<
     args: z.infer<AppOptionsSchema>,
     config: AppConfig, // or: z.infer<typeof appConfigSchema>
     help: string | undefined,
-) => void | Promise<void>
+) => Promise<void> | void
 
 /**
  * Initializes the application with the provided configuration and options schema.

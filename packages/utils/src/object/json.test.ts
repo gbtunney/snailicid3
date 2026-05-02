@@ -20,7 +20,7 @@ describe('JSON serialize', () => {
     })
 
     test("demoDeserializeJSON  and serialize  should return the deserialized JSON object with the tag or 'ERROR'", () => {
-        type TestJson = { name: string; age: number }
+        type TestJson = { age: number; name: string }
         const testjson: TestJson = { age: 30, name: 'John' }
 
         const _schemaresult = jsonParser()
@@ -31,8 +31,8 @@ describe('JSON serialize', () => {
             const ppExample = serialized_result
             const result = _schemaresult.deserialize(serialized_result)
             expectTypeOf(result).not.toMatchObjectType<{
-                name: string
                 age: string
+                name: string
             }>()
             /* expectTypeOf(result).toMatchObjectType<{
                 name: string

@@ -1,6 +1,8 @@
 import type { RuleConfig } from '@eslint/config-helpers'
-/** The human readable severity level used in a configuration. */
-export type SeverityName = 'off' | 'warn' | 'error'
+/** Represents the metadata for an object, such as a plugin or processor. */
+export type RuleOptions = Array<RuleConfig> | RuleConfig
+/** The severity of a rule in a configuration. */
+export type Severity = SeverityLevel | SeverityName
 /**
  * The numeric severity level for a rule.
  *
@@ -9,10 +11,8 @@ export type SeverityName = 'off' | 'warn' | 'error'
  * - `2` means error.
  */
 export type SeverityLevel = 0 | 1 | 2
-/** The severity of a rule in a configuration. */
-export type Severity = SeverityName | SeverityLevel
-/** Represents the metadata for an object, such as a plugin or processor. */
-export type RuleOptions = RuleConfig | Array<RuleConfig>
+/** The human readable severity level used in a configuration. */
+export type SeverityName = 'error' | 'off' | 'warn'
 
 /** Typed helper for defining ESLint rules. Preserves the exact rule configuration type. */
 export const defineRule = <RuleType extends RuleConfig>(
@@ -22,7 +22,7 @@ type CleanRuleInput = Record<string, Array<unknown> | undefined>
 
 /** TODO: TEST THESE Optional: stricter version (cleaner input) If you want to never write severity in input */
 export const rulesWithSeverity = <Type extends CleanRuleInput>(
-    severity: 'off' | 'warn' | 'error',
+    severity: 'error' | 'off' | 'warn',
     rules: Type,
 ): Record<keyof Type, RuleConfig> => {
     return Object.fromEntries(
@@ -33,7 +33,7 @@ export const rulesWithSeverity = <Type extends CleanRuleInput>(
 }
 /** Applies a severity to a rules object. Allows writing rules without repeating 'warn' / 'error'. */
 export const withSeverity = <Type extends Record<string, RuleOptions>>(
-    severity: 'off' | 'warn' | 'error',
+    severity: 'error' | 'off' | 'warn',
     rules: Type,
 ): Record<keyof Type, RuleConfig> => {
     return Object.fromEntries(

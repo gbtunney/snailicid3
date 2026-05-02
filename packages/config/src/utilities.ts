@@ -1,7 +1,7 @@
 import type { JsonArray, JsonObject, JsonValue, UnknownRecord } from 'type-fest'
-import fs from 'fs'
+import fs from 'node:fs'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import path from 'path'
 
 type TraceLogger = {
     error: (...args: Array<unknown>) => void

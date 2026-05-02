@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest'
-import { PlainObject } from './../types/utility.js'
+import { type PlainObject } from './../types/utility.js'
 
 /** Local minimal validators replacing the removed number/validators dependency */
-const isNumeric = (value: unknown): value is number | bigint =>
+const isNumeric = (value: unknown): value is bigint | number =>
     typeof value === 'number' || typeof value === 'bigint'
 const isPossibleNumeric = (
     value: unknown,
@@ -13,9 +13,9 @@ const isPossibleNumeric = (
     const trimmed = value.trim()
     if (trimmed === '') return false
     if (!strict) return true
-    return !Number.isNaN(Number(trimmed)) || /^[+-]?0x[0-9a-f]+$/i.test(trimmed)
+    return !Number.isNaN(Number(trimmed)) || /^[+-]?0x[\da-f]+$/i.test(trimmed)
 }
-const isValidScientificNumber = (value: unknown): value is string | number => {
+const isValidScientificNumber = (value: unknown): value is number | string => {
     if (typeof value === 'number') return !Number.isNaN(value)
     if (typeof value !== 'string') return false
     return /^[+-]?(?:\d(?:_?\d)*(?:\.\d(?:_?\d)*)?|\.\d(?:_?\d)*)(?:e[+-]?\d(?:_?\d)*)?$/i.test(
@@ -32,24 +32,24 @@ const minLen = (value: string, min: number): boolean =>
 const startsWithPrefix = (value: string, prefix: string): boolean =>
     typeof value === 'string' && value.startsWith(prefix)
 
-// Assertion function types
-type AssertString = (value: unknown) => asserts value is string
 type AssertBigInt = (value: unknown) => asserts value is bigint
+type AssertJsonArray = (value: unknown) => asserts value is Array<unknown>
+type AssertMinLen = (value: string, min: number) => asserts value is string
 type AssertNumber = (value: unknown) => asserts value is number
 type AssertPlainObject = (
     value: unknown,
 ) => asserts value is PlainObject | Record<string, unknown>
-type AssertJsonArray = (value: unknown) => asserts value is Array<unknown>
 type AssertPossibleNumeric = (
     value: unknown,
     strict?: boolean,
 ) => asserts value is number | string
 type AssertScientific = (value: unknown) => asserts value is string
-type AssertMinLen = (value: string, min: number) => asserts value is string
 type AssertStartsWith = (
     value: string,
     prefix: string,
 ) => asserts value is string
+// Assertion function types
+type AssertString = (value: unknown) => asserts value is string
 
 // Guard-derived assertions
 const assertIsString: AssertString = guardToAssertion(isString)

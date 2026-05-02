@@ -10,7 +10,7 @@ export const parseDecimal = (v: string): number => Number(v)
 export const parseScientific = (v: string): number => Number(v)
 export const parseExponential = (v: string): number => Number(v)
 export const parseBigintLiteral = (v: string): bigint =>
-    BigInt(v.replace(/[nN]$/, ''))
+    BigInt(v.replace(/[Nn]$/, ''))
 
 export const numericFormats = {
     bigint: {
@@ -62,7 +62,7 @@ type FormatUtils = {
         isValid: (
             v: string,
         ) => v is NumericString<K extends NumericStringKind ? K : never>
-        parse: (v: string) => number | bigint
+        parse: (v: string) => bigint | number
     }
 }
 
@@ -74,7 +74,7 @@ export const numericFormatUtils = Object.fromEntries(
                 key,
                 {
                     isValid: (v: string): boolean => meta.regex.test(v.trim()),
-                    parse: (v: string): number | bigint =>
+                    parse: (v: string): bigint | number =>
                         meta.parse(_cleanup(v.trim())),
                 },
             ]

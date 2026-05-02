@@ -1,7 +1,7 @@
 /** Translate a {@link BuildPlan} into Rollup configuration objects. */
 
 import type { OutputOptions, RollupOptions } from 'rollup'
-import path from 'path'
+import path from 'node:path'
 import { getPluginsForPreset, inferPreset } from './plugins.js'
 import { createBanner } from '../../build/banner.js'
 import type { BannerPackageMeta } from '../../build/banner.js'
@@ -24,25 +24,33 @@ const OUTPUT_KIND_EXT: Record<OutputKind, string> = {
     umd: '-umd.js',
 }
 
-function buildOutputOptions(
-    entry: EntrySpec,
-    kind: OutputKind,
-    outputDir: string,
-    libraryName: string,
-    banner: string | undefined,
-): OutputOptions {
-    const filename = resolveEntryFilename(entry.key)
-    const ext = OUTPUT_KIND_EXT[kind]
-    const file = path.resolve(outputDir, `${filename}${ext}`)
+/**
+ * Generate a `package.json` `exports` field from a {@link BuildPlan}.
+ *
+ * Returns a plain object suitable for writing into `package.json#exports`.
+ */
+export function toPackageExports(
+    plan: BuildPlan,
+): Record<string, Record<string, string>> {
+    const result: Record<string, Record<string, string>> = {}
 
-    return {
-        exports: 'named',
-        file,
-        format: OUTPUT_KIND_FORMAT[kind],
-        name: libraryName,
-        sourcemap: entry.sourcemap ?? true,
-        ...(banner ? { banner } : {}),
+    for (const entry of plan.entries) {
+        const exportKey = normaliseExportKey(entry.key)
+        const filename = resolveEntryFilename(entry.key)
+        const conditions: Record<string, string> = {}
+
+        for (const kind of entry.outputKinds) {
+            const ext = OUTPUT_KIND_EXT[kind]
+            const file = `./${path.join(path.relative('.', plan.outputDir), `${filename}${ext}`)}`
+            conditions[
+                kind === 'esm' ? 'import' : kind === 'cjs' ? 'require' : kind
+            ] = file
+        }
+
+        result[exportKey] = conditions
     }
+
+    return result
 }
 
 /**
@@ -117,31 +125,23 @@ export function toRollupConfig(
     })
 }
 
-/**
- * Generate a `package.json` `exports` field from a {@link BuildPlan}.
- *
- * Returns a plain object suitable for writing into `package.json#exports`.
- */
-export function toPackageExports(
-    plan: BuildPlan,
-): Record<string, Record<string, string>> {
-    const result: Record<string, Record<string, string>> = {}
+function buildOutputOptions(
+    entry: EntrySpec,
+    kind: OutputKind,
+    outputDir: string,
+    libraryName: string,
+    banner: string | undefined,
+): OutputOptions {
+    const filename = resolveEntryFilename(entry.key)
+    const ext = OUTPUT_KIND_EXT[kind]
+    const file = path.resolve(outputDir, `${filename}${ext}`)
 
-    for (const entry of plan.entries) {
-        const exportKey = normaliseExportKey(entry.key)
-        const filename = resolveEntryFilename(entry.key)
-        const conditions: Record<string, string> = {}
-
-        for (const kind of entry.outputKinds) {
-            const ext = OUTPUT_KIND_EXT[kind]
-            const file = `./${path.join(path.relative('.', plan.outputDir), `${filename}${ext}`)}`
-            conditions[
-                kind === 'esm' ? 'import' : kind === 'cjs' ? 'require' : kind
-            ] = file
-        }
-
-        result[exportKey] = conditions
+    return {
+        exports: 'named',
+        file,
+        format: OUTPUT_KIND_FORMAT[kind],
+        name: libraryName,
+        sourcemap: entry.sourcemap ?? true,
+        ...(banner ? { banner } : {}),
     }
-
-    return result
 }

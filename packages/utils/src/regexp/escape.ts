@@ -6,7 +6,7 @@ import { isStringValidRegExp } from './validators.js'
  * grammar.
  */
 export const escapeStringRegexp = (value: string): string => {
-    return value.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d')
+    return value.replace(/[$()*+.?[\\\]^{|}]/g, '\\$&').replace(/-/g, '\\x2d')
 }
 
 /**

@@ -16,10 +16,10 @@ export const transformExplodeArray = function ({
     trim,
     value,
 }: BatchBaseValue & {
-    delimiter?: string | RegExp
-    trim?: (TrimCharacters & { pattern: string | Array<string> }) | undefined
+    delimiter?: RegExp | string
     prefix?: string | undefined
-}): string | Array<string> {
+    trim?: (TrimCharacters & { pattern: Array<string> | string }) | undefined
+}): Array<string> | string {
     if (isEmpty(value)) return []
     //if it is an array already,delimiter is disregarded & array is just cleaned & prefixed.
     //the only case for delimiter being undefined is if value as an array
@@ -32,9 +32,10 @@ export const transformExplodeArray = function ({
     if (isNotUndefined<TrimCharacters>(trim)) {
         const patternTrim = trim
 
-        const newObj: BatchBaseValue & {
-            pattern: string | Array<string>
-        } & TrimCharacters = {
+        const newObj: BatchBaseValue &
+            TrimCharacters & {
+                pattern: Array<string> | string
+            } = {
             value: result,
             ...trim,
         }
@@ -64,7 +65,7 @@ export const explodeCSSClassString = ({
     prefix,
     trim = { pattern: TRIM_CHARS_DEFAULT },
     value,
-}: Parameters<typeof transformExplodeArray>[0]): string | Array<string> =>
+}: Parameters<typeof transformExplodeArray>[0]): Array<string> | string =>
     transformExplodeArray({ delimiter, prefix, trim, value })
 
 export default transformExplodeArray

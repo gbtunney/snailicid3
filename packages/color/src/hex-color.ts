@@ -1,9 +1,9 @@
-import ColorIO, { ColorObject as Color, Coords } from 'colorjs.io'
-import { mapRange, Range, roundToDecimals } from './numeric.js'
+import ColorIO, { type ColorObject as Color, type Coords } from 'colorjs.io'
+import { mapRange, type Range, roundToDecimals } from './numeric.js'
 import { fmt } from './pretty.print.js'
+export type ColorJS = ColorIO
 // Branded hex type
 export type HexColor = `#${string}` & { readonly __hexBrand: 'HexColor' }
-export type ColorJS = ColorIO
 export function mapColorJSCoords(
     color: ColorJS,
     mapFunction: (value: number) => number,
@@ -27,17 +27,8 @@ export const normalizeRGBCoords = (color: ColorJS): Coords => {
 }
 
 export const isHexColor = (value: string): value is HexColor =>
-    /^#[0-9A-Fa-f]{6}$/.test(value)
+    /^#[\dA-Fa-f]{6}$/.test(value)
 
-/** Checks if a color string is valid by attempting to parse it to hex also validates the string */
-export function isValidColor(input: string): boolean {
-    try {
-        parseColorToHexStrict(input)
-        return true
-    } catch {
-        return false
-    }
-}
 export function assertHexColor(
     value: string,
     ctx?: string,
@@ -48,10 +39,19 @@ export function assertHexColor(
         )
     }
 }
+/** Checks if a color string is valid by attempting to parse it to hex also validates the string */
+export function isValidColor(input: string): boolean {
+    try {
+        parseColorToHexStrict(input)
+        return true
+    } catch {
+        return false
+    }
+}
 
 /** Parse any CSS color string via ColorJS; throws on failure TODO: expand gamuts, spaces. */
 export function parseColorJS(
-    input: string | Color /*:space ColorJS["space"]*/,
+    input: Color | string /*:space ColorJS["space"]*/,
     ctx?: string,
 ): ColorJS {
     try {
@@ -70,7 +70,7 @@ export function parseColorJS(
 }
 /** Parse any CSS color string via ColorJS; throws on failure TODO: expand gamuts, spaces. */
 export function parseColorToHexStrict(
-    input: string | Color,
+    input: Color | string,
     ctx?: string,
 ): HexColor {
     try {
@@ -89,13 +89,9 @@ export function parseColorToHexStrict(
 
 export const parseColorToHex: typeof parseColorToHexStrict =
     parseColorToHexStrict
-/** Parse to branded #RRGGBB; returns undefined instead of throwing on failure */
-export function tryParseColorToHex(input: string): undefined {
-    try {
-        // return parseColorToHexStrict(input)
-    } catch {
-        return undefined
-    }
+export type ColorTheme = {
+    bg: ColorJS | HexColor
+    fg: ColorJS | HexColor
 }
 
 export function toHex(color: ColorJS, includeAlpha = false): string {
@@ -109,18 +105,22 @@ export function toHex(color: ColorJS, includeAlpha = false): string {
         n.toString(16).padStart(2, '0').toUpperCase()
 
     const [rF, gF, bF] = srgb.coords as [number, number, number]
-    const r = toByte(rF),
+    const b = toByte(bF),
         g = toByte(gF),
-        b = toByte(bF)
+        r = toByte(rF)
     const a = toByte(srgb.alpha ?? 1)
 
     let hex = `#${toHex2(r)}${toHex2(g)}${toHex2(b)}`
     if (includeAlpha) hex += toHex2(a)
     return hex
 }
-export type ColorTheme = {
-    bg: ColorJS | HexColor
-    fg: ColorJS | HexColor
+/** Parse to branded #RRGGBB; returns undefined instead of throwing on failure */
+export function tryParseColorToHex(input: string): undefined {
+    try {
+        // return parseColorToHexStrict(input)
+    } catch {
+        return undefined
+    }
 }
 export const apcaContrast = (theme: ColorTheme): number => {
     const { bg, fg } = theme
@@ -134,9 +134,9 @@ export const apcaContrast = (theme: ColorTheme): number => {
 }
 
 export function readableTextHex(
-    color: string | ColorJS,
+    color: ColorJS | string,
     theme: keyof ColorTheme = 'fg',
-): 'white' | 'black' {
+): 'black' | 'white' {
     const _color = typeof color === 'string' ? parseColorJS(color) : color
     const white = parseColorJS('white')
     const black = parseColorJS('black')

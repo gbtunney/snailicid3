@@ -7,13 +7,13 @@ import {
 
 /** Allowed diff units */
 export type DayjsDiffUnit =
-    | 'millisecond'
-    | 'second'
-    | 'minute'
-    | 'hour'
     | 'day'
-    | 'week'
+    | 'hour'
+    | 'millisecond'
+    | 'minute'
     | 'month'
+    | 'second'
+    | 'week'
     | 'year'
 
 /** Nanoseconds to milliseconds */

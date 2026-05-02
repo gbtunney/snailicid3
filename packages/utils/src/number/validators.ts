@@ -6,17 +6,12 @@ import {
     octalNumber,
     scientificNumber,
 } from './../regexp/dictionary.js'
-import type {
-    Numeric,
-    NumericString,
-    NumericStringKind,
-    PossibleNumeric,
-} from './numeric.js'
+import type { Numeric, NumericStringKind, PossibleNumeric } from './numeric.js'
 import {
     isBigInt,
-    isInteger as tgIsInteger,
     isNumber,
     isString,
+    isInteger as tgIsInteger,
 } from '../typeguard/utility.typeguards.js'
 
 export const classifyNumericString = (raw: string): NumericStringKind => {
@@ -175,4 +170,4 @@ export const isNumericFloat = isNumericNonInteger
 export const cleanString = (value: string): string =>
     value.trim().replace(/\s+/g, ' ')
 
-export type { NumericString, NumericStringKind }
+export { type NumericString, type NumericStringKind } from './numeric.js'

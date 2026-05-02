@@ -32,10 +32,10 @@ export const formatDurationFromMs = (
         String(value).padStart(length, '0')
 
     switch (pattern) {
-        case format_duration_long:
-            return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}.${pad(hundredths)}`
         case format_duration_basic:
             return `${pad(minutes)}:${pad(seconds)}.${pad(hundredths)}`
+        case format_duration_long:
+            return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}.${pad(hundredths)}`
         case format_duration_truncated:
             return `${pad(minutes)}:${pad(seconds)}`
         default:

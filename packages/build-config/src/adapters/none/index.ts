@@ -24,3 +24,4 @@ export const noneAdapter: BuildAdapter = {
         return NONE_PRODUCTS.includes(product)
     },
 }
+export default noneAdapter

@@ -3,7 +3,7 @@
  *
  * @see [Vitest - A modern testing library for Vue 3](https://vitest.dev/)
  */
-import { defineConfig, ViteUserConfig } from 'vitest/config'
+import { defineConfig, type ViteUserConfig } from 'vitest/config'
 
 export type VitestConfig = ViteUserConfig
 

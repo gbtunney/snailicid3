@@ -7,7 +7,7 @@
  */
 import { defineConfig } from '@eslint/config-helpers'
 import { flatEslintConfig } from './base.js'
-
+// TODO reimplement check files for different file types in eslint
 /** @ignore */
 export const EsLint: {
     config: typeof flatEslintConfig

@@ -1,12 +1,12 @@
-import { ChalkColor, logger } from '@snailicid3/logger'
-import chalk, { ChalkInstance } from 'chalk'
+import { type ChalkColor, logger } from '@snailicid3/logger'
+import chalk, { type ChalkInstance } from 'chalk'
 import { z } from 'zod'
 
 export const prettyErrorLog = (
     error: z.ZodError,
     message: string,
     color: ChalkColor | undefined = 'red',
-    theme: 'fg' | 'bg' = 'fg',
+    theme: 'bg' | 'fg' = 'fg',
 ): string => {
     const _instance: ChalkInstance =
         color !== undefined ? logger.getChalkInstance(color, theme) : chalk

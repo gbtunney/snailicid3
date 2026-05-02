@@ -1,12 +1,12 @@
 import { merge as deepmerge } from 'ts-deepmerge'
 import type { Merge } from 'type-fest'
-import { ReflectionKind } from 'typedoc'
-import { PluginOptions as MarkdownPluginOptions } from 'typedoc-plugin-markdown'
+import { type ReflectionKind } from 'typedoc'
+import { type PluginOptions as MarkdownPluginOptions } from 'typedoc-plugin-markdown'
 
 import {
     fileSharedOptions,
-    TypedocConfigFunction,
-    TypedocOptions,
+    type TypedocConfigFunction,
+    type TypedocOptions,
 } from './shared.js'
 export type RemarkPluginOptions = {
     /** An array of remark plugin names. */

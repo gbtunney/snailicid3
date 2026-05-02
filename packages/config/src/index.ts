@@ -17,8 +17,15 @@ export { EsLint } from './eslint/index.js'
 // Do not re-export all types to avoid duplicate identifier error
 export type { EslintConfig, TsConfig } from './eslint/index.js'
 
+/* *  UTILITIES *  */
 export { expandExtensions } from './helpers.js'
+/**
+ * @namespace LintStaged Configuration
+ * @see [npm Lint Staged](https://www.npmjs.com/package/lint-staged)
+ */
+export { lintstaged } from './lint-staged/index.js'
 
+export type { LintStagedConfiguration } from './lint-staged/index.js'
 /**
  * A Node.js command line interface and style checker / lint tool for Markdown files.
  *
@@ -28,7 +35,6 @@ export { expandExtensions } from './helpers.js'
 export { markdownlint } from './markdownlint/index.js'
 
 export type * from './markdownlint/index.js'
-
 /**
  * @namespace Prettier Configuration
  * @see [Prettier - Opinionated Code Formatter](https://prettier.io/)
@@ -36,6 +42,7 @@ export type * from './markdownlint/index.js'
 export { Prettier } from './prettier/index.js'
 
 export type { PrettierConfig, PrettierOptions } from './prettier/index.js'
+/* SHARED CONFIGURATIONS */
 export {
     JS_FILE_EXTENSIONS,
     JSLIKE_FILE_EXTENSIONS,
@@ -46,14 +53,11 @@ export type {
     JSLikeFileExtensions,
     TSFileExtensions,
 } from './shared.js'
-
 export { PRETTIER_FILE_EXTENSIONS } from './shared.js'
 export type { PrettierFileExtensions } from './shared.js'
-
 export { MARKDOWN_FILE_EXTENSIONS } from './shared.js'
-export type { MarkdownFileExtensions } from './shared.js'
 
-/* *  UTILITIES *  */
+export type { MarkdownFileExtensions } from './shared.js'
 export {
     //globFileFilter,
     importJSON,
@@ -61,5 +65,4 @@ export {
     safeDeserializeJSON,
 } from './utilities.js'
 export type * from './utilities.js'
-
 export { merge } from 'ts-deepmerge'
