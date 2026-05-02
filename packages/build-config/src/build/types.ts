@@ -52,6 +52,8 @@ export type EntrySpec = {
     minify?: boolean
     /** Emit source maps. */
     sourcemap?: boolean
+    /** Emit bundled TypeScript declarations alongside JS outputs. */
+    dts?: boolean
 }
 
 /**

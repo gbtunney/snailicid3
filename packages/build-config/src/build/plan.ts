@@ -1,5 +1,6 @@
 /** BuildPlan helpers and constructors. */
 
+import path from 'path'
 import type {
     BuildPlan,
     BuildStrategy,
@@ -109,4 +110,81 @@ export function resolveEntryFilename(key: string): string {
 export function normaliseExportKey(key: string): string {
     if (key === '.' || key === '*' || key === 'main') return '.'
     return key.startsWith('./') ? key : `./${key}`
+}
+
+/** File extensions for each output kind. */
+const OUTPUT_KIND_EXT: Record<OutputKind, string> = {
+    cjs: '.cjs',
+    esm: '.js',
+    iife: '-iife.js',
+    umd: '-umd.js',
+}
+
+/**
+ * Generate a `package.json` `exports` field from a {@link BuildPlan}.
+ *
+ * Conditions are ordered per Node.js spec (most-specific first): `types` → `import` → `require` → `browser` →
+ * `default`.
+ *
+ * - `iife` and `umd` both map to the `"browser"` condition; `iife` takes priority.
+ * - A `"default"` fallback is always added when any JS output is present.
+ * - When an entry has `dts: true`, a `"types"` condition is prepended.
+ */
+export function toPackageExports(
+    plan: BuildPlan,
+): Record<string, Record<string, string>> {
+    const result: Record<string, Record<string, string>> = {}
+    const outDir = path.posix.join(
+        ...path.relative('.', plan.outputDir).split(path.sep),
+    )
+
+    for (const entry of plan.entries) {
+        const exportKey = normaliseExportKey(entry.key)
+        const filename = resolveEntryFilename(entry.key)
+        const conditions: Record<string, string> = {}
+
+        // types — must be first per TypeScript resolution order
+        if (entry.dts) {
+            conditions['types'] = `./${outDir}/${filename}.d.ts`
+        }
+
+        // import (ESM)
+        if (entry.outputKinds.includes('esm')) {
+            conditions['import'] =
+                `./${outDir}/${filename}${OUTPUT_KIND_EXT.esm}`
+        }
+
+        // require (CJS)
+        if (entry.outputKinds.includes('cjs')) {
+            conditions['require'] =
+                `./${outDir}/${filename}${OUTPUT_KIND_EXT.cjs}`
+        }
+
+        // browser — iife takes priority over umd
+        const browserKind = entry.outputKinds.includes('iife')
+            ? 'iife'
+            : entry.outputKinds.includes('umd')
+              ? 'umd'
+              : null
+        if (browserKind !== null) {
+            conditions['browser'] =
+                `./${outDir}/${filename}${OUTPUT_KIND_EXT[browserKind]}`
+        }
+
+        // default fallback — esm preferred, then cjs, then browser format
+        const defaultFile = entry.outputKinds.includes('esm')
+            ? `./${outDir}/${filename}${OUTPUT_KIND_EXT.esm}`
+            : entry.outputKinds.includes('cjs')
+              ? `./${outDir}/${filename}${OUTPUT_KIND_EXT.cjs}`
+              : browserKind !== null
+                ? `./${outDir}/${filename}${OUTPUT_KIND_EXT[browserKind]}`
+                : null
+        if (defaultFile !== null) {
+            conditions['default'] = defaultFile
+        }
+
+        result[exportKey] = conditions
+    }
+
+    return result
 }

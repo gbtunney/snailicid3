@@ -3,13 +3,9 @@ import {
     defineIdentity,
     definePlan,
     identityFromPackage,
-    toPackageExports,
-    toRollupConfig,
+    toTsdownConfig,
 } from '@snailicid3/build-config'
-import type { RollupOptions } from 'rollup'
 import pkg from './package.json' with { type: 'json' }
-
-const PRINT_EXPORTS = false
 
 const plan = definePlan(
     identityFromPackage(pkg) ?? defineIdentity('node', 'library', 'bundle'),
@@ -18,12 +14,10 @@ const plan = definePlan(
     [
         defineEntry('.', ['esm', 'cjs', 'iife', 'umd'], {
             banner: true,
+            dts: true,
             sourcemap: true,
         }),
     ],
 )
 
-if (PRINT_EXPORTS) console.log(toPackageExports(plan))
-
-const config: Array<RollupOptions> = toRollupConfig(plan, 'gbtBoilerplate', pkg)
-export default config
+export default toTsdownConfig(plan)

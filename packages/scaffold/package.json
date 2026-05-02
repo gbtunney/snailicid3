@@ -20,7 +20,6 @@
     "devDependencies": {
         "@snailicid3/config": "workspace:*",
         "@types/node": "^25.6.0",
-        "rollup": "^4.60.1",
         "typescript": "^6.0.2",
         "vitest": "^4.1.4"
     },

@@ -3,17 +3,21 @@ import {
     defineIdentity,
     definePlan,
     identityFromPackage,
-    toRollupConfig,
+    toTsdownConfig,
 } from '@snailicid3/build-config'
-import type { RollupOptions } from 'rollup'
 import pkg from './package.json' with { type: 'json' }
 
 const plan = definePlan(
     identityFromPackage(pkg) ?? defineIdentity('node', 'cli', 'bundle'),
     './src',
     './dist',
-    [defineEntry('.', ['esm'], { banner: true, sourcemap: true })],
+    [
+        defineEntry('.', ['esm'], {
+            banner: true,
+            dts: true,
+            sourcemap: true,
+        }),
+    ],
 )
 
-const config: Array<RollupOptions> = toRollupConfig(plan, 'scaffold', pkg)
-export default config
+export default toTsdownConfig(plan)
