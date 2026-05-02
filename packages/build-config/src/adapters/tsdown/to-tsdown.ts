@@ -74,3 +74,4 @@ function inferPackageMeta(plan: BuildPlan): BannerPackageMeta | undefined {
         return undefined
     }
 }
+export default toTsdownConfig

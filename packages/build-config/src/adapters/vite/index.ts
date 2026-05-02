@@ -15,6 +15,7 @@ import type { BuildPlan, Product, Runtime } from '../../build/types.js'
 
 /** Products handled by the Vite adapter when buildStrategy is 'bundle'. */
 const VITE_PRODUCTS: Array<Product> = ['web_app']
+export { toViteConfig } from './to-vite.js'
 
 export const viteAdapter: BuildAdapter = {
     async build(plan: BuildPlan): Promise<void> {
@@ -31,5 +32,3 @@ export const viteAdapter: BuildAdapter = {
         return VITE_PRODUCTS.includes(product)
     },
 }
-
-export { toViteConfig } from './to-vite.js'

@@ -67,11 +67,6 @@
     "main": "./src/index.js",
     "types": "./types/index.d.ts",
     "dependencies": {
-
-
-
-
-        
         "@rollup/plugin-commonjs": "^29.0.2",
         "@rollup/plugin-json": "^6.1.0",
         "@rollup/plugin-node-resolve": "^16.0.3",

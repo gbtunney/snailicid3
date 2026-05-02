@@ -79,3 +79,4 @@ export function toViteConfig(
         plugins,
     }
 }
+export default toViteConfig

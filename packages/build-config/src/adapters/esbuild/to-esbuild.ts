@@ -48,3 +48,5 @@ export function toEsbuildConfig(plan: BuildPlan): Array<BuildOptions> {
         }
     })
 }
+
+export default toEsbuildConfig

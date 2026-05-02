@@ -62,15 +62,14 @@ export const basePackage = z.object({
     name: z
         .string()
         .regex(/^(@[\da-z~-][\d._a-z~-]*\/)?[\da-z~-][\d._a-z~-]*$/),
-    repository: z
-        .union([
-            z.string().min(1),
-            z.object({
-                directory: z.string().optional(),
-                type: z.enum(REPO_TYPES).default('git'),
-                url: z.url(),
-            }),
-        ]),
+    repository: z.union([
+        z.string().min(1),
+        z.object({
+            directory: z.string().optional(),
+            type: z.enum(REPO_TYPES).default('git'),
+            url: z.url(),
+        }),
+    ]),
 
     version: z.string().regex(SEMVER_REGEX, {
         message: 'Please enter a valid semver',
@@ -94,4 +93,3 @@ export const pkgSchema = z.looseObject({
     buildConfig: packageIdentitySchema,
     scripts: schemaRequiredScripts,
 })
-

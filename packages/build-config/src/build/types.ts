@@ -4,7 +4,13 @@
  * These types must remain independent from Rollup, Vite, esbuild, and any other bundler. Adapters translate a
  * {@link BuildPlan} into tool-specific configuration.
  */
-export type { BuildStrategy, OutputKind, PackageIdentity, Product, Runtime } from './schema.js'
+export type {
+    BuildStrategy,
+    OutputKind,
+    PackageIdentity,
+    Product,
+    Runtime,
+} from './schema.js'
 import type { OutputKind, PackageIdentity } from './schema.js'
 
 /**
@@ -43,4 +49,3 @@ export type EntrySpec = {
     /** Emit source maps. */
     sourcemap?: boolean
 }
-

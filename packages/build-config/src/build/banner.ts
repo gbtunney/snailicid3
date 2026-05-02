@@ -5,7 +5,7 @@
  */
 
 import type { infer as Infer } from 'zod'
-// eslint-disable-next-line import-x/no-unresolved
+
 import { basePackage } from './schema.js'
 
 export const bannerPackageMetaSchema = basePackage.pick({
@@ -84,7 +84,5 @@ function moduleNameFromPackageName(packageName: string): string {
         .split(/[\s._-]+/)
         .filter((word) => word.length > 0)
 
-    return words
-        .map((word) => word[0].toUpperCase() + word.slice(1))
-        .join(' ')
+    return words.map((word) => word[0].toUpperCase() + word.slice(1)).join(' ')
 }

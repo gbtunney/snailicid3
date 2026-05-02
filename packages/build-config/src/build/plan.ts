@@ -68,8 +68,8 @@ export function definePlan(
  *
  * Always returns an identity.
  *
- * If `buildConfig` is absent, defaults from `packageIdentitySchema` are used.
- * Throws if provided `buildConfig` does not match the required schema.
+ * If `buildConfig` is absent, defaults from `packageIdentitySchema` are used. Throws if provided `buildConfig` does not
+ * match the required schema.
  *
  * Intended for use in `rollup.config.mts` files so the identity is defined once in `package.json` rather than repeated
  * in every config file.
