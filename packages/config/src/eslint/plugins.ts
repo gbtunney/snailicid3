@@ -4,9 +4,10 @@ import vitestPlugin from '@vitest/eslint-plugin'
 import checkFilePlugin from 'eslint-plugin-check-file'
 import importPlugin from 'eslint-plugin-import-x'
 import jsdocPlugin from 'eslint-plugin-jsdoc'
+import reactPlugin from 'eslint-plugin-react'
 import _reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
-import sortPlugin from 'eslint-plugin-sort'
+import unicornPlugin from 'eslint-plugin-unicorn'
 import unusedImports from 'eslint-plugin-unused-imports'
 import tsEslint from 'typescript-eslint'
 
@@ -29,9 +30,10 @@ export const pluginsConfig = (): Array<Config> =>
                 ['eslint-comments']: eslintCommentsPlugin,
                 ['import']: importPlugin,
                 ['jsdoc']: jsdocPlugin,
+                ['react']: reactPlugin,
                 ['react-hooks']: reactHooks,
                 ['react-refresh']: reactRefresh,
-                ['sort']: sortPlugin,
+                ['unicorn']: unicornPlugin,
                 ['unused-imports']: unusedImports,
                 ['vitest']: vitestPlugin,
             },

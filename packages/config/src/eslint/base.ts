@@ -3,10 +3,12 @@ import globals from 'globals'
 import { filePatternOverrides } from './overrides/files.js'
 import pluginsConfig from './plugins.js'
 import { baseRules } from './rules/base.js'
-import { docsRules } from './rules/docs.js'
+import { codeStyleRules } from './rules/codestyle.js'
+import { commentsRules } from './rules/comments.js'
 import { importRules } from './rules/imports.js'
 import { namingRules } from './rules/naming.js'
 import { reactRules } from './rules/react.js'
+import { safetyRules } from './rules/safety.js'
 import { testingRules } from './rules/testing.js'
 import { typescriptRules } from './rules/typescript.js'
 import { expandExtensions } from '../helpers.js'
@@ -57,8 +59,10 @@ export const flatEslintConfig = (__dirname: string): Array<Config> => {
         /** Concern-based rules */
         ...typescriptRules(),
         ...importRules(),
-        ...docsRules(),
         ...namingRules(),
+        ...commentsRules(),
+        ...codeStyleRules(),
+        ...safetyRules(),
         ...reactRules(),
         ...testingRules(),
 

@@ -1,21 +1,32 @@
 import { type Config, defineConfig } from '@eslint/config-helpers'
-import sortPlugin from 'eslint-plugin-sort'
+import importPlugin from 'eslint-plugin-import-x'
+import perfectionistPlugin from 'eslint-plugin-perfectionist'
 import { expandExtensions } from '../../helpers.js'
 import { JSLIKE_FILE_EXTENSIONS } from '../../shared.js'
 
+/**
+ * Imports: module resolution, import/export ordering, unused import removal, and type import consistency.
+ * Uses eslint-plugin-import-x for resolution rules and eslint-plugin-perfectionist for sorting.
+ */
 export const importRules = (): Array<Config> =>
     defineConfig(
-        sortPlugin.configs['flat/recommended'],
+        importPlugin.flatConfigs.recommended,
+        importPlugin.flatConfigs.typescript,
+        perfectionistPlugin.configs['recommended-natural'],
         {
             name: 'Imports: default rules',
             rules: {
+                '@typescript-eslint/consistent-type-imports': [
+                    'error',
+                    { fixStyle: 'inline-type-imports', prefer: 'type-imports' },
+                ],
                 'import/extensions': ['error', 'ignorePackages'],
                 'import/no-default-export': 'off',
-                'import/no-duplicates': 'warn',
-                'import/order': [
+                'import/no-duplicates': ['warn', { considerQueryString: true }],
+                'no-unused-vars': 'off',
+                'perfectionist/sort-imports': [
                     'error',
                     {
-                        alphabetize: { caseInsensitive: true, order: 'asc' },
                         groups: [
                             'external',
                             'builtin',
@@ -24,34 +35,14 @@ export const importRules = (): Array<Config> =>
                             'parent',
                             'index',
                         ],
-                        pathGroups: [
-                            { group: 'internal', pattern: 'components' },
-                            { group: 'internal', pattern: 'common' },
-                            { group: 'internal', pattern: 'routes/**' },
-                            {
-                                group: 'internal',
-                                pattern: 'assets/**',
-                                position: 'after',
-                            },
-                        ],
-                        pathGroupsExcludedImportTypes: ['internal'],
+                        newlinesBetween: 'ignore',
+                        order: 'asc',
+                        type: 'natural',
                     },
                 ],
-                'no-unused-vars': 'off',
-                'sort/destructuring-properties': [
-                    'error',
-                    { caseSensitive: false, natural: true },
-                ],
-                'sort/exports': [
-                    'error',
-                    {
-                        caseSensitive: false,
-                        groups: [],
-                        natural: true,
-                        typeOrder: 'preserve',
-                    },
-                ],
-                'sort/imports': 'off',
+                'perfectionist/sort-named-imports': ['error', { order: 'asc', type: 'natural' }],
+                'perfectionist/sort-named-exports': ['error', { order: 'asc', type: 'natural' }],
+                'perfectionist/sort-exports': ['error', { order: 'asc', type: 'natural' }],
                 'unused-imports/no-unused-imports': 'error',
             },
         },
@@ -61,8 +52,7 @@ export const importRules = (): Array<Config> =>
             ],
             name: 'Imports: warn on default exports in src files',
             rules: {
-                //TODO 'import-x/prefer-default-export': 'warn',
-                'import/no-default-export': 'off',
+                'import/no-default-export': 'warn',
             },
         },
     )

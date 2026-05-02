@@ -2,12 +2,16 @@ import { type Config, defineConfig } from '@eslint/config-helpers'
 import jsdoc from 'eslint-plugin-jsdoc'
 import { getScaledWidth } from '../../shared.js'
 
-export const docsRules = (): Array<Config> =>
+/**
+ * Comments: JSDoc documentation structure, tag validity, indentation, and formatting.
+ *
+ * @see [eslint-plugin-jsdoc](https://github.com/gajus/eslint-plugin-jsdoc)
+ */
+export const commentsRules = (): Array<Config> =>
     defineConfig(
         { ...jsdoc.configs['flat/recommended'] },
-        /* eslint sort/object-properties:off */
         {
-            name: 'Docs: JSDoc ERROR',
+            name: 'Comments: JSDoc ERROR',
             rules: {
                 'jsdoc/check-alignment': 'error',
                 'jsdoc/check-indentation': [
@@ -18,6 +22,14 @@ export const docsRules = (): Array<Config> =>
                     'error',
                     'any',
                     { wrapIndent: '  ' },
+                ],
+                'jsdoc/check-tag-names': [
+                    'warn',
+                    { definedTags: ['group', 'category', 'todo'] },
+                ],
+                'jsdoc/convert-to-jsdoc-comments': [
+                    'error',
+                    { lineOrBlockStyle: 'both' },
                 ],
                 'jsdoc/multiline-blocks': [
                     'error',
@@ -31,27 +43,19 @@ export const docsRules = (): Array<Config> =>
                         noZeroLineText: true,
                     },
                 ],
-                'jsdoc/tag-lines': ['error', 'any', { startLines: 1 }],
-                'jsdoc/check-tag-names': [
-                    'warn',
-                    { definedTags: ['group', 'category', 'todo'] },
-                ],
                 'jsdoc/no-blank-block-descriptions': 'error',
                 'jsdoc/no-blank-blocks': ['error', { enableFixer: true }],
-                'jsdoc/require-asterisk-prefix': 'error',
-                /** @todo Jsdoc/no-multi-asterisks is messed up, prettier turns to hyphens */
+                /** @todo jsdoc/no-multi-asterisks is messed up — prettier turns to hyphens */
                 'jsdoc/no-multi-asterisks': [
                     'error',
                     { allowWhitespace: false },
                 ],
-                'jsdoc/convert-to-jsdoc-comments': [
-                    'error',
-                    { lineOrBlockStyle: 'both' },
-                ],
+                'jsdoc/require-asterisk-prefix': 'error',
+                'jsdoc/tag-lines': ['error', 'any', { startLines: 1 }],
             },
         },
         {
-            name: 'Docs: JSDoc OFF',
+            name: 'Comments: JSDoc OFF',
             rules: {
                 'jsdoc/lines-before-block': 'off',
                 'jsdoc/require-jsdoc': 'off',
