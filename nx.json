@@ -66,6 +66,23 @@
                 "cwd": "{projectRoot}"
             }
         },
+        "build:tsdown": {
+            "cache": true,
+            "dependsOn": ["^build"],
+            "inputs": ["production", "^production"],
+            "outputs": ["{projectRoot}/dist"],
+            "command": "tsdown",
+            "options": {
+                "cwd": "{projectRoot}"
+            }
+        },
+        "dev:tsdown": {
+            "cache": false,
+            "command": "tsdown --watch",
+            "options": {
+                "cwd": "{projectRoot}"
+            }
+        },
         "build:vite": {
             "cache": true,
             "dependsOn": ["build:ts"],
@@ -78,7 +95,7 @@
         },
         "build": {
             "cache": true,
-            "dependsOn": ["build:ts", "build:rollup"],
+            "dependsOn": ["build:ts"],
             "inputs": ["production", "^production"]
         },
         "test": {

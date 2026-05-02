@@ -32,13 +32,17 @@
         "targets": {
             "dev": {},
             "dev:ts": {},
-            "dev:rollup": {},
+            "dev:tsdown": {},
             "dev:vite": {},
             "build:ts": {},
             "check:ts": {},
-            "build:rollup": {},
+            "build:tsdown": {},
             "build:vite": {},
-            "build": {},
+            "build": {
+                "dependsOn": [
+                    "build:tsdown"
+                ]
+            },
             "test": {},
             "test:watch": {},
             "lint": {},

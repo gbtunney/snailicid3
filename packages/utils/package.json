@@ -60,10 +60,14 @@
         "targets": {
             "dev": {},
             "dev:ts": {},
-            "dev:rollup": {},
+            "dev:tsdown": {},
             "build:ts": {},
-            "build:rollup": {},
-            "build": {},
+            "build:tsdown": {},
+            "build": {
+                "dependsOn": [
+                    "build:tsdown"
+                ]
+            },
             "check:ts": {},
             "test": {},
             "test:nx": {},

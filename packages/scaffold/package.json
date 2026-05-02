@@ -42,9 +42,15 @@
         "targets": {
             "dev": {},
             "dev:ts": {},
+            "dev:tsdown": {},
             "build:ts": {},
             "check:ts": {},
-            "build": {},
+            "build:tsdown": {},
+            "build": {
+                "dependsOn": [
+                    "build:tsdown"
+                ]
+            },
             "test": {},
             "test:watch": {},
             "lint": {},
