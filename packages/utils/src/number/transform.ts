@@ -31,7 +31,7 @@ export const toStringNumeric = <Type extends string>(
     }
     if (isStringNumeric(value, false)) {
         const stripped = removeAllNewlines(value).replace(
-            /[a-zA-Z,?$!@#%&]/g,
+            /[!#$%&,?@A-Za-z]/g,
             '',
         )
         if (stripped.length > 0) return parseFloat(stripped)

@@ -14,7 +14,7 @@ import { ensureArray } from '../zod_helpers/schemas.js'
  */
 export const formatString = (
     value: string,
-    args: string | Array<string>,
+    args: Array<string> | string,
 ): string => {
     const _vars = ensureArray(z.string()).parse(args)
     return vsprintf(value, _vars)

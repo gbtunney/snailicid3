@@ -19,9 +19,10 @@ export const trimCharacters = ({
     doTrimStart = true,
     pattern,
     value,
-}: BaseValue & {
-    pattern: string | Array<string>
-} & TrimCharacters): string => {
+}: BaseValue &
+    TrimCharacters & {
+        pattern: Array<string> | string
+    }): string => {
     if (!doTrimStart && !doTrimEnd) return value
     const patterns = ensureArray(pattern)
     return patterns.reduce<string>((accumulator, pattern_single) => {
@@ -46,10 +47,11 @@ export const batchTrimCharacters = ({
     doTrimStart = true,
     pattern,
     value,
-}: BatchBaseValue & {
-    /** This is different. */
-    pattern: string | Array<string>
-} & TrimCharacters): Array<string> => {
+}: BatchBaseValue &
+    TrimCharacters & {
+        /** This is different. */
+        pattern: Array<string> | string
+    }): Array<string> => {
     const _value = ensureArray(value)
 
     return _value.map((single_value) => {
@@ -73,7 +75,7 @@ export const trimCharactersStart = ({
     pattern,
     value,
 }: BaseValue & {
-    pattern: string | Array<string>
+    pattern: Array<string> | string
 }): string => {
     return trimCharacters({
         doTrimEnd: false,
@@ -94,7 +96,7 @@ export const trimCharactersEnd = ({
     pattern,
     value,
 }: BaseValue & {
-    pattern: string | Array<string>
+    pattern: Array<string> | string
 }): string => {
     return trimCharacters({
         doTrimEnd: true,
@@ -109,10 +111,11 @@ const trimCharactersforSinglePattern = function ({
     doTrimStart = true,
     pattern,
     value,
-}: BaseValue & {
-    /** This is different. */
-    pattern: string
-} & TrimCharacters): string {
+}: BaseValue &
+    TrimCharacters & {
+        /** This is different. */
+        pattern: string
+    }): string {
     if (!doTrimStart && !doTrimEnd) return value
     return [
         ...(doTrimStart

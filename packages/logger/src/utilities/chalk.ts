@@ -8,8 +8,8 @@ import chalk, {
     modifierNames,
 } from 'chalk'
 import {
-    type ColorJS,
-    type HexColor,
+    //type ColorJS,
+    //  type HexColor,
     parseColorJS,
     parseColorToHexStrict,
     readableTextHex,
@@ -18,8 +18,11 @@ import { lowerCaseFirstLetter, upperCaseFirstLetter } from './string.js'
 
 export type ChalkBackgroundColor = BackgroundColorName
 export type ChalkColor = ChalkColorPreset | HexColor // LoggerRecord< ChalkInstance|ChalkColor|HexColor>
+
 export type ChalkColorPreset = ColorName
 export type ChalkForegroundColor = ForegroundColorName
+type ColorJS = ReturnType<typeof parseColorJS>
+type HexColor = ReturnType<typeof parseColorToHexStrict>
 
 /** Replace the guard to use Chalk's canonical list */
 export const isChalkColorPreset = (

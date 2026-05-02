@@ -11,7 +11,7 @@ import {
 
 describe('validators', () => {
     test('number and bigint primitives', () => {
-        const values: Array<number | bigint> = [
+        const values: Array<bigint | number> = [
             0xff,
             -0xabc,
             0b0010_1010,

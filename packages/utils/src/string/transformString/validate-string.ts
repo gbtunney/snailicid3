@@ -4,21 +4,21 @@ import {
     getRegExpStartOfString,
 } from '../../regexp/string-to-regexp.js'
 
-export type ValidateOperation =
-    | 'startsWith'
-    | 'endsWith'
-    | 'includes'
-    | 'contains'
-    | 'eq'
-    | ValidateFunc
-export type ValidateFunc = (value: string, pattern: string) => boolean
-
 /** Interface for validation object. */
 export type IValidateObj = {
-    value: string
-    pattern: string | RegExp
+    pattern: RegExp | string
     validate_op?: ValidateOperation
+    value: string
 }
+export type ValidateFunc = (value: string, pattern: string) => boolean
+
+export type ValidateOperation =
+    | 'contains'
+    | 'endsWith'
+    | 'eq'
+    | 'includes'
+    | 'startsWith'
+    | ValidateFunc
 
 /**
  * Checks if the string starts with the given pattern
@@ -81,7 +81,7 @@ export const match = (value: string, pattern: RegExp): boolean =>
  */
 export const validateString = (
     value: string,
-    pattern: string | RegExp,
+    pattern: RegExp | string,
     validate_op: ValidateOperation = 'eq',
 ): boolean => {
     if (isRegExp(pattern)) return match(value, pattern as RegExp)
@@ -95,9 +95,9 @@ export const validateString = (
  * @see {@link validateString}
  */
 export const validateStringBatch = (
-    value: string | Array<IValidateObj>,
+    value: Array<IValidateObj> | string,
     validateObjects?: Array<Omit<IValidateObj, 'value'>>,
-    operation: 'some' | 'every' = 'some',
+    operation: 'every' | 'some' = 'some',
 ): boolean => {
     const validateArr: Array<IValidateObj> =
         isString(value) && isNotUndefined(validateObjects)

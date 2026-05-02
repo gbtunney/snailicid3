@@ -11,9 +11,10 @@ const replaceCharactersSinglePattern = ({
     pattern,
     replacement,
     value,
-}: BaseValue & {
-    pattern: Pattern
-} & ReplaceCharacters): string => replaceAll(pattern, replacement, value)
+}: BaseValue &
+    ReplaceCharacters & {
+        pattern: Pattern
+    }): string => replaceAll(pattern, replacement, value)
 
 /**
  * @category Replace Characters
@@ -23,9 +24,10 @@ export const replaceAllCharacters = ({
     pattern,
     replacement,
     value,
-}: BaseValue & {
-    pattern: Pattern | Array<Pattern>
-} & ReplaceCharacters): string => {
+}: BaseValue &
+    ReplaceCharacters & {
+        pattern: Array<Pattern> | Pattern
+    }): string => {
     return ensureArray(pattern).reduce<typeof value>(
         (accumulator: string, _pattern) =>
             replaceCharactersSinglePattern({
@@ -44,9 +46,10 @@ export const batchReplaceAll = ({
     pattern,
     replacement,
     value,
-}: BatchBaseValue & {
-    pattern: Pattern | Array<Pattern>
-} & ReplaceCharacters): string | Array<string> => {
+}: BatchBaseValue &
+    ReplaceCharacters & {
+        pattern: Array<Pattern> | Pattern
+    }): Array<string> | string => {
     /** Already an array */
     const _value = isString(value) ? ensureArray(value) : value
 

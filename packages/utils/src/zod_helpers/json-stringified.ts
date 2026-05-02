@@ -1,8 +1,5 @@
-import { Jsonifiable } from 'type-fest'
+import { type Jsonifiable } from 'type-fest'
 import { z } from 'zod'
-
-/** The branded Json */
-export type JsonStringified<Type> = string & { readonly __json_of: Type }
 
 /** Input value type for serialization (raw object value). This is BEFORE JSON.stringify. */
 export type InferJsonSchemaInput<TStringifiedSchema> =
@@ -20,20 +17,21 @@ export type InferStringifiedOutput<TStringifiedSchema> =
         ? Out
         : never
 
+/** The branded Json */
+export type JsonStringified<Type> = string & { readonly __json_of: Type }
+
+export type JsonStringifiedSchema<TSchema extends z.ZodType> =
+    JsonStringifiedAPI<TSchema> &
+        z.ZodType<JsonStringified<z.infer<TSchema>>, string>
+
 type JsonStringifiedAPI<TSchema extends z.ZodType> = {
-    serialize(value: z.output<TSchema>): JsonStringified<z.output<TSchema>>
     deserialize(raw: JsonStringified<z.output<TSchema>>): z.output<TSchema>
-    parseToValue(raw: string): z.output<TSchema>
-    outputValue(output: z.output<TSchema>): z.output<TSchema>
     inputValue(input: z.input<TSchema>): z.input<TSchema>
+    outputValue(output: z.output<TSchema>): z.output<TSchema>
+    parseToValue(raw: string): z.output<TSchema>
+    serialize(value: z.output<TSchema>): JsonStringified<z.output<TSchema>>
     validate(raw: string | z.input<TSchema>): boolean
 }
-
-export type JsonStringifiedSchema<TSchema extends z.ZodType> = z.ZodType<
-    JsonStringified<z.infer<TSchema>>,
-    string
-> &
-    JsonStringifiedAPI<TSchema>
 
 export const makeJsonStringifiedSchema = <TSchema extends z.ZodType>(
     schema: TSchema,
@@ -88,7 +86,7 @@ export const makeJsonStringifiedSchema = <TSchema extends z.ZodType>(
         serialize(value: Output): JsonStringified<Output> {
             return JSON.stringify(value) as JsonStringified<Output>
         },
-        validate(raw: string | Input): boolean {
+        validate(raw: Input | string): boolean {
             try {
                 if (typeof raw === 'string') {
                     this.parseToValue(raw)
@@ -101,8 +99,11 @@ export const makeJsonStringifiedSchema = <TSchema extends z.ZodType>(
             }
         },
     }
-    const _result: z.ZodType<JsonStringified<z.infer<TSchema>>, string> &
-        JsonStringifiedAPI<TSchema> = Object.assign(brandedSchema, _api)
+    const _result: JsonStringifiedAPI<TSchema> &
+        z.ZodType<JsonStringified<z.infer<TSchema>>, string> = Object.assign(
+        brandedSchema,
+        _api,
+    )
     return _result
 }
 
@@ -124,10 +125,10 @@ export const jsonSchema = <TSchema extends z.ZodType>(
 
 /** WIP @todo - some other day */
 export const jsonLooseCodec = <
-    TSchema extends z.ZodType<Exclude<Jsonifiable, null | number | boolean>>,
+    TSchema extends z.ZodType<Exclude<Jsonifiable, boolean | null | number>>,
 >(
     schema: TSchema,
-): z.ZodType<z.output<TSchema> | string> => {
+): z.ZodType<string | z.output<TSchema>> => {
     const jsonStringSchema = z.string().brand('JsonEncoded')
     type BrandedString = z.infer<typeof jsonStringSchema>
 
@@ -180,7 +181,7 @@ export const jsonLooseCodec = <
     })
 
     // Allow both JSON string and raw object
-    const _result: z.ZodType<z.output<typeof userSchema> | string> = z.union([
+    const _result: z.ZodType<string | z.output<typeof userSchema>> = z.union([
         JsonCodec,
         schema,
     ])

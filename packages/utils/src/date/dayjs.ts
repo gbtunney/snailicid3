@@ -8,5 +8,4 @@ dayjs.extend(customParseFormat)
 dayjs.extend(utc)
 dayjs.extend(duration)
 
-export { dayjs }
-export default dayjs
+export { default as dayjs, default } from 'dayjs'

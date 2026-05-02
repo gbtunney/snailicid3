@@ -1,5 +1,4 @@
 import { ensureArray } from 'ramda-adjunct'
-
 import type { Writable } from 'type-fest'
 
 /**
@@ -12,7 +11,7 @@ import type { Writable } from 'type-fest'
  *     )
  */
 export const validPackageName =
-    /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/
+    /^(@[\da-z~-][\d._a-z~-]*\/)?[\da-z~-][\d._a-z~-]*$/
 
 /**
  * PackageManager field in package.json
@@ -30,11 +29,11 @@ export const packageManager = /(npm|pnpm|yarn)@\d+\.\d+\.\d+(-.+)?/
 export const scientificNumber =
     /^[+-]?(?:\d(?:_?\d)*(?:\.\d(?:_?\d)*)?|\.\d(?:_?\d)*)(?:e[+-]?\d(?:_?\d)*)?$/i
 
-export const hexNumber = /^[+-]?0x[0-9a-f](?:_?[0-9a-f])*$/i
+export const hexNumber = /^[+-]?0x[\da-f](?:_?[\da-f])*$/i
 export const octalNumber = /^[+-]?0o[0-7](?:_?[0-7])*$/i
 export const binaryNumber = /^[+-]?0b[01](?:_?[01])*$/i
 export const bigintNumber =
-    /^[+-]?(?:\d(?:_?\d)*|0x[0-9a-f](?:_?[0-9a-f])*|0b[01](?:_?[01])*)n$/i
+    /^[+-]?(?:\d(?:_?\d)*|0x[\da-f](?:_?[\da-f])*|0b[01](?:_?[01])*)n$/i
 
 /** Common characters to trim from CSS classes or otherwise. */
 export const DEFAULT_TRIM_CHARACTERS = [
@@ -375,21 +374,21 @@ export const URL = new RegExp(
 )
 
 export const IP_ADDRESS_REG_EXP = new RegExp(
-    '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$',
+    '(25[0-5]|2[0-4]\\d|[01]?\\d\\d?).(25[0-5]|2[0-4]\\d|[01]?\\d\\d?).(25[0-5]|2[0-4]\\d|[01]?\\d\\d?).(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)$',
     'm',
 )
 
 export const anyURLDomainExtension = (): RegExp => urlDomainExtension()
 /** Todo: handle urls with query strings */
 export const urlDomainExtension = (
-    value: string | Array<string> = URL_DOMAIN_EXTENSION as Writable<
+    value: Array<string> | string = URL_DOMAIN_EXTENSION as Writable<
         typeof URL_DOMAIN_EXTENSION
     >,
 ): RegExp => new RegExp(`^(?!\\.)[^.]+\\.(${ensureArray(value).join('|')})$`)
 
 export const anyURLScheme = (): RegExp => urlScheme()
 export const urlScheme = (
-    value: string | Array<string> = URL_SCHEME as Writable<typeof URL_SCHEME>,
+    value: Array<string> | string = URL_SCHEME as Writable<typeof URL_SCHEME>,
     optional: boolean = false,
 ): RegExp =>
     !optional
@@ -404,7 +403,7 @@ export const urlScheme = (
  * @see {@link https://regex101.com/r/CYCMEc/1 | regexp101 examples}
  */
 export const phoneNumber =
-    /^((((\+[\d\-.]{1,5})?[ \-.]?\d{3})|(\+[\d\-.]{1,5})?[ \-.]?\((\d{3}\)))?[ \-.]?\d{3}[ \-.]?\d{4}\s?)?$/g
+    /^((((\+[\d.-]{1,5})?[ .-]?\d{3})|(\+[\d.-]{1,5})?[ .-]?\((\d{3}\)))?[ .-]?\d{3}[ .-]?\d{4}\s?)?$/g
 
 /**
  * US ZIP CODE
@@ -414,5 +413,5 @@ export const phoneNumber =
  * @category GoogleAppScript
  * @see {@link https://regex101.com/r/VFnoSZ/2 | regexp101 examples}
  */
-export const zipCode = /^\d{5,6}(?:[-\s]\d{4})?$/gm
+export const zipCode = /^\d{5,6}(?:[\s-]\d{4})?$/gm
 //const streetAddress = /[a-zA-Z\d\s\-\,\#\.\+]+/g
