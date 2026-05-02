@@ -1,7 +1,4 @@
-import type { ScaffoldInput } from '../input.js'
-
-export const generateTsdownConfig = (input: ScaffoldInput): string =>
-    `import {
+import {
     defineEntry,
     definePlan,
     identityFromPackage,
@@ -20,7 +17,6 @@ const plan = definePlan(identity, './src', './dist', [
     }),
 ])
 
-const config = toTsdownConfig(plan)
+const config: ReturnType<typeof toTsdownConfig> = toTsdownConfig(plan)
 
 export default defineConfig(config)
-`

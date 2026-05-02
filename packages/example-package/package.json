@@ -3,6 +3,14 @@
     "version": "0.0.0",
     "private": true,
     "description": "Example monorepo package",
+    "keywords": [
+        "typescript",
+        "snailicid3",
+        "monorepo",
+        "example",
+        "template",
+        "boilerplate"
+    ],
     "scripts": {
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
@@ -10,26 +18,11 @@
         "dev:nx": "nx run $npm_package_name:dev",
         "test:coverage": "vitest run --coverage"
     },
-    "devDependencies": {
-        "@snailicid3/build-config": "workspace:*",
-        "@snailicid3/config": "workspace:*",
-        "@types/node": "^25.6.0",
-        "rollup": "^4.60.1",
-        "tsdown": "^0.21.10",
-        "typescript": "^6.0.2",
-        "vitest": "^4.1.4"
+    "buildConfig": {
+        "runtime": "universal",
+        "product": "library",
+        "buildStrategy": "bundle"
     },
-    "exports": {
-        ".": {
-            "import": "./dist/index.js",
-            "types": "./types/index.d.ts"
-        }
-    },
-    "files": [
-        "CHANGELOG.md",
-        "dist",
-        "types"
-    ],
     "nx": {
         "targets": {
             "dev": {},
@@ -51,6 +44,22 @@
         }
     },
     "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs",
+            "browser": "./dist/index-iife.js",
+            "default": "./dist/index.js"
+        }
+    },
+    "files": [
+        "CHANGELOG.md",
+        "dist",
+        "types"
+    ],
     "author": {
         "name": "Gillian Tunney",
         "email": "gbtunney@mac.com"
@@ -58,13 +67,15 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/gbtunney/snailicid3-monorepo"
+        "url": "https://github.com/gbtunney/snailicid3",
+        "directory": "packages/example-package"
     },
-    "main": "./dist/index.js",
-    "types": "./types/index.d.ts",
-    "buildConfig": {
-        "runtime": "universal",
-        "product": "library",
-        "buildStrategy": "bundle"
+    "devDependencies": {
+        "@snailicid3/build-config": "workspace:*",
+        "@snailicid3/config": "workspace:*",
+        "@types/node": "^25.6.0",
+        "tsdown": "^0.21.10",
+        "typescript": "^6.0.2",
+        "vitest": "^4.1.4"
     }
 }

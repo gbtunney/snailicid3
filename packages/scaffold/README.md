@@ -1,76 +1,54 @@
-<!-- @snailicid3:header:start -->
+# @snailicid3/scaffold 🐌
 
-# @snailicid3/scaffold
+> _Workspace package — not published to npm_
 
-> Package scaffolding generator with TypeScript-function-based templates
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![Zod](https://img.shields.io/badge/zod-%233068b7.svg?style=for-the-badge&logo=zod&logoColor=white)
 
-<!-- @snailicid3:header:end -->
+### Repository
 
-## Installation
+- **Github:** [`@snailicid3/scaffold`](https://github.com/gbtunney/snailicid3/tree/main/packages/scaffold) • [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
+
+### Author
+
+👤 **Gillian Tunney**
+
+- [github](https://github.com/gbtunney)
+- [email](mailto:gbtunney@mac.com)
+
+## @snailicid3/scaffold 🐌
+
+---
+
+This package provides a package scaffolding generator with TypeScript-function-based templates. It can generate new workspace packages with pre-configured tsdown configs, tsconfigs, and package.json templates.
+
+### `@snailicid3/scaffold` _contains:_
+
+- **Package generator** — creates new monorepo packages from templates
+- **TypeScript templates** — tsdown config, tsconfig, package.json templates
+- **CLI** — `scaffold` binary for interactive package creation
+- **Schema validation** — Zod-backed configuration validation
+
+## Usage
 
 ```sh
-pnpm add @snailicid3/scaffold
+# Run via pnpm workspace
+pnpm --filter=@snailicid3/scaffold exec scaffold
 ```
 
-## TODO
+## Planned: Package.json Manifest Utilities
 
-- [ ] Add a manifest utility module for package.json generation and updates
-- [ ] Add `reorderPackageJsonKeys()` for stable top-level key ordering
-- [ ] Add `mergePackageJson()` for merging scaffold defaults into an existing
-      manifest
-- [ ] Add `updatePackageJsonSections()` for targeted section updates
-- [ ] Define per-section behavior rules
-- [ ] Reorder only: `name`, `version`, `private`, `description`, `type`,
-      `author`, `license`, `repository`, `main`, `types`, `exports`, `files`,
-      `keywords`, `nx`, `bin`
-- [ ] Merge shallow object sections: `scripts`, `dependencies`,
-      `devDependencies`, `peerDependencies`, `optionalDependencies`, `engines`
-- [ ] Preserve existing package-specific scalar values unless explicitly
-      overridden
-- [ ] Decide array behavior per key
-- [ ] Replace arrays by default for `files`
-- [ ] Merge unique values for `keywords`
-- [ ] Preserve manual `exports` entries unless scaffold explicitly owns them
-- [ ] Add a scaffold option for `packageJsonStrategy`:
-      `create | merge | update-sections`
-- [ ] Add a scaffold option for `packageJsonSections` to limit which sections
-      are updated
-- [ ] Add fixture-based tests for new package creation
-- [ ] Add fixture-based tests for merging into an existing package.json
-- [ ] Add fixture-based tests for preserving package-specific values
-- [ ] Add fixture-based tests for key ordering stability
-- [ ] Export manifest helpers from the package public API only if they are
-      intended for reuse
-
-## Suggested First API Shape
+- `reorderPackageJsonKeys()` — stable top-level key ordering
+- `mergePackageJson()` — merge scaffold defaults into existing manifest
+- `updatePackageJsonSections()` — targeted section updates
 
 ```ts
-type PackageJsonSectionName =
-  | 'scripts'
-  | 'nx'
-  | 'dependencies'
-  | 'devDependencies'
-  | 'bin'
-  | 'exports'
-;'rando entry pts' | 'files' | 'keywords'
-
-type PackageJsonStrategy = 'create' | 'merge' | 'update-sections'
-
-type UpdatePackageJsonOptions = {
-  strategy: PackageJsonStrategy
-  sections?: PackageJsonSectionName[]
-}
-
 declare function reorderPackageJsonKeys(
-  packageJson: Record<string, unknown>,
+    packageJson: Record<string, unknown>,
 ): Record<string, unknown>
+
 declare function mergePackageJson(
-  existingPackageJson: Record<string, unknown>,
-  scaffoldPackageJson: Record<string, unknown>,
-): Record<string, unknown>
-declare function updatePackageJsonSections(
-  existingPackageJson: Record<string, unknown>,
-  scaffoldPackageJson: Record<string, unknown>,
-  options: UpdatePackageJsonOptions,
+    existingPackageJson: Record<string, unknown>,
+    scaffoldPackageJson: Record<string, unknown>,
 ): Record<string, unknown>
 ```

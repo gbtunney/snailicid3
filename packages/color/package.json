@@ -3,6 +3,16 @@
     "version": "0.0.1",
     "private": false,
     "description": "Color math, parsing, conversion and hex utilities",
+    "keywords": [
+        "typescript",
+        "snailicid3",
+        "monorepo",
+        "color",
+        "chroma",
+        "hex",
+        "color-conversion",
+        "colorjs"
+    ],
     "scripts": {
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
@@ -10,42 +20,23 @@
         "dev:nx": "nx run $npm_package_name:dev",
         "test:coverage": "vitest run --coverage"
     },
-    "dependencies": {
-        "@snailicid3/types": "workspace:*",
-        "@snailicid3/utils": "workspace:*",
-        "@types/ramda": "^0.31.1",
-        "chroma.ts": "^1.0.0",
-        "colorjs.io": "^0.6.1",
-        "ramda": "^0.32.0"
+    "buildConfig": {
+        "runtime": "universal",
+        "product": "library",
+        "buildStrategy": "bundle"
     },
-    "devDependencies": {
-        "@snailicid3/config": "workspace:*",
-        "@types/node": "^25.6.0",
-        "typescript": "^6.0.2",
-        "vitest": "^4.1.4"
-    },
-    "exports": {
-        ".": {
-            "import": "./dist/index.js",
-            "types": "./types/index.d.ts"
-        }
-    },
-    "files": [
-        "CHANGELOG.md",
-        "dist",
-        "types"
-    ],
     "nx": {
         "targets": {
             "dev": {},
             "dev:ts": {},
-            "dev:rollup": {},
+            "dev:tsdown": {},
             "build:ts": {},
             "check:ts": {},
-            "build:rollup": {},
+            "build:tsdown": {},
             "build": {
                 "dependsOn": [
-                    "build:ts"
+                    "build:ts",
+                    "build:tsdown"
                 ]
             },
             "test": {},
@@ -57,7 +48,25 @@
             "clean:build": {}
         }
     },
+    "publishConfig": {
+        "access": "public"
+    },
     "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs",
+            "default": "./dist/index.js"
+        }
+    },
+    "files": [
+        "CHANGELOG.md",
+        "dist",
+        "types"
+    ],
     "author": {
         "name": "Gillian Tunney",
         "email": "gbtunney@mac.com"
@@ -65,9 +74,23 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/gbtunney/snailicid3-monorepo",
+        "url": "https://github.com/gbtunney/snailicid3",
         "directory": "packages/color"
     },
-    "main": "./dist/index.js",
-    "types": "./types/index.d.ts"
+    "dependencies": {
+        "@snailicid3/types": "workspace:*",
+        "@snailicid3/utils": "workspace:*",
+        "@types/ramda": "^0.31.1",
+        "chroma.ts": "^1.0.0",
+        "colorjs.io": "^0.6.1",
+        "ramda": "^0.32.0"
+    },
+    "devDependencies": {
+        "@snailicid3/build-config": "workspace:*",
+        "@snailicid3/config": "workspace:*",
+        "@types/node": "^25.6.0",
+        "tsdown": "^0.21.10",
+        "typescript": "^6.0.2",
+        "vitest": "^4.1.4"
+    }
 }

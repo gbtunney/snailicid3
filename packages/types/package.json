@@ -3,6 +3,14 @@
     "version": "0.0.1",
     "private": false,
     "description": "Pure TypeScript types, utility types and typeguards",
+    "keywords": [
+        "typescript",
+        "snailicid3",
+        "monorepo",
+        "types",
+        "typeguards",
+        "utility-types"
+    ],
     "scripts": {
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
@@ -37,11 +45,12 @@
     },
     "type": "module",
     "main": "./dist/index.js",
-    "types": "./types/index.d.ts",
+    "types": "./dist/index.d.ts",
     "exports": {
         ".": {
+            "types": "./dist/index.d.ts",
             "import": "./dist/index.js",
-            "types": "./types/index.d.ts"
+            "default": "./dist/index.js"
         }
     },
     "files": [
@@ -56,7 +65,7 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/gbtunney/snailicid3-monorepo",
+        "url": "https://github.com/gbtunney/snailicid3",
         "directory": "packages/types"
     },
     "dependencies": {
