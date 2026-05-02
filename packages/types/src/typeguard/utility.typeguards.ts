@@ -1,5 +1,10 @@
 import { isNil } from 'ramda'
-import { Integer, IsLiteral, UnknownArray, UnknownRecord } from 'type-fest'
+import {
+    type Integer,
+    type IsLiteral,
+    type UnknownArray,
+    type UnknownRecord,
+} from 'type-fest'
 
 import type {
     // EmptyObject,
@@ -18,7 +23,7 @@ import { RA } from './ramdaimports.js'
  * @group Empty Types
  * @see {@link isFalsy}
  */
-export const isTruthy = <Type>(value: Type | Falsy): value is Type =>
+export const isTruthy = <Type>(value: Falsy | Type): value is Type =>
     RA.isTruthy(value)
 /**
  * Checks if a value is falsy.
@@ -26,7 +31,7 @@ export const isTruthy = <Type>(value: Type | Falsy): value is Type =>
  * @group Empty Types
  * @see {@link isTruthy}
  */
-export const isFalsy = <Type>(value: Type | Falsy): value is Falsy =>
+export const isFalsy = <Type>(value: Falsy | Type): value is Falsy =>
     RA.isFalsy(value)
 
 /**
@@ -45,7 +50,7 @@ export const isFalsy = <Type>(value: Type | Falsy): value is Falsy =>
  * @see {@link isNotNilOrEmpty}
  */
 export const isNilOrEmpty = <Type>(
-    value: Type | NilOrEmpty,
+    value: NilOrEmpty | Type,
 ): value is NilOrEmpty => RA.isNilOrEmpty(value)
 
 /**
@@ -55,7 +60,7 @@ export const isNilOrEmpty = <Type>(
  * @see {@link isNilOrEmpty}
  */
 export const isNotNilOrEmpty = <Type>(
-    value: Type | NilOrEmpty,
+    value: NilOrEmpty | Type,
 ): value is Type => RA.isNotNilOrEmpty(value)
 
 /**
@@ -84,7 +89,7 @@ export const isString = <Type extends string>(value: unknown): value is Type =>
  * @see {@link isString}
  */
 export const isNotString = <Type = unknown>(
-    value: Type | string,
+    value: string | Type,
 ): value is Exclude<Type, 'string'> => RA.isNotString(value)
 
 /**
@@ -158,7 +163,7 @@ export const isPrimitive = <Type extends Primitive>(
  * @see {@link isPrimitive}
  */
 export const isNotPrimitive = <Type = unknown>(
-    value: Type | Primitive,
+    value: Primitive | Type,
 ): value is Type => RA.isNotPrimitive(value)
 
 /**
@@ -167,7 +172,7 @@ export const isNotPrimitive = <Type = unknown>(
  * @category Empty Types
  * @see {@link isNotNilLike}
  */
-export const isNilLike = <Type>(value: Type | NilLike): value is NilLike =>
+export const isNilLike = <Type>(value: NilLike | Type): value is NilLike =>
     RA.isEmptyString(value) || isNil(value)
 
 /**
@@ -176,7 +181,7 @@ export const isNilLike = <Type>(value: Type | NilLike): value is NilLike =>
  * @category Empty Types
  * @see {@link isNilLike}
  */
-export const isNotNilLike = <Type>(value: Type | NilLike): value is Type =>
+export const isNotNilLike = <Type>(value: NilLike | Type): value is Type =>
     !(RA.isEmptyString(value) || isNil(value))
 
 /**
@@ -185,7 +190,7 @@ export const isNotNilLike = <Type>(value: Type | NilLike): value is Type =>
  * @category Empty Types
  * @see {@link isNotNullish}
  */
-export const isNullish = <Type>(value: Type | NilLike): value is undefined =>
+export const isNullish = <Type>(value: NilLike | Type): value is undefined =>
     RA.isEmptyString(value) || isNil(value)
 
 /**
@@ -194,7 +199,7 @@ export const isNullish = <Type>(value: Type | NilLike): value is undefined =>
  * @category Empty Types
  * @see {@link isNullish}
  */
-export const isNotNullish = <Type>(value: Type | NilLike): value is Type =>
+export const isNotNullish = <Type>(value: NilLike | Type): value is Type =>
     !(RA.isEmptyString(value) || isNil(value))
 
 /**
@@ -221,7 +226,7 @@ export const isNotNull = <Type extends NonNullable<unknown>>(
  * @category Empty Types
  * @see {@link isNotUndefined}
  */
-export const isUndefined = <Type>(value: Type | Nullish): value is undefined =>
+export const isUndefined = <Type>(value: Nullish | Type): value is undefined =>
     isNil(value)
 
 /**
@@ -230,7 +235,7 @@ export const isUndefined = <Type>(value: Type | Nullish): value is undefined =>
  * @category Empty Types
  * @see {@link isUndefined}
  */
-export const isNotUndefined = <Type>(value: Type | Nullish): value is Type =>
+export const isNotUndefined = <Type>(value: Nullish | Type): value is Type =>
     RA.isNotNil(value)
 
 /**

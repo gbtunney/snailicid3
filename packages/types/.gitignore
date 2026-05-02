@@ -43,8 +43,8 @@ node_modules/
 jspm_packages/
 
 # TypeScript v1 declaration files
-typings/
-types/
+/typings/
+/types/
 
 # TypeScript cache
 *.tsbuildinfo
@@ -149,7 +149,8 @@ dist
 *.map
 
 # Un-ignore src/types/ subdirectories (source code, not declarations)
-!./src/types/
+!src/types/
+!src/types/**
 
 #Husky
 .husky/_

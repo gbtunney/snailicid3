@@ -95,7 +95,7 @@
         },
         "build": {
             "cache": true,
-            "dependsOn": ["build:ts"],
+            "dependsOn": ["build:ts", "build:tsdown"],
             "inputs": ["production", "^production"]
         },
         "test": {
@@ -126,7 +126,7 @@
         },
         "lint": {
             "cache": true,
-            "dependsOn": ["check:ts"],
+            "dependsOn": ["check:ts", "build"],
             "command": "pnpm exec prettier --ignore-path ./.gitignore --check . && eslint .",
             "options": {
                 "cwd": "{projectRoot}"
@@ -134,7 +134,7 @@
         },
         "fix": {
             "cache": true,
-            "dependsOn": ["check:ts"],
+            "dependsOn": ["check:ts", "build"],
             "command": "pnpm exec prettier --ignore-path ./.gitignore --write . && pnpm exec eslint . --fix",
             "options": {
                 "cwd": "{projectRoot}"
