@@ -1,3 +1,4 @@
+import { type PartialDeep } from 'type-fest'
 import type z from 'zod'
 import { createBanner } from './banner.js'
 import {
@@ -14,18 +15,14 @@ import {
     schemaBuildPlanRoot,
 } from './schemas/plan.js'
 
-export type BuildPlanRoot = z.output<typeof schemaBuildPlanRoot>
-export type BuildPlanEntryInput = z.input<typeof schemaBuildPlanEntrySpec>
 export type BuildPlanEntryBase = z.output<typeof schemaBuildPlanEntrySpec>
+export type BuildPlanEntryInput = z.input<typeof schemaBuildPlanEntrySpec>
 export type BuildPlanPackage = z.output<typeof schemaBasePackage>
+export type BuildPlanRoot = z.output<typeof schemaBuildPlanRoot>
 
-export type ResolvedBuildPlanEntry = BuildPlanEntryBase & {
-    bannerContent?: string
-    displayName: string
-    exportKey: string
-    fileName: string
-    moduleName: string
-    sourcePath: string
+export type DefineBuildPlanInput = {
+    entries?: Array<BuildPlanEntryInput>
+    root?: z.input<typeof schemaBuildPlanRoot>
 }
 
 export type ResolvedBuildPlan = {
@@ -36,19 +33,28 @@ export type ResolvedBuildPlan = {
     sourceDir: string
 }
 
-export type DefineBuildPlanInput = {
-    entries?: Array<BuildPlanEntryInput>
-    root?: z.input<typeof schemaBuildPlanRoot>
+export type ResolvedBuildPlanEntry = BuildPlanEntryBase & {
+    bannerContent?: string
+    displayName: string
+    exportKey: string
+    fileName: string
+    moduleName: string
+    sourcePath: string
 }
 
 export function defineBuildPlan<
     const Package extends z.input<typeof schemaBasePackage>,
->(pkg: Package, input: DefineBuildPlanInput = {}): ResolvedBuildPlan {
+>(
+    pkg: Package,
+    input: PartialDeep<DefineBuildPlanInput> = {},
+): ResolvedBuildPlan {
     const parsedPkg = schemaBasePackage.parse(pkg)
     const root = schemaBuildPlanRoot.parse(input.root ?? {})
 
     const entries =
-        input.entries && input.entries.length > 0 ? input.entries : [{ key: '*' }]
+        input.entries && input.entries.length > 0
+            ? input.entries
+            : [{ key: '*' }]
 
     return {
         entries: entries.map((entry) =>
@@ -66,7 +72,7 @@ export function defineBuildPlan<
 }
 
 export function deriveBuildPlanEntry(options: {
-    entry: BuildPlanEntryInput
+    entry: PartialDeep<BuildPlanEntryInput>
     pkg: BuildPlanPackage
     root: BuildPlanRoot
 }): ResolvedBuildPlanEntry {
@@ -107,12 +113,12 @@ export function deriveBuildPlanEntry(options: {
     }
 }
 
-export function isRootEntryKey(key: string): boolean {
-    return key === '*' || key === '.' || key === './' || key === 'index'
-}
-
 export function entryKeyToSlug(key: string): string {
     return isRootEntryKey(key) ? 'index' : key.replace(/^\.\//, '')
+}
+
+export function isRootEntryKey(key: string): boolean {
+    return key === '*' || key === '.' || key === './' || key === 'index'
 }
 
 export function packageNameToDisplayName(packageName: string): string {

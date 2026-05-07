@@ -82,7 +82,7 @@ describe('plan2', () => {
     })
 
     test('defineBuildPlan defaults to a root entry', () => {
-        const plan = defineBuildPlan(pkg)
+        const plan = defineBuildPlan(parsedPkg)
 
         expect(plan.packageName).toBe('@snailicid3/build-config')
         expect(plan.entries).toHaveLength(1)
@@ -90,15 +90,15 @@ describe('plan2', () => {
     })
 
     test('defineBuildPlan merges root into every entry', () => {
-        const plan = defineBuildPlan(pkg, {
-            root: {
-                outputDir: './lib',
-                sourceDir: './src',
-            },
+        const plan = defineBuildPlan(parsedPkg, {
             entries: [
                 { key: '*', sourceFile: 'index.ts' },
                 { key: './vitest', sourceFile: 'vitest/index.ts' },
             ],
+            root: {
+                outputDir: './lib',
+                sourceDir: './src',
+            },
         })
 
         expect(plan.outputDir).toBe('./lib')
@@ -109,10 +109,6 @@ describe('plan2', () => {
 
     test('entry overrides root config', () => {
         const plan = defineBuildPlan(pkg, {
-            root: {
-                bundle: true,
-                outputDir: './dist',
-            },
             entries: [
                 {
                     bundle: false,
@@ -120,6 +116,10 @@ describe('plan2', () => {
                     sourceFile: 'index.ts',
                 },
             ],
+            root: {
+                bundle: true,
+                outputDir: './dist',
+            },
         })
 
         expect(plan.entries[0]?.bundle).toBe(false)
