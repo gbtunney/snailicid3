@@ -256,3 +256,19 @@ export function toBlockComment(lines: ReadonlyArray<string>): string {
     return `/*\n${lines.map((line) => ` * ${line}`).join('\n')}\n */`
 }
 
+
+export function entryKeyToSlug(key: string): string {
+    return isRootEntryKey(key) ? 'index' : key.replace(/^\.\//, '')
+}
+
+export function isRootEntryKey(key: string): boolean {
+    return key === '*' || key === '.' || key === './' || key === 'index'
+}
+
+export function packageNameToDisplayName(packageName: string): string {
+    return slugLikeToDisplayName(packageNameWithoutScope(packageName))
+}
+
+export function packageNameToModuleName(packageName: string): string {
+    return slugLikeToPascalCase(packageNameWithoutScope(packageName))
+}

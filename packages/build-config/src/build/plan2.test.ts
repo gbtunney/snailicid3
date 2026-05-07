@@ -108,7 +108,7 @@ describe('plan2', () => {
     })
 
     test('entry overrides root config', () => {
-        const plan = defineBuildPlan(pkg, {
+        const plan = defineBuildPlan(parsedPkg, {
             entries: [
                 {
                     bundle: false,
@@ -126,7 +126,7 @@ describe('plan2', () => {
     })
 
     test('can omit banner content', () => {
-        const plan = defineBuildPlan(pkg, {
+        const plan = defineBuildPlan(parsedPkg, {
             entries: [
                 {
                     banner: false,

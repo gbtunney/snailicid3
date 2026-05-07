@@ -3,11 +3,11 @@ import type z from 'zod'
 import { createBanner } from './banner.js'
 import {
     normaliseExportKey,
-    packageNameWithoutScope,
+    packageNameWithoutScope,packageNameToDisplayName,packageNameToModuleName,
     resolveEntryFilename,
     resolveSourceEntryPath,
     slugLikeToDisplayName,
-    slugLikeToPascalCase,
+    slugLikeToPascalCase,entryKeyToSlug,isRootEntryKey,isSlugLike
 } from './helpers.js'
 import { schemaBasePackage } from './schemas/index.js'
 import {
@@ -75,7 +75,10 @@ export function deriveBuildPlanEntry(options: {
     entry: PartialDeep<BuildPlanEntryInput>
     pkg: BuildPlanPackage
     root: BuildPlanRoot
-}): ResolvedBuildPlanEntry {
+}
+
+
+): ResolvedBuildPlanEntry {
     const merged = {
         ...options.root,
         ...options.entry,
@@ -111,20 +114,4 @@ export function deriveBuildPlanEntry(options: {
         moduleName,
         sourcePath,
     }
-}
-
-export function entryKeyToSlug(key: string): string {
-    return isRootEntryKey(key) ? 'index' : key.replace(/^\.\//, '')
-}
-
-export function isRootEntryKey(key: string): boolean {
-    return key === '*' || key === '.' || key === './' || key === 'index'
-}
-
-export function packageNameToDisplayName(packageName: string): string {
-    return slugLikeToDisplayName(packageNameWithoutScope(packageName))
-}
-
-export function packageNameToModuleName(packageName: string): string {
-    return slugLikeToPascalCase(packageNameWithoutScope(packageName))
 }
