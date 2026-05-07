@@ -49,10 +49,6 @@ export const schemaBuildPlanOptionals = z.object({
     transpile: schemaBuildPlanCore.shape.transpile.optional(), //i believe true willuse whatevers in the package for engines?
 })
 
-const schemaEntryKey: z.ZodType<
-    LiteralUnion<(typeof ENTRY_KEY_DEFAULTS)[number], string>
-> = z.union([z.enum(ENTRY_KEY_DEFAULTS), z.string()])
-
 export const schemaEntryKey2: z.ZodType<
     LiteralUnion<(typeof ENTRY_KEY_DEFAULTS)[number], string>
 > = z

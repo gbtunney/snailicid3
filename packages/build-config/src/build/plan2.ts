@@ -1,13 +1,16 @@
-import { type PartialDeep } from 'type-fest'
 import type z from 'zod'
 import { createBanner } from './banner.js'
 import {
+    entryKeyToSlug,
+    isRootEntryKey,
     normaliseExportKey,
-    packageNameWithoutScope,packageNameToDisplayName,packageNameToModuleName,
+    packageNameToDisplayName,
+    packageNameToModuleName,
+    packageNameWithoutScope,
     resolveEntryFilename,
     resolveSourceEntryPath,
     slugLikeToDisplayName,
-    slugLikeToPascalCase,entryKeyToSlug,isRootEntryKey,isSlugLike
+    slugLikeToPascalCase,
 } from './helpers.js'
 import { schemaBasePackage } from './schemas/index.js'
 import {
@@ -16,7 +19,7 @@ import {
 } from './schemas/plan.js'
 
 export type BuildPlanEntryBase = z.output<typeof schemaBuildPlanEntrySpec>
-export type BuildPlanEntryInput = z.input<typeof schemaBuildPlanEntrySpec>
+export type BuildPlanEntryInput = Partial<z.input<typeof schemaBuildPlanEntrySpec>>
 export type BuildPlanPackage = z.output<typeof schemaBasePackage>
 export type BuildPlanRoot = z.output<typeof schemaBuildPlanRoot>
 
@@ -46,7 +49,7 @@ export function defineBuildPlan<
     const Package extends z.input<typeof schemaBasePackage>,
 >(
     pkg: Package,
-    input: PartialDeep<DefineBuildPlanInput> = {},
+    input: DefineBuildPlanInput = {},
 ): ResolvedBuildPlan {
     const parsedPkg = schemaBasePackage.parse(pkg)
     const root = schemaBuildPlanRoot.parse(input.root ?? {})
@@ -72,13 +75,10 @@ export function defineBuildPlan<
 }
 
 export function deriveBuildPlanEntry(options: {
-    entry: PartialDeep<BuildPlanEntryInput>
+    entry: BuildPlanEntryInput
     pkg: BuildPlanPackage
     root: BuildPlanRoot
-}
-
-
-): ResolvedBuildPlanEntry {
+}): ResolvedBuildPlanEntry {
     const merged = {
         ...options.root,
         ...options.entry,
@@ -115,3 +115,10 @@ export function deriveBuildPlanEntry(options: {
         sourcePath,
     }
 }
+
+export {
+    entryKeyToSlug,
+    isRootEntryKey,
+    packageNameToDisplayName,
+    packageNameToModuleName,
+} from './helpers.js'
