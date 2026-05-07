@@ -1,0 +1,82 @@
+{
+    "[markdown]": {
+        "editor.wordWrap": "off",
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+
+    "files.associations": {
+        "*.yaml": "home-assistant"
+    },
+
+    "files.watcherExclude": {
+        "**/.git/**": true,
+        "**/node_modules/**": true,
+        "**/dist/**": true,
+        "**/.nx/**": true,
+        "**/.turbo/**": true
+    },
+
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/dist": true
+    },
+
+    "git.decorations.enabled": false,
+    "editor.minimap.enabled": false,
+
+    "workbench.list.smoothScrolling": false,
+    "editor.cursorSmoothCaretAnimation": "off",
+    "editor.smoothScrolling": false,
+
+    "typescript.tsserver.maxTsServerMemory": 4096,
+    "typescript.disableAutomaticTypeAcquisition": true,
+
+    "prettier.proseWrap": "never",
+    "prettier.printWidth": 140,
+    "typescript.tsserver.experimental.enableProjectDiagnostics": false,
+    "typescript.preferences.includePackageJsonAutoImports": "off",
+
+    "terminal.integrated.profiles.linux": {
+        "zsh": {
+            "path": "/usr/bin/zsh"
+        }
+    },
+    "terminal.integrated.defaultProfile.linux": "zsh",
+    "eslint.rules.customizations": [
+        {
+            "rule": "unused-imports/no-unused-imports",
+            "severity": "off"
+        },
+        {
+            "rule": "perfectionist/sort-imports",
+            "severity": "off"
+        },
+        {
+            "rule": "perfectionist/sort-named-imports",
+            "severity": "off"
+        },
+        {
+            "rule": "perfectionist/sort-objects",
+            "severity": "off"
+        },
+        { "rule": "perfectionist/sort-object-types", "severity": "off" },
+        { "rule": "perfectionist/sort-arrays", "severity": "off" },
+        { "rule": "perfectionist/sort-union-types", "severity": "off" },
+
+        { "rule": "perfectionist/sort-exports", "severity": "off" },
+
+        {
+            "rule": "perfectionist/sort-modules",
+            "severity": "off"
+        },
+        { "rule": "@typescript-eslint/array-type", "severity": "off" },
+        { "rule": "no-multiple-empty-lines", "severity": "off" },
+        { "rule": "import/order", "severity": "off" },
+        { "rule": "import/newline-after-import", "severity": "off" },
+        { "rule": "import/first", "severity": "off" },
+        { "rule": "import/no-duplicates", "severity": "off" },
+        { "rule": "import/no-unresolved", "severity": "off" },
+        { "rule": "import/no-extraneous-dependencies", "severity": "off" },
+        { "rule": "@typescript-eslint/no-unused-vars", "severity": "off" }
+    ]
+}

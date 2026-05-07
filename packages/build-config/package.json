@@ -86,6 +86,7 @@
         "rollup-plugin-node-externals": "^9.0.1",
         "rollup-plugin-polyfill-node": "^0.13.0",
         "ts-deepmerge": "^7.0.3",
+        "ts-extras": "^1.0.0",
         "tsdown": "^0.21.10",
         "type-fest": "^5.6.0",
         "typedoc-material-theme": "^1.4.1",

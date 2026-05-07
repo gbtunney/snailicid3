@@ -148,6 +148,9 @@ importers:
             ts-deepmerge:
                 specifier: ^7.0.3
                 version: 7.0.3
+            ts-extras:
+                specifier: ^1.0.0
+                version: 1.0.0
             tsdown:
                 specifier: ^0.21.10
                 version: 0.21.10(typescript@6.0.3)
@@ -9655,6 +9658,13 @@ packages:
             }
         engines: { node: '>=14.13.1' }
 
+    ts-extras@1.0.0:
+        resolution:
+            {
+                integrity: sha512-+TLxs47RxPDBowI0hwO2D92VeWkAsUygu6bdzGpWTkbOtEEZgyVRoLQbgJT0CO0QegviEN12RbT820xbmUaV4Q==,
+            }
+        engines: { node: '>=20' }
+
     ts-toolbelt@9.6.0:
         resolution:
             {
@@ -16248,6 +16258,10 @@ snapshots:
             typescript: 6.0.3
 
     ts-deepmerge@7.0.3: {}
+
+    ts-extras@1.0.0:
+        dependencies:
+            type-fest: 5.6.0
 
     ts-toolbelt@9.6.0: {}
 
