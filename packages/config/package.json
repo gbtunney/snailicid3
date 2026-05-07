@@ -16,7 +16,7 @@
         "config"
     ],
     "scripts": {
-        "build:exporter": "pnpm exec tsx ./build-exporter.ts",
+        "build:exporter": "pnpm exec node ./dist/build-exporter.js",
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
