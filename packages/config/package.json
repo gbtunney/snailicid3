@@ -133,6 +133,7 @@
         "globals": "^17.5.0",
         "json-schema": "^0.4.0",
         "json-schema-to-typescript": "^15.0.4",
+        "lint-staged": "^17.0.2",
         "markdownlint-cli2": "^0.22.0",
         "prettier": "^3.8.2",
         "prettier-plugin-jsdoc": "^1.8.0",
@@ -144,7 +145,7 @@
         "zod": "^4.3.6"
     },
     "devDependencies": {
-        "@types/node": "25.6.0",
+        "@types/node": "25.6.1",
         "tsx": "^4.21.0",
         "typescript": "^6.0.2",
         "vitest": "^4.1.4"
