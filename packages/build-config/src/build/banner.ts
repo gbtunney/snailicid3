@@ -19,6 +19,8 @@ export const bannerPackageMetaSchema = basePackage.pick({
 
 export type BannerPackageMeta = Infer<typeof bannerPackageMetaSchema>
 
+export { toBlockComment } from './helpers.js'
+
 /**
  * Generate a banner comment block from package metadata.
  *

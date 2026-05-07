@@ -252,4 +252,7 @@ export function resolveSourceEntryPath(options: {
     return resolvedPath
 }
 
-const myreg = fileExtensionsToPattern(['psd'])
+export function toBlockComment(lines: ReadonlyArray<string>): string {
+    return `/*\n${lines.map((line) => ` * ${line}`).join('\n')}\n */`
+}
+

@@ -1,8 +1,6 @@
 import { arrayIncludes } from 'ts-extras'
 import { type LiteralUnion } from 'type-fest'
 import z from 'zod'
-import { existsSync, readFileSync } from 'node:fs'
-import path from 'node:path'
 import {
     ENTRY_KEY_DEFAULTS,
     LOG_LEVEL,
@@ -14,30 +12,10 @@ import {
 } from './constants.js'
 import { schemaTranspile } from './transpile.js'
 
-import { fileExtensionsToPattern, resolveSourceEntryPath } from '../helpers.js'
+import { fileExtensionsToPattern } from '../helpers.js'
 
 const SOURCE_EXTENSION_REGEX = fileExtensionsToPattern(SOURCE_EXTENSIONS)
-function inferModuleNameFromPackage(): string {
-    const packageJsonPath = path.resolve(process.cwd(), 'package.json')
-    if (!existsSync(packageJsonPath)) return 'package'
 
-    try {
-        const raw: unknown = JSON.parse(readFileSync(packageJsonPath, 'utf8'))
-        if (!raw || typeof raw !== 'object') return 'package'
-
-        const pkg = raw as { name?: unknown }
-        return typeof pkg.name === 'string'
-            ? moduleNameFromPackageName(pkg.name)
-            : 'package'
-    } catch {
-        return 'package'
-    }
-}
-
-function moduleNameFromPackageName(packageName: string): string {
-    const nameWithoutScope = packageName.replace(/^@[^/]+\//, '')
-    return nameWithoutScope
-}
 export const schemaBuildPlanCore = z.object({
     bundle: z.boolean(),
     outputDir: z.string(),
@@ -81,14 +59,14 @@ export const schemaEntryKey2: z.ZodType<
     .union([z.enum(ENTRY_KEY_DEFAULTS), z.string()])
     .refine(
         (key): boolean => {
+            const slug = key.startsWith('./') ? key.slice(2) : key
             return (
                 arrayIncludes(ENTRY_KEY_DEFAULTS, key) ||
-                SLUG_LIKE_REGEX.test(key)
+                SLUG_LIKE_REGEX.test(slug)
             )
         },
-
         {
-            message: 'Entry key must be root-like or slug-like.',
+            message: 'Entry key must be root-like or slug-like (e.g. "./utils").',
         },
     )
     .refine((key) => !SOURCE_EXTENSION_REGEX.test(key), {
@@ -123,62 +101,3 @@ export const schemaBuildPlanEntrySpec = z.object({
 })
 
 export default schemaBuildPlanCore
-
-const innerSchema = z.object({
-    bannerContent: z.string().optional(),
-    displayName: z.string().optional(),
-    moduleName: z.string().optional(),
-    sourcePath: z.string(),
-})
-
-const derivedSchema: z.ZodType<
-    z.infer<typeof innerSchema>,
-    z.infer<typeof schemaBuildPlanEntrySpec>
-> = z.transform((entry) => {
-    /** Replace w dynamic */
-    const packageName = ''
-
-    return {
-        ...entry,
-
-        sourcePath: resolveSourceEntryPath({
-            key: entry.key,
-            sourceDir: entry.sourceDir ?? './src',
-            sourceFile: entry.sourceFile,
-        }),
-        /*
-        displayName:
-            entry.displayName ??
-            (isRootEntryKey(entry.key)
-                ? displayNameFromPackageName(packageName)
-                : slugLikeToDisplayName(entry.key)),
-
-        moduleName:
-            entry.moduleName ??
-            (isRootEntryKey(entry.key)
-                ? moduleNameFromPackageName(packageName)
-                : slugLikeToPascalCase(entry.key)),
-    }*/
-    }
-})
-
-//so bAsically it first needs to parse each schema, then merge with default
-//then it is gonna have to map to the tsdown config - this will need to often be split and expanded - like needs 2 entries if it has iiei bc it needs
-// bundle and inxlude rthe dependencies for most.  also , product of cli needs a bin mapping, and webapp needs some sort of html template gen.  so the adapter is gonna have to be pretty smart and do a lot of mapping and merging of the config.  but the user only has to define a simple config with sensible defaults.  and then we can add more options to the entry spec as needed and it will just work without the user having to change anything until they want to use those options.
-/**
- * THE 'product' can possibly infer some kind of preset ? idk.
- *
- * What is the difference of setting a target in tsconfig vs setting it in the build config ? ?? maybe the build config
- * can be used to generate a tsconfig for each entry point ? or maybe it just passes the target to the adapter and the
- * adapter decides how to use it. like for esbuild it would just pass it as the target, but for rollup it might generate
- * a tsconfig with that target and then use that tsconfig for the build. or maybe it just passes it as an option to the
- * rollup plugin. idk. this is something that can be figured out when we get to the adapter implementation. but it is
- * something to keep in mind when designing the build config schema, because we want to make sure that it is flexible
- * enough to support different adapters and different ways of specifying targets.
- */
-//so basiccally  if tsdown is being used, it doesnt need a check and build .
-//if the build strategy is 'none' then it just copies the files over and doesnt do any bundling or transpiling.  if the build strategy is 'transpile' then it just transpiles the files without bundling. im not sure how to do this w/out a target
-/* 
-  if the build strategy is 'bundle' then it bundles the files and also transpiles them.  so the build strategy is basically controlling how much processing is done to the files.  and then the output formats are controlling what formats are emitted for each entry point.  so if the output formats include 'ts' then it emits the TypeScript source files alongside the JS outputs.  if it includes 'esm' then it emits an ES module build.  if it includes 'cjs' then it emits a CommonJS build.  if it includes 'iife' then it emits an IIFE build.  if it includes 'umd' then it emits a UMD build.  and then the adapter is responsible for taking all of this information and generating the appropriate configuration for the underlying build tool (e.g. Rollup, esbuild, tsdown, etc.) to produce the desired outputs.
-  can  a target be requirwed if its not 'none' ?  or should it just default to something like 'esnext' if its not provided and the strategy is not 'none' ?  this is something to consider when designing the schema and the validation logic for the build config.  we want to make sure that it is flexible enough to allow for different use cases, but also provides sensible defaults and clear error messages when the config is invalid.
-  */

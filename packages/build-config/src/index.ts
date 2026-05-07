@@ -38,6 +38,8 @@ export {
 } from './build/plan.js'
 export type { PackageBuildConfig } from './build/plan.js'
 
+export * from './build/plan2.js'
+
 // ── Build port ────────────────────────────────────────────────────────────────
 export type { BuildAdapter } from './build/ports.js'
 
