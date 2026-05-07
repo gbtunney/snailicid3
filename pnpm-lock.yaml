@@ -40,6 +40,9 @@ importers:
             '@vitest/ui':
                 specifier: ^4.1.5
                 version: 4.1.5(vitest@4.1.5)
+            attw:
+                specifier: ^1.0.0
+                version: 1.0.0
             commitizen:
                 specifier: ^4.3.1
                 version: 4.3.1(@types/node@25.6.0)(typescript@6.0.3)
@@ -67,6 +70,9 @@ importers:
             prettier:
                 specifier: ^3.8.2
                 version: 3.8.3
+            publint:
+                specifier: ^0.3.19
+                version: 0.3.19
             tsx:
                 specifier: ^4.21.0
                 version: 4.21.0
@@ -76,6 +82,9 @@ importers:
             typescript-eslint:
                 specifier: ^8.58.1
                 version: 8.59.2(eslint@10.3.0(jiti@2.7.0))(typescript@6.0.3)
+            unrun:
+                specifier: ^0.3.0
+                version: 0.3.0
             verdaccio:
                 specifier: ^6.5.0
                 version: 6.5.2(typanion@3.14.0)
@@ -153,7 +162,7 @@ importers:
                 version: 1.0.0
             tsdown:
                 specifier: ^0.21.10
-                version: 0.21.10(typescript@6.0.3)
+                version: 0.21.10(publint@0.3.19)(typescript@6.0.3)
             type-fest:
                 specifier: ^5.6.0
                 version: 5.6.0
@@ -257,7 +266,7 @@ importers:
                 version: 17.0.35
             tsdown:
                 specifier: ^0.21.10
-                version: 0.21.10(typescript@6.0.3)
+                version: 0.21.10(publint@0.3.19)(typescript@6.0.3)
             typedoc:
                 specifier: ^0.28.19
                 version: 0.28.19(typescript@6.0.3)
@@ -300,7 +309,7 @@ importers:
                 version: 25.6.0
             tsdown:
                 specifier: ^0.21.10
-                version: 0.21.10(typescript@6.0.3)
+                version: 0.21.10(publint@0.3.19)(typescript@6.0.3)
             typescript:
                 specifier: ^6.0.2
                 version: 6.0.3
@@ -436,7 +445,7 @@ importers:
                 version: 25.6.0
             tsdown:
                 specifier: ^0.21.10
-                version: 0.21.10(typescript@6.0.3)
+                version: 0.21.10(publint@0.3.19)(typescript@6.0.3)
             typescript:
                 specifier: ^6.0.2
                 version: 6.0.3
@@ -473,7 +482,7 @@ importers:
                 version: 25.6.0
             tsdown:
                 specifier: ^0.21.10
-                version: 0.21.10(typescript@6.0.3)
+                version: 0.21.10(publint@0.3.19)(typescript@6.0.3)
             typescript:
                 specifier: ^6.0.2
                 version: 6.0.3
@@ -525,7 +534,7 @@ importers:
                 version: 17.0.35
             tsdown:
                 specifier: ^0.21.10
-                version: 0.21.10(typescript@6.0.3)
+                version: 0.21.10(publint@0.3.19)(typescript@6.0.3)
             typescript:
                 specifier: ^6.0.2
                 version: 6.0.3
@@ -556,7 +565,7 @@ importers:
                 version: 25.6.0
             tsdown:
                 specifier: ^0.21.10
-                version: 0.21.10(typescript@6.0.3)
+                version: 0.21.10(publint@0.3.19)(typescript@6.0.3)
             typescript:
                 specifier: ^6.0.2
                 version: 6.0.3
@@ -590,7 +599,7 @@ importers:
                 version: 0.31.1
             tsdown:
                 specifier: ^0.21.10
-                version: 0.21.10(typescript@6.0.3)
+                version: 0.21.10(publint@0.3.19)(typescript@6.0.3)
             typescript:
                 specifier: ^6.0.2
                 version: 6.0.3
@@ -657,7 +666,7 @@ importers:
                 version: 25.6.0
             tsdown:
                 specifier: ^0.21.10
-                version: 0.21.10(typescript@6.0.3)
+                version: 0.21.10(publint@0.3.19)(typescript@6.0.3)
             typedoc:
                 specifier: ^0.28.19
                 version: 0.28.19(typescript@6.0.3)
@@ -2282,6 +2291,13 @@ packages:
             }
         peerDependencies:
             prettier: ^3.0.0
+
+    '@publint/pack@0.1.4':
+        resolution:
+            {
+                integrity: sha512-HDVTWq3H0uTXiU0eeSQntcVUTPP3GamzeXI41+x7uU9J65JgWQh3qWZHblR1i0npXfFtF+mxBiU2nJH8znxWnQ==,
+            }
+        engines: { node: '>=18' }
 
     '@quansync/fs@1.0.0':
         resolution:
@@ -4346,6 +4362,13 @@ packages:
                 integrity: sha512-kNOjDqAh7px0XWNI+4QbzoiR/nTkHAWNud2uvnJquD1/x5a7EQZMJT0AczqK0Qn67oY/TTQ1LbUKajZpp3I9tQ==,
             }
         engines: { node: '>=8.0.0' }
+
+    attw@1.0.0:
+        resolution:
+            {
+                integrity: sha512-sUJK62u07rUakcCmke8aJ4WIW8CzRRGhwEJfk2ot3ME1pVTRZ7Ozblc1JT8gZ64wp8u9xlpYQJJc7d1gTslSGg==,
+            }
+        hasBin: true
 
     available-typed-arrays@1.0.7:
         resolution:
@@ -8631,6 +8654,12 @@ packages:
                 integrity: sha512-BEnLolu+yuz22S56CU1SUKq3XC3PkwD5wv4ikR4MfGvnRVcmzXR9DwSlW2fEamyTPyXHomBJRzgapeuBvRNzJQ==,
             }
 
+    package-manager-detector@1.6.0:
+        resolution:
+            {
+                integrity: sha512-61A5ThoTiDG/C8s8UMZwSorAGwMJ0ERVGj2OjoW5pAalsNOg15+iQiPzrLJ4jhZ1HJzmC2PIHT2oEiH3R5fzNA==,
+            }
+
     pako@0.2.9:
         resolution:
             {
@@ -8958,6 +8987,14 @@ packages:
                 integrity: sha512-cJ+oHTW1VAEa8cJslgmUZrc+sjRKgAKl3Zyse6+PV38hZe/V6Z14TbCuXcan9F9ghlz4QrFr2c92TNF82UkYHA==,
             }
         engines: { node: '>=10' }
+
+    publint@0.3.19:
+        resolution:
+            {
+                integrity: sha512-J3p4GOocCRFyLLFRzGfIhAwWgk0Kkcdxj5iFspFvCYbyiJs5IhCM8gsIkcNeQL+tdpV671RtJQiTFSUKhl1Wjg==,
+            }
+        engines: { node: '>=18' }
+        hasBin: true
 
     pump@2.0.1:
         resolution:
@@ -9442,6 +9479,13 @@ packages:
             {
                 integrity: sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==,
             }
+
+    sade@1.8.1:
+        resolution:
+            {
+                integrity: sha512-xal3CZX1Xlo/k4ApwCFrHVACi9fBqJ7V+mwhBsuf/1IOKbBy098Fex+Wa/5QMubw09pSZ/u8EY8PWgevJsXp1A==,
+            }
+        engines: { node: '>=6' }
 
     safe-array-concat@1.1.4:
         resolution:
@@ -10568,6 +10612,19 @@ packages:
         resolution:
             {
                 integrity: sha512-vYFWSyX5Be408RX+CAd2Heh8egQRnGBWOQmZKwYPvMtTQNmRYoKdSyFIczYNxZEMqz0dJzSxp7xkcZGzvtkHyQ==,
+            }
+        engines: { node: ^22.13.0 || >=24.0.0 }
+        hasBin: true
+        peerDependencies:
+            synckit: ^0.11.11
+        peerDependenciesMeta:
+            synckit:
+                optional: true
+
+    unrun@0.3.0:
+        resolution:
+            {
+                integrity: sha512-5xw2AIVS2WR9Lqhz76qDIQLxipKRidf7Nq+Iz5SZ8shk1OmRlxnc6FyI/1Q2m99WLj6cbqaKFdESfWE99KPzlA==,
             }
         engines: { node: ^22.13.0 || >=24.0.0 }
         hasBin: true
@@ -12010,6 +12067,8 @@ snapshots:
             '@xml-tools/parser': 1.0.11
             prettier: 3.8.3
 
+    '@publint/pack@0.1.4': {}
+
     '@quansync/fs@1.0.0':
         dependencies:
             quansync: 1.0.0
@@ -13201,6 +13260,8 @@ snapshots:
     at-least-node@1.0.0: {}
 
     atomic-sleep@1.0.0: {}
+
+    attw@1.0.0: {}
 
     available-typed-arrays@1.0.7:
         dependencies:
@@ -16044,6 +16105,8 @@ snapshots:
         dependencies:
             quansync: 0.2.11
 
+    package-manager-detector@1.6.0: {}
+
     pako@0.2.9: {}
 
     parent-module@1.0.1:
@@ -16216,6 +16279,13 @@ snapshots:
             ipaddr.js: 1.9.1
 
     proxy-from-env@2.1.0: {}
+
+    publint@0.3.19:
+        dependencies:
+            '@publint/pack': 0.1.4
+            package-manager-detector: 1.6.0
+            picocolors: 1.1.1
+            sade: 1.8.1
 
     pump@2.0.1:
         dependencies:
@@ -16591,6 +16661,10 @@ snapshots:
     rxjs@7.8.2:
         dependencies:
             tslib: 2.8.1
+
+    sade@1.8.1:
+        dependencies:
+            mri: 1.2.0
 
     safe-array-concat@1.1.4:
         dependencies:
@@ -17088,7 +17162,7 @@ snapshots:
             minimist: 1.2.8
             strip-bom: 3.0.0
 
-    tsdown@0.21.10(typescript@6.0.3):
+    tsdown@0.21.10(publint@0.3.19)(typescript@6.0.3):
         dependencies:
             ansis: 4.2.0
             cac: 7.0.0
@@ -17107,6 +17181,7 @@ snapshots:
             unconfig-core: 7.5.0
             unrun: 0.2.38
         optionalDependencies:
+            publint: 0.3.19
             typescript: 6.0.3
         transitivePeerDependencies:
             - '@ts-macro/tsc'
@@ -17324,6 +17399,10 @@ snapshots:
             '@unrs/resolver-binding-win32-x64-msvc': 1.11.1
 
     unrun@0.2.38:
+        dependencies:
+            rolldown: 1.0.0
+
+    unrun@0.3.0:
         dependencies:
             rolldown: 1.0.0
 
