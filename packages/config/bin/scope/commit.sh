@@ -339,7 +339,13 @@ EOF
     if [[ "${#input_paths[@]}" -gt 0 ]]; then
         paths=("${input_paths[@]}")
     else
-        mapfile -t paths < <(collect_changed_paths)
+        # macOS ships bash 3.2, which doesn't have `mapfile`.
+        # Read lines into the `paths` array manually.
+        paths=()
+        while IFS= read -r path; do
+            [[ -n "$path" ]] || continue
+            paths+=("$path")
+        done < <(collect_changed_paths)
     fi
 
     if [[ "${#paths[@]}" -eq 0 ]]; then
