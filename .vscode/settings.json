@@ -41,5 +41,42 @@
             "path": "/usr/bin/zsh"
         }
     },
-    "terminal.integrated.defaultProfile.linux": "zsh"
+    "terminal.integrated.defaultProfile.linux": "zsh",
+    "eslint.rules.customizations": [
+        {
+            "rule": "unused-imports/no-unused-imports",
+            "severity": "off"
+        },
+        {
+            "rule": "perfectionist/sort-imports",
+            "severity": "off"
+        },
+        {
+            "rule": "perfectionist/sort-named-imports",
+            "severity": "off"
+        },
+        {
+            "rule": "perfectionist/sort-objects",
+            "severity": "off"
+        },
+        { "rule": "perfectionist/sort-object-types", "severity": "off" },
+        { "rule": "perfectionist/sort-arrays", "severity": "off" },
+        { "rule": "perfectionist/sort-union-types", "severity": "off" },
+
+        { "rule": "perfectionist/sort-exports", "severity": "off" },
+
+        {
+            "rule": "perfectionist/sort-modules",
+            "severity": "off"
+        },
+        { "rule": "@typescript-eslint/array-type", "severity": "off" },
+        { "rule": "no-multiple-empty-lines", "severity": "off" },
+        { "rule": "import/order", "severity": "off" },
+        { "rule": "import/newline-after-import", "severity": "off" },
+        { "rule": "import/first", "severity": "off" },
+        { "rule": "import/no-duplicates", "severity": "off" },
+        { "rule": "import/no-unresolved", "severity": "off" },
+        { "rule": "import/no-extraneous-dependencies", "severity": "off" },
+        { "rule": "@typescript-eslint/no-unused-vars", "severity": "off" }
+    ]
 }
