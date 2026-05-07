@@ -159,7 +159,7 @@ EOF
 
     if [[ "$run_commit_before" == "true" ]]; then
         # Keep the expensive pre-commit checks behind final commit-message validation below.
-        pnpm commit:before || return 1
+        pnpm lint:staged || return 1
     fi
 
     read_package_name() {

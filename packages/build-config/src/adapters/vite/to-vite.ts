@@ -1,10 +1,10 @@
 /** Translate a {@link BuildPlan} into a Vite InlineConfig for library mode. */
 
 import type { InlineConfig, LibraryFormats } from 'vite'
+import type { PluginOptions as ViteDTSPluginOptions } from 'vite-plugin-dts'
 import path from 'node:path'
 import { resolveEntryFilename } from './../../build/plan.js'
 import type { BuildPlan, OutputKind } from './../../build/types.js'
-
 /** Map OutputKind to Vite's LibraryFormats. Vite uses 'es' not 'esm'. */
 const VITE_FORMAT_MAP: Partial<Record<OutputKind, LibraryFormats>> = {
     cjs: 'cjs',
@@ -51,10 +51,13 @@ export function toViteConfig(
     if (dts) {
         // vite-plugin-dts is an optional peer dep — import lazily so the adapter
         // works without it when dts is false.
+
+        const pluginOptions: ViteDTSPluginOptions = {
+            insertTypesEntry: true,
+        }
+
         plugins.push(
-            import('vite-plugin-dts').then((m) =>
-                m.default({ rollupTypes: true }),
-            ),
+            import('vite-plugin-dts').then((m) => m.default(pluginOptions)),
         )
     }
 
