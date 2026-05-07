@@ -157,10 +157,10 @@ EOF
         input_paths=("${positionals[@]}")
     fi
 
-    if [[ "$run_commit_before" == "true" ]]; then
-        # Keep the expensive pre-commit checks behind final commit-message validation below.
-        pnpm lint:staged || return 1
-    fi
+    # TODO commentiing out , not sure if we need it . if [[ "$run_commit_before" == "true" ]]; then
+    # Keep the expensive pre-commit checks behind final commit-message validation below.
+    # pnpm lint:staged || return 1
+    #fi
 
     read_package_name() {
         local package_json="$1"

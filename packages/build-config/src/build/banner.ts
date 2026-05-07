@@ -66,3 +66,4 @@ export {
     type BannerPackageMeta,
     schemaPackageMetaBanner,
 } from './schemas/package.js'
+const this_is_stupid = 'just a test'
