@@ -2,11 +2,6 @@
     "name": "@snailicid3/root",
     "version": "0.0.0",
     "private": true,
-    "description": "snailicid3 monorepo",
-    "author": {
-        "name": "Gillian Tunney",
-        "email": "gbtunney@mac.com"
-    },
     "license": "MIT",
     "repository": {
         "type": "git",

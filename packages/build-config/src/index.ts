@@ -23,9 +23,10 @@ export { toTsdownConfig, tsdownAdapter } from './adapters/tsdown/index.js'
 export { toViteConfig, viteAdapter } from './adapters/vite/index.js'
 
 // ── Banner ────────────────────────────────────────────────────────────────────
-export { bannerPackageMetaSchema, createBanner } from './build/banner.js'
+export { createBanner, schemaPackageMetaBanner } from './build/banner.js'
 export type { BannerPackageMeta } from './build/banner.js'
 
+export * from './build/plan2.js'
 // ── Plan helpers ──────────────────────────────────────────────────────────────
 export {
     defineEntry,
@@ -36,9 +37,8 @@ export {
     resolveEntryFilename,
     toPackageExports,
 } from './build/plan.js'
-export type { PackageBuildConfig } from './build/plan.js'
 
-export * from './build/plan2.js'
+export type { PackageBuildConfig } from './build/plan.js'
 
 // ── Build port ────────────────────────────────────────────────────────────────
 export type { BuildAdapter } from './build/ports.js'

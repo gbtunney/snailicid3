@@ -62,9 +62,8 @@
         { "rule": "perfectionist/sort-object-types", "severity": "off" },
         { "rule": "perfectionist/sort-arrays", "severity": "off" },
         { "rule": "perfectionist/sort-union-types", "severity": "off" },
-
         { "rule": "perfectionist/sort-exports", "severity": "off" },
-
+        { "rule": "perfectionist/sort-named-exports", "severity": "off" },
         {
             "rule": "perfectionist/sort-modules",
             "severity": "off"

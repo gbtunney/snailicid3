@@ -60,5 +60,6 @@ export const schemaPackageMetaBanner = z.object({
         version: true,
     }).shape,
 })
+export type BannerPackageMeta = z.infer<typeof schemaPackageMetaBanner>
 
 const licenseDchem = z.enum(LICENSES).default('MIT')

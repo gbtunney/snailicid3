@@ -4,20 +4,13 @@
  * Generates a comment block suitable for prepending to bundled output files.
  */
 
-import type { infer as Infer } from 'zod'
+import type z from 'zod'
 
-import { basePackage } from './schema.js'
 import { packageNameToDisplayName, toBlockComment } from './helpers.js'
-export const bannerPackageMetaSchema = basePackage.pick({
-    author: true,
-    description: true,
-    license: true,
-    name: true,
-    repository: true,
-    version: true,
-})
-
-export type BannerPackageMeta = Infer<typeof bannerPackageMetaSchema>
+import {
+    type BannerPackageMeta,
+    schemaPackageMetaBanner,
+} from './schemas/package.js'
 
 export { toBlockComment } from './helpers.js'
 
@@ -38,14 +31,14 @@ export { toBlockComment } from './helpers.js'
  */
 
 export function createBanner(
-    packageMeta: BannerPackageMeta,
+    packageMeta: z.input<typeof schemaPackageMetaBanner>,
     moduleName?: string,
 ): string | undefined {
-    const parsedMeta = bannerPackageMetaSchema.safeParse(packageMeta)
+    const parsedMeta = schemaPackageMetaBanner.safeParse(packageMeta)
     if (!parsedMeta.success) return undefined
 
-    const validMeta = parsedMeta.data
-    const resolvedModuleName :string=
+    const validMeta: BannerPackageMeta = parsedMeta.data
+    const resolvedModuleName: string =
         moduleName && moduleName.trim().length > 0
             ? moduleName
             : packageNameToDisplayName(validMeta.name)
@@ -69,3 +62,7 @@ export function createBanner(
 
     return toBlockComment(lines)
 }
+export {
+    type BannerPackageMeta,
+    schemaPackageMetaBanner,
+} from './schemas/package.js'
