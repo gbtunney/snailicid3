@@ -1,5 +1,10 @@
 import type z from 'zod'
-import { ensureArray, numeric, resolveRegExpSchema } from './schemas.js'
+import {
+    coerceRegExpSchema,
+    createEnumSchema,
+    ensureArray,
+    numeric,
+} from './schemas.js'
 
 /**
  * @deprecated This is replaced with ZodType<> in zod 4
@@ -88,12 +93,13 @@ export const parseFactory =
 
 /** @namespace This file contains utility functions for zod */
 export const zodHelpers = {
+    coerceRegExpSchema,
+    createEnumSchema,
     ensureArray,
     isZodParsable,
     numeric,
     parseFactory,
     parseZodData,
-    resolveRegExpSchema,
     wrapSchema,
 }
 export default zodHelpers
