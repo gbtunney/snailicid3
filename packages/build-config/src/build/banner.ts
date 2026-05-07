@@ -7,7 +7,7 @@
 import type { infer as Infer } from 'zod'
 
 import { basePackage } from './schema.js'
-
+import {moduleNameFromPackageName,toBlockComment} from './helpers.js'
 export const bannerPackageMetaSchema = basePackage.pick({
     author: true,
     description: true,
@@ -36,55 +36,36 @@ export { toBlockComment } from './helpers.js'
  *     //  * /
  *     ```
  */
-export function createBanner(meta: BannerPackageMeta): string | undefined
-export function createBanner(
-    moduleName: string,
-    meta: BannerPackageMeta,
-): string | undefined
-export function createBanner(
-    moduleNameOrMeta: BannerPackageMeta | string,
-    metaMaybe?: BannerPackageMeta,
-): string | undefined {
-    const [moduleNameInput, meta] =
-        typeof moduleNameOrMeta === 'string'
-            ? [moduleNameOrMeta, metaMaybe]
-            : [undefined, moduleNameOrMeta]
 
-    const parsedMeta = bannerPackageMetaSchema.safeParse(meta)
+export function createBanner(
+    packageMeta: BannerPackageMeta,
+    moduleName?: string,
+): string | undefined {
+    const parsedMeta = bannerPackageMetaSchema.safeParse(packageMeta)
     if (!parsedMeta.success) return undefined
 
     const validMeta = parsedMeta.data
-    const moduleName =
-        moduleNameInput && moduleNameInput.trim().length > 0
-            ? moduleNameInput
+    const resolvedModuleName :string=
+        moduleName && moduleName.trim().length > 0
+            ? moduleName
             : moduleNameFromPackageName(validMeta.name)
 
     const lines: Array<string> = [
-        ` * ${validMeta.name} v${validMeta.version}`,
-        ` * Module: ${moduleName}`,
-        ` * (c) ${String(new Date().getFullYear())} ${validMeta.author.name}`,
+        `${validMeta.name} v${validMeta.version}`,
+        `Module: ${resolvedModuleName}`,
+        `(c) ${String(new Date().getFullYear())} ${validMeta.author.name}`,
     ]
 
-    if (validMeta.description) lines.push(` * ${validMeta.description}`)
+    if (validMeta.description) lines.push(validMeta.description)
     if (validMeta.repository) {
         lines.push(
-            ` * ${typeof validMeta.repository === 'string' ? validMeta.repository : validMeta.repository.url}`,
+            typeof validMeta.repository === 'string'
+                ? validMeta.repository
+                : validMeta.repository.url,
         )
     }
-    lines.push(` * Released under the ${validMeta.license} License.`)
-    lines.push(` * Build: ${new Date().toLocaleString()}`)
+    lines.push(`Released under the ${validMeta.license} License.`)
+    lines.push(`Build: ${new Date().toLocaleString()}`)
 
-    return `/*\n${lines.join('\n')}\n */`
-}
-
-function moduleNameFromPackageName(packageName: string): string {
-    const nameWithoutScope = packageName.startsWith('@snailicid3/')
-        ? packageName.slice('@snailicid3/'.length)
-        : packageName.replace(/^@[^/]+\//, '')
-
-    const words = nameWithoutScope
-        .split(/[\s._-]+/)
-        .filter((word) => word.length > 0)
-
-    return words.map((word) => word[0].toUpperCase() + word.slice(1)).join(' ')
+    return toBlockComment(lines)
 }
