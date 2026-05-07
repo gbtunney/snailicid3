@@ -75,7 +75,7 @@ export function toRollupConfig(
 
         const banner =
             entry.banner && packageMeta
-                ? createBanner(libraryName, packageMeta)
+                ? createBanner(packageMeta, libraryName)
                 : undefined
 
         const preset = inferPreset(entry.outputKinds, plan.identity.runtime)

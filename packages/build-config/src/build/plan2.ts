@@ -106,7 +106,7 @@ export function deriveBuildPlanEntry(options: {
     return {
         ...parsedEntry,
         bannerContent: parsedEntry.banner
-            ? createBanner(moduleName, options.pkg)
+            ? createBanner(options.pkg, moduleName)
             : undefined,
         displayName,
         exportKey: normaliseExportKey(parsedEntry.key),

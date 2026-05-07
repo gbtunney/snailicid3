@@ -123,14 +123,14 @@ describe('@snailicid3/build-config', () => {
     })
 
     test('creates banner content from package metadata', () => {
-        const banner = createBanner('exampleLib', {
+        const banner = createBanner({
             author: { email: 'gbtunney@example.test', name: 'Gillian Tunney' },
             description: 'Example package',
             license: 'MIT',
             name: '@snailicid3/example-package',
             repository: { type: 'git', url: 'https://example.test/repo' },
             version: '1.2.3',
-        })
+        }, 'exampleLib')
 
         expect(banner).toContain('@snailicid3/example-package v1.2.3')
         expect(banner).toContain('Module: exampleLib')

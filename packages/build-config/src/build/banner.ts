@@ -7,7 +7,7 @@
 import type { infer as Infer } from 'zod'
 
 import { basePackage } from './schema.js'
-import {moduleNameFromPackageName,toBlockComment} from './helpers.js'
+import { packageNameToDisplayName, toBlockComment } from './helpers.js'
 export const bannerPackageMetaSchema = basePackage.pick({
     author: true,
     description: true,
@@ -48,7 +48,7 @@ export function createBanner(
     const resolvedModuleName :string=
         moduleName && moduleName.trim().length > 0
             ? moduleName
-            : moduleNameFromPackageName(validMeta.name)
+            : packageNameToDisplayName(validMeta.name)
 
     const lines: Array<string> = [
         `${validMeta.name} v${validMeta.version}`,

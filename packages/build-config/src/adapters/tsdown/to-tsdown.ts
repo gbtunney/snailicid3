@@ -49,7 +49,7 @@ export function toTsdownConfig(
 
     return {
         ...(wantsBanner && resolvedMeta
-            ? { banner: createBanner(moduleName, resolvedMeta) }
+            ? { banner: createBanner(resolvedMeta, moduleName) }
             : {}),
         clean: true,
         dts,
