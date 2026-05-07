@@ -42,6 +42,7 @@ export const configuration = (
             settings: { enableMultipleScopes: true, scopeEnumSeparator: ',' },
         },
         rules: {
+            'header-max-length': [2, 'always', 150],
             'scope-empty': [2, 'never'],
             'scope-enum': [2, 'always', scope_enum],
             'type-enum': [2, 'always', type_enum],
