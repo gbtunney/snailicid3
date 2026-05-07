@@ -12,7 +12,6 @@ import { build } from 'vite'
 import { toViteConfig } from './to-vite.js'
 import type { BuildAdapter } from '../../build/ports.js'
 import type { BuildPlan, Product, Runtime } from '../../build/types.js'
-
 /** Products handled by the Vite adapter when buildStrategy is 'bundle'. */
 const VITE_PRODUCTS: Array<Product> = ['web_app']
 export { toViteConfig } from './to-vite.js'
