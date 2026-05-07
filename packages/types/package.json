@@ -76,9 +76,9 @@
     "devDependencies": {
         "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
-        "@types/node": "^25.6.0",
+        "@types/node": "^25.6.1",
         "@types/ramda": "^0.31.1",
-        "tsdown": "^0.21.10",
+        "tsdown": "^0.22.0",
         "typescript": "^6.0.2",
         "vitest": "^4.1.4"
     }
