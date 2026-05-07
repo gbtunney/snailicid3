@@ -49,7 +49,7 @@ export const schemaBuildPlanOptionals = z.object({
     transpile: schemaBuildPlanCore.shape.transpile.optional(), //i believe true willuse whatevers in the package for engines?
 })
 
-export const schemaEntryKey2: z.ZodType<
+export const schemaEntryKey: z.ZodType<
     LiteralUnion<(typeof ENTRY_KEY_DEFAULTS)[number], string>
 > = z
     .union([z.enum(ENTRY_KEY_DEFAULTS), z.string()])
@@ -79,7 +79,7 @@ export const schemaBuildPlanEntrySpec = z.object({
     exports: z.boolean().default(true),
 
     /** IMPORTANT PROPS FOR ENTRY SPEC */
-    key: schemaEntryKey2.default('*'), //will map to file name will pre pended by the sourceDir unless ovverriden.?
+    key: schemaEntryKey.default('*'), //will map to file name will pre pended by the sourceDir unless ovverriden.?
     /* this is only really used for umd/iife builds-  will be the name of the global variable that the library is assigned to in those formats. 
       * it will also be used as the "name" of the module in the banner, unless the key is set to * or . or index. 
       it will be ignored for other formats.  if not provided, it will default to the package name. */
