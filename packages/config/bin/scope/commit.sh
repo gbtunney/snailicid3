@@ -48,6 +48,12 @@ get_commit_scope() {
     validate_commit_message() {
         local message="$1"
 
+        # Allow callers (CI dispatch jobs) to skip commitlint validation when
+        # dependencies are not installed in the current environment.
+        if [[ "${SCOPE_COMMIT_SKIP_COMMITLINT:-0}" == "1" ]]; then
+            return 0
+        fi
+
         printf '%s\n' "$message" | pnpm exec commitlint --cwd "$repo_root" > /dev/null || {
             echo "Error: invalid commit message:" >&2
             echo "  $message" >&2

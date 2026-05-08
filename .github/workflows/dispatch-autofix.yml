@@ -102,18 +102,6 @@ jobs:
               env:
                   GH_PAT: ${{ secrets.GH_PAT }}
 
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: 'lts/*'
-                  cache: pnpm
-                  cache-dependency-path: pnpm-lock.yaml
-
-            - uses: pnpm/action-setup@v4
-
-            - name: 📦 Install workspace dependencies (for scope-commit)
-              shell: bash
-              run: pnpm install --ignore-scripts --no-frozen-lockfile
-
             # ── Restore pipeline artifact ────────────────────────────
             - name: 📥 Download workspace artifact
               uses: actions/download-artifact@v4
@@ -152,12 +140,14 @@ jobs:
               id: scoped_message
               if: ${{ steps.dirty.outputs.dirty == 'true' }}
               shell: bash
+              env:
+                  SCOPE_COMMIT_SKIP_COMMITLINT: '1'
               run: |
                   TYPE="${{ inputs.commit_message_type }}"
                   SUBJECT="${{ inputs.commit_message_subject }}"
 
                   git add -A
-                  MESSAGE="$(pnpm exec scope-commit --staged --message "$TYPE" "$SUBJECT" 2>/dev/null || echo "$TYPE(root): $SUBJECT")"
+                  MESSAGE="$(bash packages/config/bin/scope/commit.sh --staged --message "$TYPE" "$SUBJECT" 2>/dev/null || echo "$TYPE(root): $SUBJECT")"
                   echo "message=$MESSAGE" >> "$GITHUB_OUTPUT"
                   echo "✅ Scoped message: $MESSAGE"
 
