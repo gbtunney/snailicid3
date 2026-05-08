@@ -70,6 +70,7 @@
         "report:commit-scope": "pnpm exec scope-commit"
     },
     "devDependencies": {
+        "@arethetypeswrong/core": "^0.18.2",
         "@changesets/cli": "^2.31.0",
         "@commitlint/cli": "^20.5.0",
         "@commitlint/config-conventional": "^20.5.0",
@@ -95,6 +96,7 @@
         "tsx": "^4.21.0",
         "typescript": "^6.0.2",
         "typescript-eslint": "^8.58.1",
+        "unplugin-unused": "^0.5.7",
         "unrun": "^0.3.0",
         "verdaccio": "^6.5.0"
     },

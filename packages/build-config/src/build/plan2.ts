@@ -1,4 +1,5 @@
 import type z from 'zod'
+import path from 'node:path'
 import { createBanner } from './banner.js'
 import {
     entryKeyToSlug,
@@ -6,7 +7,6 @@ import {
     normaliseExportKey,
     packageNameToDisplayName,
     packageNameToModuleName,
-    packageNameWithoutScope,
     resolveEntryFilename,
     resolveSourceEntryPath,
     slugLikeToDisplayName,
@@ -19,13 +19,25 @@ import {
 } from './schemas/plan.js'
 
 export type BuildPlanEntryBase = z.output<typeof schemaBuildPlanEntrySpec>
-export type BuildPlanEntryInput = Partial<z.input<typeof schemaBuildPlanEntrySpec>>
+export type BuildPlanEntryInput = Partial<
+    z.input<typeof schemaBuildPlanEntrySpec>
+>
 export type BuildPlanPackage = z.output<typeof schemaBasePackage>
 export type BuildPlanRoot = z.output<typeof schemaBuildPlanRoot>
 
 export type DefineBuildPlanInput = {
     entries?: Array<BuildPlanEntryInput>
     root?: z.input<typeof schemaBuildPlanRoot>
+}
+
+export type PackageExportExtensionPreset = 'standard' | 'strict'
+
+export type PackageExportExtensions = {
+    cjs: string
+    esm: string
+    iife: string
+    types: string
+    umd: string
 }
 
 export type ResolvedBuildPlan = {
@@ -45,10 +57,19 @@ export type ResolvedBuildPlanEntry = BuildPlanEntryBase & {
     sourcePath: string
 }
 
-export function defineBuildPlan<
-    const Package extends z.input<typeof schemaBasePackage>,
->(
-    pkg: Package,
+export type ToPackageExportsPlan2Options = {
+    extensionPreset?: PackageExportExtensionPreset
+    outDir?: string
+    resolvePath?: (options: {
+        condition: 'browser' | 'default' | 'import' | 'require' | 'types'
+        entry: ResolvedBuildPlanEntry
+        ext: string
+        outDir: string
+    }) => string
+}
+
+export function defineBuildPlan(
+    pkg: unknown,
     input: DefineBuildPlanInput = {},
 ): ResolvedBuildPlan {
     const parsedPkg = schemaBasePackage.parse(pkg)
@@ -114,6 +135,94 @@ export function deriveBuildPlanEntry(options: {
         moduleName,
         sourcePath,
     }
+}
+
+export function toPackageExportsPlan2(
+    plan: ResolvedBuildPlan,
+    options: ToPackageExportsPlan2Options = {},
+): Record<string, Record<string, string>> {
+    const extensionPreset = options.extensionPreset ?? 'standard'
+    const extensionMap = getPackageExportExtensions(extensionPreset)
+    const outDir = normaliseOutDirToPosix(options.outDir ?? plan.outputDir)
+    const exportsMap: Record<string, Record<string, string>> = {}
+
+    for (const entry of plan.entries) {
+        if (!entry.exports) {
+            continue
+        }
+
+        const conditions: Record<string, string> = {}
+        const resolvePath = (
+            condition: 'browser' | 'default' | 'import' | 'require' | 'types',
+            ext: string,
+        ): string => {
+            if (options.resolvePath) {
+                return options.resolvePath({ condition, entry, ext, outDir })
+            }
+
+            return `./${outDir}/${entry.fileName}${ext}`
+        }
+
+        if (entry.output_formats.includes('ts')) {
+            conditions['types'] = resolvePath('types', extensionMap.types)
+        }
+
+        if (entry.output_formats.includes('esm')) {
+            conditions['import'] = resolvePath('import', extensionMap.esm)
+        }
+
+        if (entry.output_formats.includes('cjs')) {
+            conditions['require'] = resolvePath('require', extensionMap.cjs)
+        }
+
+        const browserExt = entry.output_formats.includes('iife')
+            ? extensionMap.iife
+            : entry.output_formats.includes('umd')
+              ? extensionMap.umd
+              : null
+
+        if (browserExt !== null) {
+            conditions['browser'] = resolvePath('browser', browserExt)
+        }
+
+        if (conditions['import']) {
+            conditions['default'] = conditions['import']
+        } else if (conditions['require']) {
+            conditions['default'] = conditions['require']
+        } else if (conditions['browser']) {
+            conditions['default'] = conditions['browser']
+        }
+
+        exportsMap[entry.exportKey] = conditions
+    }
+
+    return exportsMap
+}
+
+function getPackageExportExtensions(
+    preset: PackageExportExtensionPreset,
+): PackageExportExtensions {
+    if (preset === 'strict') {
+        return {
+            cjs: '.cjs',
+            esm: '.mjs',
+            iife: '-iife.js',
+            types: '.d.mts',
+            umd: '-umd.js',
+        }
+    }
+
+    return {
+        cjs: '.cjs',
+        esm: '.js',
+        iife: '-iife.js',
+        types: '.d.ts',
+        umd: '-umd.js',
+    }
+}
+
+function normaliseOutDirToPosix(outDir: string): string {
+    return path.posix.join(...path.relative('.', outDir).split(path.sep))
 }
 
 export {

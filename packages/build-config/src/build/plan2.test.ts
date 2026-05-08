@@ -7,6 +7,7 @@ import {
     isRootEntryKey,
     packageNameToDisplayName,
     packageNameToModuleName,
+    toPackageExportsPlan2,
 } from './plan2.js'
 import { schemaBasePackage } from './schemas/index.js'
 
@@ -137,5 +138,75 @@ describe('plan2', () => {
         })
 
         expect(plan.entries[0]?.bannerContent).toBeUndefined()
+    })
+
+    test('toPackageExportsPlan2 includes types for root and named exports', () => {
+        const plan = defineBuildPlan(parsedPkg, {
+            entries: [
+                { key: '*', output_formats: ['esm', 'cjs', 'ts'] },
+                {
+                    key: './node',
+                    output_formats: ['esm', 'cjs', 'ts'],
+                    sourceFile: 'index.ts',
+                },
+            ],
+            root: {
+                outputDir: './dist',
+            },
+        })
+
+        expect(toPackageExportsPlan2(plan)).toEqual({
+            '.': {
+                default: './dist/index.js',
+                import: './dist/index.js',
+                require: './dist/index.cjs',
+                types: './dist/index.d.ts',
+            },
+            './node': {
+                default: './dist/node.js',
+                import: './dist/node.js',
+                require: './dist/node.cjs',
+                types: './dist/node.d.ts',
+            },
+        })
+    })
+
+    test('toPackageExportsPlan2 supports strict extension preset', () => {
+        const plan = defineBuildPlan(parsedPkg, {
+            entries: [{ key: '*', output_formats: ['esm', 'cjs', 'ts'] }],
+        })
+
+        expect(
+            toPackageExportsPlan2(plan, { extensionPreset: 'strict' }),
+        ).toEqual({
+            '.': {
+                default: './dist/index.mjs',
+                import: './dist/index.mjs',
+                require: './dist/index.cjs',
+                types: './dist/index.d.mts',
+            },
+        })
+    })
+
+    test('toPackageExportsPlan2 skips entries with exports:false', () => {
+        const plan = defineBuildPlan(parsedPkg, {
+            entries: [
+                {
+                    exports: false,
+                    key: './internal',
+                    output_formats: ['esm', 'ts'],
+                    sourceFile: 'index.ts',
+                },
+                { key: '*', output_formats: ['esm', 'ts'] },
+            ],
+        })
+
+        expect(toPackageExportsPlan2(plan)).toEqual({
+            '.': {
+                default: './dist/index.js',
+                import: './dist/index.js',
+                types: './dist/index.d.ts',
+            },
+        })
     })
 })

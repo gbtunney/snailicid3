@@ -142,7 +142,7 @@
         },
         "clean:ts": {
             "cache": false,
-            "command": "pnpm exec tsc --build --clean && tsc --build --clean tsconfig.docs.json && rm -f src/tsconfig.tsbuildinfo tsconfig.tsbuildinfo",
+            "command": "pnpm exec tsc --build --clean && if [ -f tsconfig.docs.json ]; then pnpm exec tsc --build --clean tsconfig.docs.json; fi && rm -f src/tsconfig.tsbuildinfo tsconfig.tsbuildinfo",
             "options": {
                 "cwd": "{projectRoot}"
             }

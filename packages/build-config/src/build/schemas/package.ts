@@ -49,6 +49,10 @@ export function definePackageJson<
     return packageJson
 }
 
+export function parsePackage(pkg: unknown): z.output<typeof schemaBasePackage> {
+    return schemaBasePackage.parse(pkg)
+}
+
 //stripped down to just the required meta ffieldd.
 export const schemaPackageMetaBanner = z.object({
     ...schemaBasePackage.pick({

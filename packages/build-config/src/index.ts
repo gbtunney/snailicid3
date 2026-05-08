@@ -19,14 +19,18 @@ export { tscAdapter } from './adapters/tsc/index.js'
 
 // tsdown — node/universal library bundling (Rolldown-powered)
 export { toTsdownConfig, tsdownAdapter } from './adapters/tsdown/index.js'
+export {
+    entryToTsdownConfig,
+    toTsdownConfigs,
+} from './adapters/tsdownv2/index.js'
 /** Vite — browser library / web app (Rolldown-powered) */
 export { toViteConfig, viteAdapter } from './adapters/vite/index.js'
 
 // ── Banner ────────────────────────────────────────────────────────────────────
 export { createBanner, schemaPackageMetaBanner } from './build/banner.js'
 export type { BannerPackageMeta } from './build/banner.js'
-
 export * from './build/plan2.js'
+
 // ── Plan helpers ──────────────────────────────────────────────────────────────
 export {
     defineEntry,
@@ -37,7 +41,6 @@ export {
     resolveEntryFilename,
     toPackageExports,
 } from './build/plan.js'
-
 export type { PackageBuildConfig } from './build/plan.js'
 
 // ── Build port ────────────────────────────────────────────────────────────────
@@ -59,6 +62,8 @@ export {
     runtimeSchema,
     schemaRequiredScripts,
 } from './build/schema.js'
+
+export { parsePackage } from './build/schemas/package.js'
 
 /** Adapter-based build system for the snailicid3 monorepo. */
 

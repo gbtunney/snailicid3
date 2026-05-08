@@ -32,10 +32,10 @@ describe('tsdownv2 adapter', () => {
         })
         const [config] = toTsdownConfigs(plan)
 
-        expect(config?.dts).toBe(true)
-        expect(config?.format).not.toContain('ts')
-        expect(config?.format).toContain('esm')
-        expect(config?.format).toContain('cjs')
+        expect(config.dts).toBe(true)
+        expect(config.format).not.toContain('ts')
+        expect(config.format).toContain('esm')
+        expect(config.format).toContain('cjs')
     })
 
     test('no ts in output_formats leaves dts:false', () => {
@@ -44,7 +44,7 @@ describe('tsdownv2 adapter', () => {
         })
         const [config] = toTsdownConfigs(plan)
 
-        expect(config?.dts).toBe(false)
+        expect(config.dts).toBe(false)
     })
 
     test('global format sets globalName from moduleName', () => {
@@ -102,14 +102,24 @@ describe('tsdownv2 adapter', () => {
         })
         const [config] = toTsdownConfigs(plan)
 
-        expect(config?.platform).toBe('neutral')
+        expect(config.platform).toBe('neutral')
     })
 
     test('platform node for node runtime', () => {
         const plan = defineBuildPlan(parsedPkg, { root: { runtime: 'node' } })
         const [config] = toTsdownConfigs(plan)
 
-        expect(config?.platform).toBe('node')
+        expect(config.platform).toBe('node')
+    })
+
+    test('entry runtime override maps platform from merged entry runtime', () => {
+        const plan = defineBuildPlan(parsedPkg, {
+            entries: [{ key: '*', runtime: 'node' }],
+            root: { runtime: 'universal' },
+        })
+        const [config] = toTsdownConfigs(plan)
+
+        expect(config.platform).toBe('node')
     })
 
     test('outDir comes from entry outputDir', () => {
@@ -118,6 +128,46 @@ describe('tsdownv2 adapter', () => {
         })
         const [config] = toTsdownConfigs(plan)
 
-        expect(config?.outDir).toBe('./lib')
+        expect(config.outDir).toBe('./lib')
+    })
+
+    test('transpile:true omits target so tsdown can infer defaults', () => {
+        const plan = defineBuildPlan(parsedPkg, {
+            entries: [{ key: '*', transpile: true }],
+        })
+        const [config] = toTsdownConfigs(plan)
+
+        expect(config.target).toBeUndefined()
+    })
+
+    test('transpile:false maps to target:esnext', () => {
+        const plan = defineBuildPlan(parsedPkg, {
+            entries: [{ key: '*', transpile: false }],
+        })
+        const [config] = toTsdownConfigs(plan)
+
+        expect(config.target).toBe('esnext')
+    })
+
+    test('transpile:none maps to target:esnext', () => {
+        const plan = defineBuildPlan(parsedPkg, {
+            entries: [{ key: '*', transpile: 'none' }],
+        })
+        const [config] = toTsdownConfigs(plan)
+
+        expect(config.target).toBe('esnext')
+    })
+
+    test('transpile array passes explicit targets through', () => {
+        const explicitTargets: Array<'chrome120.0.0' | 'node20.0.0'> = [
+            'node20.0.0',
+            'chrome120.0.0',
+        ]
+        const plan = defineBuildPlan(parsedPkg, {
+            entries: [{ key: '*', transpile: explicitTargets }],
+        })
+        const [config] = toTsdownConfigs(plan)
+
+        expect(config.target).toEqual(explicitTargets)
     })
 })
