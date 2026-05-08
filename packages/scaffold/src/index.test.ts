@@ -92,9 +92,9 @@ describe('generateTsdownConfig', () => {
         expect(config).toContain("from '@snailicid3/build-config'")
     })
 
-    test('uses identityFromPackage', () => {
+    test('uses defineBuildPlan', () => {
         const config = generateTsdownConfig(testInput)
-        expect(config).toContain('identityFromPackage')
+        expect(config).toContain('defineBuildPlan')
     })
 
     test('is a non-empty string', () => {

@@ -51,15 +51,14 @@
         }
     },
     "type": "module",
-    "main": "./dist/index.js",
+    "main": "./dist/index.cjs",
     "types": "./dist/index.d.cts",
     "exports": {
         ".": {
-            "types": "./dist/index.d.cts",
             "import": "./dist/index.js",
-            "require": "./dist/index.cjs",
-            "default": "./dist/index.js"
-        }
+            "require": "./dist/index.cjs"
+        },
+        "./package.json": "./package.json"
     },
     "files": [
         "CHANGELOG.md",
@@ -100,5 +99,6 @@
         "typedoc": "^0.28.19",
         "typescript": "^6.0.2",
         "vitest": "^4.1.4"
-    }
+    },
+    "module": "./dist/index.js"
 }

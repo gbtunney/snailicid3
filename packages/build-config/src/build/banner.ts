@@ -22,11 +22,11 @@ export { toBlockComment } from './helpers.js'
  * @example
  *     ;```ts
  *     const banner = createBanner('myModule', pkg)
- *     // /*
- *     //  * my-package v1.0.0
- *     //  * Module: myModule
- *     //  * ...
- *     //  * /
+ *     /*
+ *      my-package v1.0.0
+ *     Module:  myModule
+ *      ...
+ *      /
  *     ```
  */
 

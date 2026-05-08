@@ -25,10 +25,6 @@ const plan = defineBuildPlan(pkg, {
     },
 })
 
-const toTsdownConfigsCompat = toTsdownConfigs as unknown as (
-    resolvedPlan: typeof plan,
-) => Parameters<typeof defineConfig>[0]
-
-const tsdownConfigs = toTsdownConfigsCompat(plan)
+const tsdownConfigs = toTsdownConfigs(plan)
 
 export default defineConfig(tsdownConfigs)

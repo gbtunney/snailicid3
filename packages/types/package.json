@@ -44,15 +44,6 @@
         "access": "public"
     },
     "type": "module",
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
-    "exports": {
-        ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.js",
-            "default": "./dist/index.js"
-        }
-    },
     "files": [
         "CHANGELOG.md",
         "dist",
@@ -81,5 +72,15 @@
         "tsdown": "^0.22.0",
         "typescript": "^6.0.2",
         "vitest": "^4.1.4"
-    }
+    },
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs"
+        },
+        "./package.json": "./package.json"
+    },
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.cts"
 }
