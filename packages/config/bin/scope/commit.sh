@@ -158,8 +158,11 @@ EOF
     fi
 
     run_checked_precommit() {
-        # Keep lint-staged in checked commit mode so scope is based on the final staged state.
+        # Ensure lint-staged runs against the full intended commit set, then
+        # keep any formatter/linter edits staged for scope detection + commit.
+        git add -A || return 1
         pnpm exec lint-staged --relative || return 1
+        git add -A || return 1
     }
 
     read_package_name() {
@@ -295,7 +298,9 @@ EOF
             return 0
         fi
 
-        printf '%s\n' "${values[@]}" | paste -sd ',' - | sed 's/,/, /g'
+        # Keep commas tight so commitlint multi-scope parsing does not include
+        # a leading space in subsequent scope values.
+        printf '%s\n' "${values[@]}" | paste -sd ',' -
     }
 
     format_scope_output() {
