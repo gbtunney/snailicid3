@@ -105,8 +105,14 @@ jobs:
             - uses: actions/setup-node@v4
               with:
                   node-version: 'lts/*'
+                  cache: pnpm
+                  cache-dependency-path: pnpm-lock.yaml
 
             - uses: pnpm/action-setup@v4
+
+            - name: 📦 Install workspace dependencies (for scope-commit)
+              shell: bash
+              run: pnpm install --ignore-scripts --no-frozen-lockfile
 
             # ── Restore pipeline artifact ────────────────────────────
             - name: 📥 Download workspace artifact
@@ -142,26 +148,39 @@ jobs:
                   fi
 
             # ── Commit and push ───────────────────────────────────────
+            - name: 🏷️ Compute scoped commit message
+              id: scoped_message
+              if: ${{ steps.dirty.outputs.dirty == 'true' }}
+              shell: bash
+              run: |
+                  TYPE="${{ inputs.commit_message_type }}"
+                  SUBJECT="${{ inputs.commit_message_subject }}"
+
+                  git add -A
+                  MESSAGE="$(pnpm exec scope-commit --staged --message "$TYPE" "$SUBJECT" 2>/dev/null || echo "$TYPE(root): $SUBJECT")"
+                  echo "message=$MESSAGE" >> "$GITHUB_OUTPUT"
+                  echo "✅ Scoped message: $MESSAGE"
+
             - name: 📝 Commit changes
               if: ${{ steps.dirty.outputs.dirty == 'true' }}
               shell: bash
               run: |
                   git config user.name  "${{ inputs.commit_user_name }}"
                   git config user.email "${{ inputs.commit_user_name }}@${{ inputs.commit_user_domain }}"
+                  git config commit.gpgsign false
 
-                  TYPE="${{ inputs.commit_message_type }}"
-                  SUBJECT="${{ inputs.commit_message_subject }}"
+                  if git diff --cached --quiet; then
+                    echo "No staged changes after message generation. Skipping commit."
+                    exit 0
+                  fi
 
-                  git add -A
-                  MESSAGE="$(pnpm exec scope-commit --staged --message "$TYPE" "$SUBJECT")"
-                   
-                  git commit -m "$MESSAGE" \
+                  git commit -m "${{ steps.scoped_message.outputs.message }}" \
                     -m "Triggered by: @${{ github.actor }} via workflow_dispatch" \
                     -m "Branch: ${{ github.ref_name }}" \
                     -m "Pipeline artifact: ${{ needs.pipeline_fix.outputs.workspace_artifact_name }}" \
                     -m "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-                  echo "✅ Committed: $MESSAGE"
+                  echo "✅ Committed: ${{ steps.scoped_message.outputs.message }}"
 
             - name: 🚀 Push
               if: ${{ steps.dirty.outputs.dirty == 'true' }}
@@ -184,4 +203,5 @@ jobs:
                     echo "- artifact_uploaded: \`${{ needs.pipeline_fix.outputs.artifact_uploaded }}\`"
                     echo "- workspace_artifact_name: \`${{ needs.pipeline_fix.outputs.workspace_artifact_name }}\`"
                     echo "- verify: \`${{ inputs.run_verify }}\`"
+                    echo "- computed_message: \`${{ steps.scoped_message.outputs.message }}\`"
                   } >> "$GITHUB_STEP_SUMMARY"
