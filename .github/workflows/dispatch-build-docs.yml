@@ -116,12 +116,14 @@ jobs:
               shell: bash
               run: |
                   ARTIFACT_DIR="${{ runner.temp }}/workspace-artifact"
-                  rsync -a \
-                    --exclude='.git/' \
-                    --exclude='node_modules/' \
-                    --exclude='dist/' \
-                    --exclude='types/' \
-                    "$ARTIFACT_DIR"/ "$GITHUB_WORKSPACE"/
+                  ARCHIVE_PATH="$(find "$ARTIFACT_DIR" -maxdepth 1 -name '*.tar.gz' | head -n 1)"
+
+                  if [ -z "$ARCHIVE_PATH" ]; then
+                    echo "❌ Workspace artifact archive not found."
+                    exit 1
+                  fi
+
+                  tar -xzf "$ARCHIVE_PATH" -C "$GITHUB_WORKSPACE"
 
             # ── Check if repo is dirty ────────────────────────────────
             - name: 🧼 Check repo status
