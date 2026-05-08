@@ -144,6 +144,10 @@ export function slugLikeToPascalCase(value: string): string {
 
 const ROOT_EXPORT_KEYS = ENTRY_KEY_DEFAULTS
 
+export function entryKeyToSlug(key: string): string {
+    return isRootEntryKey(key) ? 'index' : key.replace(/^\.\//, '')
+}
+
 export function escapeRegex(value: string): string {
     return value.replace(/[$()*+.?[\\\]^{|}]/g, '\\$&')
 }
@@ -196,6 +200,9 @@ export function filenameToExportKey(filename: string): string {
     return filename === 'index' ? '.' : normaliseExportKey(filename)
 }
 
+export function isRootEntryKey(key: string): boolean {
+    return key === '*' || key === '.' || key === './' || key === 'index'
+}
 /**
  * Normalises an entry key to an npm export key.
  *
@@ -218,6 +225,15 @@ export function normaliseExportKey(key: string): string {
 export function normalizeFileExtension(extension: string): string {
     return extension.startsWith('.') ? extension : `.${extension}`
 }
+
+export function packageNameToDisplayName(packageName: string): string {
+    return slugLikeToDisplayName(packageNameWithoutScope(packageName))
+}
+
+export function packageNameToModuleName(packageName: string): string {
+    return slugLikeToPascalCase(packageNameWithoutScope(packageName))
+}
+
 /**
  * Resolves the output filename stem for an entry key.
  *
@@ -254,21 +270,4 @@ export function resolveSourceEntryPath(options: {
 
 export function toBlockComment(lines: ReadonlyArray<string>): string {
     return `/*\n${lines.map((line) => ` * ${line}`).join('\n')}\n */`
-}
-
-
-export function entryKeyToSlug(key: string): string {
-    return isRootEntryKey(key) ? 'index' : key.replace(/^\.\//, '')
-}
-
-export function isRootEntryKey(key: string): boolean {
-    return key === '*' || key === '.' || key === './' || key === 'index'
-}
-
-export function packageNameToDisplayName(packageName: string): string {
-    return slugLikeToDisplayName(packageNameWithoutScope(packageName))
-}
-
-export function packageNameToModuleName(packageName: string): string {
-    return slugLikeToPascalCase(packageNameWithoutScope(packageName))
 }

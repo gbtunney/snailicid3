@@ -62,7 +62,8 @@ export const schemaEntryKey: z.ZodType<
             )
         },
         {
-            message: 'Entry key must be root-like or slug-like (e.g. "./utils").',
+            message:
+                'Entry key must be root-like or slug-like (e.g. "./utils").',
         },
     )
     .refine((key) => !SOURCE_EXTENSION_REGEX.test(key), {

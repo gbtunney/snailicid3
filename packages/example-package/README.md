@@ -7,7 +7,9 @@
 
 ### Repository
 
-- **Github:** [`@snailicid3/example-package`](https://github.com/gbtunney/snailicid3/tree/main/packages/example-package) • [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
+- **Github:**
+  [`@snailicid3/example-package`](https://github.com/gbtunney/snailicid3/tree/main/packages/example-package)
+  • [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
 
 ### Author
 
@@ -20,7 +22,9 @@
 
 ---
 
-This is an example/template package demonstrating the canonical structure for a new snailicid3 monorepo package. It shows the standard tsdown config, tsconfig, package.json layout, and vitest test setup.
+This is an example/template package demonstrating the canonical structure for a
+new snailicid3 monorepo package. It shows the standard tsdown config, tsconfig,
+package.json layout, and vitest test setup.
 
 ### Structure
 

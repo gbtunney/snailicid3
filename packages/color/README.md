@@ -4,7 +4,8 @@
 ![License: MIT](https://img.shields.io/npm/l/@snailicid3/color)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
-_Color math, parsing, conversion, and hex utilities powered by chroma.ts and colorjs.io._
+_Color math, parsing, conversion, and hex utilities powered by chroma.ts and
+colorjs.io._
 
 ---
 
@@ -13,8 +14,11 @@ _Color math, parsing, conversion, and hex utilities powered by chroma.ts and col
 
 ### Repository
 
-- **Github:** [`@snailicid3/color`](https://github.com/gbtunney/snailicid3/tree/main/packages/color) • [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
-- **CDN**: [jsdeliver](https://cdn.jsdelivr.net/npm/@snailicid3/color/dist/index.min.js)
+- **Github:**
+  [`@snailicid3/color`](https://github.com/gbtunney/snailicid3/tree/main/packages/color)
+  • [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
+- **CDN**:
+  [jsdeliver](https://cdn.jsdelivr.net/npm/@snailicid3/color/dist/index.min.js)
 
 ### Author
 
@@ -31,13 +35,18 @@ _Color math, parsing, conversion, and hex utilities powered by chroma.ts and col
 
 ---
 
-This package provides color math, CSS color parsing, hex conversion, contrast calculation, and chroma utilities. It wraps [chroma.ts](https://github.com/nicholasgasior/chroma.ts) and [colorjs.io](https://colorjs.io) with a consistent API and adds branded `HexColor` types.
+This package provides color math, CSS color parsing, hex conversion, contrast
+calculation, and chroma utilities. It wraps
+[chroma.ts](https://github.com/nicholasgasior/chroma.ts) and
+[colorjs.io](https://colorjs.io) with a consistent API and adds branded
+`HexColor` types.
 
 ### `@snailicid3/color` _contains:_
 
 - **Hex utilities** — `isHexColor`, `parseColorToHex`, `assertHexColor`, `toHex`
 - **CSS color parsing** — `parseColorJS`, `isValidColor` via colorjs.io
-- **Chroma utilities** — `colorUtils.isValidColor`, `colorUtils.getColor`, `colorUtils.complement`, `colorUtils.triad`
+- **Chroma utilities** — `colorUtils.isValidColor`, `colorUtils.getColor`,
+  `colorUtils.complement`, `colorUtils.triad`
 - **Contrast** — `apcaContrast`, `readableTextHex`
 - **Types** — `HexColor`, `ColorJS`, `ColorTheme`
 
@@ -61,11 +70,11 @@ $ npm install @snailicid3/color
 ```ts
 import { isHexColor, parseColorToHex, isValidColor } from '@snailicid3/color'
 
-isHexColor('#FF0000')         // true
-isHexColor('red')             // false
-isValidColor('red')           // true
-parseColorToHex('red')        // '#FF0000'
-parseColorToHex('#336699')    // '#336699'
+isHexColor('#FF0000') // true
+isHexColor('red') // false
+isValidColor('red') // true
+parseColorToHex('red') // '#FF0000'
+parseColorToHex('#336699') // '#336699'
 ```
 
 ### Chroma utilities
@@ -73,8 +82,8 @@ parseColorToHex('#336699')    // '#336699'
 ```ts
 import { colorUtils } from '@snailicid3/color'
 
-colorUtils.isValidColor('blue')    // true
-colorUtils.complement('red')       // Color (180° hue rotation)
+colorUtils.isValidColor('blue') // true
+colorUtils.complement('red') // Color (180° hue rotation)
 ```
 
 ### Accessible contrast

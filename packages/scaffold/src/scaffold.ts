@@ -18,10 +18,7 @@ export const scaffoldPackage = (input: ScaffoldInput, outDir: string): void => {
         join(outDir, 'tsconfig.json'),
         JSON.stringify(generateTsConfig(input), null, 4) + '\n',
     )
-    writeFileSync(
-        join(outDir, 'tsdown.config.ts'),
-        generateTsdownConfig(input),
-    )
+    writeFileSync(join(outDir, 'tsdown.config.ts'), generateTsdownConfig(input))
     writeFileSync(join(outDir, 'README.md'), generateReadme(input))
     writeFileSync(
         join(outDir, 'src/index.ts'),

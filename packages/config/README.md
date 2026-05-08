@@ -4,7 +4,8 @@
 ![License: MIT](https://img.shields.io/npm/l/@snailicid3/config)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
-_Shared ESLint, Prettier, markdownlint, commitlint, and TypeScript base configurations for the snailicid3 monorepo._
+_Shared ESLint, Prettier, markdownlint, commitlint, and TypeScript base
+configurations for the snailicid3 monorepo._
 
 ---
 
@@ -14,7 +15,9 @@ _Shared ESLint, Prettier, markdownlint, commitlint, and TypeScript base configur
 
 ### Repository
 
-- **Github:** [`@snailicid3/config`](https://github.com/gbtunney/snailicid3/tree/main/packages/config) • [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
+- **Github:**
+  [`@snailicid3/config`](https://github.com/gbtunney/snailicid3/tree/main/packages/config)
+  • [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
 
 ### Author
 
@@ -31,15 +34,22 @@ _Shared ESLint, Prettier, markdownlint, commitlint, and TypeScript base configur
 
 ---
 
-This package provides shareable configuration files for common tooling used across the snailicid3 monorepo. It includes ESLint flat configs, Prettier options, markdownlint rules, commitlint conventions, TypeScript base configs, and utility shell scripts.
+This package provides shareable configuration files for common tooling used
+across the snailicid3 monorepo. It includes ESLint flat configs, Prettier
+options, markdownlint rules, commitlint conventions, TypeScript base configs,
+and utility shell scripts.
 
 ### `@snailicid3/config` _contains:_
 
-- [**eslint**](https://eslint.org/) • _Flat config with TypeScript, import, jsdoc, and sort rules_
+- [**eslint**](https://eslint.org/) • _Flat config with TypeScript, import,
+  jsdoc, and sort rules_
 - [**prettier**](https://prettier.io/) • _Shared Prettier options_
-- [**markdownlint-cli2**](https://github.com/DavidAnson/markdownlint-cli2) • _Markdown linting rules_
-- [**commitlint**](https://commitlint.js.org/) • _Conventional commit configuration_
-- [**typescript**](https://www.typescriptlang.org/) • _Base tsconfig presets: `base`, `library`, `typecheck`, `docs`_
+- [**markdownlint-cli2**](https://github.com/DavidAnson/markdownlint-cli2) •
+  _Markdown linting rules_
+- [**commitlint**](https://commitlint.js.org/) • _Conventional commit
+  configuration_
+- [**typescript**](https://www.typescriptlang.org/) • _Base tsconfig presets:
+  `base`, `library`, `typecheck`, `docs`_
 
 ## Installation
 
@@ -65,10 +75,10 @@ import { EsLint } from '@snailicid3/config'
 const FLAT_CONFIG = await EsLint.flatConfig()
 
 export default [
-    ...FLAT_CONFIG,
-    {
-        ignores: ['packages/**/docs/**/*'],
-    },
+  ...FLAT_CONFIG,
+  {
+    ignores: ['packages/**/docs/**/*'],
+  },
 ]
 ```
 
@@ -77,7 +87,7 @@ export default [
 ```json5
 /* @file package.json */
 {
-    "prettier": "@snailicid3/config/prettier"
+  prettier: '@snailicid3/config/prettier',
 }
 ```
 
@@ -86,9 +96,9 @@ export default [
 ```json5
 /* @file tsconfig.json */
 {
-    "extends": "@snailicid3/config/tsconfig/typecheck",
-    "include": ["**/*.ts"],
-    "exclude": ["node_modules"]
+  extends: '@snailicid3/config/tsconfig/typecheck',
+  include: ['**/*.ts'],
+  exclude: ['node_modules'],
 }
 ```
 

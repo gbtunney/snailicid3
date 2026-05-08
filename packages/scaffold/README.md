@@ -7,7 +7,9 @@
 
 ### Repository
 
-- **Github:** [`@snailicid3/scaffold`](https://github.com/gbtunney/snailicid3/tree/main/packages/scaffold) • [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
+- **Github:**
+  [`@snailicid3/scaffold`](https://github.com/gbtunney/snailicid3/tree/main/packages/scaffold)
+  • [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
 
 ### Author
 
@@ -20,7 +22,9 @@
 
 ---
 
-This package provides a package scaffolding generator with TypeScript-function-based templates. It can generate new workspace packages with pre-configured tsdown configs, tsconfigs, and package.json templates.
+This package provides a package scaffolding generator with
+TypeScript-function-based templates. It can generate new workspace packages with
+pre-configured tsdown configs, tsconfigs, and package.json templates.
 
 ### `@snailicid3/scaffold` _contains:_
 
@@ -44,11 +48,11 @@ pnpm --filter=@snailicid3/scaffold exec scaffold
 
 ```ts
 declare function reorderPackageJsonKeys(
-    packageJson: Record<string, unknown>,
+  packageJson: Record<string, unknown>,
 ): Record<string, unknown>
 
 declare function mergePackageJson(
-    existingPackageJson: Record<string, unknown>,
-    scaffoldPackageJson: Record<string, unknown>,
+  existingPackageJson: Record<string, unknown>,
+  scaffoldPackageJson: Record<string, unknown>,
 ): Record<string, unknown>
 ```
