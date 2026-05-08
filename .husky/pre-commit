@@ -5,13 +5,12 @@ set -eu
 
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 PROTECTED_BRANCHES="^(master|main)$"
-LINT_MODE="LINT_STAGED" # other values: LINT_ALL | DISABLED
 
 # Allowed: A-Z a-z 0-9 space . _ - + @ /   (blocks unicode like —)
 BAD_FILENAME_RE='[^A-Za-z0-9._/@ +\-]'
 
 printf "\n===\n>> Running in shell:: %s\n" "${SHELL:-unknown}"
-printf ">> Pre-commit Hook:: Checking BRANCH: %s LINT_MODE: %s\n===\n\n" "$BRANCH" "$LINT_MODE"
+printf ">> Pre-commit Hook:: Checking BRANCH: %s\n===\n\n" "$BRANCH"
 
 # Protect branches from accidental commits.
 if echo "$BRANCH" | grep -Eq "$PROTECTED_BRANCHES"; then
@@ -42,10 +41,5 @@ if [ -n "$BAD_FILES" ]; then
     exit 1
 fi
 
-if [ "$LINT_MODE" = "DISABLED" ]; then
-    exit 0
-fi
-
-# LINT_STAGED: run on all commits (including direct git commit)
-printf "\nRunning lint-staged...\n\n"
-pnpm exec lint-staged --relative
+# lint-staged is intentionally not run in Husky pre-commit.
+# Checked commit flow runs it before composing the scoped commit message.

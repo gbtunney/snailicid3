@@ -157,10 +157,10 @@ EOF
         input_paths=("${positionals[@]}")
     fi
 
-    # TODO commentiing out , not sure if we need it . if [[ "$run_commit_before" == "true" ]]; then
-    # Keep the expensive pre-commit checks behind final commit-message validation below.
-    # pnpm lint:staged || return 1
-    #fi
+    run_checked_precommit() {
+        # Keep lint-staged in checked commit mode so scope is based on the final staged state.
+        pnpm exec lint-staged --relative || return 1
+    }
 
     read_package_name() {
         local package_json="$1"
@@ -335,6 +335,10 @@ EOF
                 ;;
         esac
     }
+
+    if [[ "$run_commit_before" == "true" ]]; then
+        run_checked_precommit || return 1
+    fi
 
     if [[ "${#input_paths[@]}" -gt 0 ]]; then
         paths=("${input_paths[@]}")
