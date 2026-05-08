@@ -26,3 +26,5 @@ export const commonFlagsSchema = z.object({
 export type CommonFlagsInput = z.input<typeof commonFlagsSchema>
 export type CommonFlagsOutput = z.infer<typeof commonFlagsSchema>
 export type CommonFlagsSchema = typeof commonFlagsSchema
+
+//TODO: remove me !!!
