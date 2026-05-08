@@ -158,11 +158,13 @@ EOF
     fi
 
     run_checked_precommit() {
-        # Ensure lint-staged runs against the full intended commit set, then
-        # keep any formatter/linter edits staged for scope detection + commit.
-        git add -A || return 1
+        # If nothing is staged yet, stage current changes once so checked-commit
+        # remains convenient. Otherwise, preserve the user's staged selection.
+        if git diff --cached --quiet; then
+            git add -A || return 1
+        fi
+
         pnpm exec lint-staged --relative || return 1
-        git add -A || return 1
     }
 
     read_package_name() {
