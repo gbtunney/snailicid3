@@ -28,14 +28,14 @@ package.json layout, and vitest test setup.
 
 ### Structure
 
-```
+```sh
 packages/example-package/
 ├── src/
-│   ├── index.ts          # Public exports
-│   └── index.test.ts     # Vitest tests
-├── tsdown.config.ts      # tsdown build config
-├── tsconfig.json         # TypeScript config
-└── package.json          # Package manifest
+│ ├── index.ts       # Public exports
+│ └── index.test.ts  # Vitest tests
+├── tsdown.config.ts # tsdown build config
+├── tsconfig.json    # TypeScript config
+└── package.json     # Package manifest
 ```
 
 ## Usage

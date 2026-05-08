@@ -1,6 +1,8 @@
-# snailicid3
+# snailicid3 monorepo 🐌
 
-> @snailicid3 monorepo — TypeScript utility libraries and tooling
+> `@snailicid3` — utility libraries and tooling etc
+
+[![CI Main](https://github.com/gbtunney/snailicid3/actions/workflows/ci-main.yml/badge.svg)](https://github.com/gbtunney/snailicid3/actions/workflows/ci-main.yml)
 
 ## Packages
 
@@ -28,6 +30,20 @@
 ```sh
 pnpm install
 pnpm build
+```
+
+## Test
+
+```sh
+pnpm install
+pnpm test
+```
+
+## Lint
+
+```sh
+pnpm install
+pnpm test
 ```
 
 ## Requirements
