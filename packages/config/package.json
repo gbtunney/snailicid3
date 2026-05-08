@@ -3,6 +3,27 @@
     "version": "0.0.1",
     "private": false,
     "description": "Shared linting, formatting, and TypeScript config utilities for the snailicid3 monorepo",
+    "keywords": [
+        "typescript",
+        "snailicid3",
+        "monorepo",
+        "eslint",
+        "prettier",
+        "markdownlint",
+        "commitlint",
+        "linting",
+        "formatting",
+        "config"
+    ],
+    "scripts": {
+        "build:exporter": "pnpm exec node ./dist/build-exporter.js",
+        "build:nx": "nx run $npm_package_name:build",
+        "test:nx": "nx run $npm_package_name:test",
+        "clean:nx": "nx run $npm_package_name:clean",
+        "dev:nx": "nx run $npm_package_name:dev",
+        "demo:logger": "pnpm exec ./bin/snail-sh-test.sh",
+        "demo:2": "pnpm exec snail-sh header '🐌 SNAIL BUILD' '50%'  '~'"
+    },
     "bin": {
         "snail-sh": "./bin/snail-sh-logger.sh",
         "scope-commit": "./bin/scope/commit.sh",
@@ -11,6 +32,48 @@
         "gbt-setup": "./bin/completions/install-pnpm.sh",
         "gbt-uninstall": "./bin/uninstall.sh"
     },
+    "buildConfig": {
+        "runtime": "node",
+        "product": "config",
+        "buildStrategy": "none"
+    },
+    "nx": {
+        "targets": {
+            "dev": {},
+            "dev:ts": {},
+            "build:ts": {},
+            "check:ts": {},
+            "build:exporter": {
+                "cache": true,
+                "dependsOn": [
+                    "build:ts"
+                ],
+                "outputs": [
+                    "{projectRoot}/dist/.prettierrc.json",
+                    "{projectRoot}/dist/.markdownlint.json"
+                ]
+            },
+            "build": {
+                "dependsOn": [
+                    "build:ts",
+                    "build:exporter"
+                ]
+            },
+            "test": {},
+            "test:watch": {},
+            "lint": {},
+            "fix": {},
+            "clean": {},
+            "clean:ts": {},
+            "clean:build": {}
+        }
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "type": "module",
+    "main": "./dist/index.js",
+    "types": "./types/index.d.ts",
     "exports": {
         ".": {
             "import": "./dist/index.js",
@@ -27,14 +90,23 @@
         "./tsconfig.typecheck": "./typescript-config/tsconfig.typecheck.json",
         "./tsconfig.docs": "./typescript-config/tsconfig.docs.json"
     },
-    "scripts": {
-        "build:exporter": "pnpm exec tsx ./build-exporter.ts",
-        "build:nx": "nx run $npm_package_name:build",
-        "test:nx": "nx run $npm_package_name:test",
-        "clean:nx": "nx run $npm_package_name:clean",
-        "dev:nx": "nx run $npm_package_name:dev",
-        "demo:logger": "pnpm exec ./bin/snail-sh-test.sh",
-        "demo:2": "pnpm exec snail-sh header '🐌 SNAIL BUILD' '50%'  '~'"
+    "files": [
+        "CHANGELOG.md",
+        "dist",
+        "types",
+        "typescript-config",
+        "bin",
+        "completions"
+    ],
+    "author": {
+        "name": "Gillian Tunney",
+        "email": "gbtunney@mac.com"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/gbtunney/snailicid3",
+        "directory": "packages/config"
     },
     "dependencies": {
         "@apidevtools/json-schema-ref-parser": "^15.3.5",
@@ -61,6 +133,7 @@
         "globals": "^17.5.0",
         "json-schema": "^0.4.0",
         "json-schema-to-typescript": "^15.0.4",
+        "lint-staged": "^17.0.2",
         "markdownlint-cli2": "^0.22.0",
         "prettier": "^3.8.2",
         "prettier-plugin-jsdoc": "^1.8.0",
@@ -72,69 +145,9 @@
         "zod": "^4.3.6"
     },
     "devDependencies": {
-        "@types/node": "25.6.0",
+        "@types/node": "25.6.1",
         "tsx": "^4.21.0",
         "typescript": "^6.0.2",
         "vitest": "^4.1.4"
-    },
-    "main": "./dist/index.js",
-    "types": "./types/index.d.ts",
-    "files": [
-        "CHANGELOG.md",
-        "dist",
-        "types",
-        "typescript-config",
-        "bin",
-        "completions"
-    ],
-    "keywords": [
-        "eslint",
-        "prettier",
-        "typescript",
-        "config"
-    ],
-    "nx": {
-        "targets": {
-            "dev": {},
-            "dev:ts": {},
-            "dev:rollup": {},
-            "build:ts": {},
-            "check:ts": {},
-            "build:rollup": {},
-            "build:exporter": {
-                "cache": true,
-                "dependsOn": [
-                    "build:ts"
-                ],
-                "outputs": [
-                    "{projectRoot}/dist/.prettierrc.json",
-                    "{projectRoot}/dist/.markdownlint.json"
-                ]
-            },
-            "build": {
-                "dependsOn": [
-                    "build:ts",
-                    "build:exporter"
-                ]
-            },
-            "test": {},
-            "test:watch": {},
-            "lint": {},
-            "fix": {},
-            "clean": {},
-            "clean:ts": {},
-            "clean:build": {}
-        }
-    },
-    "type": "module",
-    "author": {
-        "name": "Gillian Tunney",
-        "email": "gbtunney@mac.com"
-    },
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/gbtunney/snailicid3-monorepo",
-        "directory": "packages/config"
     }
 }

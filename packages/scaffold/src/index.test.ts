@@ -7,7 +7,7 @@ import { scaffoldInputSchema } from './input.js'
 import { scaffoldPackage } from './scaffold.js'
 import { generatePackageJson } from './templates/package-json.js'
 import { generateReadme, HEADER_END, HEADER_START } from './templates/readme.js'
-import { generateRollupConfig } from './templates/rollup-config.js'
+import { generateTsdownConfig } from './templates/rollup-config.js'
 import { generateTsConfig } from './templates/tsconfig.js'
 
 const testInput = scaffoldInputSchema.parse({
@@ -86,19 +86,19 @@ describe('generateTsConfig', () => {
     })
 })
 
-describe('generateRollupConfig', () => {
-    test('contains package library_name', () => {
-        const config = generateRollupConfig(testInput)
-        expect(config).toContain("library_name: 'my-pkg'")
-    })
-
+describe('generateTsdownConfig', () => {
     test('imports build-config', () => {
-        const config = generateRollupConfig(testInput)
+        const config = generateTsdownConfig(testInput)
         expect(config).toContain("from '@snailicid3/build-config'")
     })
 
+    test('uses defineBuildPlan', () => {
+        const config = generateTsdownConfig(testInput)
+        expect(config).toContain('defineBuildPlan')
+    })
+
     test('is a non-empty string', () => {
-        const config = generateRollupConfig(testInput)
+        const config = generateTsdownConfig(testInput)
         expect(config.trim().length).toBeGreaterThan(0)
     })
 })
@@ -129,7 +129,7 @@ describe('scaffoldPackage', () => {
         const files = [
             'package.json',
             'tsconfig.json',
-            'rollup.config.mts',
+            'tsdown.config.ts',
             'README.md',
             'src/index.ts',
         ]

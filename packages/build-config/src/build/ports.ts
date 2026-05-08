@@ -1,25 +1,22 @@
 /**
  * BuildAdapter port — the interface all adapters implement.
  *
- * The core build system interacts only with this interface, never with Rollup, Vite, esbuild, or other tool-specific
- * types directly.
+ * The core build system interacts only with this interface, never with any specific bundler. Adapters translate a
+ * {@link ResolvedBuildPlan} into tool-specific configuration.
  */
 
-import type { BuildPlan, Product, Runtime } from './types.js'
+import type { ResolvedBuildPlan } from './plan2.js'
 
 export type BuildAdapter = {
     /** Execute the build described by `plan`. */
-    build(plan: BuildPlan): Promise<void>
+    build(plan: ResolvedBuildPlan): Promise<void>
 
     /**
-     * Optionally return the tool-specific configuration object (e.g. a `RollupOptions[]` array) without executing a
-     * build. Useful for inspecting or exporting config.
+     * Optionally return the tool-specific configuration object without executing a build. Useful for inspecting or
+     * exporting config.
      */
-    createConfig?(plan: BuildPlan): unknown
+    createConfig?(plan: ResolvedBuildPlan): unknown
 
-    /** Human-readable adapter name (e.g. `"rollup"`, `"tsc"`). */
+    /** Human-readable adapter name (e.g. `"tsdown"`, `"tsc"`). */
     name: string
-
-    /** Returns true if this adapter can handle the given runtime and product combination. to pick the right adapter. */
-    supports(runtime: Runtime, product: Product): boolean
 }

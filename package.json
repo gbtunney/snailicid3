@@ -2,11 +2,6 @@
     "name": "@snailicid3/root",
     "version": "0.0.0",
     "private": true,
-    "description": "snailicid3 monorepo",
-    "author": {
-        "name": "Gillian Tunney",
-        "email": "gbtunney@mac.com"
-    },
     "license": "MIT",
     "repository": {
         "type": "git",
@@ -21,8 +16,7 @@
     "scripts": {
         "\n========== COMMIT >> ==========": "",
         "commit": "pnpm build:self && pnpm exec scope-commit --checked-commit",
-        "commit:cz": "pnpm commit:before && pnpm exec git-cz",
-        "commit:before": "pnpm lint:staged",
+        "commit:cz": "pnpm exec git-cz",
         "commit:direct": "git commit --no-verify -m",
         "lint:staged": "pnpm exec lint-staged --relative",
         "\n========== BUILD >> ==========": "",
@@ -76,6 +70,7 @@
         "report:commit-scope": "pnpm exec scope-commit"
     },
     "devDependencies": {
+        "@arethetypeswrong/core": "^0.18.2",
         "@changesets/cli": "^2.31.0",
         "@commitlint/cli": "^20.5.0",
         "@commitlint/config-conventional": "^20.5.0",
@@ -84,9 +79,10 @@
         "@nx/devkit": "^22.6.5",
         "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
-        "@types/node": "^25.6.0",
+        "@types/node": "^25.6.1",
         "@vitest/coverage-v8": "^4.1.5",
         "@vitest/ui": "^4.1.5",
+        "attw": "^1.0.0",
         "commitizen": "^4.3.1",
         "cz-conventional-changelog": "^3.3.0",
         "eslint": "^10.2.1",
@@ -96,9 +92,12 @@
         "markdownlint-cli2": "^0.22.0",
         "nx": "^22.6.5",
         "prettier": "^3.8.2",
+        "publint": "^0.3.19",
         "tsx": "^4.21.0",
         "typescript": "^6.0.2",
         "typescript-eslint": "^8.58.1",
+        "unplugin-unused": "^0.5.7",
+        "unrun": "^0.3.0",
         "verdaccio": "^6.5.0"
     },
     "config": {

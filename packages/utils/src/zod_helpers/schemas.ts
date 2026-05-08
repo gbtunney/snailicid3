@@ -4,7 +4,6 @@ import z from 'zod'
 import { type Numeric } from '../number/index.js'
 import { toNumeric } from '../number/transform.js'
 import { escapeStringRegexpInvalid } from '../regexp/escape.js'
-import { isRegExp, isString } from '../typeguard/utility.typeguards.js'
 
 export type ZodRegExp = z.ZodType<RegExp>
 
@@ -12,25 +11,36 @@ export type ZodRegExp = z.ZodType<RegExp>
  * @category Zod
  * @category Schema
  */
-export const resolveRegExpSchema = (
-    doEscape: boolean = true,
+export const coerceRegExpSchema = (
+    doEscape = true,
 ): z.ZodType<RegExp, RegExp | string> => {
-    const union = z
+    return z
         .union([z.string(), z.instanceof(RegExp)])
-        .transform<RegExp>((value) => {
-            if (isString<string>(value)) {
-                const _value = escapeStringRegexpInvalid(value, doEscape)
-                return new RegExp(_value ?? '')
-            } else {
+        .transform((value, ctx) => {
+            if (typeof value !== 'string') {
                 return value
             }
-        })
-        .refine((value: RegExp) => {
-            return value.source !== '(?:)' ? isRegExp(value) : false
-        }, 'Please provide a valid regular expression.')
-    return union
-}
 
+            const escaped = escapeStringRegexpInvalid(value, doEscape)
+
+            if (!escaped?.trim()) {
+                ctx.addIssue({
+                    code: 'custom',
+                    message: 'Regular expression string cannot be empty.',
+                })
+                return z.NEVER
+            }
+            try {
+                return new RegExp(escaped)
+            } catch {
+                ctx.addIssue({
+                    code: 'custom',
+                    message: 'Please provide a valid regular expression.',
+                })
+                return z.NEVER
+            }
+        })
+}
 /**
  * @category Zod
  * @category Schema
@@ -67,4 +77,15 @@ export const numeric = (): z.ZodType<
             'Please enter a valid number|bigint|string',
         )
     return result
+}
+export type EnumSchema<Type extends EnumValues> = z.ZodEnum<{
+    [Key in Type[number]]: Key
+}>
+
+export type EnumValues = readonly [string, ...Array<string>]
+
+export function createEnumSchema<const Type extends EnumValues>(
+    values: Type,
+): EnumSchema<Type> {
+    return z.enum(values)
 }

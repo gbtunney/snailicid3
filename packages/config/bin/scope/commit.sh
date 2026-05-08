@@ -48,6 +48,12 @@ get_commit_scope() {
     validate_commit_message() {
         local message="$1"
 
+        # Allow callers (CI dispatch jobs) to skip commitlint validation when
+        # dependencies are not installed in the current environment.
+        if [[ "${SCOPE_COMMIT_SKIP_COMMITLINT:-0}" == "1" ]]; then
+            return 0
+        fi
+
         printf '%s\n' "$message" | pnpm exec commitlint --cwd "$repo_root" > /dev/null || {
             echo "Error: invalid commit message:" >&2
             echo "  $message" >&2
@@ -157,10 +163,15 @@ EOF
         input_paths=("${positionals[@]}")
     fi
 
-    if [[ "$run_commit_before" == "true" ]]; then
-        # Keep the expensive pre-commit checks behind final commit-message validation below.
-        pnpm commit:before || return 1
-    fi
+    run_checked_precommit() {
+        # If nothing is staged yet, stage current changes once so checked-commit
+        # remains convenient. Otherwise, preserve the user's staged selection.
+        if git diff --cached --quiet; then
+            git add -A || return 1
+        fi
+
+        pnpm exec lint-staged --relative || return 1
+    }
 
     read_package_name() {
         local package_json="$1"
@@ -295,7 +306,9 @@ EOF
             return 0
         fi
 
-        printf '%s\n' "${values[@]}" | paste -sd ',' - | sed 's/,/, /g'
+        # Keep commas tight so commitlint multi-scope parsing does not include
+        # a leading space in subsequent scope values.
+        printf '%s\n' "${values[@]}" | paste -sd ',' -
     }
 
     format_scope_output() {
@@ -336,10 +349,20 @@ EOF
         esac
     }
 
+    if [[ "$run_commit_before" == "true" ]]; then
+        run_checked_precommit || return 1
+    fi
+
     if [[ "${#input_paths[@]}" -gt 0 ]]; then
         paths=("${input_paths[@]}")
     else
-        mapfile -t paths < <(collect_changed_paths)
+        # macOS ships bash 3.2, which doesn't have `mapfile`.
+        # Read lines into the `paths` array manually.
+        paths=()
+        while IFS= read -r path; do
+            [[ -n "$path" ]] || continue
+            paths+=("$path")
+        done < <(collect_changed_paths)
     fi
 
     if [[ "${#paths[@]}" -eq 0 ]]; then

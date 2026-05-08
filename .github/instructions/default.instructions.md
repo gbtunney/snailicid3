@@ -72,8 +72,8 @@ type Wrapped<Type extends string> = Promise<Type> //GOOD!!!!!!!
 ### command preference for different project types
 
 - zod ^4.0.0
-- ts libraries **public** (rollup) for release on npm
-- cli-apps **public** (rollup) - typedoc markdown (committed)
+- ts libraries **public** (tsdown) for release on npm
+- cli-apps **public** (tsdown) - typedoc markdown (committed)
 - component libraries **public** (**react | vue**) (vite config) storybook
   preferred
 - web projects **deployed somewhere** (vite)

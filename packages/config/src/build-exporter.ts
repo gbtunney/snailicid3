@@ -1,12 +1,12 @@
 import type { Jsonify, JsonObject } from 'type-fest'
-import { exportJSONFile } from './src/export.json.file.js'
-import { Prettier } from './src/index.js'
+import { exportJSONFile } from './export.json.file.js'
 import {
     markdownlint,
     type MarkdownlintConfiguration,
-} from './src/markdownlint/index.js'
-import { getPrettierPluginsList } from './src/prettier/plugins.js'
-import { safeDeserializeJSON } from './src/utilities.js'
+} from './markdownlint/index.js'
+import { getPrettierPluginsList } from './prettier/plugins.js'
+import { safeDeserializeJSON } from './utilities.js'
+import { Prettier } from './index.js'
 
 /* TODO: outputs a json dump of markdownlint and prettier. this is TEMPORARY till the configs are correct. ideally this should be gotten rid of */
 

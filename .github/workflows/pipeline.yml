@@ -322,18 +322,28 @@ jobs:
             - name: 📦 Upload workspace artifact
               id: upload_workspace
               if: ${{ inputs.upload_workspace_artifact && steps.repo_dirty.outputs.is_repo_dirty == 'true' }}
+              shell: bash
+              run: |
+                  ARCHIVE_PATH="${{ runner.temp }}/workspace-artifact.tar.gz"
+                  tar -czf "$ARCHIVE_PATH" \
+                    --exclude='.git' \
+                    --exclude='**/node_modules' \
+                    --exclude='**/.nx/cache' \
+                    --exclude='**/.pnpm-store' \
+                    --exclude='**/coverage' \
+                    --exclude='**/.turbo' \
+                    .
+
+                  echo "archive_path=$ARCHIVE_PATH" >> "$GITHUB_OUTPUT"
+
+            - name: 📦 Upload workspace artifact file
+              id: upload_workspace_file
+              if: ${{ inputs.upload_workspace_artifact && steps.repo_dirty.outputs.is_repo_dirty == 'true' }}
               uses: actions/upload-artifact@v4
               with:
                   name: ${{ steps.artifact_name.outputs.name }}
                   if-no-files-found: error
-                  path: |
-                      .
-                      !**/.git/**
-                      !**/node_modules/**
-                      !**/.nx/cache/**
-                      !**/.pnpm-store/**
-                      !**/coverage/**
-                      !**/.turbo/**
+                  path: ${{ steps.upload_workspace.outputs.archive_path }}
 
             - name: 🧾 Compute artifact_uploaded output
               id: artifact_uploaded
@@ -345,7 +355,7 @@ jobs:
                     exit 0
                   fi
 
-                  if [ "${{ steps.upload_workspace.outcome }}" = "success" ]; then
+                  if [ "${{ steps.upload_workspace_file.outcome }}" = "success" ]; then
                     echo "artifact_uploaded=true" >> "$GITHUB_OUTPUT"
                   else
                     echo "artifact_uploaded=false" >> "$GITHUB_OUTPUT"

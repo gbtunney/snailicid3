@@ -1,77 +1,153 @@
-/** Translate a {@link BuildPlan} into tsdown build config. */
-
 import type { build } from 'tsdown'
-import { existsSync, readFileSync } from 'node:fs'
-import path from 'node:path'
-import { bannerPackageMetaSchema, createBanner } from '../../build/banner.js'
-import type { BannerPackageMeta } from '../../build/banner.js'
-import { resolveEntryFilename } from '../../build/plan.js'
-import type { BuildPlan, OutputKind } from '../../build/types.js'
+import type {
+    ResolvedBuildPlan,
+    ResolvedBuildPlanEntry,
+} from '../../build/plan2.js'
 
+export type TsdownConfigInput = Array<TsdownBuildConfig>
 type TsdownBuildConfig = NonNullable<Parameters<typeof build>[0]>
 
+/** Module-family formats — can share a single tsdown call, 'ts' maps to dts:true */
+const MODULE_FORMATS = ['esm', 'cjs'] as const
+/** Global-family formats — need globalName, typically one per entry */
+const GLOBAL_FORMATS = ['iife', 'umd'] as const
+
+type GlobalFormat = (typeof GLOBAL_FORMATS)[number]
+type ModuleFormat = (typeof MODULE_FORMATS)[number]
+type TsdownFormat = GlobalFormat | ModuleFormat
+
 /**
- * Translate a {@link BuildPlan} into a tsdown build config object.
+ * Translate a single {@link ResolvedBuildPlanEntry} into a tsdown build config.
  *
- * Tsdown accepts multiple entry points in a single call, unlike rollup which required one config per entry.
+ * - `'ts'` in `output_formats` is stripped from the format list and sets `dts: true`
+ * - Global formats (`iife`, `umd`) set `globalName` from `entry.moduleName`
+ * - `bannerContent` (pre-rendered string) is passed through directly
  */
-export function toTsdownConfig(
-    plan: BuildPlan,
-    packageMeta?: BannerPackageMeta,
-    moduleName: string = resolveEntryFilename(plan.entries[0]?.key ?? 'index'),
+export function entryToTsdownConfig(
+    entry: ResolvedBuildPlanEntry,
+    plan: ResolvedBuildPlan,
 ): TsdownBuildConfig {
-    const entry: Record<string, string> = {}
-    for (const e of plan.entries) {
-        const filename = resolveEntryFilename(e.key)
-        const inputFile = e.input
-            ? path.resolve(plan.sourceDir, e.input)
-            : path.resolve(plan.sourceDir, `${filename}.ts`)
-        entry[filename] = inputFile
-    }
+    logTsdownAdapter('entryToTsdownConfig:start', {
+        entryKey: entry.key,
+        entryOutputFormats: entry.output_formats,
+        runtime: entry.runtime,
+    })
 
-    // Collect the union of all format+options across entries.
-    // tsdown applies one format list to all entries; individual overrides aren't
-    // supported at the Options level (use separate build() calls if needed).
-    const formats: Array<OutputKind> =
-        plan.entries.length > 0 ? plan.entries[0].outputKinds : ['esm']
-    const dts = plan.entries.some((e) => e.dts)
-    const sourcemap = plan.entries.every((e) => e.sourcemap !== false)
-    const minify = plan.entries.some((e) => e.minify)
-    const wantsBanner = plan.entries.some((e) => e.banner)
-    const resolvedMeta = packageMeta ?? inferPackageMeta(plan)
+    const hasDts = entry.output_formats.includes('ts')
+    const formats = entry.output_formats.filter(
+        (f): f is TsdownFormat => isModuleFormat(f) || isGlobalFormat(f),
+    )
+    const hasGlobal = formats.some(isGlobalFormat)
+    const platform = runtimeToPlatform(entry.runtime)
 
-    const platform =
-        plan.identity.runtime === 'node'
-            ? 'node'
-            : plan.identity.runtime === 'browser'
-              ? 'browser'
-              : 'neutral'
+    const target = transpileToTarget(entry.transpile)
 
-    return {
-        ...(wantsBanner && resolvedMeta
-            ? { banner: createBanner(moduleName, resolvedMeta) }
-            : {}),
-        clean: true,
-        dts,
-        entry,
-        format: formats,
-        minify,
-        outDir: plan.outputDir,
+    const lintSettings: Partial<TsdownBuildConfig> = entry.lint
+        ? {
+              attw: {
+                  level: 'error',
+                  profile: 'node16',
+              },
+              publint: true,
+              report: true,
+              unused: {
+                  level: 'warning', //this should be setup on publish or ci to do it for real
+              },
+          }
+        : {}
+    logTsdownAdapter('entryToTsdownConfig:derived', {
+        entryKey: entry.key,
+        hasDts,
+        hasGlobal,
         platform,
-        sourcemap,
+        target,
+        transpile: entry.transpile,
+        tsdownFormats: formats,
+    })
+    //const bundle = entry.bundle
+    const config: TsdownBuildConfig = {
+        ...(entry.bannerContent ? { banner: entry.bannerContent } : {}),
+        ...(hasGlobal ? { globalName: entry.moduleName } : {}),
+        clean: false,
+        dts: hasDts,
+        entry: { [entry.fileName]: entry.sourcePath },
+        exports: true,
+        format: formats,
+        logLevel: entry.logLevel,
+        outDir: entry.outputDir,
+        platform,
+        unbundle: !entry.bundle,
+        ...lintSettings,
+        ...(target ? { target } : {}),
     }
+
+    logTsdownAdapter('entryToTsdownConfig:result', {
+        config,
+        entryKey: entry.key,
+    })
+
+    return config
 }
 
-function inferPackageMeta(plan: BuildPlan): BannerPackageMeta | undefined {
-    const candidate = path.resolve(plan.sourceDir, '../package.json')
-    if (!existsSync(candidate)) return undefined
+/** Translate a {@link ResolvedBuildPlan} into an array of tsdown build configs, one per entry. */
+export function toTsdownConfigs(plan: ResolvedBuildPlan): TsdownConfigInput {
+    logTsdownAdapter('toTsdownConfigs:start', {
+        entryCount: plan.entries.length,
+        packageName: plan.packageName,
+        runtime: plan.root.runtime,
+    })
 
-    try {
-        const raw: unknown = JSON.parse(readFileSync(candidate, 'utf8'))
-        const result = bannerPackageMetaSchema.safeParse(raw)
-        return result.success ? result.data : undefined
-    } catch {
-        return undefined
-    }
+    const configs = plan.entries.map((entry) =>
+        entryToTsdownConfig(entry, plan),
+    )
+
+    logTsdownAdapter('toTsdownConfigs:result', {
+        configCount: configs.length,
+    })
+
+    return configs
 }
-export default toTsdownConfig
+
+function isGlobalFormat(f: string): f is GlobalFormat {
+    return (GLOBAL_FORMATS as ReadonlyArray<string>).includes(f)
+}
+
+function isModuleFormat(f: string): f is ModuleFormat {
+    return (MODULE_FORMATS as ReadonlyArray<string>).includes(f)
+}
+
+/** Emit adapter debug logs when TSDOWN_ADAPTER_DEBUG is enabled. */
+function logTsdownAdapter(
+    message: string,
+    context?: Readonly<Record<string, unknown>>,
+): void {
+    if (process.env.TSDOWN_ADAPTER_DEBUG !== '1') {
+        return
+    }
+
+    if (context) {
+        console.log(`[tsdownv2-adapter] ${message}`, context)
+        return
+    }
+
+    console.log(`[tsdownv2-adapter] ${message}`)
+}
+
+/** Derives the tsdown platform value from a runtime kind. */
+function runtimeToPlatform(
+    runtime: ResolvedBuildPlan['root']['runtime'],
+): 'browser' | 'neutral' | 'node' {
+    if (runtime === 'node') return 'node'
+    if (runtime === 'browser') return 'browser'
+    return 'neutral'
+}
+
+/** Map build-plan transpile values to tsdown target behavior. */
+function transpileToTarget(
+    transpile: ResolvedBuildPlanEntry['transpile'],
+): Array<string> | string | undefined {
+    if (transpile === true) return undefined
+    if (transpile === false || transpile === 'none') return 'esnext'
+    if (transpile.length === 0) return undefined
+    return transpile
+}

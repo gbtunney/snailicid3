@@ -22,6 +22,7 @@
         "christian-kohler.npm-intellisense",
         "redhat.vscode-yaml",
         "anseki.vscode-color",
-        "openai.chatgpt"
+        "openai.chatgpt",
+        "esbenp.prettier-vscode"
     ]
 }

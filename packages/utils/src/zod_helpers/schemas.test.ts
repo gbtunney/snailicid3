@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import z from 'zod'
-import { ensureArray, numeric, resolveRegExpSchema } from './schemas.js'
+import { coerceRegExpSchema, ensureArray, numeric } from './schemas.js'
 import { isRegExp } from '../typeguard/utility.typeguards.js'
 
 describe('Zod helpers', () => {
@@ -78,8 +78,8 @@ describe('Zod helpers', () => {
         //expect(getArrRecursiveSchemaTest.parse("gillian") ).toStrictEqual([['gillian']])
     })
     test('resolveRegExpSchema', () => {
-        expect(resolveRegExpSchema().safeParse('^+0x').success).toBe(true)
-        const testschema = resolveRegExpSchema(true)
+        expect(coerceRegExpSchema().safeParse('^+0x').success).toBe(true)
+        const testschema = coerceRegExpSchema(true)
 
         const getREGEXPSchemaTest = ensureArray<typeof testschema>(
             testschema,
@@ -113,7 +113,7 @@ describe('Zod helpers', () => {
         expect(
             getREGEXPSchemaTest.parse(['^+0x', 'FFFF00']).test('^+0x234760x'),
         ).toBe(true)
-        expect(resolveRegExpSchema(false).safeParse('^+0x').success).toBe(false)
+        expect(coerceRegExpSchema(false).safeParse('^+0x').success).toBe(false)
     })
 })
 export {}

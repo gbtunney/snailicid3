@@ -3,51 +3,30 @@
     "version": "0.0.1",
     "private": true,
     "description": "Package scaffolding generator with TypeScript-function-based templates",
-    "buildConfig": {
-        "runtime": "node",
-        "product": "cli",
-        "buildStrategy": "bundle"
-    },
-    "publishConfig": {
-        "access": "public"
-    },
+    "keywords": [
+        "typescript",
+        "snailicid3",
+        "monorepo",
+        "scaffold",
+        "generator",
+        "template",
+        "cli"
+    ],
     "scripts": {
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
         "dev:nx": "nx run $npm_package_name:dev",
-        "\n========== TEST >> ==========": "",
         "test:coverage": "vitest run --coverage"
-    },
-    "dependencies": {
-        "@snailicid3/build-config": "workspace:*",
-        "@snailicid3/cli-app": "workspace:*",
-        "@snailicid3/node-utils": "workspace:*",
-        "zod": "^4.3.6"
-    },
-    "devDependencies": {
-        "@snailicid3/config": "workspace:*",
-        "@types/node": "^25.6.0",
-        "rollup": "^4.60.1",
-        "tsdown": "^0.21.10",
-        "typescript": "^6.0.2",
-        "vitest": "^4.1.4"
-    },
-    "exports": {
-        ".": {
-            "import": "./dist/index.js",
-            "types": "./types/index.d.ts"
-        }
     },
     "bin": {
         "scaffold": "./bin/scaffold.ts"
     },
-    "files": [
-        "CHANGELOG.md",
-        "dist",
-        "types",
-        "bin"
-    ],
+    "buildConfig": {
+        "runtime": "node",
+        "product": "cli",
+        "buildStrategy": "bundle"
+    },
     "nx": {
         "targets": {
             "dev": {},
@@ -66,6 +45,21 @@
         }
     },
     "type": "module",
+    "main": "./dist/index.cjs",
+    "types": "./dist/index.d.cts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs"
+        },
+        "./package.json": "./package.json"
+    },
+    "files": [
+        "CHANGELOG.md",
+        "dist",
+        "types",
+        "bin"
+    ],
     "author": {
         "name": "Gillian Tunney",
         "email": "gbtunney@mac.com"
@@ -73,8 +67,21 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/gbtunney/snailicid3-monorepo"
+        "url": "https://github.com/gbtunney/snailicid3",
+        "directory": "packages/scaffold"
     },
-    "main": "./dist/index.js",
-    "types": "./types/index.d.ts"
+    "dependencies": {
+        "@snailicid3/build-config": "workspace:*",
+        "@snailicid3/cli-app": "workspace:*",
+        "@snailicid3/node-utils": "workspace:*",
+        "zod": "^4.3.6"
+    },
+    "devDependencies": {
+        "@snailicid3/config": "workspace:*",
+        "@types/node": "^25.6.1",
+        "tsdown": "^0.22.0",
+        "typescript": "^6.0.2",
+        "vitest": "^4.1.4"
+    },
+    "module": "./dist/index.js"
 }

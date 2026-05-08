@@ -40,8 +40,6 @@ body:
               - '@snailicid3/scaffold'
               - '@snailicid3/types'
               - '@snailicid3/utils'
-              - '@snailicid3/workspace-tools'
-              - '@snailicid3/zod-helpers'
       validations:
           required: true
 
