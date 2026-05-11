@@ -6,8 +6,7 @@
 undefined
 ```
 
-When a function may intentionally return “no value” as part of its runtime
-result.
+When a function may intentionally return “no value” as part of its runtime result.
 
 Use:
 

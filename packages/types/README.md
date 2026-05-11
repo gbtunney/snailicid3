@@ -13,11 +13,9 @@ _Pure TypeScript types, utility types, and typeguard functions._
 
 ### Repository
 
-- **Github:**
-  [`@snailicid3/types`](https://github.com/gbtunney/snailicid3/tree/main/packages/types)
+- **Github:** [`@snailicid3/types`](https://github.com/gbtunney/snailicid3/tree/main/packages/types)
   • [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
-- **CDN**:
-  [jsdeliver](https://cdn.jsdelivr.net/npm/@snailicid3/types/dist/index.min.js)
+- **CDN**: [jsdeliver](https://cdn.jsdelivr.net/npm/@snailicid3/types/dist/index.min.js)
 
 ### Author
 
@@ -34,17 +32,17 @@ _Pure TypeScript types, utility types, and typeguard functions._
 
 ---
 
-This package provides foundational TypeScript type definitions, utility types,
-and runtime typeguard functions. It has no runtime dependencies beyond `ramda`
-and `type-fest` and is safe to use in any environment.
+This package provides foundational TypeScript type definitions, utility types, and runtime typeguard
+functions. It has no runtime dependencies beyond `ramda` and `type-fest` and is safe to use in any
+environment.
 
 ### `@snailicid3/types` _contains:_
 
-- **Utility types** — `Falsy`, `NilOrEmpty`, `NilLike`, `Nullish`, `Primitive`,
-  `PlainObject`, `EmptyString` and more
+- **Utility types** — `Falsy`, `NilOrEmpty`, `NilLike`, `Nullish`, `Primitive`, `PlainObject`,
+  `EmptyString` and more
 - **JSON types** — typed JSON value, object, and array types
-- **Typeguards** — `tg.isTruthy`, `tg.isFalsy`, `tg.isNilOrEmpty`,
-  `tg.isNotNilOrEmpty`, `tg.guardToAssertion`, `tg.predicateToAssertion`
+- **Typeguards** — `tg.isTruthy`, `tg.isFalsy`, `tg.isNilOrEmpty`, `tg.isNotNilOrEmpty`,
+  `tg.guardToAssertion`, `tg.predicateToAssertion`
 
 ## Installation
 
@@ -73,9 +71,7 @@ tg.isNilOrEmpty(null) // true
 tg.isNilOrEmpty([]) // true
 tg.isNilOrEmpty([1]) // false
 
-const assertIsString = tg.guardToAssertion(
-  (v: unknown): v is string => typeof v === 'string',
-)
+const assertIsString = tg.guardToAssertion((v: unknown): v is string => typeof v === 'string')
 assertIsString('ok') // passes
 assertIsString(42) // throws TypeError
 ```

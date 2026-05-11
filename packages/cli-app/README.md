@@ -8,8 +8,8 @@
 ### Repository
 
 - **Github:**
-  [`@snailicid3/cli-app`](https://github.com/gbtunney/snailicid3/tree/main/packages/cli-app)
-  • [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
+  [`@snailicid3/cli-app`](https://github.com/gbtunney/snailicid3/tree/main/packages/cli-app) •
+  [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
 
 ### Author
 
@@ -22,10 +22,10 @@
 
 ---
 
-This package provides a Zod-backed CLI application framework built on top of
-`yargs` and `yargs-interactive`. It integrates with `@snailicid3/logger` for
-structured output and `@snailicid3/color` for styled terminal text. Used
-internally by scaffold and other CLI tools in this monorepo.
+This package provides a Zod-backed CLI application framework built on top of `yargs` and
+`yargs-interactive`. It integrates with `@snailicid3/logger` for structured output and
+`@snailicid3/color` for styled terminal text. Used internally by scaffold and other CLI tools in
+this monorepo.
 
 ### `@snailicid3/cli-app` _contains:_
 

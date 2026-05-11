@@ -14,8 +14,8 @@ _Unified Node.js logger with chalk-powered colored output._
 ### Repository
 
 - **Github:**
-  [`@snailicid3/logger`](https://github.com/gbtunney/snailicid3/tree/main/packages/logger)
-  • [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
+  [`@snailicid3/logger`](https://github.com/gbtunney/snailicid3/tree/main/packages/logger) •
+  [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
 
 ### Author
 
@@ -32,16 +32,15 @@ _Unified Node.js logger with chalk-powered colored output._
 
 ---
 
-This package provides a structured Node.js logger with configurable chalk colors
-per log level. Log levels include `info`, `warn`, `error`, `debug`, and `trace`.
-Colors can be specified as chalk color names or hex strings.
+This package provides a structured Node.js logger with configurable chalk colors per log level. Log
+levels include `info`, `warn`, `error`, `debug`, and `trace`. Colors can be specified as chalk color
+names or hex strings.
 
 ### `@snailicid3/logger` _contains:_
 
 - **`getLogger`** — create a logger instance with per-level color configuration
 - **Log levels** — `info`, `warn`, `error`, `debug`, `trace`
-- **Color support** — chalk color names and hex color strings via
-  `@snailicid3/color`
+- **Color support** — chalk color names and hex color strings via `@snailicid3/color`
 - **Types** — `LogLevelName`, `ChalkColor`
 
 ## Installation

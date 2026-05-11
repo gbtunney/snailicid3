@@ -1,7 +1,6 @@
 ---
 name: Snailicid3 Work Item
-description:
-  Create a feature, bug, or design issue for the Operator Editor system
+description: Create a feature, bug, or design issue for the Operator Editor system
 title: '<type>(<scope>): <short summary>'
 labels: []
 assignees: []

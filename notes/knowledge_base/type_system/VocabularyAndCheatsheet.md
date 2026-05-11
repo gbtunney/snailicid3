@@ -20,10 +20,9 @@
 
 ## Type Reference Table
 
-> **Warning** : _This table is not exhaustive and serves as a general reference.
-> The actual implementation may vary depending on specific use cases, system,
-> requirements, or platform constraints. Always validate against your system's
-> requirements and data models._
+> **Warning** : _This table is not exhaustive and serves as a general reference. The actual
+> implementation may vary depending on specific use cases, system, requirements, or platform
+> constraints. Always validate against your system's requirements and data models._
 
 | Conceptual Type     | Meaning                           | Common Raw Types                                 | Typical UI Types             | Multi-Value? |
 | ------------------- | --------------------------------- | ------------------------------------------------ | ---------------------------- | ------------ |
@@ -60,23 +59,19 @@
 
 ?? TODO: IDK WHERE TO PUT THIS ??
 
-To better understand the raw data types used in this above table, here are some
-common data type definitions:
+To better understand the raw data types used in this above table, here are some common data type
+definitions:
 
-- **`boolean`:** Represents a true/false value, often used for flags or binary
-  states.
-- **`{ ... }`:** A structured object with named fields (e.g.,
-  `{ id: string, label: string }`).
+- **`boolean`:** Represents a true/false value, often used for flags or binary states.
+- **`{ ... }`:** A structured object with named fields (e.g., `{ id: string, label: string }`).
 - **`T[]` or `Array<T>`:** An ordered list of items of type `T`.
-- **`Record<string, T>`:** A dictionary or map where keys are strings and values
-  are of type `T`.
+- **`Record<string, T>`:** A dictionary or map where keys are strings and values are of type `T`.
 
 ## Vocabulary - Technical Types
 
 ### Scalar (_One Value, No Structure_)
 
-- A **scalar** is a single value. It is not nested, not iterable, and not a
-  container.
+- A **scalar** is a single value. It is not nested, not iterable, and not a container.
 
 #### Examples
 
@@ -107,8 +102,7 @@ common data type definitions:
 
 ### Object (Fixed Structure, Known Fields)
 
-- An **object** has a fixed structure with known fields. Each field has a
-  specific meaning.
+- An **object** has a fixed structure with known fields. Each field has a specific meaning.
 
 #### Examples
 
@@ -131,14 +125,12 @@ common data type definitions:
 
 ### Map / Dictionary (Key → Value Lookup, Variable Keys)
 
-- A **map** or **dictionary** is a key-value lookup structure with variable
-  keys.
+- A **map** or **dictionary** is a key-value lookup structure with variable keys.
 
 #### Examples
 
 - `Record<string, T>`: A map where keys are strings and values are of type `T`.
-- `Record<'k1' | 'k2', T>`: A map with a known set of keys, but still
-  map-shaped.
+- `Record<'k1' | 'k2', T>`: A map with a known set of keys, but still map-shaped.
 
 ---
 
@@ -159,8 +151,7 @@ common data type definitions:
 
 ### Time-Related
 
-Time-related concepts are often confused. They are **siblings**, not
-parent/child.
+Time-related concepts are often confused. They are **siblings**, not parent/child.
 
 ```text
 Time-related
