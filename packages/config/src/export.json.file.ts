@@ -8,6 +8,7 @@ import {
 } from 'type-fest'
 import fs from 'node:fs'
 import path from 'node:path'
+import { serializeJSON } from './utilities.js'
 export namespace Json {
     export type Array = JsonArray
     export type Object = JsonObject
@@ -64,9 +65,7 @@ export const exportJSONFile = (
                 fs.mkdirSync(path.dirname(filePath), { recursive: true })
                 fs.writeFileSync(filePath, prettyPrintJSON(entry.data))
             }
-            const logObject = logData
-                ? `\n${prettyPrintJSON(entry.data, 12)}`
-                : ''
+            const logObject = logData ? `\n${serializeJSON(entry.data)}` : ''
 
             /** Write file regardless */
             if (overwrite) {

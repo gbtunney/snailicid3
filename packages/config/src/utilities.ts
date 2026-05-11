@@ -1,4 +1,10 @@
-import type { JsonArray, JsonObject, JsonValue, UnknownRecord } from 'type-fest'
+import type {
+    JsonArray,
+    Jsonifiable,
+    JsonObject,
+    JsonValue,
+    UnknownRecord,
+} from 'type-fest'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -41,6 +47,29 @@ export const safeDeserializeJSON = <Type extends JsonValue = JsonValue>(
         return undefined
     }
 }
+
+export function serializeJSON<Type extends Jsonifiable = Jsonifiable>(
+    value: unknown,
+): string {
+    // already object/array/etc
+    if (typeof value !== 'string') {
+        // serialize normally
+        return JSON.stringify(value, undefined, 4)
+    }
+    try {
+        // test whether string is already valid JSON
+        JSON.parse(value)
+
+        // already serialized JSON string
+        // return unchanged to avoid double stringify
+        return value
+    } catch {
+        // raw non-json string
+        // serialize into valid JSON string
+        return JSON.stringify(value)
+    }
+}
+
 /**
  * TODO idk isnt this more of a node-utls function? and the next one? Idk export is not actually exported from this
  * package export.json.file is more of a node-utils thing too and should probably be moved? i am confused. :(
