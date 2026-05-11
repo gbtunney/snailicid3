@@ -14,8 +14,8 @@ _Node.js filesystem, path, glob, and package.json utilities._
 ### Repository
 
 - **Github:**
-  [`@snailicid3/node-utils`](https://github.com/gbtunney/snailicid3/tree/main/packages/node-utils)
-  • [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
+  [`@snailicid3/node-utils`](https://github.com/gbtunney/snailicid3/tree/main/packages/node-utils) •
+  [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
 
 ### Author
 
@@ -32,19 +32,15 @@ _Node.js filesystem, path, glob, and package.json utilities._
 
 ---
 
-This package provides Node.js-specific utilities for filesystem operations, path
-resolution, glob pattern matching, and reading/validating `package.json` files.
-It targets Node.js runtime only.
+This package provides Node.js-specific utilities for filesystem operations, path resolution, glob
+pattern matching, and reading/validating `package.json` files. It targets Node.js runtime only.
 
 ### `@snailicid3/node-utils` _contains:_
 
-- **Filesystem utilities** — file existence checks, directory traversal, reading
-  files
-- **Path utilities** — path resolution, normalization, relative/absolute
-  conversions
+- **Filesystem utilities** — file existence checks, directory traversal, reading files
+- **Path utilities** — path resolution, normalization, relative/absolute conversions
 - **Glob utilities** — pattern matching via `glob` and `is-glob`
-- **Package.json utilities** — reading and validating workspace `package.json`
-  files
+- **Package.json utilities** — reading and validating workspace `package.json` files
 - **CLI argument parsing** — via `yargs` integration
 
 ## Installation

@@ -34,7 +34,7 @@ export const lintStagedConfig = (): LintStagedConfiguration => {
             //  const ignores = toIgnoreArgs(mdIgnores)
             return [
                 `pnpm exec prettier --write ${files}`,
-                `pnpm exec markdownlint-cli2 --fix ${files}  || true`,
+                `pnpm exec markdownlint-cli2 --no-globs --fix ${files}  || true`,
             ]
         },
 

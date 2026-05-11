@@ -38,7 +38,7 @@ const PRETTIER_WIDTH_BASE: Config['tabWidth'] = 100
 const PRETTIER_WIDTH_SCALE = {
     code: 0.8,
     comments: 1.2,
-    markdown: 0.8,
+    markdown: 1.0,
 } as const
 
 export const SHARED_FORMATTING_RULES: Merge<

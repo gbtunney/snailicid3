@@ -7,8 +7,8 @@ description: |
   This prompt offers a guided menu and step-by-step instructions for syncing and auditing files between your repository and a template repository, making it easy to keep your project up-to-date or customized as needed.
 ---
 
-This skill provides a reusable workflow for auditing and syncing files between
-your current repository and a template repository.
+This skill provides a reusable workflow for auditing and syncing files between your current
+repository and a template repository.
 
 ---
 
@@ -16,16 +16,13 @@ your current repository and a template repository.
 
 **What template sync action do you want to perform?**
 
-- Compare file statuses — Check which files are up-to-date, changed in the
-  template, changed locally, only exist on one side, or have diverged.
-- Pull one-off file replacement — Replace a specific file in your repo with the
-  version from the template.
-- Sync all files — Overwrite all files in your repo with the template's
-  versions.
-- Add template remote — Add the template repository as a remote to your local
-  git config.
-- Show status label definitions — Display the meaning of each status label used
-  in the comparison.
+- Compare file statuses — Check which files are up-to-date, changed in the template, changed
+  locally, only exist on one side, or have diverged.
+- Pull one-off file replacement — Replace a specific file in your repo with the version from the
+  template.
+- Sync all files — Overwrite all files in your repo with the template's versions.
+- Add template remote — Add the template repository as a remote to your local git config.
+- Show status label definitions — Display the meaning of each status label used in the comparison.
 
 ---
 
@@ -34,8 +31,8 @@ your current repository and a template repository.
 Use this skill to:
 
 - Compare the status of files between your repository and a template repository.
-- Identify files that are up-to-date, changed in the template, changed locally,
-  only present on one side, or diverged.
+- Identify files that are up-to-date, changed in the template, changed locally, only present on one
+  side, or diverged.
 - Pull one-off file replacements from the template.
 - Automate the process of syncing files with the template.
 
@@ -158,10 +155,8 @@ git checkout template/main -- .
 ## Status Labels
 
 - **🟢 UP TO DATE**: File is identical in both repositories.
-- **🔵 TEMPLATE CHANGED**: The template changed and your repo still matches the
-  shared base version.
-- **🟡 LOCAL MODIFIED**: Your repo changed the file locally and the template did
-  not.
+- **🔵 TEMPLATE CHANGED**: The template changed and your repo still matches the shared base version.
+- **🟡 LOCAL MODIFIED**: Your repo changed the file locally and the template did not.
 - **🔴 DIVERGED**: Both local and template versions have changed.
 - **🟣 TEMPLATE ONLY**: The file exists in the template but not in your repo.
 - **⚪ LOCAL ONLY**: The file exists in your repo but not in the template.

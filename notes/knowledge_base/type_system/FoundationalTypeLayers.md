@@ -1,26 +1,24 @@
 # Foundational Type Layers
 
-This document provides a detailed reference for understanding and designing
-attributes using three **foundational** type layers: **Conceptual**,
-**Technical**, and **User Interface**. By separating these layers, we can ensure
-flexibility and adaptability across different systems, platforms, and contexts.
+This document provides a detailed reference for understanding and designing attributes using three
+**foundational** type layers: **Conceptual**, **Technical**, and **User Interface**. By separating
+these layers, we can ensure flexibility and adaptability across different systems, platforms, and
+contexts.
 
 ---
 
 ## Definitions
 
-- **Conceptual Type**: _Describes the real-world meaning of the value_,
-  independent of how it is stored or displayed. Conceptual types are
-  **human-meaningful**, **stable** across systems, and **portable** between
-  platforms.
-- **Technical Type**: _Describes the **structural** representation of the value
-  in code or data_. Technical types focus on the data's **shape** and
-  **format**, rather than its meaning or how it is presented to users.
-- **User Interface Type**: _Describes how the value is presented to or
-  interacted with by a human user_. User Interface (**_UI_**) types define
-  **affordances**—design features that provide **visual** or **interactive**
-  cues to suggest how user can interact with an element (e.g., _buttons_,
-  _sliders_, _text inputs_).
+- **Conceptual Type**: _Describes the real-world meaning of the value_, independent of how it is
+  stored or displayed. Conceptual types are **human-meaningful**, **stable** across systems, and
+  **portable** between platforms.
+- **Technical Type**: _Describes the **structural** representation of the value in code or data_.
+  Technical types focus on the data's **shape** and **format**, rather than its meaning or how it is
+  presented to users.
+- **User Interface Type**: _Describes how the value is presented to or interacted with by a human
+  user_. User Interface (**_UI_**) types define **affordances**—design features that provide
+  **visual** or **interactive** cues to suggest how user can interact with an element (e.g.,
+  _buttons_, _sliders_, _text inputs_).
 
 ---
 
@@ -46,10 +44,9 @@ flexibility and adaptability across different systems, platforms, and contexts.
 
 > **_“What kind of thing is this?”_**
 
-A **conceptual type** describes the **real-world meaning** of a value,
-independent of how it is stored, transmitted, or rendered. This layer of type
-focuses on the _essence_ of the data, rather than its technical or user
-interface representation.
+A **conceptual type** describes the **real-world meaning** of a value, independent of how it is
+stored, transmitted, or rendered. This layer of type focuses on the _essence_ of the data, rather
+than its technical or user interface representation.
 
 ### Examples
 
@@ -70,11 +67,10 @@ interface representation.
 
 > **_“What shape is this data?”_**
 
-A **technical type** describes the structural form that a system uses to store
-or transmit the raw data value. It focuses on the data's **shape** and
-**format**, rather than its meaning or how it is presented to users. This layer
-includes **scalar types**, **containers**, and **primitive families**. These are
-_essential_ for defining how data is **stored**, **validated**, and
+A **technical type** describes the structural form that a system uses to store or transmit the raw
+data value. It focuses on the data's **shape** and **format**, rather than its meaning or how it is
+presented to users. This layer includes **scalar types**, **containers**, and **primitive
+families**. These are _essential_ for defining how data is **stored**, **validated**, and
 **transmitted** between systems. Some examples include:
 
 - **Primitive Families**:
@@ -86,13 +82,10 @@ _essential_ for defining how data is **stored**, **validated**, and
 
 - **Structures**:
   - **Scalar**: _A single value (e.g., `Text`, `Number`, `Boolean`, `Binary`)._
-  - **Enum**: _A scalar with a fixed set of allowed values (e.g., `Enum<Text>`
-    or `Enum<Number>`)._
-  - **Object / Record**: _A structured collection of fields (e.g.,
-    `Object{ field: T, ... }`)._
+  - **Enum**: _A scalar with a fixed set of allowed values (e.g., `Enum<Text>` or `Enum<Number>`)._
+  - **Object / Record**: _A structured collection of fields (e.g., `Object{ field: T, ... }`)._
   - **List / Sequence**: _An ordered collection of items (e.g., `List<T>`)._
-  - **Tuple (fixed)**: _A fixed-length collection of items (e.g.,
-    `Tuple<T1, T2, ...>`)._
+  - **Tuple (fixed)**: _A fixed-length collection of items (e.g., `Tuple<T1, T2, ...>`)._
   - **Map / Dictionary**: _A key-value lookup structure (e.g., `Map<Text, T>`)._
 
 #### Examples
@@ -109,11 +102,10 @@ _essential_ for defining how data is **stored**, **validated**, and
 
 > **_“How should someone input or read this?”_**
 
-A **User Interface (UI) Type** describes how the value is **presented** to a
-human user and guides their behavior. It focuses on the **experience** of
-interacting with the data, rather than how it is stored or structured. It
-defines **affordances**—design features that use **visual or interactive cues**
-to help users understand how to engage with an element. For example:
+A **User Interface (UI) Type** describes how the value is **presented** to a human user and guides
+their behavior. It focuses on the **experience** of interacting with the data, rather than how it is
+stored or structured. It defines **affordances**—design features that use **visual or interactive
+cues** to help users understand how to engage with an element. For example:
 
 - A **button** suggests it can be clicked.
 - A **slider** suggests it can be dragged to adjust a value.
@@ -147,9 +139,8 @@ to help users understand how to engage with an element. For example:
 
 ### Type Constraints Reference
 
-> **Warning** : _This list of constraints is not exhaustive and serves as a
-> general reference. Always validate against your system's requirements and data
-> models._
+> **Warning** : _This list of constraints is not exhaustive and serves as a general reference.
+> Always validate against your system's requirements and data models._
 
 - **Text (string):**
   - `minLength`: Minimum length of the string.
@@ -173,15 +164,12 @@ to help users understand how to engage with an element. For example:
   - `notInPast`: Date must not be in the past.
 
 - **Lists** `T[]`
-  - `minItems` / `maxItems`: Minimum and maximum number of items allowed in the
-    list.
+  - `minItems` / `maxItems`: Minimum and maximum number of items allowed in the list.
   - `uniqueItems`: Ensures all items in the list are unique.
-  - `itemPattern` / `itemConstraints`: Constraints applied to each item in the
-    list.
+  - `itemPattern` / `itemConstraints`: Constraints applied to each item in the list.
 
 - **Objects** `{...}`
-  - `noExtraKeys`: Ensures the object does not have keys outside the defined
-    schema.
+  - `noExtraKeys`: Ensures the object does not have keys outside the defined schema.
   - `requiredKeys`: Specifies keys that must be present in the object.
 
 - **Maps** `Record<string, T>`

@@ -4,8 +4,7 @@
 ![License: MIT](https://img.shields.io/npm/l/@snailicid3/build-config)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
-_Provides reusable build configurations and adapters for tsdown, vite, vitest,
-and typedoc._
+_Provides reusable build configurations and adapters for tsdown, vite, vitest, and typedoc._
 
 ---
 
@@ -37,10 +36,10 @@ and typedoc._
 
 ---
 
-This package provides a tool-agnostic build planning system with adapter
-implementations for tsdown, vite, esbuild, rollup, and tsc. It defines a
-`BuildPlan` abstraction so package build identity (runtime, product, build
-strategy) is declared once in `package.json` and consumed by all build configs.
+This package provides a tool-agnostic build planning system with adapter implementations for tsdown,
+vite, esbuild, rollup, and tsc. It defines a `BuildPlan` abstraction so package build identity
+(runtime, product, build strategy) is declared once in `package.json` and consumed by all build
+configs.
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full design specification.
 
@@ -48,26 +47,22 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full design specification.
 
 #### Build Adapters
 
-- [**tsdown**](https://tsdown.dev/) • _Primary bundler for TypeScript libraries
-  (ESM + CJS)_
+- [**tsdown**](https://tsdown.dev/) • _Primary bundler for TypeScript libraries (ESM + CJS)_
 - [**vite**](https://vitejs.dev/) • _Web app and browser library bundler_
 - [**esbuild**](https://esbuild.github.io/) • _Single-file script bundler_
-- [**rollup**](https://rollupjs.org/) • _Available as an adapter for
-  multi-format builds_
+- [**rollup**](https://rollupjs.org/) • _Available as an adapter for multi-format builds_
 - [**tsc**](https://www.typescriptlang.org/) • _Transpile-only adapter_
 
 #### Vitest Configuration
 
-- [**vitest**](https://vitest.dev/) • _Shared vitest configuration with
-  coverage_
+- [**vitest**](https://vitest.dev/) • _Shared vitest configuration with coverage_
 
 #### TypeDoc Configuration
 
 - [**typedoc**](https://typedoc.org/) • _Documentation generator for TypeScript_
-- [**typedoc-plugin-markdown**](https://typedoc-plugin-markdown.org/) •
-  _Generate docs as markdown_
-- [**typedoc-material-theme**](https://github.com/nicholasgasior/typedoc-material-theme)
-  • _Material theme for TypeDoc_
+- [**typedoc-plugin-markdown**](https://typedoc-plugin-markdown.org/) • _Generate docs as markdown_
+- [**typedoc-material-theme**](https://github.com/nicholasgasior/typedoc-material-theme) • _Material
+  theme for TypeDoc_
 
 ## Installation
 

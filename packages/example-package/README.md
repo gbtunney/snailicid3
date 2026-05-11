@@ -22,9 +22,9 @@
 
 ---
 
-This is an example/template package demonstrating the canonical structure for a
-new snailicid3 monorepo package. It shows the standard tsdown config, tsconfig,
-package.json layout, and vitest test setup.
+This is an example/template package demonstrating the canonical structure for a new snailicid3
+monorepo package. It shows the standard tsdown config, tsconfig, package.json layout, and vitest
+test setup.
 
 ### Structure
 

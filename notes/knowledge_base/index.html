@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>DX-Developer Experience Info</title>
+        <style>
+            /* Basic styles for readability */
+            body {
+                font-family: sans-serif;
+                max-width: 800px;
+                margin: 2em auto;
+                padding: 0 1em;
+                line-height: 1.6;
+            }
+            img {
+                max-width: 100%;
+                height: auto;
+            }
+            pre {
+                background-color: #f4f4f4;
+                padding: 1em;
+                overflow-x: auto;
+            }
+            code {
+                font-family: monospace;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>DX Developer Experience Info</h1>
+        <h2>Concise Checklist</h2>
+        <p>
+            Use this to judge <strong>any dev library in ~5 minutes</strong>.
+            Translation:
+            <em>“Would Future‑Me curse Present‑Me for choosing this?”</em>
+        </p>
+        <hr />
+        <h3>1. Type Safety</h3>
+        <ul>
+            <li>
+                ❓ Do types come <strong>from the library</strong>, or do I have
+                to bolt them on?
+            </li>
+            <li>❓ Does autocomplete <em>actually</em> reflect reality?</li>
+            <li>❓ Do types get worse as the project grows?</li>
+        </ul>
+        <p>
+            <strong>Green flag:</strong> end‑to‑end types, few
+            <code>any</code>s<br />
+            <strong>Red flag:</strong> docs say “TypeScript supported” but
+            examples are JS
+        </p>
+        <hr />
+        <h3>2. Error Messages</h3>
+        <p>When something breaks, does the error:</p>
+        <ul>
+            <li>tell me <strong>what</strong> broke?</li>
+            <li>tell me <strong>where</strong>?</li>
+            <li>suggest <strong>how to fix it</strong>?</li>
+        </ul>
+        <p>
+            <strong>Green flag:</strong> actionable, human‑readable errors<br />
+            <strong>Red flag:</strong> stack traces into internals you didn’t
+            write
+        </p>
+        <hr />
+        <h3>3. Common Tasks Are Easy</h3>
+        <p>Ask: <em>what will I do 90% of the time?</em></p>
+        <ul>
+            <li>create / update / delete data</li>
+            <li>rename a field</li>
+            <li>run migrations</li>
+            <li>add a new environment</li>
+            <li>reset local state</li>
+        </ul>
+        <p>
+            <strong>Green flag:</strong> 1–2 commands or obvious APIs<br />
+            <strong>Red flag:</strong> wiki pages + cargo‑cult incantations
+        </p>
+        <hr />
+        <h3>4. Escape Hatches Exist</h3>
+        <p>No abstraction survives reality.</p>
+        <ul>
+            <li>❓ Can I drop down a level when I need to?</li>
+            <li>❓ Can I write raw SQL / custom logic / bypass magic?</li>
+        </ul>
+        <p>
+            <strong>Green flag:</strong> explicit, documented escape hatches<br />
+            <strong>Red flag:</strong> “you’re not supposed to do that”
+        </p>
+        <hr />
+        <h3>5. Refactors Are Safe</h3>
+        <ul>
+            <li>
+                ❓ If I rename a field, does TypeScript help me fix
+                <em>all</em> usages?
+            </li>
+            <li>❓ Can I trust my editor + compiler?</li>
+        </ul>
+        <p>
+            <strong>Green flag:</strong> compiler‑driven refactors<br />
+            <strong>Red flag:</strong> “hope you caught all of those”
+        </p>
+        <hr />
+        <h3>6. Tooling &amp; Workflow Fit</h3>
+        <ul>
+            <li>
+                ❓ Does it fight my stack?
+                <ul>
+                    <li>Node vs Bun vs Deno</li>
+                    <li>ESM vs CJS</li>
+                    <li>monorepo support</li>
+                </ul>
+            </li>
+            <li>
+                ❓ Does it require global installs or weird runtime assumptions?
+            </li>
+        </ul>
+        <p>
+            <strong>Green flag:</strong> works <em>with</em> your tools<br />
+            <strong>Red flag:</strong> “just install this daemon and patch Node”
+        </p>
+        <hr />
+        <h3>7. Docs &amp; Examples</h3>
+        <p>Are examples:</p>
+        <ul>
+            <li>current?</li>
+            <li>idiomatic?</li>
+            <li>actually copy‑pasteable?</li>
+        </ul>
+        <p>
+            <strong>Green flag:</strong> docs match latest release<br />
+            <strong>Red flag:</strong> blog posts from 2019
+        </p>
+        <hr />
+        <h3>8. Community Signal</h3>
+        <p>You don’t need hype — you need signal.</p>
+        <ul>
+            <li>❓ Are issues responded to?</li>
+            <li>❓ Is the project actively maintained?</li>
+            <li>❓ Are people using it in production <em>now</em>?</li>
+        </ul>
+        <p>
+            <strong>Green flag:</strong> steady commits, sane discussions<br />
+            <strong>Red flag:</strong> abandoned PRs, “use fork X”
+        </p>
+        <hr />
+        <h2>9. Mental Overhead</h2>
+        <ul>
+            <li>❓ How many concepts must I learn before being productive?</li>
+            <li>❓ Does it feel “obvious” after a day or two?</li>
+        </ul>
+        <p>
+            <strong>Green flag:</strong> small, composable ideas<br />
+            <strong>Red flag:</strong> framework‑specific vocabulary explosion
+        </p>
+        <hr />
+        <h2>10. Future‑You Test</h2>
+        <p>Ask honestly:</p>
+        <blockquote>
+            <p>
+                <em
+                    >“If I open this repo in 6 months… will I understand what’s
+                    going on?”</em
+                >
+            </p>
+        </blockquote>
+        <p>
+            <strong>Green flag:</strong> boring, explicit, predictable<br />
+            <strong>Red flag:</strong> clever magic with no paper trail
+        </p>
+        <hr />
+        <h2>Applying This to ORMs (Example)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tool</th>
+                    <th>DX Summary</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Prisma</td>
+                    <td>
+                        Excellent DX, strong types, great migrations, some
+                        abstraction cost
+                    </td>
+                </tr>
+                <tr>
+                    <td>Drizzle</td>
+                    <td>Very good DX, SQL‑adjacent, lighter mental model</td>
+                </tr>
+                <tr>
+                    <td>Kysely</td>
+                    <td>Amazing DX if you like SQL, minimal magic</td>
+                </tr>
+                <tr>
+                    <td>TypeORM</td>
+                    <td>Heavy abstraction, mixed DX</td>
+                </tr>
+                <tr>
+                    <td>Sequelize</td>
+                    <td>Stable but aging DX</td>
+                </tr>
+            </tbody>
+        </table>
+        <hr />
+        <h2>One‑Liner Rule of Thumb</h2>
+        <ul>
+            <li>
+                <strong
+                    >If the tool disappears while you’re working → good
+                    DX</strong
+                >
+            </li>
+            <li>
+                <strong
+                    >If you’re constantly thinking about the tool → bad
+                    DX</strong
+                >
+            </li>
+        </ul>
+        <hr />
+        <h2>Want This Applied to <em>Your</em> Stack?</h2>
+        <p>Reply with:</p>
+        <ul>
+            <li><strong>Stack</strong> (Node / Next / Bun / etc.)</li>
+            <li><strong>Runtime</strong> (server, serverless, edge)</li>
+            <li><strong>Repo shape</strong> (monorepo? pnpm?)</li>
+            <li><strong>Project lifespan</strong> (prototype vs years)</li>
+            <li><strong>Team</strong> (solo vs collaborators)</li>
+            <li>
+                <strong>How SQL‑y it’ll get</strong> (CRUD vs gnarly queries)
+            </li>
+        </ul>
+        <p>I’ll score libraries for your setup and pick a default.</p>
+        <p>[[deep-research-report]]</p>
+    </body>
+</html>

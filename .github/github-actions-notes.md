@@ -20,8 +20,7 @@ That version PR
 
 - → pr-changesets-version CI runs
 - → build + test + docs:build + require_clean_repo
-- → if docs:build generated new/changed files → repo is dirty → CI FAILS ←
-  intentional
+- → if docs:build generated new/changed files → repo is dirty → CI FAILS ← intentional
 
 ### You run dispatch-build-docs on the changesets/... branch
 
@@ -39,12 +38,11 @@ That version PR
 
 1. Feature PRs into `main` run the normal required CI gate.
 2. PRs from `release/**` into `main` run a stricter release-candidate gate.
-3. PRs from `changesets/**` into `main` run the version-package gate and must
-   prove docs were rebuilt after version bump.
-4. Pushes to `main` run the release orchestration. This can either open/update
-   the Changesets version PR or publish if the version PR was merged.
-5. Tags should be produced only by the publish/release job, not by PR validation
-   jobs.
+3. PRs from `changesets/**` into `main` run the version-package gate and must prove docs were
+   rebuilt after version bump.
+4. Pushes to `main` run the release orchestration. This can either open/update the Changesets
+   version PR or publish if the version PR was merged.
+5. Tags should be produced only by the publish/release job, not by PR validation jobs.
 
 ## Required branch protection checks for `main`
 

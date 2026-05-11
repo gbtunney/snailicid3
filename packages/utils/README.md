@@ -14,11 +14,9 @@ _String, numeric, object, date, and formatting utility functions._
 
 ### Repository
 
-- **Github:**
-  [`@snailicid3/utils`](https://github.com/gbtunney/snailicid3/tree/main/packages/utils)
+- **Github:** [`@snailicid3/utils`](https://github.com/gbtunney/snailicid3/tree/main/packages/utils)
   • [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
-- **CDN**:
-  [jsdeliver](https://cdn.jsdelivr.net/npm/@snailicid3/utils/dist/index.min.js)
+- **CDN**: [jsdeliver](https://cdn.jsdelivr.net/npm/@snailicid3/utils/dist/index.min.js)
 
 ### Author
 
@@ -35,14 +33,13 @@ _String, numeric, object, date, and formatting utility functions._
 
 ---
 
-This package provides a wide range of general-purpose utility functions for
-string manipulation, numeric operations, object transformations, date
-formatting, and pretty-printing. It runs in any JavaScript environment.
+This package provides a wide range of general-purpose utility functions for string manipulation,
+numeric operations, object transformations, date formatting, and pretty-printing. It runs in any
+JavaScript environment.
 
 ### `@snailicid3/utils` _contains:_
 
-- **String utilities** — case conversion, truncation, template formatting with
-  `sprintf`
+- **String utilities** — case conversion, truncation, template formatting with `sprintf`
 - **Numeric utilities** — range mapping, rounding, parsing, step ranges
 - **Object utilities** — deep merge, flatten, pick, omit
 - **Date utilities** — formatting and parsing via `dayjs`

@@ -1,15 +1,13 @@
 ---
 description:
-  'Best practices and actions for managing .gitignore in this workspace. Use
-  `/gitignore` to trigger.'
+  'Best practices and actions for managing .gitignore in this workspace. Use `/gitignore` to
+  trigger.'
 ---
 
 # .gitignore Management
 
-- Review and update `.gitignore` to exclude logs, build artifacts, and sensitive
-  files.
-- Use language- and tool-specific templates from
-  <https://github.com/github/gitignore> as a base.
+- Review and update `.gitignore` to exclude logs, build artifacts, and sensitive files.
+- Use language- and tool-specific templates from <https://github.com/github/gitignore> as a base.
 - To add a new ignore rule, append it to `.gitignore` and commit the change.
 - To check if a file is ignored:
 
