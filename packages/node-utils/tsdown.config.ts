@@ -7,7 +7,10 @@ const plan = defineBuildPlan(pkg, {
         {
             banner: true,
             key: '*',
+            lint: true,
             output_formats: ['esm', 'cjs', 'ts'],
+            runtime: 'node',
+            transpile: ['es2020'],
         },
     ],
     root: {
