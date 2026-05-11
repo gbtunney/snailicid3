@@ -14,7 +14,7 @@ const BASE_IGNORES = [
     '**/.changeset/**',
     '**/docs/**',
     '**/scratch/**',
-    // '**/{.changeset,docs,.history,scratch}/**',
+    '**/.github/instructions/nx.instructions.md',
 ]
 
 export const markdownlint = {

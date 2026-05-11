@@ -203,3 +203,4 @@ export const getBaseConfig = (): MarkdownlintRuleConfiguration => {
     }
     return baseConfig
 }
+export default getBaseConfig
