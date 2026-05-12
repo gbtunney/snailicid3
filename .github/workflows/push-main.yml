@@ -1,6 +1,6 @@
 # Runs on every push to `main`. This answers: “is main busted after merge?”
 # Run CI on main branch. This is the final check before we merge to main, so it should be as strict as possible. If this fails, we should not merge to main.
-name: CI Main
+name: Push Main
 on:
     push:
         branches:
