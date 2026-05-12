@@ -6,7 +6,7 @@
 
     "files.associations": {
         "*.yaml": "home-assistant",
-         "**/api-extractor.json": "jsonc"
+        "**/api-extractor.json": "jsonc"
     },
     "files.watcherExclude": {
         "**/.git/**": true,
