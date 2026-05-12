@@ -12,7 +12,7 @@ import { safetyRules } from './rules/safety.js'
 import { testingRules } from './rules/testing.js'
 import { typescriptRules } from './rules/typescript.js'
 import { expandExtensions } from '../helpers.js'
-import { TS_FILE_EXTENSIONS } from '../shared.js'
+import { JS_FILE_EXTENSIONS, TS_FILE_EXTENSIONS } from '../shared.js'
 
 const base_files: Array<string> = [
     ...expandExtensions(TS_FILE_EXTENSIONS, '*.'),
@@ -23,8 +23,6 @@ const base_ignores = [
     '**/dist/**',
     '**/docs/**',
     '**/coverage/**',
-    '**/types/**/*.d.ts',
-    '**/types/**/*.d.ts.map',
     '**/.history/**',
     '**/scratch/**',
     '**/.venv/**',
@@ -34,6 +32,7 @@ const base_ignores = [
     '**/*.d.*',
     '**/*.map',
     '**/storybook-static/**',
+    ...expandExtensions(JS_FILE_EXTENSIONS, '**/types/**/*.'),
 ]
 
 export const flatEslintConfig = (__dirname: string): Array<Config> => {

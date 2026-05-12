@@ -20,10 +20,7 @@ jobs:
     required:
         name: required
         if: >-
-            ${{
-              !startsWith(github.head_ref, 'release/') &&
-              !startsWith(github.head_ref, 'changesets/')
-            }}
+            !startsWith(github.head_ref, 'release/') && !startsWith(github.head_ref, 'changesets/')
 
 
         uses: ./.github/workflows/pipeline.yml

@@ -8,7 +8,7 @@
 # - Workspace artifact upload is optional and uploads from filesystem globs (does not respect .gitignore).
 # ─────────────────────────────────────────────────────────────
 
-name: Pipeline
+name: Pipeline 🚰
 
 on:
     workflow_call:
@@ -132,7 +132,7 @@ env:
 jobs:
     pipeline:
         runs-on: ubuntu-latest
-        name: node-${{ inputs.node_version }}
+        name: pipeline
         outputs:
             is_repo_dirty: ${{ steps.repo_dirty.outputs.is_repo_dirty }}
             workspace_artifact_name: ${{ steps.artifact_name.outputs.name }}

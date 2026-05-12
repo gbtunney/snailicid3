@@ -18,7 +18,8 @@
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
         "docs:nx": "nx run $npm_package_name:docs:build",
-        "docs:serve:nx": "nx run $npm_package_name:docs:serve"
+        "docs:serve:nx": "nx run $npm_package_name:docs:serve",
+        "api:report:nx": "nx run $npm_package_name:api:report"
     },
     "buildConfig": {
         "runtime": "universal",
@@ -38,6 +39,8 @@
                     "build:tsdown"
                 ]
             },
+            "api:report": {},
+            "api:check": {},
             "check:ts": {},
             "test": {},
             "test:nx": {},
@@ -98,6 +101,7 @@
         "zod": "^4.3.6"
     },
     "devDependencies": {
+        "@microsoft/api-extractor": "^7.58.7",
         "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
         "@types/node": "^25.6.1",

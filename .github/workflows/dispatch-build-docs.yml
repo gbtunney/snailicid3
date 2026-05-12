@@ -1,4 +1,4 @@
-name: Build Docs & Commit
+name: Dispatch Docs & Commit
 
 # ─────────────────────────────────────────────────────────────
 # Manually triggered workflow for building docs and committing changes
