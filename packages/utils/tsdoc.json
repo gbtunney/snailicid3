@@ -1,0 +1,36 @@
+{
+    "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
+
+    "tagDefinitions": [
+        {
+            "tagName": "@category",
+            "syntaxKind": "block"
+        },
+        {
+            "tagName": "@group",
+            "syntaxKind": "block"
+        },
+        {
+            "tagName": "@namespace",
+            "syntaxKind": "block"
+        },
+        {
+            "tagName": "@todo",
+            "syntaxKind": "block"
+        }
+    ],
+    "supportForTags": {
+        "@category": true,
+        "@group": true,
+        "@namespace": true,
+        "@todo": true,
+
+        "@public": true,
+        "@alpha": true,
+        "@beta": true,
+        "@internal": true,
+        "@remarks": true,
+        "@example": true,
+        "@defaultValue": true
+    }
+}
