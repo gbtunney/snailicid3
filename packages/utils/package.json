@@ -104,7 +104,7 @@
         "@microsoft/api-extractor": "^7.58.7",
         "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
-        "@types/node": "^25.6.1",
+        "@types/node": "^25.7.0",
         "tsdown": "^0.22.0",
         "typedoc": "^0.28.19",
         "typescript": "^6.0.2",
