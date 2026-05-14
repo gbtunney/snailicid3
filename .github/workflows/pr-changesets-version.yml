@@ -29,6 +29,7 @@ jobs:
               needs.detect.outputs.is_release_pr != 'true' &&
               needs.detect.outputs.has_added_or_modified_changeset == 'true' }}
 
+
         uses: ./.github/workflows/call-pipeline.yml
         with:
             mode: abort_on_error
