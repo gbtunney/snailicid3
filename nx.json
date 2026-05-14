@@ -177,25 +177,24 @@
                 "cwd": "{projectRoot}"
             }
         },
-        
-"api:report": {
-  "dependsOn": ["build"],
-  "cache": true,
-  "outputs": ["{projectRoot}/etc/*.api.md"],
-  "command": "api-extractor run --local",
-  "options": {
-    "cwd": "{projectRoot}"
-}
-},
-"api:check": {
-  "dependsOn": ["build"],
-  "cache": true,
-  "command": "api-extractor run",
-  "options": {
-    "cwd": "{projectRoot}"
-}
-}
 
+        "api:report": {
+            "dependsOn": ["build"],
+            "cache": true,
+            "outputs": ["{projectRoot}/etc/*.api.md"],
+            "command": "api-extractor run --local",
+            "options": {
+                "cwd": "{projectRoot}"
+            }
+        },
+        "api:check": {
+            "dependsOn": ["build"],
+            "cache": true,
+            "command": "api-extractor run",
+            "options": {
+                "cwd": "{projectRoot}"
+            }
+        }
     },
     "analytics": true,
     "nxCloudId": "69ef26f2453df8557a7462c5"
