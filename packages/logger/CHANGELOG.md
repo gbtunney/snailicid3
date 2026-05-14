@@ -1,5 +1,13 @@
 # @snailicid3/logger
 
+## 0.0.3
+
+### Patch Changes
+
+- Updated dependencies [a5558d2]
+  - @snailicid3/utils@0.0.3
+  - @snailicid3/color@0.0.3
+
 ## 0.0.2
 
 ### Patch Changes
