@@ -10,7 +10,7 @@ on:
             - main
 
 concurrency:
-    group: pr-main-${{ github.event.pull_request.number }}
+    group: ppr-main-${{ github.event.pull_request.number }}
     cancel-in-progress: true
 
 permissions:
@@ -30,6 +30,7 @@ jobs:
             ${{
               needs.detect.outputs.is_release_pr != 'true' &&
               needs.detect.outputs.has_added_or_modified_changeset != 'true' }}
+
 
         uses: ./.github/workflows/call-pipeline.yml
         with:
