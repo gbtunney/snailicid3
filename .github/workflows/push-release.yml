@@ -1,6 +1,6 @@
 # Runs only after merge to `main`. Phase 1: creates/updates a version PR (release/main → main)
 # with a scoped commit message. Phase 2: publishes to npm after the version PR merges.
-name: Release
+name: Push Release
 
 on:
     push:
@@ -21,7 +21,68 @@ env:
     NPM_CONFIG_PROVENANCE: true
 
 jobs:
+    detect:
+        name: detect release phase
+        runs-on: ubuntu-latest
+
+        outputs:
+            has_pending_changesets: ${{ steps.release_phase.outputs.has_pending_changesets }}
+            is_version_packages_commit: ${{ steps.release_phase.outputs.is_version_packages_commit }}
+            should_version: ${{ steps.release_phase.outputs.should_version }}
+            should_publish: ${{ steps.release_phase.outputs.should_publish }}
+            should_skip: ${{ steps.release_phase.outputs.should_skip }}
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 2
+
+            - name: Detect release phase
+              id: release_phase
+              shell: bash
+              run: |
+                  changeset_count="$(find .changeset -name "*.md" ! -name "README.md" | wc -l | tr -d ' ')"
+
+                  has_pending_changesets=false
+                  if [ "$changeset_count" -gt 0 ]; then
+                    has_pending_changesets=true
+                  fi
+
+                  is_version_packages_commit=false
+                  if [[ "${{ github.event.head_commit.message }}" == *": version packages"* ]]; then
+                    is_version_packages_commit=true
+                  fi
+
+                  should_version=false
+                  should_publish=false
+                  should_skip=false
+
+                  if [[ "$has_pending_changesets" == "true" ]]; then
+                    should_version=true
+                  elif [[ "$is_version_packages_commit" == "true" ]]; then
+                    should_publish=true
+                  else
+                    should_skip=true
+                  fi
+
+                  {
+                    echo "changeset_count=$changeset_count"
+                    echo "has_pending_changesets=$has_pending_changesets"
+                    echo "is_version_packages_commit=$is_version_packages_commit"
+                    echo "should_version=$should_version"
+                    echo "should_publish=$should_publish"
+                    echo "should_skip=$should_skip"
+                  } >> "$GITHUB_OUTPUT"
+
     pipeline:
+        needs: detect
+        if: >-
+            ${{
+              needs.detect.outputs.should_version == 'true' ||
+              needs.detect.outputs.should_publish == 'true'
+            }}
+
+
         uses: ./.github/workflows/pipeline.yml
         with:
             mode: abort_on_error
@@ -37,7 +98,15 @@ jobs:
     release:
         name: release
         runs-on: ubuntu-latest
-        needs: pipeline
+        needs:
+            - detect
+            - pipeline
+        if: >-
+            ${{
+              needs.detect.outputs.should_version == 'true' ||
+              needs.detect.outputs.should_publish == 'true'
+            }}
+
 
         steps:
             - name: Checkout repository
@@ -74,25 +143,15 @@ jobs:
                     --exclude='.git/' \
                     "${{ runner.temp }}/built-output"/ "$GITHUB_WORKSPACE"/
 
-            # Count pending .changeset/*.md files (excludes README.md)
-            - name: Check for pending changesets
-              id: has_changesets
-              shell: bash
-              run: |
-                  count=$(find .changeset -name "*.md" ! -name "README.md" | wc -l)
-                  echo "count=$count" >> "$GITHUB_OUTPUT"
-                  echo "has=$( [ "$count" -gt 0 ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
-                  echo "Pending changesets: $count"
-
             # ── Phase 1 — version PR ──────────────────────────────────────
             # Bump versions, compute scoped commit message, push to release/main, create/update PR.
             - name: Version packages
-              if: steps.has_changesets.outputs.has == 'true'
+              if: needs.detect.outputs.should_version == 'true'
               run: pnpm changeset version
 
             - name: Stage and compute scoped commit message
               id: version_msg
-              if: steps.has_changesets.outputs.has == 'true'
+              if: needs.detect.outputs.should_version == 'true'
               shell: bash
               run: |
                   git add -A
@@ -102,7 +161,7 @@ jobs:
                   echo "Commit message: $MSG"
 
             - name: Commit version changes
-              if: steps.has_changesets.outputs.has == 'true'
+              if: needs.detect.outputs.should_version == 'true'
               shell: bash
               run: |
                   git config user.name  "github-actions[bot]"
@@ -117,11 +176,11 @@ jobs:
                   git commit -m "${{ steps.version_msg.outputs.message }}"
 
             - name: Push to release/main branch
-              if: steps.has_changesets.outputs.has == 'true'
+              if: needs.detect.outputs.should_version == 'true'
               run: git push origin HEAD:refs/heads/release/main --force
 
             - name: Create or update version PR
-              if: steps.has_changesets.outputs.has == 'true'
+              if: needs.detect.outputs.should_version == 'true'
               shell: bash
               run: |
                   TITLE="${{ steps.version_msg.outputs.message }}"
@@ -139,9 +198,7 @@ jobs:
             # ── Phase 2 — publish ─────────────────────────────────────────
             # Publishes only when: no pending changesets AND the triggering commit is a version bump.
             - name: Publish packages and create GitHub releases
-              if: |
-                  steps.has_changesets.outputs.has == 'false' &&
-                  contains(github.event.head_commit.message, ': version packages')
+              if: needs.detect.outputs.should_publish == 'true'
               uses: changesets/action@v1
               with:
                   publish: pnpm changeset publish

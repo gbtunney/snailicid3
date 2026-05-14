@@ -18,7 +18,7 @@ env:
 
 jobs:
     required:
-        name: required
+        name: required-main
         if: >-
             !startsWith(github.head_ref, 'release/') && !startsWith(github.head_ref, 'changesets/')
 

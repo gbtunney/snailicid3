@@ -19,7 +19,7 @@ env:
 
 jobs:
     required:
-        name: required
+        name: required-changeset-version
         if: ${{ startsWith(github.head_ref, 'changesets/') }}
         uses: ./.github/workflows/pipeline.yml
         with:
