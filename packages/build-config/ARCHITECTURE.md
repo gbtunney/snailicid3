@@ -1,6 +1,6 @@
 # @snailicid3/build-config — Architecture
 
-> **Status: Partially Implemented (Current + Target).**
+> **Status: Partially Implemented (Current & Target).**
 >
 > The adapter-based core in `src/build/` and `src/adapters/` is implemented and used now.
 >

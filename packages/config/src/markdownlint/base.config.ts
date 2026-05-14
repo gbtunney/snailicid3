@@ -158,7 +158,7 @@ export const getBaseConfig = (): MarkdownlintRuleConfiguration => {
         MD045: true,
 
         // MD046 code-block-style
-        MD046: { style: 'consistent' },
+        MD046: { style: 'fenced' },
 
         // MD047 single-trailing-newline
         MD047: true,
