@@ -155,8 +155,8 @@ jobs:
               shell: bash
               run: |
                   git add -A
-                  MSG="$(pnpm exec scope-commit --staged --message chore "version packages" \
-                          2>/dev/null || echo "chore(release): version packages")"
+                  MSG="$(pnpm exec scope-commit --staged --message release "version packages" \
+                          2>/dev/null || echo "release(root): version packages")"
                   echo "message=$MSG" >> "$GITHUB_OUTPUT"
                   echo "Commit message: $MSG"
 
