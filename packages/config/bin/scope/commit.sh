@@ -170,7 +170,7 @@ EOF
             git add -A || return 1
         fi
 
-        pnpm exec lint-staged --relative || return 1
+        pnpm exec lint-staged --debug --relative || return 1
     }
 
     read_package_name() {
