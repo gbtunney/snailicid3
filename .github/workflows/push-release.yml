@@ -27,7 +27,7 @@ jobs:
 
         outputs:
             has_pending_changesets: ${{ steps.release_phase.outputs.has_pending_changesets }}
-            is_version_packages_commit: ${{ steps.release_phase.outputs.is_version_packages_commit }}
+            is_version_packages_diff: ${{ steps.release_phase.outputs.is_version_packages_diff }}
             should_version: ${{ steps.release_phase.outputs.should_version }}
             should_publish: ${{ steps.release_phase.outputs.should_publish }}
             should_skip: ${{ steps.release_phase.outputs.should_skip }}
@@ -48,9 +48,30 @@ jobs:
                     has_pending_changesets=true
                   fi
 
-                  is_version_packages_commit=false
-                  if [[ "${{ github.event.head_commit.message }}" == *": version packages"* ]]; then
-                    is_version_packages_commit=true
+                  STATUS="$(git diff --name-status HEAD^ HEAD)"
+
+                  has_deleted_changeset=false
+                  has_package_changes=false
+                  has_changelog_changes=false
+                  is_version_packages_diff=false
+
+                  if echo "$STATUS" | grep -qE '^D[[:space:]]+\.changeset/[^/]+\.md$'; then
+                    has_deleted_changeset=true
+                  fi
+
+                  if echo "$STATUS" | grep -qE '^[AM][[:space:]]+(.*/)?package\.json$'; then
+                    has_package_changes=true
+                  fi
+
+                  if echo "$STATUS" | grep -qE '^[AM][[:space:]]+(.*/)?CHANGELOG\.md$'; then
+                    has_changelog_changes=true
+                  fi
+
+                  if [[ "$has_pending_changesets" != "true" ]] &&
+                     [[ "$has_deleted_changeset" == "true" ]] &&
+                     [[ "$has_package_changes" == "true" ]] &&
+                     [[ "$has_changelog_changes" == "true" ]]; then
+                    is_version_packages_diff=true
                   fi
 
                   should_version=false
@@ -59,7 +80,7 @@ jobs:
 
                   if [[ "$has_pending_changesets" == "true" ]]; then
                     should_version=true
-                  elif [[ "$is_version_packages_commit" == "true" ]]; then
+                  elif [[ "$is_version_packages_diff" == "true" ]]; then
                     should_publish=true
                   else
                     should_skip=true
@@ -68,7 +89,10 @@ jobs:
                   {
                     echo "changeset_count=$changeset_count"
                     echo "has_pending_changesets=$has_pending_changesets"
-                    echo "is_version_packages_commit=$is_version_packages_commit"
+                    echo "has_deleted_changeset=$has_deleted_changeset"
+                    echo "has_package_changes=$has_package_changes"
+                    echo "has_changelog_changes=$has_changelog_changes"
+                    echo "is_version_packages_diff=$is_version_packages_diff"
                     echo "should_version=$should_version"
                     echo "should_publish=$should_publish"
                     echo "should_skip=$should_skip"
