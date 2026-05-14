@@ -18,7 +18,7 @@ env:
 
 jobs:
     required:
-        name: required
+        name: required-pr-release
         if: ${{ startsWith(github.head_ref, 'release/') }}
         uses: ./.github/workflows/pipeline.yml
         with:

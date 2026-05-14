@@ -1,6 +1,6 @@
 # Runs only after merge to `main`. Phase 1: creates/updates a version PR (release/main → main)
 # with a scoped commit message. Phase 2: publishes to npm after the version PR merges.
-name: Release
+name: Push Release
 
 on:
     push:
@@ -81,6 +81,8 @@ jobs:
               needs.detect.outputs.should_version == 'true' ||
               needs.detect.outputs.should_publish == 'true'
             }}
+
+
         uses: ./.github/workflows/pipeline.yml
         with:
             mode: abort_on_error
@@ -104,6 +106,7 @@ jobs:
               needs.detect.outputs.should_version == 'true' ||
               needs.detect.outputs.should_publish == 'true'
             }}
+
 
         steps:
             - name: Checkout repository

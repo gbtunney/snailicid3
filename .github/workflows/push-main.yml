@@ -7,7 +7,7 @@ on:
             - main
 
 concurrency:
-    group: ci-main-${{ github.ref }}
+    group: push-main-${{ github.ref }}
     cancel-in-progress: false
 
 permissions:
