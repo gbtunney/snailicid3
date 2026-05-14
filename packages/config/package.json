@@ -1,6 +1,6 @@
 {
     "name": "@snailicid3/config",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "private": false,
     "description": "Shared linting, formatting, and TypeScript config utilities for the snailicid3 monorepo",
     "keywords": [

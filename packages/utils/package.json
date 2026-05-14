@@ -1,6 +1,6 @@
 {
     "name": "@snailicid3/utils",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "private": false,
     "description": "String, numeric, object, date and fmt utilities",
     "keywords": [

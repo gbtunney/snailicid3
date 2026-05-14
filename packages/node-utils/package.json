@@ -1,6 +1,6 @@
 {
     "name": "@snailicid3/node-utils",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "private": false,
     "description": "Node.js filesystem, path and package.json utilities",
     "keywords": [
