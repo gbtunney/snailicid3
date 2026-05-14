@@ -123,7 +123,7 @@ Examples:
   pnpm exec scope-commit --commit --dry-run chore autofix
   pnpm exec scope-commit --commit chore autofix
   pnpm exec scope-commit --checked-commit chore autofix
-  pnpm exec scope-commit .github/workflows/pipeline.yml
+  pnpm exec scope-commit .github/workflows/call-pipeline.yml
 EOF
                 return 0
                 ;;

@@ -83,7 +83,7 @@ jobs:
             }}
 
 
-        uses: ./.github/workflows/pipeline.yml
+        uses: ./.github/workflows/call-pipeline.yml
         with:
             mode: abort_on_error
             check_mode: check

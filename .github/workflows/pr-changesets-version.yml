@@ -1,5 +1,5 @@
-# Blocks `changesets/**` PRs into `main` until docs are rebuilt and committed. This assumes docs generation changes tracked files.
-
+# Blocks PRs into `main` that add or modify .changeset/*.md.
+# This is the release-intent gate: prove build/test/docs are clean before versioning.
 name: PR Changesets Version
 
 on:
@@ -18,10 +18,18 @@ env:
     HUSKY: 0
 
 jobs:
+    detect:
+        uses: ./.github/workflows/call-detect-pr-kind.yml
+
     required:
-        name: required-changeset-version
-        if: ${{ startsWith(github.head_ref, 'changesets/') }}
-        uses: ./.github/workflows/pipeline.yml
+        name: pr-changesets-version / required
+        needs: detect
+        if: >-
+            ${{
+              needs.detect.outputs.is_release_pr != 'true' &&
+              needs.detect.outputs.has_added_or_modified_changeset == 'true' }}
+
+        uses: ./.github/workflows/call-pipeline.yml
         with:
             mode: abort_on_error
             check_mode: check
