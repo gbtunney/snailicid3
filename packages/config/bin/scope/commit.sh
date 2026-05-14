@@ -123,7 +123,7 @@ Examples:
   pnpm exec scope-commit --commit --dry-run chore autofix
   pnpm exec scope-commit --commit chore autofix
   pnpm exec scope-commit --checked-commit chore autofix
-  pnpm exec scope-commit .github/workflows/pipeline.yml
+  pnpm exec scope-commit .github/workflows/call-pipeline.yml
 EOF
                 return 0
                 ;;
@@ -170,7 +170,7 @@ EOF
             git add -A || return 1
         fi
 
-        pnpm exec lint-staged --relative || return 1
+        pnpm exec lint-staged --debug --relative || return 1
     }
 
     read_package_name() {

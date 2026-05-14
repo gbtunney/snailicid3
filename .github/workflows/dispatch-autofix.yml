@@ -70,7 +70,7 @@ jobs:
     pipeline_fix:
         name: Run autofix pipeline
         needs: guard
-        uses: ./.github/workflows/pipeline.yml
+        uses: ./.github/workflows/call-pipeline.yml
         with:
             mode: report
             check_mode: fix

@@ -1,4 +1,9 @@
-# Blocks `release/**` PRs into `main`. This is stricter than normal CI.
+# Blocks generated release PRs into `main`.
+# Generated release PR:
+# - source branch is release/main
+# - deletes consumed .changeset/*.md
+# - changes package.json
+# - changes CHANGELOG.md
 name: PR Release
 
 on:
@@ -17,10 +22,15 @@ env:
     HUSKY: 0
 
 jobs:
+    detect:
+        uses: ./.github/workflows/call-detect-pr-kind.yml
+
     required:
-        name: required-pr-release
-        if: ${{ startsWith(github.head_ref, 'release/') }}
-        uses: ./.github/workflows/pipeline.yml
+        name: pr-release / required
+        needs: detect
+        if: ${{ needs.detect.outputs.is_release_pr == 'true' }}
+
+        uses: ./.github/workflows/call-pipeline.yml
         with:
             mode: abort_on_error
             check_mode: check

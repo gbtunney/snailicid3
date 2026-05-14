@@ -1,4 +1,7 @@
 # Blocks normal PRs into `main` if the repo is busted.
+# Not a generated release PR
+# AND does not add/modify .changeset/*.md
+# → normal PR checks
 name: PR Main
 
 on:
@@ -17,13 +20,19 @@ env:
     HUSKY: 0
 
 jobs:
+    detect:
+        uses: ./.github/workflows/call-detect-pr-kind.yml
+
     required:
-        name: required-main
+        name: pr-main / required
+        needs: detect
         if: >-
-            !startsWith(github.head_ref, 'release/') && !startsWith(github.head_ref, 'changesets/')
+            ${{
+              needs.detect.outputs.is_release_pr != 'true' &&
+              needs.detect.outputs.has_added_or_modified_changeset != 'true' }}
 
 
-        uses: ./.github/workflows/pipeline.yml
+        uses: ./.github/workflows/call-pipeline.yml
         with:
             mode: abort_on_error
             check_mode: check
