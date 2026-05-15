@@ -3,22 +3,12 @@
     "version": "0.0.3",
     "private": false,
     "description": "Color math, parsing, conversion and hex utilities",
-    "keywords": [
-        "typescript",
-        "snailicid3",
-        "monorepo",
-        "color",
-        "chroma",
-        "hex",
-        "color-conversion",
-        "colorjs"
-    ],
     "scripts": {
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
         "dev:nx": "nx run $npm_package_name:dev",
-        "test:coverage": "vitest run --coverage"
+        "api:report:nx": "nx run $npm_package_name:api:report"
     },
     "buildConfig": {
         "runtime": "universal",
@@ -39,6 +29,8 @@
                     "build:tsdown"
                 ]
             },
+            "api:report": {},
+            "api:check": {},
             "test": {},
             "test:watch": {},
             "lint": {},
@@ -48,6 +40,18 @@
             "clean:build": {}
         }
     },
+    "keywords": [
+        "color",
+        "oklch",
+        "hex",
+        "colorjs.io",
+        "srgb",
+        "chroma",
+        "color-conversion",
+        "hsl",
+        "css",
+        "rgb"
+    ],
     "publishConfig": {
         "access": "public"
     },
@@ -85,6 +89,7 @@
         "ramda": "^0.32.0"
     },
     "devDependencies": {
+        "@microsoft/api-extractor": "^7.58.7",
         "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
         "@types/node": "^25.7.0",

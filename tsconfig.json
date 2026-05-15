@@ -4,7 +4,8 @@
     "extends": "@snailicid3/config/tsconfig.typecheck",
     "compilerOptions": {
         "types": ["node"],
-        "noEmit": false
+        "noEmit": false,
+        "declaration": false
     },
     "files": [
         "./commitlint.config.ts",

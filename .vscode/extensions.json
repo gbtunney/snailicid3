@@ -23,6 +23,7 @@
         "redhat.vscode-yaml",
         "anseki.vscode-color",
         "openai.chatgpt",
-        "esbenp.prettier-vscode"
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-chat-customizations-evaluations"
     ]
 }

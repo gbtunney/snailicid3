@@ -127,7 +127,7 @@
         "lint": {
             "cache": true,
             "dependsOn": ["check:ts", "build"],
-            "command": "pnpm exec prettier --ignore-path ./.gitignore --check . && eslint .",
+            "command": "pnpm exec prettier --check . '!**/*.api.md' && eslint .",
             "options": {
                 "cwd": "{projectRoot}"
             }
@@ -135,7 +135,7 @@
         "fix": {
             "cache": true,
             "dependsOn": ["check:ts", "build"],
-            "command": "pnpm exec prettier --ignore-path ./.gitignore --write . && pnpm exec eslint . --fix",
+            "command": "pnpm exec prettier  --write . '!**/*.api.md' && pnpm exec eslint . --fix",
             "options": {
                 "cwd": "{projectRoot}"
             }
@@ -149,7 +149,7 @@
         },
         "clean:build": {
             "cache": false,
-            "command": "rm -rf ./dist ./types",
+            "command": "rm -rf ./dist ./types ./temp ./tmp",
             "options": {
                 "cwd": "{projectRoot}"
             }

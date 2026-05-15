@@ -2,26 +2,14 @@
     "name": "@snailicid3/root",
     "version": "0.0.0",
     "private": true,
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/gbtunney/snailicid3-monorepo"
-    },
-    "packageManager": "pnpm@10.30.2",
-    "engines": {
-        "node": ">=20.x",
-        "pnpm": ">=10.0.0"
-    },
-    "type": "module",
     "scripts": {
         "\n========== COMMIT >> ==========": "",
         "commit": "pnpm build:self && pnpm exec scope-commit --checked-commit",
-        "commit:cz": "pnpm exec git-cz",
         "commit:direct": "git commit --no-verify -m",
         "lint:staged": "pnpm exec lint-staged --relative",
         "\n========== BUILD >> ==========": "",
         "build": "pnpm nx:build",
-        "build:self": "pnpm exec nx run root:build",
+        "build:self": "pnpm exec nx run @snailicid3/root:build",
         "nx:build": "pnpm exec nx run-many -t build",
         "\n========== TEST >> ==========": "",
         "test": "pnpm nx:test",
@@ -29,6 +17,9 @@
         "\n========== DOCUMENTATION >> ==========": "",
         "docs:build": "pnpm nx:docs:build",
         "nx:docs:build": "pnpm exec nx run-many -t docs:build",
+        "\n========== API REPORT >> ==========": "",
+        "api:report": "pnpm exec nx run-many --target=api:report",
+        "api:check": "pnpm exec nx run-many --target=api:check",
         "\n========== INSPECT >> ==========": "",
         "inspect:nx": "pnpm nx:graph",
         "inspect:lint": "pnpm exec eslint-config-inspector --no-open",
@@ -39,7 +30,7 @@
         "setup": "pnpm exec gbt-setup",
         "reset": "pnpm run uninstall && pnpm start",
         "prepare": "husky",
-        "postinstall": "pnpm build:self && echo '\n=== >> Success:: Install complete.'",
+        "postinstall": "pnpm build:self && pnpm exec gbt-prettier-ignore && echo '\n=== >> Success:: Install complete.'",
         "\n========== PUBLISH >> ==========": "",
         "create:changeset": "pnpm pre:changeset && pnpm changeset",
         "pre:changeset": "pnpm run fix && pnpm run test && pnpm docs:build && pnpm exec gbt-changeset && pnpm changeset",
@@ -58,32 +49,18 @@
         "fix:md": "pnpm exec nx run @snailicid3/root:fix:md",
         "\n========== CLEAN >> ==========": "",
         "clean": "pnpm exec nx run-many -t clean",
-        "\n========== REPORT >> ==========": "",
-        "report": "pnpm report:all",
-        "report:all": "pnpm report:env && pnpm report:repo && pnpm report:workspace && pnpm report:prettier",
-        "report:env": "bash .github/scripts/report-env.sh",
-        "report:repo": "bash .github/scripts/report-repo.sh",
-        "report:workspace": "bash .github/scripts/report-workspace.sh",
-        "report:prettier": "bash .github/scripts/report-prettier.sh",
-        "report:scope": "pnpm exec scope-affected",
-        "report:affected-scope": "pnpm exec scope-affected",
-        "report:commit-scope": "pnpm exec scope-commit"
+        "clean:self": "pnpm exec nx run @snailicid3/root:clean"
     },
     "devDependencies": {
-        "@arethetypeswrong/core": "^0.18.2",
         "@changesets/cli": "^2.31.0",
         "@commitlint/cli": "^21.0.1",
         "@commitlint/config-conventional": "^21.0.1",
-        "@commitlint/cz-commitlint": "^21.0.1",
         "@eslint/config-inspector": "^3.0.2",
-        "@nx/devkit": "^22.6.5",
         "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
         "@types/node": "^25.7.0",
         "@vitest/coverage-v8": "^4.1.5",
         "@vitest/ui": "^4.1.5",
-        "commitizen": "^4.3.1",
-        "cz-conventional-changelog": "^3.3.0",
         "eslint": "^10.2.1",
         "husky": "^9.1.7",
         "jiti": "^2.6.1",
@@ -95,12 +72,18 @@
         "typescript": "^6.0.2",
         "verdaccio": "^6.5.0"
     },
-    "config": {
-        "commitizen": {
-            "path": "@commitlint/cz-commitlint"
-        }
-    },
     "nx": {
         "includedScripts": []
-    }
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/gbtunney/snailicid3-monorepo"
+    },
+    "packageManager": "pnpm@10.30.2",
+    "engines": {
+        "node": ">=20.x",
+        "pnpm": ">=10.0.0"
+    },
+    "type": "module"
 }

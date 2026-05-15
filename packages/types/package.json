@@ -3,18 +3,11 @@
     "version": "0.0.2",
     "private": false,
     "description": "Pure TypeScript types, utility types and typeguards",
-    "keywords": [
-        "typescript",
-        "snailicid3",
-        "monorepo",
-        "types",
-        "typeguards",
-        "utility-types"
-    ],
     "scripts": {
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
-        "clean:nx": "nx run $npm_package_name:clean"
+        "clean:nx": "nx run $npm_package_name:clean",
+        "api:report:nx": "nx run $npm_package_name:api:report"
     },
     "buildConfig": {
         "runtime": "universal",
@@ -32,6 +25,8 @@
                     "build:tsdown"
                 ]
             },
+            "api:report": {},
+            "api:check": {},
             "test": {},
             "lint": {},
             "fix": {},
@@ -43,6 +38,12 @@
     "publishConfig": {
         "access": "public"
     },
+    "keywords": [
+        "typescript",
+        "typeguards",
+        "utility-types",
+        "assertions"
+    ],
     "type": "module",
     "files": [
         "CHANGELOG.md",
@@ -65,6 +66,7 @@
         "type-fest": "^5.5.0"
     },
     "devDependencies": {
+        "@microsoft/api-extractor": "^7.58.7",
         "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
         "@types/node": "^25.7.0",

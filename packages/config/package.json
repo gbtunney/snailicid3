@@ -5,7 +5,6 @@
     "description": "Shared linting, formatting, and TypeScript config utilities for the snailicid3 monorepo",
     "keywords": [
         "typescript",
-        "snailicid3",
         "monorepo",
         "eslint",
         "prettier",
@@ -13,7 +12,7 @@
         "commitlint",
         "linting",
         "formatting",
-        "config"
+        "snail-sh"
     ],
     "scripts": {
         "build:exporter": "pnpm exec node ./dist/build-exporter.js",
@@ -21,6 +20,7 @@
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
         "dev:nx": "nx run $npm_package_name:dev",
+        "api:report:nx": "nx run $npm_package_name:api:report",
         "demo:logger": "pnpm exec ./bin/snail-sh-test.sh",
         "demo:2": "pnpm exec snail-sh header '🐌 SNAIL BUILD' '50%'  '~'"
     },
@@ -30,7 +30,8 @@
         "scope-affected": "./bin/scope/affected.sh",
         "gbt-changeset": "./bin/changeset-branch.sh",
         "gbt-setup": "./bin/completions/install-pnpm.sh",
-        "gbt-uninstall": "./bin/uninstall.sh"
+        "gbt-uninstall": "./bin/uninstall.sh",
+        "gbt-prettier-ignore": "./bin/export.prettier.ignore.sh"
     },
     "buildConfig": {
         "runtime": "node",
@@ -53,6 +54,8 @@
                     "{projectRoot}/dist/.markdownlint.json"
                 ]
             },
+            "api:report": {},
+            "api:check": {},
             "build": {
                 "dependsOn": [
                     "build:ts",
@@ -117,6 +120,7 @@
         "@prettier/plugin-php": "^0.25.0",
         "@prettier/plugin-xml": "^3.4.2",
         "@types/json-schema": "^7.0.15",
+        "@types/yargs": "^17.0.35",
         "@vitest/eslint-plugin": "^1.6.17",
         "ajv": "^8.20.0",
         "eslint": "^10.3.0",
@@ -143,9 +147,11 @@
         "typedoc": "^0.28.19",
         "typedoc-plugin-markdown": "^4.11.0",
         "typescript-eslint": "^8.59.3",
+        "yargs": "^18.0.0",
         "zod": "^4.4.3"
     },
     "devDependencies": {
+        "@microsoft/api-extractor": "^7.58.7",
         "@types/node": "25.7.0",
         "tsx": "^4.21.0",
         "typescript": "^6.0.3",

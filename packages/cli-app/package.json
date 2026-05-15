@@ -3,26 +3,12 @@
     "version": "0.0.3",
     "private": true,
     "description": "Zod-backed CLI app framework",
-    "keywords": [
-        "typescript",
-        "snailicid3",
-        "monorepo",
-        "cli",
-        "framework",
-        "zod",
-        "yargs"
-    ],
     "scripts": {
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
         "dev:nx": "nx run $npm_package_name:dev",
-        "test:coverage": "vitest run --coverage"
-    },
-    "buildConfig": {
-        "runtime": "node",
-        "product": "cli",
-        "buildStrategy": "bundle"
+        "api:report:nx": "nx run $npm_package_name:api:report"
     },
     "nx": {
         "targets": {
@@ -38,6 +24,8 @@
                     "build:tsdown"
                 ]
             },
+            "api:report": {},
+            "api:check": {},
             "test": {},
             "test:nx": {},
             "test:watch": {},
@@ -49,6 +37,20 @@
             "docs:build:ts": {},
             "docs:build": {}
         }
+    },
+    "keywords": [
+        "typescript",
+        "snailicid3",
+        "monorepo",
+        "cli",
+        "framework",
+        "zod",
+        "yargs"
+    ],
+    "buildConfig": {
+        "runtime": "node",
+        "product": "cli",
+        "buildStrategy": "bundle"
     },
     "type": "module",
     "main": "./dist/index.cjs",
@@ -92,6 +94,7 @@
         "zod": "^4.3.6"
     },
     "devDependencies": {
+        "@microsoft/api-extractor": "^7.58.7",
         "@snailicid3/config": "workspace:*",
         "@types/node": "^25.7.0",
         "@types/yargs": "^17.0.35",

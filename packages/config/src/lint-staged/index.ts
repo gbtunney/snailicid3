@@ -21,8 +21,7 @@ export const toFileArgs = (staged: ReadonlyArray<string> | string): string =>
 
 export const lintStagedConfig = (): LintStagedConfiguration => {
     const config: LintStagedConfiguration = {
-        '.gitignore':
-            'LintStagedConfiguration exec prettier --write .gitignore',
+        '.gitignore': 'pnpm exec prettier --write .gitignore',
 
         '.husky/**/*': (staged: ReadonlyArray<string>) => {
             const files = toFileArgs(staged)
@@ -33,7 +32,7 @@ export const lintStagedConfig = (): LintStagedConfiguration => {
             const files = toFileArgs(staged)
             //  const ignores = toIgnoreArgs(mdIgnores)
             return [
-                `pnpm exec prettier --write ${files}`,
+                `pnpm exec prettier --ignore-path ./.prettierignore.generated --write ${files}`,
                 `pnpm exec markdownlint-cli2 --no-globs --fix ${files}  || true`,
             ]
         },
@@ -43,7 +42,7 @@ export const lintStagedConfig = (): LintStagedConfiguration => {
         ) => {
             const files = toFileArgs(staged)
             return [
-                `pnpm exec prettier --write ${files}`,
+                `pnpm exec prettier --ignore-path ./.prettierignore.generated --write ${files}`,
                 `pnpm exec eslint --fix ${files}`,
             ]
         },
@@ -52,7 +51,7 @@ export const lintStagedConfig = (): LintStagedConfiguration => {
             staged: ReadonlyArray<string>,
         ) => {
             const files = toFileArgs(staged)
-            return `pnpm exec prettier --write ${files}`
+            return `pnpm exec prettier ./.prettierignore.generated --write ${files}`
         },
     }
     return defineLintStagedConfig(config)

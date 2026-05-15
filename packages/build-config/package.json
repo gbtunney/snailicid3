@@ -3,28 +3,16 @@
     "version": "0.0.3",
     "private": false,
     "description": "Shared tsdown, vite, vitest and typedoc build tool configs",
-    "keywords": [
-        "typescript",
-        "snailicid3",
-        "monorepo",
-        "rollup",
-        "vite",
-        "tsdown",
-        "vitest",
-        "typedoc",
-        "build",
-        "bundler"
-    ],
     "scripts": {
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
-        "test:coverage": "vitest run --coverage"
+        "api:report:nx": "nx run $npm_package_name:api:report"
     },
     "buildConfig": {
         "runtime": "node",
         "product": "build_tool",
-        "buildStrategy": "transpile"
+        "buildStrategy": "none"
     },
     "nx": {
         "targets": {
@@ -37,6 +25,8 @@
                     "build:ts"
                 ]
             },
+            "api:report": {},
+            "api:check": {},
             "test": {},
             "test:watch": {},
             "lint": {},
@@ -49,6 +39,18 @@
     "publishConfig": {
         "access": "public"
     },
+    "keywords": [
+        "typescript",
+        "snailicid3",
+        "monorepo",
+        "rollup",
+        "vite",
+        "tsdown",
+        "vitest",
+        "typedoc",
+        "build",
+        "bundler"
+    ],
     "type": "module",
     "main": "./dist/index.js",
     "types": "./types/index.d.ts",
@@ -75,6 +77,7 @@
         "directory": "packages/build-config"
     },
     "dependencies": {
+        "@arethetypeswrong/core": "^0.18.2",
         "@rollup/plugin-commonjs": "^29.0.2",
         "@rollup/plugin-json": "^6.1.0",
         "@rollup/plugin-node-resolve": "^16.0.3",
@@ -91,22 +94,22 @@
         "ts-extras": "^1.0.0",
         "tsdown": "^0.22.0",
         "type-fest": "^5.6.0",
+        "typedoc": "^0.28.19",
         "typedoc-material-theme": "^1.4.1",
         "typedoc-plugin-markdown": "^4.11.0",
         "typedoc-plugin-remark": "^2.0.1",
         "typedoc-plugin-zod": "^1.4.3",
         "unified-prettier": "^2.0.1",
         "unplugin-unused": "^0.5.7",
+        "vite": "^8.0.8",
         "vite-plugin-dts": "^5.0.0",
         "zod": "^4.4.2"
     },
     "devDependencies": {
+        "@microsoft/api-extractor": "^7.58.7",
         "@snailicid3/config": "workspace:*",
         "@types/node": "^25.7.0",
-        "tslib": "^2.8.1",
-        "typedoc": "^0.28.19",
         "typescript": "^6.0.2",
-        "vite": "^8.0.8",
         "vitest": "^4.1.4"
     }
 }
