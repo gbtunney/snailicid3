@@ -90,6 +90,7 @@
         "zod": "^4.3.6"
     },
     "devDependencies": {
+        "@microsoft/api-extractor": "^7.58.7",
         "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
         "@types/node": "^25.7.0",

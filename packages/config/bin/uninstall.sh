@@ -72,18 +72,10 @@ kv_pair "root" "$ROOT_DIR"
 section "preflight"
 
 if [[ ! -d "$ROOT_DIR/node_modules" ]]; then
-    critical "repo does not appear to be installed"
+    critical "repo does not appear to be installed :("
     info "continuing anyway"
 else
-    success "node_modules found"
-fi
-
-section "reset nx cache"
-
-if command -v pnpm > /dev/null 2>&1; then
-    pnpm exec nx reset || warn "nx reset failed"
-else
-    warn "pnpm not found; skipping nx reset"
+    success "repository installation found!"
 fi
 
 section "clean builds"
@@ -95,6 +87,14 @@ if [[ -f "$ROOT_DIR/package.json" ]] && command -v pnpm > /dev/null 2>&1; then
     )
 else
     skipped "package clean"
+fi
+
+section "reset nx cache"
+
+if command -v pnpm > /dev/null 2>&1; then
+    pnpm exec nx reset || warn "nx reset failed"
+else
+    warn "pnpm not found; skipping nx reset"
 fi
 
 section "remove node_modules"

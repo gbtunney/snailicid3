@@ -17,6 +17,9 @@
         "\n========== DOCUMENTATION >> ==========": "",
         "docs:build": "pnpm nx:docs:build",
         "nx:docs:build": "pnpm exec nx run-many -t docs:build",
+        "\n========== API REPORT >> ==========": "",
+        "api:report": "pnpm exec nx run-many --target=api:report",
+        "api:check": "pnpm exec nx run-many --target=api:check",
         "\n========== INSPECT >> ==========": "",
         "inspect:nx": "pnpm nx:graph",
         "inspect:lint": "pnpm exec eslint-config-inspector --no-open",
@@ -46,17 +49,7 @@
         "fix:md": "pnpm exec nx run @snailicid3/root:fix:md",
         "\n========== CLEAN >> ==========": "",
         "clean": "pnpm exec nx run-many -t clean",
-        "clean:self": "pnpm exec nx run @snailicid3/root:clean",
-        "\n========== REPORT >> ==========": "",
-        "report": "pnpm report:all",
-        "report:all": "pnpm report:env && pnpm report:repo && pnpm report:workspace && pnpm report:prettier",
-        "report:env": "bash .github/scripts/report-env.sh",
-        "report:repo": "bash .github/scripts/report-repo.sh",
-        "report:workspace": "bash .github/scripts/report-workspace.sh",
-        "report:prettier": "bash .github/scripts/report-prettier.sh",
-        "report:scope": "pnpm exec scope-affected",
-        "report:affected-scope": "pnpm exec scope-affected",
-        "report:commit-scope": "pnpm exec scope-commit"
+        "clean:self": "pnpm exec nx run @snailicid3/root:clean"
     },
     "devDependencies": {
         "@changesets/cli": "^2.31.0",
