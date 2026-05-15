@@ -163,6 +163,7 @@ docs
 # Scratch Files
 scratch
 temp
+tmp
 examples
 !/notes/scratch
 

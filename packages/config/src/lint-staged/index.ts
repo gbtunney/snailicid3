@@ -21,8 +21,7 @@ export const toFileArgs = (staged: ReadonlyArray<string> | string): string =>
 
 export const lintStagedConfig = (): LintStagedConfiguration => {
     const config: LintStagedConfiguration = {
-        '.gitignore':
-            'LintStagedConfiguration exec prettier --write .gitignore',
+        '.gitignore': 'pnpm exec prettier --write .gitignore',
 
         '.husky/**/*': (staged: ReadonlyArray<string>) => {
             const files = toFileArgs(staged)
