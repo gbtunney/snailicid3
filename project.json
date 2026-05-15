@@ -1,6 +1,5 @@
 {
     "$schema": "./node_modules/nx/schemas/project-schema.json",
-    "name": "@snailicid3/root",
     "projectType": "application",
     "targets": {
         "build": {
