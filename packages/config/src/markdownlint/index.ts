@@ -14,6 +14,8 @@ const BASE_IGNORES = [
     '**/.changeset/**',
     '**/docs/**',
     '**/scratch/**',
+    '**/etc/**',
+    '**/tmp/**',
     '**/.github/instructions/nx.instructions.md',
 ]
 
