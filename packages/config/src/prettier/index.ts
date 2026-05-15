@@ -9,6 +9,8 @@ import type { IterableElement, Merge } from 'type-fest'
 import { getDefaultOptions, getDefaultOverrides } from './options.js'
 import { getPrettierPluginsBundled, getPrettierPluginsList } from './plugins.js'
 
+export const BASE_IGNORES = ['**/*.api.md', 'tmp', 'temp'] as const
+
 export type PrettierConfig = Merge<
     Merge<Config, PrettierOptions>,
     {

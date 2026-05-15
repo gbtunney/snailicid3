@@ -164,6 +164,7 @@ docs
 scratch
 temp
 tmp
+.prettierignore.generated
 examples
 !/notes/scratch
 

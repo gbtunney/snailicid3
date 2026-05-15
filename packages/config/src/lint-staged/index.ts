@@ -32,7 +32,7 @@ export const lintStagedConfig = (): LintStagedConfiguration => {
             const files = toFileArgs(staged)
             //  const ignores = toIgnoreArgs(mdIgnores)
             return [
-                `pnpm exec prettier --write ${files}`,
+                `pnpm exec prettier --write ${files} '!**/*.api.md ' `,
                 `pnpm exec markdownlint-cli2 --no-globs --fix ${files}  || true`,
             ]
         },
@@ -42,7 +42,7 @@ export const lintStagedConfig = (): LintStagedConfiguration => {
         ) => {
             const files = toFileArgs(staged)
             return [
-                `pnpm exec prettier --write ${files}`,
+                `pnpm exec prettier --write ${files} !`,
                 `pnpm exec eslint --fix ${files}`,
             ]
         },
