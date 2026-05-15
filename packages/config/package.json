@@ -5,7 +5,6 @@
     "description": "Shared linting, formatting, and TypeScript config utilities for the snailicid3 monorepo",
     "keywords": [
         "typescript",
-        "snailicid3",
         "monorepo",
         "eslint",
         "prettier",
@@ -13,7 +12,7 @@
         "commitlint",
         "linting",
         "formatting",
-        "config"
+        "snail-sh"
     ],
     "scripts": {
         "build:exporter": "pnpm exec node ./dist/build-exporter.js",
@@ -21,6 +20,7 @@
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
         "dev:nx": "nx run $npm_package_name:dev",
+        "api:report:nx": "nx run $npm_package_name:api:report",
         "demo:logger": "pnpm exec ./bin/snail-sh-test.sh",
         "demo:2": "pnpm exec snail-sh header '🐌 SNAIL BUILD' '50%'  '~'"
     },
@@ -53,6 +53,8 @@
                     "{projectRoot}/dist/.markdownlint.json"
                 ]
             },
+            "api:report": {},
+            "api:check": {},
             "build": {
                 "dependsOn": [
                     "build:ts",

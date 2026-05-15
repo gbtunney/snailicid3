@@ -149,7 +149,7 @@
         },
         "clean:build": {
             "cache": false,
-            "command": "rm -rf ./dist ./types",
+            "command": "rm -rf ./dist ./types ./temp ./tmp",
             "options": {
                 "cwd": "{projectRoot}"
             }
