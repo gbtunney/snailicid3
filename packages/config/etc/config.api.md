@@ -200,8 +200,8 @@ export type TSFileExtensions = ArrayValues<typeof TS_FILE_EXTENSIONS>
 //
 // src/eslint/index.ts:13:5 - (ae-forgotten-export) The symbol "flatEslintConfig" needs to be exported by the entry point index.d.ts
 // src/lint-staged/index.ts:23:16 - (ae-forgotten-export) The symbol "defineLintStagedConfig" needs to be exported by the entry point index.d.ts
-// src/prettier/index.ts:15:9 - (ae-forgotten-export) The symbol "PrettierOverrides" needs to be exported by the entry point index.d.ts
-// src/prettier/index.ts:55:5 - (ae-forgotten-export) The symbol "prettierConfiguration" needs to be exported by the entry point index.d.ts
+// src/prettier/index.ts:17:9 - (ae-forgotten-export) The symbol "PrettierOverrides" needs to be exported by the entry point index.d.ts
+// src/prettier/index.ts:57:5 - (ae-forgotten-export) The symbol "prettierConfiguration" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 ```
