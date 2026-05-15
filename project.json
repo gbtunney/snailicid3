@@ -26,7 +26,6 @@
             "command": "tsc --build tsconfig.json",
             "options": { "cwd": "{projectRoot}" }
         },
-
         "clean:ts": {
             "cache": false,
             "command": "tsc --build --clean tsconfig.json",

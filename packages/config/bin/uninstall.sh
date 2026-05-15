@@ -100,6 +100,9 @@ fi
 section "remove node_modules"
 remove_node_modules
 
+section "remove generated prettier ignore"
+remove_if_exists "$ROOT_DIR/.prettierignore.generated"
+
 section "remove lockfiles"
 remove_if_exists "$ROOT_DIR/pnpm-lock.yaml"
 remove_if_exists "$ROOT_DIR/package-lock.json"
