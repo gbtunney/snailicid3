@@ -51,7 +51,7 @@ export const lintStagedConfig = (): LintStagedConfiguration => {
             staged: ReadonlyArray<string>,
         ) => {
             const files = toFileArgs(staged)
-            return `pnpm exec prettier --write ${files}`
+            return `pnpm exec prettier ./.prettierignore.generated --write ${files}`
         },
     }
     return defineLintStagedConfig(config)
