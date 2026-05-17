@@ -34,9 +34,12 @@ export function entryToTsdownConfig(
     })
 
     const hasDts = entry.output_formats.includes('ts')
+
     const formats = entry.output_formats.filter(
-        (f): f is TsdownFormat => isModuleFormat(f) || isGlobalFormat(f),
+        (format): format is TsdownFormat =>
+            isModuleFormat(format) || isGlobalFormat(format),
     )
+
     const hasGlobal = formats.some(isGlobalFormat)
     const platform = runtimeToPlatform(entry.runtime)
 
@@ -108,12 +111,12 @@ export function toTsdownConfigs(plan: ResolvedBuildPlan): TsdownConfigInput {
     return configs
 }
 
-function isGlobalFormat(f: string): f is GlobalFormat {
-    return (GLOBAL_FORMATS as ReadonlyArray<string>).includes(f)
+function isGlobalFormat(format: string): format is GlobalFormat {
+    return (GLOBAL_FORMATS as ReadonlyArray<string>).includes(format)
 }
 
-function isModuleFormat(f: string): f is ModuleFormat {
-    return (MODULE_FORMATS as ReadonlyArray<string>).includes(f)
+function isModuleFormat(format: string): format is ModuleFormat {
+    return (MODULE_FORMATS as ReadonlyArray<string>).includes(format)
 }
 
 /** Emit adapter debug logs when TSDOWN_ADAPTER_DEBUG is enabled. */

@@ -18,11 +18,11 @@ export const msToIsoString = (ms_value: number): string =>
  * not support pattern tokens directly, so this builds manually.
  */
 export const formatDurationFromMs = (
-    ms: number,
+    _ms: number,
     pattern: string = format_duration_long,
 ): string => {
-    const totalSeconds = Math.floor(ms / 1000)
-    const milliseconds = ms % 1000
+    const totalSeconds = Math.floor(_ms / 1000)
+    const milliseconds = _ms % 1000
     const hours = Math.floor(totalSeconds / 3600)
     const minutes = Math.floor((totalSeconds % 3600) / 60)
     const seconds = totalSeconds % 60
@@ -39,7 +39,7 @@ export const formatDurationFromMs = (
         case format_duration_truncated:
             return `${pad(minutes)}:${pad(seconds)}`
         default:
-            return dayjs.utc(ms).format(pattern)
+            return dayjs.utc(_ms).format(pattern)
     }
 }
 

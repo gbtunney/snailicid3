@@ -93,7 +93,9 @@ describe('constants', () => {
         const logLevelValues = logger.LEVEL_NAMES.map(
             (levelName) => logger.LOG_LEVELS[levelName],
         )
-        const sortedLogLevelValues = [...logLevelValues].sort((a, b) => a - b)
+        const sortedLogLevelValues = [...logLevelValues].toSorted(
+            (left, right) => left - right,
+        )
         expect(logLevelValues).toEqual(sortedLogLevelValues)
     })
 })

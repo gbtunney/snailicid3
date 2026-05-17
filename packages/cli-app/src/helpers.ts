@@ -75,12 +75,17 @@ type WithInnerType = { innerType: () => z.ZodType }
 type WithRemoveDefault = { removeDefault: () => z.ZodType }
 type WithUnwrap = { unwrap: () => z.ZodType }
 
-const hasUnwrap = (s: unknown): s is WithUnwrap & z.ZodType =>
-    typeof (s as any)?.unwrap === 'function'
-const hasInnerType = (s: unknown): s is WithInnerType & z.ZodType =>
-    typeof (s as any)?.innerType === 'function'
-const hasRemoveDefault = (s: unknown): s is WithRemoveDefault & z.ZodType =>
-    typeof (s as any)?.removeDefault === 'function'
+const isObjectLike = (value: unknown): value is Record<string, unknown> =>
+    typeof value === 'object' && value !== null
+
+const hasUnwrap = (value: unknown): value is WithUnwrap =>
+    isObjectLike(value) && typeof value['unwrap'] === 'function'
+
+const hasInnerType = (value: unknown): value is WithInnerType =>
+    isObjectLike(value) && typeof value['innerType'] === 'function'
+
+const hasRemoveDefault = (value: unknown): value is WithRemoveDefault =>
+    isObjectLike(value) && typeof value['removeDefault'] === 'function'
 
 /** Container is a schema that contains other schemas, like array,object,record,set,map,tuple */
 export const hasContainer = <Schema extends z.ZodType>(
@@ -105,6 +110,7 @@ export const hasDefaultValueSet = <Schema extends z.ZodType>(
 export const hasZodWrapper = <Schema extends z.ZodType>(
     schema: Schema,
 ): boolean => schema instanceof z.ZodDefault || schema instanceof z.ZodOptional
+// TODO If you want this correct, we should refactor the Pipe handling to unwrap actual schemas
 
 /** Very simple recursive unwrapping: unwrap → removeDefault → innerType */
 export const getValueSchema = <Schema extends z.ZodType>(

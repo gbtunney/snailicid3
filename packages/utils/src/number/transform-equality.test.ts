@@ -29,10 +29,10 @@ describe('toNumeric equality (string vs literal)', () => {
         ['-0xAbc', -0xabc],
         ['+0x00F', 15],
         //  ['0b1010', 10],
-    ])('string->number equals literal: %s => %o', (s, expected) => {
-        expect(isStringNumeric(s)).toBe(true)
-        expect(isPossibleNumeric(s)).toBe(true)
-        const parsed = toNumeric(s)
+    ])('string->number equals literal: %s => %o', (str, expected) => {
+        expect(isStringNumeric(str)).toBe(true)
+        expect(isPossibleNumeric(str)).toBe(true)
+        const parsed = toNumeric(str)
         expect(typeof parsed).toBe('number')
         expect(parsed).toBeCloseTo(expected, 12)
     })

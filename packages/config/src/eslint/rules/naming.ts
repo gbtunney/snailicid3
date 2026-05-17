@@ -158,6 +158,16 @@ export const namingRules = (error: boolean = true): Array<Config> =>
             },
         },
         {
+            files: [
+                ...expandExtensions(TS_FILE_EXTENSIONS, '**/*.test.'),
+                ...expandExtensions(TS_FILE_EXTENSIONS, '**/*.spec.'),
+            ],
+            name: 'Naming: relax in test files',
+            rules: {
+                '@typescript-eslint/naming-convention': 'off',
+            },
+        },
+        {
             name: 'Naming: check-file rules',
             rules: {},
         },

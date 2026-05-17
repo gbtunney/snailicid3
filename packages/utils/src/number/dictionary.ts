@@ -3,14 +3,14 @@ import { numericPatterns } from './patterns.js'
 
 const _cleanup = (str: string): string => str.replace(/_/g, '').trim()
 
-export const parseBinary = (v: string): number => Number(v)
-export const parseOctal = (v: string): number => Number(v)
-export const parseHex = (v: string): number => parseInt(v, 16)
-export const parseDecimal = (v: string): number => Number(v)
-export const parseScientific = (v: string): number => Number(v)
-export const parseExponential = (v: string): number => Number(v)
-export const parseBigintLiteral = (v: string): bigint =>
-    BigInt(v.replace(/[Nn]$/, ''))
+export const parseBinary = (value: string): number => Number(value)
+export const parseOctal = (value: string): number => Number(value)
+export const parseHex = (value: string): number => parseInt(value, 16)
+export const parseDecimal = (value: string): number => Number(value)
+export const parseScientific = (value: string): number => Number(value)
+export const parseExponential = (value: string): number => Number(value)
+export const parseBigintLiteral = (value: string): bigint =>
+    BigInt(value.replace(/[Nn]$/, ''))
 
 export const numericFormats = {
     bigint: {
@@ -73,9 +73,10 @@ export const numericFormatUtils = Object.fromEntries(
             return [
                 key,
                 {
-                    isValid: (v: string): boolean => meta.regex.test(v.trim()),
-                    parse: (v: string): bigint | number =>
-                        meta.parse(_cleanup(v.trim())),
+                    isValid: (value: string): boolean =>
+                        meta.regex.test(value.trim()),
+                    parse: (value: string): bigint | number =>
+                        meta.parse(_cleanup(value.trim())),
                 },
             ]
         },

@@ -69,6 +69,4 @@ export const filterFileArrByGlob = (
     globs: ReadonlyArray<string>,
     negate: boolean = false,
 ): Array<string> =>
-    negate
-        ? micromatch.not([...files], globs)
-        : micromatch([...files], globs)
+    negate ? micromatch.not([...files], globs) : micromatch([...files], globs)
