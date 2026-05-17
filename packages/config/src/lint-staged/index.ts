@@ -1,7 +1,9 @@
 import { type Configuration } from 'lint-staged'
+
 /// the above didnt error even tho it was not listed as a dependency - figure out why??
 export type LintStagedConfiguration = Configuration
 import {
+    filterFileArrByGlob,
     JSLIKE_FILE_EXTENSIONS,
     PRETTIER_FILE_EXTENSIONS,
 } from './../shared.js'
@@ -16,8 +18,8 @@ const extensionsToGlob = (extensions: ReadonlyArray<string>): string =>
     `*.{${extensions.join(',')}}`
 
 export const quoteArg = (p: string): string => `"${p.replaceAll('"', '\\"')}"`
-export const toFileArgs = (staged: ReadonlyArray<string> | string): string =>
-    (Array.isArray(staged) ? staged : [staged]).map(quoteArg).join(' ')
+export const toFileArgs = (staged: ReadonlyArray<string> | string): string[] =>
+    (Array.isArray(staged) ? staged : [staged]).map(quoteArg)
 
 export const lintStagedConfig = (): LintStagedConfiguration => {
     const config: LintStagedConfiguration = {
@@ -25,15 +27,17 @@ export const lintStagedConfig = (): LintStagedConfiguration => {
 
         '.husky/**/*': (staged: ReadonlyArray<string>) => {
             const files = toFileArgs(staged)
-            return `pnpm exec prettier --write ${files}`
+            return `pnpm exec prettier --write ${files.join(' ')}`
         },
 
         [`*.md`]: (staged: ReadonlyArray<string>) => {
-            const files = toFileArgs(staged)
+            const _prefiles = toFileArgs(staged)
+            const files = filterFileArrByGlob(_prefiles, ['!**/api.md'])
+            console.log('BEFORE@!!', _prefiles.length, 'AFTER ', files.length)
             //  const ignores = toIgnoreArgs(mdIgnores)
             return [
-                `pnpm exec prettier --ignore-path ./.prettierignore.generated --write ${files}`,
-                `pnpm exec markdownlint-cli2 --no-globs --fix ${files}  || true`,
+                `pnpm exec prettier --write ${files.join(' ')}`,
+                `pnpm exec markdownlint-cli2 --no-globs --fix ${files.join(' ')}  || true`,
             ]
         },
 
@@ -42,16 +46,18 @@ export const lintStagedConfig = (): LintStagedConfiguration => {
         ) => {
             const files = toFileArgs(staged)
             return [
-                `pnpm exec prettier --ignore-path ./.prettierignore.generated --write ${files}`,
-                `pnpm exec eslint --fix ${files}`,
+                `pnpm exec prettier --write ${files.join(' ')} `,
+                `pnpm exec eslint --fix ${files.join(' ')}`,
             ]
         },
 
         [extensionsToGlob(PRETTIER_FILE_EXTENSIONS)]: (
             staged: ReadonlyArray<string>,
         ) => {
-            const files = toFileArgs(staged)
-            return `pnpm exec prettier ./.prettierignore.generated --write ${files}`
+            const _prefiles = toFileArgs(staged)
+            const files = filterFileArrByGlob(_prefiles, ['!**/api.md'])
+            console.log('BEFORE@!!', _prefiles.length, 'AFTER ', files.length)
+            return `pnpm exec prettier --write ${files.join(' ')}`
         },
     }
     return defineLintStagedConfig(config)
