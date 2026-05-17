@@ -18,8 +18,9 @@ const extensionsToGlob = (extensions: ReadonlyArray<string>): string =>
     `*.{${extensions.join(',')}}`
 
 export const quoteArg = (p: string): string => `"${p.replaceAll('"', '\\"')}"`
-export const toFileArgs = (staged: ReadonlyArray<string> | string): string[] =>
-    (Array.isArray(staged) ? staged : [staged]).map(quoteArg)
+export const toFileArgs = (
+    staged: ReadonlyArray<string> | string,
+): Array<string> => (Array.isArray(staged) ? staged : [staged]).map(quoteArg)
 
 export const lintStagedConfig = (): LintStagedConfiguration => {
     const config: LintStagedConfiguration = {
@@ -31,9 +32,11 @@ export const lintStagedConfig = (): LintStagedConfiguration => {
         },
 
         [`*.md`]: (staged: ReadonlyArray<string>) => {
-            const _prefiles = toFileArgs(staged)
-            const files = filterFileArrByGlob(_prefiles, ['!**/api.md'])
-            console.log('BEFORE@!!', _prefiles.length, 'AFTER ', files.length)
+            const filtered = filterFileArrByGlob(staged, ['**/*.api.md'])
+            const files = toFileArgs(filtered)
+
+            if (files.length === 0) return []
+            console.log('BEFORE@!!', filtered.length, 'AFTER ', staged.length)
             //  const ignores = toIgnoreArgs(mdIgnores)
             return [
                 `pnpm exec prettier --write ${files.join(' ')}`,
@@ -54,9 +57,11 @@ export const lintStagedConfig = (): LintStagedConfiguration => {
         [extensionsToGlob(PRETTIER_FILE_EXTENSIONS)]: (
             staged: ReadonlyArray<string>,
         ) => {
-            const _prefiles = toFileArgs(staged)
-            const files = filterFileArrByGlob(_prefiles, ['!**/api.md'])
-            console.log('BEFORE@!!', _prefiles.length, 'AFTER ', files.length)
+            const filtered = filterFileArrByGlob(staged, ['**/*.api.md'])
+            const files = toFileArgs(filtered)
+
+            if (files.length === 0) return []
+            console.log('BEFORE@!!', filtered.length, 'AFTER ', staged.length)
             return `pnpm exec prettier --write ${files.join(' ')}`
         },
     }
