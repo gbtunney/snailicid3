@@ -32,8 +32,19 @@ export function entryToTsdownConfig(
         entryOutputFormats: entry.output_formats,
         runtime: entry.runtime,
     })
-
+    // noExternal: [/.*/],
     const hasDts = entry.output_formats.includes('ts')
+
+    const externals =
+        entry.include_dependencies === false
+            ? {}
+            : entry.include_dependencies === true
+              ? {
+                    alwaysBundle: [/.*/],
+                }
+              : {
+                    alwaysBundle: entry.include_dependencies,
+                }
 
     const formats = entry.output_formats.filter(
         (format): format is TsdownFormat =>
@@ -59,6 +70,7 @@ export function entryToTsdownConfig(
           }
         : {}
     logTsdownAdapter('entryToTsdownConfig:derived', {
+        deps: externals,
         entryKey: entry.key,
         hasDts,
         hasGlobal,
@@ -66,12 +78,14 @@ export function entryToTsdownConfig(
         target,
         transpile: entry.transpile,
         tsdownFormats: formats,
+        unbundle: !entry.bundle,
     })
     //const bundle = entry.bundle
     const config: TsdownBuildConfig = {
         ...(entry.bannerContent ? { banner: entry.bannerContent } : {}),
         ...(hasGlobal ? { globalName: entry.moduleName } : {}),
         clean: false,
+        deps: externals,
         dts: hasDts,
         entry: { [entry.fileName]: entry.sourcePath },
         exports: true,
@@ -79,6 +93,7 @@ export function entryToTsdownConfig(
         logLevel: entry.logLevel,
         outDir: entry.outputDir,
         platform,
+        report: true,
         unbundle: !entry.bundle,
         ...lintSettings,
         ...(target ? { target } : {}),

@@ -79,6 +79,9 @@ export const schemaBuildPlanEntrySpec = z.object({
     //})
     exports: z.boolean().default(true),
 
+    include_dependencies: z
+        .union([z.boolean(), z.array(z.string())])
+        .default(false), //this is for bundlers that support externalizing dependencies.  it can be a boolean to externalize all dependencies or an array of package names to externalize specific dependencies.  it will be passed directly to the bundler and will not be processed by the build config, so it can be used for advanced use cases where you need more control over which dependencies are externalized.
     /** IMPORTANT PROPS FOR ENTRY SPEC */
     key: schemaEntryKey.default('*'), //will map to file name will pre pended by the sourceDir unless ovverriden.?
     /* this is only really used for umd/iife builds-  will be the name of the global variable that the library is assigned to in those formats. 
