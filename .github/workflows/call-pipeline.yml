@@ -293,7 +293,19 @@ jobs:
               shell: bash
               run: |
                   if [ -n "$(git status --porcelain)" ]; then
-                    echo "repository is dirty"
+                    echo "::error::Repository is dirty after pipeline"
+                    echo
+                    echo "==== git status --short ===="
+                    git status --short
+                    echo
+                    echo "==== tracked changed files ===="
+                    git diff --name-only
+                    echo
+                    echo "==== staged changed files ===="
+                    git diff --cached --name-only
+                    echo
+                    echo "==== untracked files ===="
+                    git ls-files --others --exclude-standard
                     exit 1
                   fi
 
@@ -304,6 +316,8 @@ jobs:
               run: |
                   if [ -n "$(git status --porcelain)" ]; then
                     echo "is_repo_dirty=true" >> "$GITHUB_OUTPUT"
+                    echo "Repository is dirty:"
+                    git status --short
                   else
                     echo "is_repo_dirty=false" >> "$GITHUB_OUTPUT"
                   fi
