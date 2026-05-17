@@ -78,10 +78,12 @@ export type JSLikeFileExtensions = ArrayValues<typeof JSLIKE_FILE_EXTENSIONS>;
 
 // @public (undocumented)
 export const lintstaged: {
-    configuration: () => LintStagedConfiguration;
+    configuration: (merged?: LintStagedConfiguration) => LintStagedConfiguration;
     defineLintStagedConfig: typeof defineLintStagedConfig;
-    quoteArg: (p: string) => string;
-    toFileArgs: (staged: ReadonlyArray<string> | string) => string;
+    extensionsToGlob: typeof extensionsToGlob;
+    filterFileArrByGlob: typeof filterFileArrByGlob;
+    quoteArg: typeof quoteArg;
+    toFileArgs: typeof toFileArgs;
 };
 
 // @public (undocumented)
@@ -152,7 +154,11 @@ export type TSFileExtensions = ArrayValues<typeof TS_FILE_EXTENSIONS>;
 // Warnings were encountered during analysis:
 //
 // src/eslint/index.ts:13:5 - (ae-forgotten-export) The symbol "flatEslintConfig" needs to be exported by the entry point index.d.ts
-// src/lint-staged/index.ts:23:16 - (ae-forgotten-export) The symbol "defineLintStagedConfig" needs to be exported by the entry point index.d.ts
+// src/lint-staged/index.ts:87:5 - (ae-forgotten-export) The symbol "defineLintStagedConfig" needs to be exported by the entry point index.d.ts
+// src/lint-staged/index.ts:88:5 - (ae-forgotten-export) The symbol "extensionsToGlob" needs to be exported by the entry point index.d.ts
+// src/lint-staged/index.ts:89:5 - (ae-forgotten-export) The symbol "filterFileArrByGlob" needs to be exported by the entry point index.d.ts
+// src/lint-staged/index.ts:90:5 - (ae-forgotten-export) The symbol "quoteArg" needs to be exported by the entry point index.d.ts
+// src/lint-staged/index.ts:91:5 - (ae-forgotten-export) The symbol "toFileArgs" needs to be exported by the entry point index.d.ts
 // src/prettier/index.ts:17:9 - (ae-forgotten-export) The symbol "PrettierOverrides" needs to be exported by the entry point index.d.ts
 // src/prettier/index.ts:57:5 - (ae-forgotten-export) The symbol "prettierConfiguration" needs to be exported by the entry point index.d.ts
 

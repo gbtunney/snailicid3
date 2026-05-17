@@ -84,3 +84,4 @@ export const typescriptRules = (): Array<Config> => {
         },*/
     ])
 }
+export default typescriptRules

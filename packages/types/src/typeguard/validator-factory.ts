@@ -15,7 +15,9 @@ const toPascal = (rawName: string): string => {
         .flatMap(
             (segment) => segment.match(/[A-Z]?[\da-z]+|[A-Z]+(?![a-z])/g) ?? [],
         )
-    return parts.map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join('')
+    return parts
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join('')
 }
 
 export type BoolValidatorResult<BaseName extends string> = {

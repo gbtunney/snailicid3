@@ -19,3 +19,5 @@ export const docServer = (port = 5555): ViteDocConfig => {
         },
     })
 }
+
+export default docServer

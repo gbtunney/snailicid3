@@ -120,10 +120,11 @@
         "@prettier/plugin-php": "^0.25.0",
         "@prettier/plugin-xml": "^3.4.2",
         "@types/json-schema": "^7.0.15",
+        "@types/micromatch": "^4.0.10",
         "@types/yargs": "^17.0.35",
         "@vitest/eslint-plugin": "^1.6.17",
         "ajv": "^8.20.0",
-        "eslint": "^10.3.0",
+        "eslint": "^10.4.0",
         "eslint-plugin-check-file": "^3.3.1",
         "eslint-plugin-import-x": "^4.16.2",
         "eslint-plugin-jsdoc": "^62.9.0",
@@ -137,8 +138,9 @@
         "globals": "^17.6.0",
         "json-schema": "^0.4.0",
         "json-schema-to-typescript": "^15.0.4",
-        "lint-staged": "^17.0.4",
+        "lint-staged": "^17.0.5",
         "markdownlint-cli2": "^0.22.1",
+        "micromatch": "^4.0.8",
         "prettier": "^3.8.3",
         "prettier-plugin-jsdoc": "^1.8.0",
         "prettier-plugin-sh": "^0.18.1",
@@ -152,8 +154,7 @@
     },
     "devDependencies": {
         "@microsoft/api-extractor": "^7.58.7",
-        "@types/node": "25.7.0",
-        "tsx": "^4.21.0",
+        "@types/node": "25.8.0",
         "typescript": "^6.0.3",
         "vitest": "^4.1.6"
     }

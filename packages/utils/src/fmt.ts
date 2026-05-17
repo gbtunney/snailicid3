@@ -39,7 +39,7 @@ export const formatValue = (
 
 /** Join many unknowns into a single formatted string */
 export const formatArgs = (delimiter = '', ...vals: Array<unknown>): string =>
-    vals.map((v) => formatValue(v)).join(delimiter)
+    vals.map((value) => formatValue(value)).join(delimiter)
 
 /**
  * Tagged template: safely interpolate unknowns without triggering restrict-template-expressions

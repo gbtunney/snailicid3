@@ -45,13 +45,13 @@ export function escapeUnicode(
     value: string,
     shouldEscapePrintable = false,
 ): string {
-    return value.replace(/[\S\s]/g, function (ch) {
+    return value.replace(/[\S\s]/g, function (char) {
         // skip printable ASCII chars if we should not escape them
-        if (!shouldEscapePrintable && /[\x20-\x7E]/.test(ch)) {
-            return ch
+        if (!shouldEscapePrintable && /[\x20-\x7E]/.test(char)) {
+            return char
         }
         // we use "000" and slice(-4) for brevity, need to pad zeros,
         // unicode escape always have 4 chars after "\u"
-        return '\\u' + ('000' + ch.charCodeAt(0).toString(16)).slice(-4)
+        return '\\u' + ('000' + char.charCodeAt(0).toString(16)).slice(-4)
     })
 }

@@ -5,14 +5,15 @@ import pkg from './package.json' with { type: 'json' }
 const plan = defineBuildPlan(pkg, {
     entries: [
         {
-            banner: true,
             key: '*',
-            output_formats: ['esm', 'cjs', 'iife', 'ts'],
+            lint: true,
+            output_formats: ['esm', 'cjs', 'ts'],
         },
         {
-            banner: true,
+            include_dependencies: true,
             key: '*',
             output_formats: ['iife'],
+            runtime: 'browser',
         },
     ],
     root: {

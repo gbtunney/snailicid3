@@ -4,17 +4,13 @@ import { escapeStringRegexp } from './escape.js'
 import { isStringValidRegExp } from './validators.js'
 import { isArray, isRegExp } from '../typeguard/utility.typeguards.js'
 
-/**
- * Converts a string to a regular expression.
- *
- * @param value - The string value to convert.
- * @param escape - Indicates whether to escape special characters in the string. Default is false.
- * @param flag - The flag(s) to apply to the regular expression. Default is 'global'.
- * @returns The converted regular expression or undefined if the conversion fails.
- */
+/** Converts a string to a regular expression. */
 export const stringToRegexp = (
+    /** The string value to convert. */
     value: string,
+    /** Indicates whether to escape special characters in the string. Default is false. */
     escape: boolean = false,
+    /** The flag(s) to apply to the regular expression. Default is 'global'. */
     flag: Array<Flag> | Flag | undefined = 'global',
 ): RegExp | undefined => {
     if (escape) {

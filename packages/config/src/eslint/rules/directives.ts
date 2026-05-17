@@ -4,7 +4,7 @@ import { type Config, defineConfig } from '@eslint/config-helpers'
  * Safety: guards against abusive or unsafe ESLint directive comments — prevents silencing the linter without
  * justification
  */
-export const safetyRules = (): Array<Config> =>
+export const directiveRules = (): Array<Config> =>
     defineConfig({
         name: 'Safety: ESLint directive guards',
         rules: {
@@ -27,3 +27,5 @@ export const safetyRules = (): Array<Config> =>
             ],
         },
     })
+
+export default directiveRules

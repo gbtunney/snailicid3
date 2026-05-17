@@ -30,8 +30,8 @@ describe('regexp/dictionary', () => {
             '7_123.456e-1_2',
             '+1_000.5e+1_0',
             '-.9_9e-0_2',
-        ])('valid: %s', (s) => {
-            expect(scientificNumber.test(s)).toBe(true)
+        ])('valid: %s', (str) => {
+            expect(scientificNumber.test(str)).toBe(true)
         })
 
         test.each([
@@ -54,8 +54,8 @@ describe('regexp/dictionary', () => {
             '._1',
             '2._2',
             '00.', // trailing dot without fraction
-        ])('invalid: %s', (s) => {
-            expect(scientificNumber.test(s)).toBe(false)
+        ])('invalid: %s', (str) => {
+            expect(scientificNumber.test(str)).toBe(false)
         })
     })
 
@@ -68,8 +68,8 @@ describe('regexp/dictionary', () => {
             '-0xAbc',
             '0xdead_beef',
             '0xA_B_C',
-        ])('valid: %s', (s) => {
-            expect(hexNumber.test(s)).toBe(true)
+        ])('valid: %s', (str) => {
+            expect(hexNumber.test(str)).toBe(true)
         })
 
         test.each([
@@ -78,16 +78,16 @@ describe('regexp/dictionary', () => {
             '0x_FF', // leading underscore
             '0xFF_', // trailing underscore
             '0xA__B', // double underscore
-        ])('invalid: %s', (s) => {
-            expect(hexNumber.test(s)).toBe(false)
+        ])('invalid: %s', (str) => {
+            expect(hexNumber.test(str)).toBe(false)
         })
     })
 
     describe('binaryNumber', () => {
         test.each(['0b0', '0b1', '0b1010', '+0b1_0_1', '-0b11_00'])(
             'valid: %s',
-            (s) => {
-                expect(binaryNumber.test(s)).toBe(true)
+            (str) => {
+                expect(binaryNumber.test(str)).toBe(true)
             },
         )
 
@@ -97,8 +97,8 @@ describe('regexp/dictionary', () => {
             '0b_10', // leading underscore
             '0b10_', // trailing underscore
             '0b1__0', // double underscore
-        ])('invalid: %s', (s) => {
-            expect(binaryNumber.test(s)).toBe(false)
+        ])('invalid: %s', (str) => {
+            expect(binaryNumber.test(str)).toBe(false)
         })
     })
 
@@ -112,8 +112,8 @@ describe('regexp/dictionary', () => {
             '0xFFn',
             '-0xA_Bn',
             '0b10_10n',
-        ])('valid: %s', (s) => {
-            expect(bigintNumber.test(s)).toBe(true)
+        ])('valid: %s', (str) => {
+            expect(bigintNumber.test(str)).toBe(true)
         })
 
         test.each([
@@ -125,8 +125,8 @@ describe('regexp/dictionary', () => {
             '0bn', // missing digits
             '0b_n', // underscore right after base
             '1__0n', // double underscore
-        ])('invalid: %s', (s) => {
-            expect(bigintNumber.test(s)).toBe(false)
+        ])('invalid: %s', (str) => {
+            expect(bigintNumber.test(str)).toBe(false)
         })
     })
 })

@@ -22,8 +22,9 @@ export const upperCase = (value: string): string => toUpper(value)
  * @category Case
  */
 export const capitalizeWords = (value: string): string =>
-    value.replace(/\w\S*/g, (w) => w.replace(/^\w/, (c) => c.toUpperCase()))
-
+    value.replace(/\w\S*/g, (word) =>
+        word.replace(/^\w/, (char) => char.toUpperCase()),
+    )
 /**
  * Converts a string to camelCase.
  *

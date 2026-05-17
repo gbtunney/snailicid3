@@ -96,7 +96,7 @@
     "devDependencies": {
         "@microsoft/api-extractor": "^7.58.7",
         "@snailicid3/config": "workspace:*",
-        "@types/node": "^25.7.0",
+        "@types/node": "^25.8.0",
         "@types/yargs": "^17.0.35",
         "tsdown": "^0.22.0",
         "typedoc": "^0.28.19",

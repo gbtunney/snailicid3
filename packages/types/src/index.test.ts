@@ -44,7 +44,8 @@ describe('@snailicid3/types — tg.guardToAssertion', () => {
     test('creates an assertion from a predicate that passes when predicate is true', () => {
         const assertIsString: (value: unknown) => asserts value is string =
             tg.guardToAssertion(
-                (v: unknown): v is string => typeof v === 'string',
+                (_value: unknown): _value is string =>
+                    typeof _value === 'string',
             )
         expect(() => {
             assertIsString('hello')

@@ -80,9 +80,6 @@
     },
     "dependencies": {
         "@snailicid3/types": "workspace:*",
-        "@types/ramda": "^0.31.1",
-        "@types/semver": "^7.0.0",
-        "@types/sprintf-js": "^1.1.4",
         "dayjs": "^1.11.20",
         "escape-string-regexp": "^5.0.0",
         "flat": "^6.0.1",
@@ -99,11 +96,27 @@
         "@microsoft/api-extractor": "^7.58.7",
         "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
-        "@types/node": "^25.7.0",
+        "@types/node": "^25.8.0",
+        "@types/ramda": "^0.31.1",
+        "@types/semver": "^7.7.1",
+        "@types/sprintf-js": "^1.1.4",
         "tsdown": "^0.22.0",
         "typedoc": "^0.28.19",
         "typescript": "^6.0.2",
         "vitest": "^4.1.4"
     },
-    "module": "./dist/index.js"
+    "module": "./dist/index.js",
+    "inlinedDependencies": {
+        "balanced-match": "4.0.4",
+        "brace-expansion": "5.0.6",
+        "dayjs": "1.11.20",
+        "escape-string-regexp": "5.0.0",
+        "flat": "6.0.1",
+        "minimatch": "10.2.5",
+        "ramda": "0.32.0",
+        "ramda-adjunct": "6.0.0",
+        "semver": "7.8.0",
+        "sprintf-js": "1.1.3",
+        "zod": "4.4.3"
+    }
 }

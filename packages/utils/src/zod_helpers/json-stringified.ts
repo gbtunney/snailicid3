@@ -65,7 +65,7 @@ export const makeJsonStringifiedSchema = <TSchema extends z.ZodType>(
         JsonStringified<Output>,
         z.infer<typeof base>
     > = base.transform(
-        (s): JsonStringified<Output> => s as JsonStringified<Output>,
+        (schema): JsonStringified<Output> => schema as JsonStringified<Output>,
     )
     const _api: JsonStringifiedAPI<TSchema> = {
         deserialize(raw: JsonStringified<Output>): Output {

@@ -5,10 +5,10 @@ import pluginsConfig from './plugins.js'
 import { baseRules } from './rules/base.js'
 import { codeStyleRules } from './rules/codestyle.js'
 import { commentsRules } from './rules/comments.js'
+import { directiveRules } from './rules/directives.js'
 import { importRules } from './rules/imports.js'
 import { namingRules } from './rules/naming.js'
 import { reactRules } from './rules/react.js'
-import { safetyRules } from './rules/safety.js'
 import { testingRules } from './rules/testing.js'
 import { typescriptRules } from './rules/typescript.js'
 import { expandExtensions } from '../helpers.js'
@@ -61,7 +61,7 @@ export const flatEslintConfig = (__dirname: string): Array<Config> => {
             ...namingRules(),
             ...commentsRules(),
             ...codeStyleRules(),
-            ...safetyRules(),
+            ...directiveRules(),
             ...reactRules(),
             ...testingRules(),
 

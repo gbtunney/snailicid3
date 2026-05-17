@@ -68,3 +68,5 @@ export const commentsRules = (): Array<Config> =>
             },
         },
     )
+
+export default commentsRules

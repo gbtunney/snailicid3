@@ -44,3 +44,5 @@ export const filePatternOverrides = (): Array<Config> =>
         //     },
         // },
     )
+
+export default filePatternOverrides

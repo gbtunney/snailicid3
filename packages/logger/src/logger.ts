@@ -184,7 +184,7 @@ export const createLogger = (opts?: LoggerOpts): Logger => {
 
     const _levelName = (): LogLevelName =>
         (Object.entries(LOG_LEVELS).find(
-            ([, n]) => n === minLevel,
+            ([, levelNumber]) => levelNumber === minLevel,
         )?.[0] as LogLevelName) ?? 'info'
 
     return {
@@ -194,19 +194,19 @@ export const createLogger = (opts?: LoggerOpts): Logger => {
                 ...overrides,
                 name: name ? `${name}:${childName}` : childName,
             }),
-        debug: (...a): void => {
-            emit('debug', ...a)
+        debug: (...args): void => {
+            emit('debug', ...args)
         },
 
-        error: (...a): void => {
-            emit('error', ...a)
+        error: (...args): void => {
+            emit('error', ...args)
         },
 
-        fatal: (...a): void => {
-            emit('fatal', ...a)
+        fatal: (...args): void => {
+            emit('fatal', ...args)
         },
-        info: (...a): void => {
-            emit('info', ...a)
+        info: (...args): void => {
+            emit('info', ...args)
         },
         get level(): LogLevelName {
             return _levelName()
@@ -217,11 +217,11 @@ export const createLogger = (opts?: LoggerOpts): Logger => {
         setLevel: (level: LogLevelName): void => {
             minLevel = LOG_LEVELS[level]
         },
-        trace: (...a): void => {
-            emit('trace', ...a)
+        trace: (...args): void => {
+            emit('trace', ...args)
         },
-        warn: (...a): void => {
-            emit('warn', ...a)
+        warn: (...args): void => {
+            emit('warn', ...args)
         },
     }
 }

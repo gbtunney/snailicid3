@@ -32,11 +32,25 @@ export function entryToTsdownConfig(
         entryOutputFormats: entry.output_formats,
         runtime: entry.runtime,
     })
-
+    // noExternal: [/.*/],
     const hasDts = entry.output_formats.includes('ts')
+
+    const externals =
+        entry.include_dependencies === false
+            ? {}
+            : entry.include_dependencies === true
+              ? {
+                    alwaysBundle: [/.*/],
+                }
+              : {
+                    alwaysBundle: entry.include_dependencies,
+                }
+
     const formats = entry.output_formats.filter(
-        (f): f is TsdownFormat => isModuleFormat(f) || isGlobalFormat(f),
+        (format): format is TsdownFormat =>
+            isModuleFormat(format) || isGlobalFormat(format),
     )
+
     const hasGlobal = formats.some(isGlobalFormat)
     const platform = runtimeToPlatform(entry.runtime)
 
@@ -56,6 +70,7 @@ export function entryToTsdownConfig(
           }
         : {}
     logTsdownAdapter('entryToTsdownConfig:derived', {
+        deps: externals,
         entryKey: entry.key,
         hasDts,
         hasGlobal,
@@ -63,12 +78,14 @@ export function entryToTsdownConfig(
         target,
         transpile: entry.transpile,
         tsdownFormats: formats,
+        unbundle: !entry.bundle,
     })
     //const bundle = entry.bundle
     const config: TsdownBuildConfig = {
         ...(entry.bannerContent ? { banner: entry.bannerContent } : {}),
         ...(hasGlobal ? { globalName: entry.moduleName } : {}),
         clean: false,
+        deps: externals,
         dts: hasDts,
         entry: { [entry.fileName]: entry.sourcePath },
         exports: true,
@@ -76,6 +93,7 @@ export function entryToTsdownConfig(
         logLevel: entry.logLevel,
         outDir: entry.outputDir,
         platform,
+        report: true,
         unbundle: !entry.bundle,
         ...lintSettings,
         ...(target ? { target } : {}),
@@ -108,12 +126,12 @@ export function toTsdownConfigs(plan: ResolvedBuildPlan): TsdownConfigInput {
     return configs
 }
 
-function isGlobalFormat(f: string): f is GlobalFormat {
-    return (GLOBAL_FORMATS as ReadonlyArray<string>).includes(f)
+function isGlobalFormat(format: string): format is GlobalFormat {
+    return (GLOBAL_FORMATS as ReadonlyArray<string>).includes(format)
 }
 
-function isModuleFormat(f: string): f is ModuleFormat {
-    return (MODULE_FORMATS as ReadonlyArray<string>).includes(f)
+function isModuleFormat(format: string): format is ModuleFormat {
+    return (MODULE_FORMATS as ReadonlyArray<string>).includes(format)
 }
 
 /** Emit adapter debug logs when TSDOWN_ADAPTER_DEBUG is enabled. */
