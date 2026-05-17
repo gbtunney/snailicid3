@@ -1,6 +1,6 @@
 {
     "name": "@snailicid3/color",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "private": false,
     "description": "Color math, parsing, conversion and hex utilities",
     "scripts": {

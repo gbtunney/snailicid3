@@ -1,5 +1,15 @@
 # @snailicid3/utils
 
+## 0.0.4
+
+### Patch Changes
+
+- 4b74502: Fix dependency resolution and package configuration issues.
+  - correct missing/incomplete dependency declarations
+  - align internal package dependency configuration
+  - improve CI/build reliability
+  - @snailicid3/types@0.0.2
+
 ## 0.0.3
 
 ### Patch Changes
