@@ -14,15 +14,33 @@ export function defineLintStagedConfig<
     return config
 }
 
-const extensionsToGlob = (extensions: ReadonlyArray<string>): string =>
+export const extensionsToGlob = (extensions: ReadonlyArray<string>): string =>
     `*.{${extensions.join(',')}}`
 
-export const quoteArg = (p: string): string => `"${p.replaceAll('"', '\\"')}"`
+export const quoteArg = (_path: string): string =>
+    `"${_path.replaceAll('"', '\\"')}"`
 export const toFileArgs = (
     staged: ReadonlyArray<string> | string,
 ): Array<string> => (Array.isArray(staged) ? staged : [staged]).map(quoteArg)
 
-export const lintStagedConfig = (): LintStagedConfiguration => {
+/**
+ * @example
+ *     ```ts
+ *     const test = {
+ *     '.husky': (staged: ReadonlyArray<string>): string => {
+ *     const files: string[] = lintstaged.toFileArgs(staged)
+ *     return `pnpm exec prettier --write ${files.join(' ')}`
+ *     },
+ *     hello: 'hi',
+ *     } satisfies LintStagedConfiguration
+ *
+ *     export default lintstaged.configuration(test)
+ *     ```
+ */
+
+export const lintStagedConfig = (
+    merged?: LintStagedConfiguration,
+): LintStagedConfiguration => {
     const config: LintStagedConfiguration = {
         '.gitignore': 'pnpm exec prettier --write .gitignore',
 
@@ -32,12 +50,9 @@ export const lintStagedConfig = (): LintStagedConfiguration => {
         },
 
         [`*.md`]: (staged: ReadonlyArray<string>) => {
-            const filtered = filterFileArrByGlob(staged, ['**/*.api.md'])
+            const filtered = filterFileArrByGlob(staged, ['**/*.api.md'], true)
             const files = toFileArgs(filtered)
-
             if (files.length === 0) return []
-            console.log('BEFORE@!!', filtered.length, 'AFTER ', staged.length)
-            //  const ignores = toIgnoreArgs(mdIgnores)
             return [
                 `pnpm exec prettier --write ${files.join(' ')}`,
                 `pnpm exec markdownlint-cli2 --no-globs --fix ${files.join(' ')}  || true`,
@@ -57,19 +72,28 @@ export const lintStagedConfig = (): LintStagedConfiguration => {
         [extensionsToGlob(PRETTIER_FILE_EXTENSIONS)]: (
             staged: ReadonlyArray<string>,
         ) => {
-            const filtered = filterFileArrByGlob(staged, ['**/*.api.md'])
+            const filtered = filterFileArrByGlob(staged, ['**/*.api.md'], true)
             const files = toFileArgs(filtered)
-
             if (files.length === 0) return []
-            console.log('BEFORE@!!', filtered.length, 'AFTER ', staged.length)
             return `pnpm exec prettier --write ${files.join(' ')}`
         },
     }
+    const result: LintStagedConfiguration =
+        merged !== undefined ? Object.assign(config, merged) : config
     return defineLintStagedConfig(config)
 }
-export const lintstaged = {
+export const lintstaged: {
+    configuration: (merged?: LintStagedConfiguration) => LintStagedConfiguration
+    defineLintStagedConfig: typeof defineLintStagedConfig
+    extensionsToGlob: typeof extensionsToGlob
+    filterFileArrByGlob: typeof filterFileArrByGlob
+    quoteArg: typeof quoteArg
+    toFileArgs: typeof toFileArgs
+} = {
     configuration: lintStagedConfig,
     defineLintStagedConfig,
+    extensionsToGlob,
+    filterFileArrByGlob,
     quoteArg,
     toFileArgs,
 }

@@ -67,16 +67,8 @@ export const getScaledWidth = (
 export const filterFileArrByGlob = (
     files: ReadonlyArray<string>,
     globs: ReadonlyArray<string>,
-): Array<string> => {
-    //micromatch([...files], globs)
-    console.log(
-        'COMPARING ',
-        files,
-        micromatch.not([...files], globs),
-        'next ',
-        micromatch.not([...files], ['*.api.md']),
-        'AFTER',
-        micromatch.not([...files], ['**/*.api.md']),
-    )
-    return micromatch.not([...files], globs)
-}
+    negate: boolean = false,
+): Array<string> =>
+    negate
+        ? micromatch.not([...files], globs)
+        : micromatch([...files], globs)
