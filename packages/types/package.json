@@ -69,7 +69,7 @@
         "@microsoft/api-extractor": "^7.58.7",
         "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
-        "@types/node": "^25.7.0",
+        "@types/node": "^25.8.0",
         "@types/ramda": "^0.31.1",
         "tsdown": "^0.22.0",
         "typescript": "^6.0.2",

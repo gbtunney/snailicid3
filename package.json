@@ -58,19 +58,19 @@
         "@eslint/config-inspector": "^3.0.2",
         "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
-        "@types/node": "^25.7.0",
+        "@types/node": "^25.8.0",
         "@vitest/coverage-v8": "^4.1.5",
         "@vitest/ui": "^4.1.5",
-        "eslint": "^10.2.1",
+        "eslint": "^10.4.0",
         "husky": "^9.1.7",
         "jiti": "^2.6.1",
         "lint-staged": "^16.4.0",
         "markdownlint-cli2": "^0.22.0",
         "nx": "^22.6.5",
         "prettier": "^3.8.2",
-        "tsx": "^4.21.0",
+        "tsx": "^4.22.1",
         "typescript": "^6.0.2",
-        "verdaccio": "^6.5.0"
+        "verdaccio": "^6.7.1"
     },
     "nx": {
         "includedScripts": []
