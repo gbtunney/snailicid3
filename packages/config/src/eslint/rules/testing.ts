@@ -21,3 +21,4 @@ export const testingRules = (): Array<Config> =>
             },
         },
     })
+export default testingRules

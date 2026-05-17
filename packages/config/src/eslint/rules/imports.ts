@@ -1,6 +1,6 @@
 import { type Config, defineConfig } from '@eslint/config-helpers'
-import importPlugin from 'eslint-plugin-import-x'
-import perfectionistPlugin from 'eslint-plugin-perfectionist'
+import { flatConfigs } from 'eslint-plugin-import-x'
+import { configs as perfectionistConfigs } from 'eslint-plugin-perfectionist'
 import { expandExtensions } from '../../helpers.js'
 import { JSLIKE_FILE_EXTENSIONS } from '../../shared.js'
 
@@ -10,10 +10,10 @@ import { JSLIKE_FILE_EXTENSIONS } from '../../shared.js'
  */
 export const importRules = (): Array<Config> =>
     defineConfig(
-        importPlugin.flatConfigs.recommended,
+        flatConfigs.recommended,
         // Temporarily disabled: requires eslint-import-resolver-typescript setup.
         //importPlugin.flatConfigs.typescript,
-        perfectionistPlugin.configs['recommended-natural'],
+        perfectionistConfigs['recommended-natural'],
         {
             name: 'Imports: default rules',
             rules: {
@@ -70,3 +70,4 @@ export const importRules = (): Array<Config> =>
             },
         },
     )
+export default importRules

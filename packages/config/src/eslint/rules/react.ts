@@ -54,3 +54,5 @@ export const reactRules = (): Array<Config> =>
             },
         },
     )
+
+export default reactRules
