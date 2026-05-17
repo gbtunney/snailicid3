@@ -9,7 +9,7 @@
         "clean:nx": "nx run $npm_package_name:clean",
         "api:report:nx": "nx run $npm_package_name:api:report"
     },
-                  "buildConfig": {
+    "buildConfig": {
         "runtime": "universal",
         "product": "library",
         "buildStrategy": "bundle"
