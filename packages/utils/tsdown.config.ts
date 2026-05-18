@@ -6,12 +6,17 @@ const plan = defineBuildPlan(pkg, {
     entries: [
         {
             key: '*',
-            lint: true,
+            // Refs #82
+            // TODO lint=false is temporary fix for strange tsdown memory errors
+            lint: false,
             output_formats: ['esm', 'cjs', 'ts'],
         },
         {
             include_dependencies: true,
             key: '*',
+            // Refs #82
+            // TODO lint=false is temporary fix for strange tsdown memory errors
+            lint: false,
             output_formats: ['iife'],
             runtime: 'browser',
         },
