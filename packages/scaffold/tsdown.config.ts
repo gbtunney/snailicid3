@@ -5,8 +5,10 @@ import pkg from './package.json' with { type: 'json' }
 const plan = defineBuildPlan(pkg, {
     entries: [
         {
-            banner: true,
             key: '*',
+            // Refs #82
+            // TODO lint=false is temporary fix for strange tsdown memory errors
+            lint: false,
             output_formats: ['esm', 'cjs', 'iife', 'ts'],
         },
     ],

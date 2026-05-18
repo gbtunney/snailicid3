@@ -8,6 +8,9 @@ const plan = defineBuildPlan(pkg, {
             banner: true,
             bundle: true,
             key: '*',
+            /** Refs #82 */
+            // TODO lint=false is temporary fix for strange tsdown memory errors
+            lint: false,
             output_formats: ['esm', 'ts', 'cjs'],
         },
     ],

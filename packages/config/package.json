@@ -30,8 +30,7 @@
         "scope-affected": "./bin/scope/affected.sh",
         "gbt-changeset": "./bin/changeset-branch.sh",
         "gbt-setup": "./bin/completions/install-pnpm.sh",
-        "gbt-uninstall": "./bin/uninstall.sh",
-        "gbt-prettier-ignore": "./bin/export.prettier.ignore.sh"
+        "gbt-uninstall": "./bin/uninstall.sh"
     },
     "buildConfig": {
         "runtime": "node",
