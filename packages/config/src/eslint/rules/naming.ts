@@ -103,8 +103,11 @@ export const namingRules = (error: boolean = true): Array<Config> =>
                         selector: 'parameter',
                     },
 
-                    /** Parameters (non-underscore): enforce min length >= 3 to avoid `i`, `e`, `x`-style names. */
-                    // Fixes #84
+                    /**
+                     * Parameters (non-underscore): enforce min length >= 3 to avoid `i`, `e`, `x`-style names. But
+                     * allow some important words like id,ctx,req ect
+                     */
+                    // Fixes #84 - id in paramters
                     {
                         custom: {
                             match: true,
