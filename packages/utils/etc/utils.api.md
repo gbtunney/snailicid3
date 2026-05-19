@@ -94,7 +94,7 @@ const format_duration_truncated = "mm:ss";
 export const formatArgs: (delimiter?: string, ...vals: Array<unknown>) => string;
 
 // @public
-const formatDurationFromMs: (ms: number, pattern?: string) => string;
+const formatDurationFromMs: (_ms: number, pattern?: string) => string;
 
 // @public
 const formatIsoDate: (value?: string, format?: LiteralUnion<ISO_8601, string>) => string;
@@ -132,7 +132,7 @@ export const getValidMinimatch: (value: string, pattern: string) => boolean;
 export const getValidUrl: <Type extends string>(value: Type, scheme?: Array<string> | string, optional?: boolean) => undefined | URL_2;
 
 // @public
-const highresTimestamptoISOString: (ns: number) => string;
+const highresTimestamptoISOString: (_ns: number) => string;
 
 // @public
 export type InferJsonSchemaInput<TStringifiedSchema> = TStringifiedSchema extends {
@@ -304,43 +304,43 @@ const numericFormats: {
     readonly bigint: {
         readonly base: 10;
         readonly kind: "bigint";
-        readonly parse: (v: string) => bigint;
+        readonly parse: (value: string) => bigint;
         readonly regex: RegExp;
     };
     readonly binary: {
         readonly base: 2;
         readonly kind: "binary";
-        readonly parse: (v: string) => number;
+        readonly parse: (value: string) => number;
         readonly regex: RegExp;
     };
     readonly decimal: {
         readonly base: 10;
         readonly kind: "decimal";
-        readonly parse: (v: string) => number;
+        readonly parse: (value: string) => number;
         readonly regex: RegExp;
     };
     readonly exponential: {
         readonly base: 10;
         readonly kind: "exponential";
-        readonly parse: (v: string) => number;
+        readonly parse: (value: string) => number;
         readonly regex: RegExp;
     };
     readonly hex: {
         readonly base: 16;
         readonly kind: "hex";
-        readonly parse: (v: string) => number;
+        readonly parse: (value: string) => number;
         readonly regex: RegExp;
     };
     readonly octal: {
         readonly base: 8;
         readonly kind: "octal";
-        readonly parse: (v: string) => number;
+        readonly parse: (value: string) => number;
         readonly regex: RegExp;
     };
     readonly scientific: {
         readonly base: 10;
         readonly kind: "scientific";
-        readonly parse: (v: string) => number;
+        readonly parse: (value: string) => number;
         readonly regex: RegExp;
     };
 };
@@ -377,22 +377,22 @@ const numericToFloat: <Type extends Numeric>(value: Type) => Numeric | undefined
 const numericToInteger: <Type extends Numeric, Strict = false>(value: Strict extends true ? Integer<Type> : Type) => Numeric | undefined;
 
 // @public (undocumented)
-const parseBigintLiteral: (v: string) => bigint;
+const parseBigintLiteral: (value: string) => bigint;
 
 // @public (undocumented)
-const parseBinary: (v: string) => number;
+const parseBinary: (value: string) => number;
 
 // @public (undocumented)
-const parseDecimal: (v: string) => number;
+const parseDecimal: (value: string) => number;
 
 // @public (undocumented)
-const parseExponential: (v: string) => number;
+const parseExponential: (value: string) => number;
 
 // @public (undocumented)
 export const parseFactory: <Schema extends z.ZodType>(schema: Schema) => (data: unknown) => undefined | z.infer<Schema>;
 
 // @public (undocumented)
-const parseHex: (v: string) => number;
+const parseHex: (value: string) => number;
 
 // @public (undocumented)
 function parseMaster(rawValue: string): bigint | number | undefined;
@@ -401,10 +401,10 @@ function parseMaster(rawValue: string): bigint | number | undefined;
 const parseNumeric: typeof parseMaster;
 
 // @public (undocumented)
-const parseOctal: (v: string) => number;
+const parseOctal: (value: string) => number;
 
 // @public (undocumented)
-const parseScientific: (v: string) => number;
+const parseScientific: (value: string) => number;
 
 // @public (undocumented)
 const parseStringToInteger: <Type extends string>(value: Type) => number | undefined;

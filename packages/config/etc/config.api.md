@@ -12,7 +12,10 @@ import { Configuration } from 'lint-staged';
 import { defineConfig } from '@eslint/config-helpers';
 import { Config as EslintConfig } from '@eslint/config-helpers';
 import type { IterableElement } from 'type-fest';
+import type { JsonArray } from 'type-fest';
 import type { Jsonifiable } from 'type-fest';
+import type { JsonObject } from 'type-fest';
+import type { JsonPrimitive } from 'type-fest';
 import type { JsonValue } from 'type-fest';
 import type { LiteralUnion } from 'type-fest';
 import type { Merge } from 'type-fest';
@@ -26,15 +29,20 @@ import type { UnknownRecord } from 'type-fest';
 export const COMMIT_TYPES: Array<LiteralUnion<ConventionalCommitType, string>>;
 
 // @public (undocumented)
-export const commitlint: {
-    commit_types: LiteralUnion<"style" | "feat" | "fix" | "docs" | "refactor" | "perf" | "test" | "build" | "ci" | "chore" | "revert", string>[];
-    configuration: (scope_enum?: Array<string>, append_type_enum?: Array<LiteralUnion<ConventionalCommitType, string>>) => CommitlintUserConfig;
+export type Commitlint = {
+    commit_types: typeof COMMIT_TYPES;
+    configuration: typeof configuration;
+    workspaceScopes: typeof workspaceScopes;
+    workspaceScopesCsv: typeof workspaceScopesCsv;
 };
+
+// @public (undocumented)
+export const commitlint: Commitlint;
 
 export { CommitlintUserConfig }
 
 // @public
-export const configuration: (scope_enum?: Array<string>, append_type_enum?: Array<LiteralUnion<ConventionalCommitType, string>>) => CommitlintUserConfig;
+export const configuration: (scope_options?: WorkspaceScopesOptions, append_type_enum?: Array<LiteralUnion<ConventionalCommitType, string>>) => CommitlintUserConfig;
 
 // @public (undocumented)
 export const CONVENTIONAL_COMMIT_TYPES: Array<ConventionalCommitType>;
@@ -54,6 +62,10 @@ export { EslintConfig }
 //
 // @public (undocumented)
 export const expandExtensions: (extensions: ReadonlyArray<FileExtensionHint>, basePattern?: string) => Array<string>;
+
+// @public
+export const exportJSONFile: (config: JSONExportConfig, outdir?: string,
+overwrite?: boolean, logData?: boolean) => boolean;
 
 // @public (undocumented)
 export const getFilePath: (meta: ImportMeta, filePath: string) => string;
@@ -75,6 +87,27 @@ export const JSLIKE_FILE_EXTENSIONS: readonly ["js", "mjs", "cjs", "jsx", "ts", 
 
 // @public (undocumented)
 export type JSLikeFileExtensions = ArrayValues<typeof JSLIKE_FILE_EXTENSIONS>;
+
+// @public (undocumented)
+export namespace Json {
+    // (undocumented)
+    export type Array = JsonArray;
+    // (undocumented)
+    export type Object = JsonObject;
+    // (undocumented)
+    export type Primitive = JsonPrimitive;
+    // (undocumented)
+    export type Value = Exclude<JsonValue, null>;
+}
+
+// @public (undocumented)
+export type JSONExportConfig = Array<JSONExportEntry>;
+
+// @public (undocumented)
+export type JSONExportEntry<Type extends Jsonifiable = JsonValue> = {
+    data: Type;
+    filename: string;
+};
 
 // @public (undocumented)
 export const lintstaged: {
@@ -137,6 +170,9 @@ export type PrettierFileExtensions = ArrayValues<typeof PRETTIER_FILE_EXTENSIONS
 // @public (undocumented)
 export type PrettierOptions = Options & Options_2;
 
+// @public
+export const prettyPrintJSON: <Type extends Jsonifiable>(value: Type, indentSpaces?: number) => string;
+
 // @public (undocumented)
 export const safeDeserializeJSON: <Type extends JsonValue = JsonValue>(data: unknown) => Type | undefined;
 
@@ -150,6 +186,20 @@ export { TsConfig }
 
 // @public (undocumented)
 export type TSFileExtensions = ArrayValues<typeof TS_FILE_EXTENSIONS>;
+
+// @public (undocumented)
+export const workspaceScopes: (options?: WorkspaceScopesOptions) => Array<string>;
+
+// @public (undocumented)
+export const workspaceScopesCsv: (options?: Omit<WorkspaceScopesOptions, "format">) => string;
+
+// @public (undocumented)
+export type WorkspaceScopesOptions = {
+    format?: 'array' | 'csv';
+    includeBaseScopes?: boolean;
+    keepPrefix?: boolean;
+    mergeScopes?: ReadonlyArray<string>;
+};
 
 // Warnings were encountered during analysis:
 //
