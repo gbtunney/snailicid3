@@ -19,4 +19,7 @@ Updates the release workflow so version-bump creation can trigger `pr-release.ym
 Also relaxes config linting defaults by allowing common short parameter names like `id`, `db`, `fs`,
 `ctx`, `req`, and `res`, and adjusts markdownlint line-length behavior for headings/tables.
 
-Fixes #86 Fixes #87 Fixes #84 Fixes #78
+- Fixes #86
+- Fixes #87
+- Fixes #84
+- Fixes #78
