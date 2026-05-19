@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(git rev-parse --show-toplevel 2> /dev/null || pwd)"
+ROOT_DIR="${ROOT_DIR:-$(git rev-parse --show-toplevel 2> /dev/null || pwd)}"
 
 command_version() {
     local command_name="$1"
@@ -18,7 +18,7 @@ command_version() {
 }
 
 snail_sh() {
-    bash "$ROOT_DIR/packages/config/bin/snail-sh-logger.sh" "$@"
+    pnpm exec snail-sh "$@"
 }
 
 timestamp="$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
