@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(git rev-parse --show-toplevel 2> /dev/null || pwd)"
+ROOT_DIR="${ROOT_DIR:-$(git rev-parse --show-toplevel 2> /dev/null || pwd)}"
 
 cd "$ROOT_DIR"
 
 snail_sh() {
-    bash "$ROOT_DIR/packages/config/bin/snail-sh-logger.sh" "$@"
+    pnpm exec snail-sh "$@"
 }
 
 count_lines() {
@@ -15,10 +15,20 @@ count_lines() {
 }
 
 workspace_package_count() {
+    if [[ ! -d packages ]]; then
+        printf '0\n'
+        return
+    fi
+
     find packages -name package.json -not -path '*/node_modules/*' 2> /dev/null | wc -l | tr -d ' '
 }
 
 workspace_app_count() {
+    if [[ ! -d apps ]]; then
+        printf '0\n'
+        return
+    fi
+
     find apps -name package.json -not -path '*/node_modules/*' 2> /dev/null | wc -l | tr -d ' '
 }
 
@@ -67,15 +77,19 @@ snail_sh kv_pair "changed scopes" "${all_changed_scope:-root}"
 snail_sh kv_pair "affected scopes" "${affected_scope:-workspace}"
 snail_sh kv_pair "affected from main" "${affected_scope_base_main:-workspace}"
 
-if output="$(pnpm outdated -r 2>&1)"; then
-    snail_sh status_pair "dependencies" "current" "success"
-    if [[ -n "$output" ]]; then
-        snail_sh log "$output" grey
+if [[ "${REPORT_OUTDATED:-false}" == "true" ]]; then
+    if output="$(pnpm outdated -r 2>&1)"; then
+        snail_sh status_pair "dependencies" "current" "success"
+        if [[ -n "$output" ]]; then
+            snail_sh log "$output" grey
+        fi
+    else
+        snail_sh status_pair "dependencies" "outdated or unavailable" "warn"
+        if [[ -n "$output" ]]; then
+            snail_sh log "$output" grey
+        fi
     fi
 else
-    snail_sh status_pair "dependencies" "outdated or unavailable" "warn"
-    if [[ -n "$output" ]]; then
-        snail_sh log "$output" grey
-    fi
+    snail_sh status_pair "dependencies" "skipped" "grey"
 fi
 snail_sh spacer 1

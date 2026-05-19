@@ -4,10 +4,11 @@
 
 ```ts
 
-import * as _$type_fest0 from 'type-fest';
 import { EmptyObject } from 'type-fest';
 import { Entries } from 'type-fest';
 import { Entry } from 'type-fest';
+import { Integer } from 'type-fest';
+import { IsLiteral } from 'type-fest';
 import { JsonArray } from 'type-fest';
 import { Jsonifiable } from 'type-fest';
 import { Jsonify } from 'type-fest';
@@ -131,7 +132,7 @@ export type SuffixProperties<Type extends object, Suffix extends string> = { [Ke
 export const tg: {
     guardToAssertion: typeof guardToAssertion;
     predicateToAssertion: typeof predicateToAssertion;
-    isJsonifiable: <Type extends _$type_fest0.Jsonifiable>(value: unknown) => value is Type extends _$type_fest0.Jsonifiable ? Type : never;
+    isJsonifiable: <Type extends Jsonifiable>(value: unknown) => value is Type extends Jsonifiable ? Type : never;
     isJsonValue: <Type extends Json.Value>(value: Type) => value is Type extends Json.Value ? Type : never;
     isJsonifiableObjectLike: <Type extends Json.Array | Json.Object>(value: Type) => value is Type extends Json.Array | Json.Object ? Type : never;
     isJsonifiableObject: <Type extends PlainObject>(value: unknown) => value is Type extends Json.Object ? Type : Json.Object;
@@ -146,10 +147,10 @@ export const tg: {
     isBigInt: <Type extends bigint>(value: unknown) => value is Type;
     isNumber: <Type extends number>(value: unknown) => value is Type;
     isNotNumber: <Type extends number>(value: unknown) => value is Exclude<Type, number>;
-    isInteger: <Type extends number>(value: unknown) => value is _$type_fest0.Integer<Type>;
+    isInteger: <Type extends number>(value: unknown) => value is Integer<Type>;
     isNotInteger: <Type extends number, TypeNumber = (Type extends number ? never : Type)>(value: unknown) => value is TypeNumber;
-    isPrimitive: <Type extends _$type_fest0.Primitive>(value: unknown) => value is Type;
-    isNotPrimitive: <Type = unknown>(value: _$type_fest0.Primitive | Type) => value is Type;
+    isPrimitive: <Type extends Primitive>(value: unknown) => value is Type;
+    isNotPrimitive: <Type = unknown>(value: Primitive | Type) => value is Type;
     isNilLike: <Type>(value: NilLike | Type) => value is NilLike;
     isNotNilLike: <Type>(value: NilLike | Type) => value is Type;
     isNullish: <Type>(value: NilLike | Type) => value is undefined;
@@ -158,15 +159,15 @@ export const tg: {
     isNotNull: <Type extends NonNullable<unknown>>(value: unknown) => value is Type;
     isUndefined: <Type>(value: Nullish | Type) => value is undefined;
     isNotUndefined: <Type>(value: Nullish | Type) => value is Type;
-    isEmptyArray: <Type extends _$type_fest0.UnknownArray>(value: Type) => value is Type;
-    isNonEmptyArray: <Type extends _$type_fest0.UnknownArray>(value: Type) => value is Type;
-    isArray: <Type extends _$type_fest0.UnknownArray>(value: unknown) => value is Type;
+    isEmptyArray: <Type extends UnknownArray>(value: Type) => value is Type;
+    isNonEmptyArray: <Type extends UnknownArray>(value: Type) => value is Type;
+    isArray: <Type extends UnknownArray>(value: unknown) => value is Type;
     isNonEmptyObject: <Type extends PlainObject | Record<string, unknown>>(value: Type) => value is Type;
-    isEmptyObject: <Type extends _$type_fest0.UnknownRecord>(value: Type) => value is Type;
+    isEmptyObject: <Type extends UnknownRecord>(value: Type) => value is Type;
     isPlainObject: <Type extends PlainObject | Record<string, unknown>>(value: Type) => value is Type;
     isRegExp: <Type extends RegExp>(value: unknown) => value is Type;
-    isNotError: <Type>(value: Type) => value is _$type_fest0.IsLiteral<"ERROR"> extends false ? Type : never;
-    isError: (value: unknown) => value is _$type_fest0.IsLiteral<"ERROR"> extends true ? "ERROR" : never;
+    isNotError: <Type>(value: Type) => value is IsLiteral<"ERROR"> extends false ? Type : never;
+    isError: (value: unknown) => value is IsLiteral<"ERROR"> extends true ? "ERROR" : never;
 };
 
 export { UnknownArray }
@@ -177,8 +178,8 @@ export { ValueOf }
 
 // Warnings were encountered during analysis:
 //
-// dist/index.d.ts:64:3 - (ae-forgotten-export) The symbol "guardToAssertion" needs to be exported by the entry point index.d.ts
-// dist/index.d.ts:65:3 - (ae-forgotten-export) The symbol "predicateToAssertion" needs to be exported by the entry point index.d.ts
+// dist/index.d.ts:63:3 - (ae-forgotten-export) The symbol "guardToAssertion" needs to be exported by the entry point index.d.ts
+// dist/index.d.ts:64:3 - (ae-forgotten-export) The symbol "predicateToAssertion" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

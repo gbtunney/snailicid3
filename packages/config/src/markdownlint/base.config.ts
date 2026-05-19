@@ -63,11 +63,13 @@ export const getBaseConfig = (): MarkdownlintRuleConfiguration => {
             heading_line_length: getScaledWidth('markdown'),
             headings: false,
             line_length: getScaledWidth('markdown'),
-            stern: false,
+            /**
+             * Fixes #85 (however, the line length is still enforced for code blocks, as it is for all lines in the
+             * file, and there is no option to disable it for code blocks only)
+             */
             strict: false,
             tables: false,
         },
-
         // MD014 commands-show-output
         // Dollar signs without output: https://github.com/DavidAnson/markdownlint/blob/v0.35.0/doc/md014.md
         MD014: false,

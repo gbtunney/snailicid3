@@ -179,16 +179,6 @@ jobs:
                     echo "- nx_fix_ci: \`${{ inputs.nx_fix_ci }}\`"
                   } | tee -a "$GITHUB_STEP_SUMMARY"
 
-            - name: 🩺 Report Environment
-              if: ${{ always() }}
-              continue-on-error: ${{ inputs.mode == 'report' }}
-              run: bash .github/scripts/report-env.sh
-
-            - name: 🗂️ Report Repository
-              if: ${{ always() }}
-              continue-on-error: ${{ inputs.mode == 'report' }}
-              run: bash .github/scripts/report-repo.sh
-
             # ── Install attempts ─────────────────────────────────────
             - name: 📦 Install Frozen Lockfile
               id: install_frozen
@@ -210,6 +200,17 @@ jobs:
             - uses: nrwl/nx-set-shas@v4
               if: ${{ inputs.use_nx_affected }}
 
+            # ── Reporting ────────────────────────────
+            - name: 🩺 Report Environment
+              if: ${{ always() }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: bash .github/scripts/report-env.sh
+
+            - name: 🗂️ Report Repository
+              if: ${{ always() }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: bash .github/scripts/report-repo.sh
+
             - name: 🎀 Report Prettier
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
@@ -219,6 +220,11 @@ jobs:
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: bash .github/scripts/report-workspace.sh
+
+            - name: 🧱 Nx Report
+              if: ${{ always() }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm exec nx report
 
             # ── Cache resets ─────────────────────────────────────────
             - name: 🧹 Reset Nx Cache

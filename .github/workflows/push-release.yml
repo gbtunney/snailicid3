@@ -12,6 +12,7 @@ concurrency:
     cancel-in-progress: false
 
 permissions:
+    actions: write
     contents: write
     pull-requests: write
     id-token: write
@@ -218,6 +219,12 @@ jobs:
                   fi
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Trigger release PR validation
+              if: needs.detect.outputs.should_version == 'true'
+              run: gh workflow run pr-release.yml --ref release/main
+              env:
+                  GH_TOKEN: ${{ github.token }}
 
             # ── Phase 2 — publish ─────────────────────────────────────────
             # Publishes only when: no pending changesets AND the triggering commit is a version bump.

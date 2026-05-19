@@ -103,11 +103,15 @@ export const namingRules = (error: boolean = true): Array<Config> =>
                         selector: 'parameter',
                     },
 
-                    /** Parameters (non-underscore): enforce min length >= 3 to avoid `i`, `e`, `x`-style names. */
+                    /**
+                     * Parameters (non-underscore): enforce min length >= 3 to avoid `i`, `e`, `x`-style names. But
+                     * allow some important words like id,ctx,req ect
+                     */
+                    // Fixes #84 - id in paramters
                     {
                         custom: {
                             match: true,
-                            regex: '^[a-zA-Z][a-zA-Z0-9_]{2,}$',
+                            regex: '^([a-zA-Z][a-zA-Z0-9_]{2,}|id|db|fs|ctx|req|res)$',
                         },
                         filter: {
                             match: true,
