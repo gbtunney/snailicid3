@@ -17,8 +17,6 @@ export { EsLint } from './eslint/index.js'
 // Do not re-export all types to avoid duplicate identifier error
 export type { EslintConfig, TsConfig } from './eslint/index.js'
 
-/* *  UTILITIES *  */
-export { expandExtensions } from './helpers.js'
 /**
  * @namespace LintStaged Configuration
  * @see [npm Lint Staged](https://www.npmjs.com/package/lint-staged)
@@ -58,11 +56,14 @@ export type { PrettierFileExtensions } from './shared.js'
 export { MARKDOWN_FILE_EXTENSIONS } from './shared.js'
 
 export type { MarkdownFileExtensions } from './shared.js'
+/* *  UTILITIES *  */
+export { expandExtensions } from './utilities/extensions.js'
 export {
     //globFileFilter,
     importJSON,
     isPlainObject,
     safeDeserializeJSON,
-} from './utilities.js'
-export type * from './utilities.js'
+    serializeJSON,
+} from './utilities/json.js'
+export { getFilePath } from './utilities/path.js'
 export { merge } from 'ts-deepmerge'

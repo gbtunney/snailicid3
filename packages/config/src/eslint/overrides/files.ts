@@ -2,8 +2,8 @@ import { type Config, defineConfig } from '@eslint/config-helpers'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
-import { expandExtensions } from '../../helpers.js'
 import { JS_FILE_EXTENSIONS } from '../../shared.js'
+import { expandExtensions } from '../../utilities/extensions.js'
 
 export const filePatternOverrides = (): Array<Config> =>
     defineConfig(

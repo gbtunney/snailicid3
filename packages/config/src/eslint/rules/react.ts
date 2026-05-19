@@ -2,7 +2,7 @@ import { type Config, defineConfig } from '@eslint/config-helpers'
 import reactPlugin from 'eslint-plugin-react'
 import _reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
-import { expandExtensions } from '../../helpers.js'
+import { expandExtensions } from '../../utilities/extensions.js'
 
 /**
  * React: generic baseline rules, hooks enforcement, and Vite HMR fast-refresh compatibility. Scopes JSX/TSX-specific

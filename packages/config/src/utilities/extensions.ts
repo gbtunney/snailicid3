@@ -3,7 +3,7 @@ import type {
     JSLikeFileExtensions,
     MarkdownFileExtensions,
     PrettierFileExtensions,
-} from './shared.js'
+} from '../shared.js'
 
 export type AllowedExtensions =
     | JSLikeFileExtensions

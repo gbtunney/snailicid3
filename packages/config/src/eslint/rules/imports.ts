@@ -1,8 +1,8 @@
 import { type Config, defineConfig } from '@eslint/config-helpers'
 import { flatConfigs } from 'eslint-plugin-import-x'
 import { configs as perfectionistConfigs } from 'eslint-plugin-perfectionist'
-import { expandExtensions } from '../../helpers.js'
 import { JSLIKE_FILE_EXTENSIONS } from '../../shared.js'
+import { expandExtensions } from '../../utilities/extensions.js'
 
 /**
  * Imports: module resolution, import/export ordering, unused import removal, and type import consistency. Uses
