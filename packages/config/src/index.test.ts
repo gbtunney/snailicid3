@@ -55,6 +55,11 @@ describe('commitlint export', () => {
         expect(typeof commitlint.configuration).toBe('function')
     })
 
+    test('has workspace scope helpers', () => {
+        expect(typeof commitlint.workspaceScopes).toBe('function')
+        expect(typeof commitlint.workspaceScopesCsv).toBe('function')
+    })
+
     test('configuration returns an object with extends', () => {
         const config = commitlint.configuration()
         expect(config).toHaveProperty('extends')

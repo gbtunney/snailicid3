@@ -7,6 +7,11 @@
 
 export { commitlint } from './commitlint/index.js'
 export type * from './commitlint/index.js'
+export {
+    workspaceScopes,
+    workspaceScopesCsv,
+} from './commitlint/workspace.scopes.js'
+export type { WorkspaceScopesOptions } from './commitlint/workspace.scopes.js'
 
 /**
  * @namespace Eslint / Tslint Configuration
@@ -59,11 +64,18 @@ export type { MarkdownFileExtensions } from './shared.js'
 /* *  UTILITIES *  */
 export { expandExtensions } from './utilities/extensions.js'
 export {
+    exportJSONFile,
     //globFileFilter,
     importJSON,
     isPlainObject,
+    prettyPrintJSON,
     safeDeserializeJSON,
     serializeJSON,
+} from './utilities/json.js'
+export type {
+    Json,
+    JSONExportConfig,
+    JSONExportEntry,
 } from './utilities/json.js'
 export { getFilePath } from './utilities/path.js'
 export { merge } from 'ts-deepmerge'
