@@ -7,6 +7,11 @@
 
 export { commitlint } from './commitlint/index.js'
 export type * from './commitlint/index.js'
+export {
+    workspaceScopes,
+    workspaceScopesCsv,
+} from './commitlint/workspace.scopes.js'
+export type { WorkspaceScopesOptions } from './commitlint/workspace.scopes.js'
 
 /**
  * @namespace Eslint / Tslint Configuration
@@ -17,8 +22,6 @@ export { EsLint } from './eslint/index.js'
 // Do not re-export all types to avoid duplicate identifier error
 export type { EslintConfig, TsConfig } from './eslint/index.js'
 
-/* *  UTILITIES *  */
-export { expandExtensions } from './helpers.js'
 /**
  * @namespace LintStaged Configuration
  * @see [npm Lint Staged](https://www.npmjs.com/package/lint-staged)
@@ -58,11 +61,21 @@ export type { PrettierFileExtensions } from './shared.js'
 export { MARKDOWN_FILE_EXTENSIONS } from './shared.js'
 
 export type { MarkdownFileExtensions } from './shared.js'
+/* *  UTILITIES *  */
+export { expandExtensions } from './utilities/extensions.js'
 export {
+    exportJSONFile,
     //globFileFilter,
     importJSON,
     isPlainObject,
+    prettyPrintJSON,
     safeDeserializeJSON,
-} from './utilities.js'
-export type * from './utilities.js'
+    serializeJSON,
+} from './utilities/json.js'
+export type {
+    Json,
+    JSONExportConfig,
+    JSONExportEntry,
+} from './utilities/json.js'
+export { getFilePath } from './utilities/path.js'
 export { merge } from 'ts-deepmerge'

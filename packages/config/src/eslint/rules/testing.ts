@@ -1,7 +1,7 @@
 import { type Config, defineConfig } from '@eslint/config-helpers'
 import vitestPlugin from '@vitest/eslint-plugin'
-import { expandExtensions } from '../../helpers.js'
 import { TS_FILE_EXTENSIONS } from '../../shared.js'
+import { expandExtensions } from '../../utilities/extensions.js'
 
 export const testingRules = (): Array<Config> =>
     defineConfig({

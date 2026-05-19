@@ -1,7 +1,7 @@
 import { type Config, defineConfig } from '@eslint/config-helpers'
 import tsEslint from 'typescript-eslint'
-import { expandExtensions } from '../../helpers.js'
 import { TS_FILE_EXTENSIONS } from '../../shared.js'
+import { expandExtensions } from '../../utilities/extensions.js'
 
 export const typescriptRules = (): Array<Config> => {
     return defineConfig([

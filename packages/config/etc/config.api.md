@@ -58,7 +58,7 @@ export const expandExtensions: (extensions: ReadonlyArray<FileExtensionHint>, ba
 // @public (undocumented)
 export const getFilePath: (meta: ImportMeta, filePath: string) => string;
 
-// @public
+// @public (undocumented)
 export const importJSON: (filename: string) => Promise<JsonValue | undefined>;
 
 // @public (undocumented)

@@ -5,20 +5,14 @@
  */
 import { commitlint, type CommitlintUserConfig } from '@snailicid3/config'
 
-const configuration: CommitlintUserConfig = commitlint.configuration([
-    'root',
-    'actions',
-    'notes',
-    'config',
-    'build-config',
-    'types',
-    'utils',
-    'cli-app',
-    'color',
-    'logger',
-    'node-utils',
-    'scaffold',
-    'example-package',
-    'playground',
-])
+/**
+ * @example
+ *     ;```ts
+ *     commitlint.configuration({
+ *     mergeScopes: ['stupid'],
+ *     mergeTypes: ['derp'],
+ *     })
+ *     ```
+ */
+const configuration: CommitlintUserConfig = commitlint.configuration()
 export default configuration

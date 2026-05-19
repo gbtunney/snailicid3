@@ -1,6 +1,6 @@
 import { type Config, defineConfig } from '@eslint/config-helpers'
-import { expandExtensions } from '../../helpers.js'
 import { TS_FILE_EXTENSIONS } from '../../shared.js'
+import { expandExtensions } from '../../utilities/extensions.js'
 
 /**
  * Naming: symbol naming conventions (variables, functions, types, enums) via `@typescript-eslint/naming-convention`,

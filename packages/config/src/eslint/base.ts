@@ -11,8 +11,8 @@ import { namingRules } from './rules/naming.js'
 import { reactRules } from './rules/react.js'
 import { testingRules } from './rules/testing.js'
 import { typescriptRules } from './rules/typescript.js'
-import { expandExtensions } from '../helpers.js'
 import { JS_FILE_EXTENSIONS, TS_FILE_EXTENSIONS } from '../shared.js'
+import { expandExtensions } from '../utilities/extensions.js'
 
 const base_files: Array<string> = [
     ...expandExtensions(TS_FILE_EXTENSIONS, '*.'),
