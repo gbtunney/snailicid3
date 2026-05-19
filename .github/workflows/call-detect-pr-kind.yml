@@ -44,6 +44,7 @@ jobs:
               shell: bash
               run: |
                   BASE_REF="${GITHUB_BASE_REF:-main}"
+                  HEAD_REF="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
 
                   git fetch origin "$BASE_REF"
 
@@ -72,7 +73,7 @@ jobs:
                     has_changelog_changes=true
                   fi
 
-                  if [[ "${GITHUB_HEAD_REF}" == "release/main" ]] &&
+                  if [[ "$HEAD_REF" == "release/main" ]] &&
                      [[ "$has_deleted_changeset" == "true" ]] &&
                      [[ "$has_package_changes" == "true" ]] &&
                      [[ "$has_changelog_changes" == "true" ]]; then
@@ -91,6 +92,7 @@ jobs:
                     echo "## PR kind"
                     echo ""
                     echo "- base_ref: \`$BASE_REF\`"
+                    echo "- head_ref: \`$HEAD_REF\`"
                     echo "- is_release_pr: \`$is_release_pr\`"
                     echo "- has_added_or_modified_changeset: \`$has_added_or_modified_changeset\`"
                     echo "- has_deleted_changeset: \`$has_deleted_changeset\`"
