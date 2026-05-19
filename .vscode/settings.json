@@ -76,7 +76,9 @@
         { "rule": "import/no-duplicates", "severity": "off" },
         { "rule": "import/no-unresolved", "severity": "off" },
         { "rule": "import/no-extraneous-dependencies", "severity": "off" },
-        { "rule": "@typescript-eslint/no-unused-vars", "severity": "off" }
+        { "rule": "@typescript-eslint/no-unused-vars", "severity": "off" },
+        { "rule": "import-x/prefer-default-export", "severity": "off" },
+        { "rule": "import/prefer-default-export", "severity": "off" }
     ],
     "nxConsole.generateAiAgentRules": true
 }
