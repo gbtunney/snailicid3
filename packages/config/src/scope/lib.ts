@@ -89,13 +89,14 @@ export function readPackageName(packageJsonPath: string): null | string {
 export function runCommand(
     command: string,
     args: ReadonlyArray<string>,
-    options: { cwd?: string; input?: string } = {},
+    options: { cwd?: string; input?: string; stdio?: 'inherit' | 'pipe' } = {},
 ): CommandResult {
     const result = spawnSync(command, args, {
         cwd: options.cwd,
         encoding: 'utf8',
         input: options.input,
         shell: false,
+        stdio: options.stdio ?? 'pipe',
     })
 
     return {

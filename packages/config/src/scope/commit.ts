@@ -262,7 +262,7 @@ function runCheckedPrecommit(repoRoot: string): void {
     const lintResult = runCommand(
         'pnpm',
         ['exec', 'lint-staged', '--debug', '--relative'],
-        { cwd: repoRoot },
+        { cwd: repoRoot, stdio: 'inherit' },
     )
 
     if (lintResult.status !== 0) {
