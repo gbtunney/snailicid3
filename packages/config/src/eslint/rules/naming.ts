@@ -104,10 +104,11 @@ export const namingRules = (error: boolean = true): Array<Config> =>
                     },
 
                     /** Parameters (non-underscore): enforce min length >= 3 to avoid `i`, `e`, `x`-style names. */
+                    // Fixes #84
                     {
                         custom: {
                             match: true,
-                            regex: '^[a-zA-Z][a-zA-Z0-9_]{2,}$',
+                            regex: '^([a-zA-Z][a-zA-Z0-9_]{2,}|id|db|fs|ctx|req|res)$',
                         },
                         filter: {
                             match: true,
