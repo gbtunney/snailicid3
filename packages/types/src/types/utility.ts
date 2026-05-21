@@ -8,55 +8,56 @@ import type {
     UnknownArray,
 } from 'type-fest'
 
-/** UTILITY TYPES
- * @category Utility Types
- */
-export type PlainObject = {
-    [x: string]: unknown
-    [y: number]: never
-}
+/** Function type constraint: any function that returns `boolean`. (Useful for predicates / validators.) */
+export type AnyBooleanFn = (...args: Array<any>) => boolean
 
 /** ------ Array & Tuple Utility Types ------ */
 
-/** True if `Type` is an array/tuple type. */
- export type IsArray<Type> = Type extends UnknownArray ? true : false
+/** Any function at all */
+export type AnyFn = (...args: Array<any>) => any
 
-/** First element type of a tuple. */
- export type Head<Tuple extends readonly unknown[]> =
-    Tuple extends readonly [infer First, ...unknown[]] ? First : never
+/** Function type constraint: any TypeScript type-guard function. */
+export type AnyTypeGuardFn = (
+    inputValue: any,
+    ...args: Array<any>
+) => inputValue is any
 
-/** All but the first element type of a tuple. */
- export type Tail<Tuple extends readonly unknown[]> =
-    Tuple extends readonly [unknown, ...infer Rest] ? Rest : []
+/**
+ * Same parameters as `FnType`, but always returns `boolean`. (Useful for treating type guards as plain predicate
+ * signatures.)
+ */
+export type AsBooleanFn<FnType extends AnyFn> = (
+    ...args: Parameters<FnType>
+) => boolean
 
-/** First parameter type of a function.  */
- export type FirstArgOf<FunctionType extends (...args: any[]) => any> =
-    Head<Parameters<FunctionType>>
+/** Generic “asserts value is T” function type. */
+export type AssertionFn<Type, Args extends Array<unknown> = []> = (
+    value: unknown,
+    ...args: Args
+) => asserts value is Type
 
-/** Rest parameters (everything after the first) of a function. */
- export type RestArgsOf<FunctionType extends (...args: any[]) => any> =
-    Tail<Parameters<FunctionType>>
-
-/** ------ Object Utility Types ------ */
-/** Keys of an object type. */
-export type KeysOf<Type extends object> = keyof Type
+/** Deeply optional properties. */
+export type DeepPartial<Type> = Type extends object
+    ? {
+          [Prop in keyof Type]?: DeepPartial<Type[Prop]>
+      }
+    : Type
 
 /** `Entries<T>` wrapper */
 export type EntriesOf<Type extends object> = Entries<Type>
+
 /** `Entry<T>` wrapper. @category Utility Types */
 export type EntryOf<Type extends object> = Entry<Type>
-
-/** Builds a Record<Key, Value> where Key is inferred from array or object Type. Enforces exhaustiveness: no extra or missing keys. */
+/**
+ * Builds a Record<Key, Value> where Key is inferred from array or object Type. Enforces exhaustiveness: no extra or
+ * missing keys.
+ */
 export type ExhaustiveRecordFrom<
     Type extends ReadonlyArray<unknown> | Record<keyof unknown, unknown>,
     Value = unknown,
 > = Record<ExtractKeys<Type>, Value>
 
-/**
- * Infer keys from an array (union of elements) or object type.
- 
- 
- */
+/** Infer keys from an array (union of elements) or object type. */
 export type ExtractKeys<
     Type extends ReadonlyArray<unknown> | Record<keyof unknown, unknown>,
 > =
@@ -66,76 +67,102 @@ export type ExtractKeys<
           ? keyof Type
           : never
 
-/**
- * Turns an array of `[key, value]` tuples into an object type.
- */
+/** First parameter type of a function. */
+export type FirstArgOf<FunctionType extends (...args: Array<any>) => any> = Head<
+    Parameters<FunctionType>
+>
+
+/** Turns an array of `[key, value]` tuples into an object type. */
 export type FromEntriesTuples<
     TupleArrayType extends ReadonlyArray<readonly [PropertyKey, unknown]>,
 > = {
     [Tuple in TupleArrayType[number] as PropertyKey & Tuple[0]]: Tuple[1]
 }
 
-/** Prefix all string keys of an object type.  */
- export type PrefixProperties<Type extends object, Prefix extends string> = {
+/** First element type of a tuple. */
+export type Head<Tuple extends ReadonlyArray<unknown>> = Tuple extends readonly [
+    infer First,
+    ...Array<unknown>,
+]
+    ? First
+    : never
+/** True if `Type` is an array/tuple type. */
+export type IsArray<Type> = Type extends UnknownArray ? true : false
+
+/** ------ Object Utility Types ------ */
+/** Keys of an object type. */
+export type KeysOf<Type extends object> = keyof Type
+
+/** ----- Function Utility Types ----- */
+
+/** Extract the narrowed type from a type-guard function. */
+export type NarrowedOf<GuardFunction extends AnyFn> = GuardFunction extends (
+    inputValue: any,
+    ...args: Array<any>
+) => inputValue is infer Narrowed
+    ? Extract<Narrowed, TypeGuardInputValue<GuardFunction>>
+    : never
+
+/**
+ * UTILITY TYPES
+ *
+ * @category Utility Types
+ */
+export type PlainObject = {
+    [x: string]: unknown
+    [y: number]: never
+}
+
+/** Prefix all string keys of an object type. */
+export type PrefixProperties<Type extends object, Prefix extends string> = {
     [Key in keyof Type as `${Prefix}${Key extends string
         ? Key
         : never}`]: Type[Key]
 }
-/** Suffix all string keys of an object type.    */
- export type SuffixProperties<Type extends object, Suffix extends string> = {
+
+/** Rest parameters (everything after the first) of a function. */
+export type RestArgsOf<FunctionType extends (...args: Array<any>) => any> = Tail<
+    Parameters<FunctionType>
+>
+
+/** Suffix all string keys of an object type. */
+export type SuffixProperties<Type extends object, Suffix extends string> = {
     [Key in keyof Type as `${Key extends string
         ? Key
         : never}${Suffix}`]: Type[Key]
 }
 
-/** Deeply optional properties. */
-export type DeepPartial<Type> = Type extends object
-    ? {
-          [Prop in keyof Type]?: DeepPartial<Type[Prop]>
-      }
-    : Type
+/** All but the first element type of a tuple. */
+export type Tail<Tuple extends ReadonlyArray<unknown>> = Tuple extends readonly [
+    unknown,
+    ...infer Rest,
+]
+    ? Rest
+    : []
 
-/** ----- Function Utility Types ----- */
+/** Rest parameters after the input value of a type-guard function. */
+export type TypeGuardExtraParameters<GuardFunction extends AnyFn> =
+    GuardFunction extends (
+        inputValue: any,
+        ...args: infer RestArgs extends Array<unknown>
+    ) => inputValue is any
+        ? RestArgs
+        : never
 
-/** any function at all */
-export type AnyFn = (...args: any[]) => any
+/** Function type constraint: a TypeScript type guard with an explicit input, narrowed type, and rest args. */
+export type TypeGuardFn<
+    InputValue = unknown,
+    Narrowed extends InputValue = InputValue,
+    RestArgs extends Array<unknown> = Array<unknown>,
+> = (inputValue: InputValue, ...args: RestArgs) => inputValue is Narrowed
 
-/**
- * Function type constraint: any function that returns `boolean`.
- * (Useful for predicates / validators.)
- */
-export type AnyBooleanFn = (...args: any[]) => boolean
-
-
-/**
- * Function type constraint: any TypeScript type-guard function.
- */
-export type AnyTypeGuardFn = (
-    inputValue: unknown,
-    ...args: unknown[]
-) => inputValue is unknown
-
-
-/** Generic “asserts value is T” function type. */
-export type AssertionFn<Type, Args extends unknown[] = []> = (
-    value: unknown,
-    ...args: Args
-) => asserts value is Type
-
-/**
- * Same parameters as `FnType`, but always returns `boolean`.
- * (Useful for treating type guards as plain predicate signatures.)
-
- */
-export type AsBooleanFn<FnType extends AnyFn> = (...args: Parameters<FnType>) => boolean
-
-/**
- * Extract the narrowed type from a type-guard function.
-
- */
-export type NarrowedOf<GuardFunction extends AnyTypeGuardFn> =
-    GuardFunction extends (inputValue: any, ...args: any[]) => inputValue is infer Narrowed
-        ? Narrowed
+/** First parameter of a type-guard function. */
+export type TypeGuardInputValue<GuardFunction extends AnyFn> =
+    GuardFunction extends (
+        inputValue: infer InputValue,
+        ...args: Array<any>
+    ) => inputValue is any
+        ? InputValue
         : never
 
 /*

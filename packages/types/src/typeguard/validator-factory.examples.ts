@@ -1,10 +1,7 @@
-
-import { factoryValidator ,ValidatorFn,factoryTypeGuard} from './validator-factory.js'
-import type { ValidatorReturn } from './validator-factory.js'
+import { isInteger as raIsInteger } from 'ramda-adjunct'
 import type { AsBooleanFn } from './../types/utility.js'
-
-
-import {isInteger as raIsInteger,isTruthy as raIsTruuthy , isEmptyArray}from 'ramda-adjunct'
+import { factoryTypeGuard, factoryValidator } from './validator-factory.js'
+import type { ValidatorReturn } from './validator-factory.js'
 /** Numeric string regexes kept local so this example has no cross-package import dependency. */
 const scientificNumber =
     /^[+-]?(?:\d(?:_?\d)*(?:\.\d(?:_?\d)*)?|\.\d(?:_?\d)*)(?:e[+-]?\d(?:_?\d)*)?$/i
@@ -36,11 +33,13 @@ const isTestObj = factoryValidator(testme, 'matchRegExp')
 void isTestObj
 
 // type-guard example (explicit type for isolatedModules friendliness)
-const isMatchRegExpObj: ValidatorReturn<typeof isMatchStringRegExp, 'matchRegExp'> =
-    factoryValidator(isMatchStringRegExp, 'matchRegExp')
+const isMatchRegExpObj: ValidatorReturn<
+    typeof isMatchStringRegExp,
+    'matchRegExp'
+> = factoryValidator(isMatchStringRegExp, 'matchRegExp')
 
 // Use AsBooleanFn to expose callable predicate signatures
-export const isMatchRegExp: ValidatorFn<typeof isMatchStringRegExp> =
+export const isMatchRegExp: typeof isMatchStringRegExp =
     isMatchRegExpObj.isMatchRegExp
 
 export const isNotMatchRegExp: AsBooleanFn<typeof isMatchStringRegExp> =
@@ -58,34 +57,43 @@ export const isScientificNumber: typeof isScientificString =
 export const isNotScientificNumber: AsBooleanFn<typeof isScientificString> =
     example1.isNotScientificNumber
 
-export const { isHexNumber, isNotHexNumber } = factoryValidator(
-    isHexString,
-    'hexNumber',
-)
+const hexNumberValidators = factoryValidator(isHexString, 'hexNumber')
 
-export const { isBinaryNumber, isNotBinaryNumber } = factoryValidator(
-    isBinaryString,
-    'binaryNumber',
-)
+export const isHexNumber: typeof isHexString = hexNumberValidators.isHexNumber
 
-export const { isBigIntLiteral, isNotBigIntLiteral } = factoryValidator(
+export const isNotHexNumber: AsBooleanFn<typeof isHexString> =
+    hexNumberValidators.isNotHexNumber
+
+const binaryNumberValidators = factoryValidator(isBinaryString, 'binaryNumber')
+
+export const isBinaryNumber: typeof isBinaryString =
+    binaryNumberValidators.isBinaryNumber
+
+export const isNotBinaryNumber: AsBooleanFn<typeof isBinaryString> =
+    binaryNumberValidators.isNotBinaryNumber
+
+const bigIntLiteralValidators = factoryValidator(
     isBigIntLiteralString,
     'bigIntLiteral',
 )
 
+export const isBigIntLiteral: typeof isBigIntLiteralString =
+    bigIntLiteralValidators.isBigIntLiteral
 
-const integerValidators = factoryTypeGuard<number, 'integer', typeof raIsInteger>(
-    raIsInteger,
+export const isNotBigIntLiteral: AsBooleanFn<typeof isBigIntLiteralString> =
+    bigIntLiteralValidators.isNotBigIntLiteral
+
+const integerValidators = factoryTypeGuard<
+    number,
     'integer',
-)
+    typeof raIsInteger
+>(raIsInteger, 'integer')
 
-export const iisInteger = integerValidators.isInteger
+export const isInteger: (
+    inputValue: Parameters<typeof raIsInteger>[0],
+) => inputValue is number = integerValidators.isInteger
 
-const myintRe :string|number= '3'
-if ( integerValidators.isNotInteger(myintRe) ){
+export const iisInteger: typeof isInteger = isInteger
 
-const vafffr:string = myintRe
-}
-
-
-export const isNotInteger: AsBooleanFn<typeof raIsInteger> = integerValidators.isNotInteger
+export const isNotInteger: AsBooleanFn<typeof raIsInteger> =
+    integerValidators.isNotInteger
