@@ -157,7 +157,7 @@ jobs:
               with:
                   fetch-depth: 0
 
-            - uses: pnpm/action-setup@v4
+            - uses: pnpm/action-setup@v6
               with:
                   run_install: false
                   cache: ${{ inputs.pnpm_cache }}
@@ -211,7 +211,7 @@ jobs:
                   exit 1
 
             # ── Nx affected SHA detection ────────────────────────────
-            - uses: nrwl/nx-set-shas@v4
+            - uses: nrwl/nx-set-shas@v5
               if: ${{ inputs.use_nx_affected }}
 
             # ── Reporting ────────────────────────────
