@@ -68,9 +68,8 @@ export type ExtractKeys<
           : never
 
 /** First parameter type of a function. */
-export type FirstArgOf<FunctionType extends (...args: Array<any>) => any> = Head<
-    Parameters<FunctionType>
->
+export type FirstArgOf<FunctionType extends (...args: Array<any>) => any> =
+    Head<Parameters<FunctionType>>
 
 /** Turns an array of `[key, value]` tuples into an object type. */
 export type FromEntriesTuples<
@@ -80,12 +79,8 @@ export type FromEntriesTuples<
 }
 
 /** First element type of a tuple. */
-export type Head<Tuple extends ReadonlyArray<unknown>> = Tuple extends readonly [
-    infer First,
-    ...Array<unknown>,
-]
-    ? First
-    : never
+export type Head<Tuple extends ReadonlyArray<unknown>> =
+    Tuple extends readonly [infer First, ...Array<unknown>] ? First : never
 /** True if `Type` is an array/tuple type. */
 export type IsArray<Type> = Type extends UnknownArray ? true : false
 
@@ -121,9 +116,8 @@ export type PrefixProperties<Type extends object, Prefix extends string> = {
 }
 
 /** Rest parameters (everything after the first) of a function. */
-export type RestArgsOf<FunctionType extends (...args: Array<any>) => any> = Tail<
-    Parameters<FunctionType>
->
+export type RestArgsOf<FunctionType extends (...args: Array<any>) => any> =
+    Tail<Parameters<FunctionType>>
 
 /** Suffix all string keys of an object type. */
 export type SuffixProperties<Type extends object, Suffix extends string> = {
@@ -133,12 +127,8 @@ export type SuffixProperties<Type extends object, Suffix extends string> = {
 }
 
 /** All but the first element type of a tuple. */
-export type Tail<Tuple extends ReadonlyArray<unknown>> = Tuple extends readonly [
-    unknown,
-    ...infer Rest,
-]
-    ? Rest
-    : []
+export type Tail<Tuple extends ReadonlyArray<unknown>> =
+    Tuple extends readonly [unknown, ...infer Rest] ? Rest : []
 
 /** Rest parameters after the input value of a type-guard function. */
 export type TypeGuardExtraParameters<GuardFunction extends AnyFn> =

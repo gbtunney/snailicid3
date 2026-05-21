@@ -32,9 +32,7 @@ describe('factoryValidator core', () => {
             typeof value === 'string' && /^[a-z]+$/i.test(value)
         const validators = factoryValidator(alphaPredicate, 'alpha')
 
-        expectTypeOf(validators).toEqualTypeOf<
-            BoolValidatorResult<'alpha'>
-        >()
+        expectTypeOf(validators).toEqualTypeOf<BoolValidatorResult<'alpha'>>()
         expectTypeOf(validators.isAlpha).returns.toEqualTypeOf<boolean>()
         expectTypeOf(validators.isNotAlpha).returns.toEqualTypeOf<boolean>()
 
@@ -78,7 +76,13 @@ describe('factoryValidator core', () => {
         })
 
         expectTypeOf(validators).toEqualTypeOf<
-            BoolValidatorResult<'items', ReadonlyArray<unknown>, [], 'has', 'lacks'>
+            BoolValidatorResult<
+                'items',
+                ReadonlyArray<unknown>,
+                [],
+                'has',
+                'lacks'
+            >
         >()
 
         expect(validators.hasItems(['a'])).toBe(true)
