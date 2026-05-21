@@ -45,6 +45,7 @@ jobs:
               needs.detect.outputs.should_publish == 'true'
             }}
 
+
         uses: ./.github/workflows/call-pipeline.yml
         with:
             mode: abort_on_error
