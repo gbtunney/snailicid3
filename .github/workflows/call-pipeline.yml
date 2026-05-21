@@ -106,14 +106,6 @@ on:
                 default: false
                 type: boolean
 
-            # Nx Cloud — disabled by default to avoid hitting the free-tier rate limit in CI.
-            # Set nx_cloud: true only if you have a paid plan or know the run is within quota.
-            nx_cloud:
-                description: Enable Nx Cloud integration. Defaults to false to avoid free-tier rate limits.
-                required: false
-                default: false
-                type: boolean
-
             # API report — run pnpm api:report (api-extractor) after the build.
             # The generated etc/*.api.md files are tracked; if stale, require_clean_repo will fail.
             run_api_report:
@@ -149,6 +141,11 @@ jobs:
     pipeline:
         runs-on: ubuntu-latest
         name: pipeline
+        env:
+            # Always disable Nx Cloud to avoid free-tier rate-limit errors.
+            # Nx's postinstall hook runs before any step can set this, so it must
+            # live here at the job level — not inside a step.
+            NX_NO_CLOUD: 'true'
         outputs:
             is_repo_dirty: ${{ steps.repo_dirty.outputs.is_repo_dirty }}
             workspace_artifact_name: ${{ steps.artifact_name.outputs.name }}
@@ -193,7 +190,6 @@ jobs:
                     echo "- use_nx_affected: \`${{ inputs.use_nx_affected }}\`"
                     echo "- nx_targets: \`${{ inputs.nx_targets }}\`"
                     echo "- nx_fix_ci: \`${{ inputs.nx_fix_ci }}\`"
-                    echo "- nx_cloud: \`${{ inputs.nx_cloud }}\`"
                     echo "- run_api_report: \`${{ inputs.run_api_report }}\`"
                   } | tee -a "$GITHUB_STEP_SUMMARY"
 
@@ -217,20 +213,6 @@ jobs:
             # ── Nx affected SHA detection ────────────────────────────
             - uses: nrwl/nx-set-shas@v4
               if: ${{ inputs.use_nx_affected }}
-
-            # ── Nx Cloud configuration ───────────────────────────────
-            # Set NX_NO_CLOUD=true by default to prevent free-tier rate limit
-            # errors from breaking the pipeline. Pass nx_cloud: true to re-enable
-            # (only if you have a paid plan or know you're within quota).
-            - name: ⚡ Configure Nx Cloud
-              shell: bash
-              run: |
-                  if [[ "${{ inputs.nx_cloud }}" == "true" ]]; then
-                    echo "ℹ️ Nx Cloud enabled (nx_cloud: true)"
-                  else
-                    echo "NX_NO_CLOUD=true" >> "$GITHUB_ENV"
-                    echo "ℹ️ Nx Cloud disabled — running locally (pass nx_cloud: true to enable)"
-                  fi
 
             # ── Reporting ────────────────────────────
             - name: 🩺 Report Environment
