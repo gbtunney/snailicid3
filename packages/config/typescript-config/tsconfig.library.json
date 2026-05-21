@@ -3,12 +3,11 @@
     "compilerOptions": {
         "tsBuildInfoFile": "${configDir}/node_modules/.tmp/tsconfig.library.tsbuildinfo",
         "rootDir": "${configDir}/src",
-        "outDir": "${configDir}/dist",
+        "outDir": "${configDir}/types",
         "declarationDir": "${configDir}/types",
 
         "composite": true,
         "incremental": true,
-
         "declaration": true,
         "sourceMap": true,
         "declarationMap": true,

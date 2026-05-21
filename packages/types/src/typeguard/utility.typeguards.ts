@@ -5,7 +5,6 @@ import {
     type UnknownArray,
     type UnknownRecord,
 } from 'type-fest'
-
 import type {
     // EmptyObject,
     EmptyString,
@@ -299,7 +298,7 @@ export const isEmptyObject = <Type extends UnknownRecord>(
 export const isPlainObject = <
     Type extends PlainObject | Record<string, unknown>,
 >(
-    value: Type,
+    value: unknown,
 ): value is Type => RA.isPlainObject(value)
 
 /**

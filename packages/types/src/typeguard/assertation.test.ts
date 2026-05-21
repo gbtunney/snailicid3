@@ -1,9 +1,23 @@
 import { describe, expect, test } from 'vitest'
-import { type PlainObject } from './../types/utility.js'
+import {
+    type AssertionFunctionFromGuard,
+    type AssertionFunctionFromPredicate,
+    guardToAssertion,
+    predicateToAssertion,
+} from './assertation.js'
+import { isJsonifiableArray } from './json.typeguards.js'
+import { isBigInt, isPlainObject, isString } from './utility.typeguards.js'
+
+/** Generic local helper to avoid a zillion assertion type aliases */
+type AssertionFn<T, Args extends Array<unknown> = []> = (
+    value: unknown,
+    ...args: Args
+) => asserts value is T
 
 /** Local minimal validators replacing the removed number/validators dependency */
 const isNumeric = (value: unknown): value is bigint | number =>
     typeof value === 'number' || typeof value === 'bigint'
+
 const isPossibleNumeric = (
     value: unknown,
     strict = true,
@@ -15,6 +29,7 @@ const isPossibleNumeric = (
     if (!strict) return true
     return !Number.isNaN(Number(trimmed)) || /^[+-]?0x[\da-f]+$/i.test(trimmed)
 }
+
 const isValidScientificNumber = (value: unknown): value is number | string => {
     if (typeof value === 'number') return !Number.isNaN(value)
     if (typeof value !== 'string') return false
@@ -22,55 +37,35 @@ const isValidScientificNumber = (value: unknown): value is number | string => {
         value,
     )
 }
-import { guardToAssertion, predicateToAssertion } from './assertation.js'
-import { isJsonifiableArray } from './json.typeguards.js'
-import { isBigInt, isPlainObject, isString } from './utility.typeguards.js'
 
 /** Local predicates for this test */
-const minLen = (value: string, min: number): boolean =>
-    typeof value === 'string' && value.length >= min
+const minLen = (value: string, min: number): boolean => value.length >= min
 const startsWithPrefix = (value: string, prefix: string): boolean =>
-    typeof value === 'string' && value.startsWith(prefix)
+    value.startsWith(prefix)
 
-type AssertBigInt = (value: unknown) => asserts value is bigint
-type AssertJsonArray = (value: unknown) => asserts value is Array<unknown>
-type AssertMinLen = (value: string, min: number) => asserts value is string
-type AssertNumber = (value: unknown) => asserts value is number
-type AssertPlainObject = (
-    value: unknown,
-) => asserts value is PlainObject | Record<string, unknown>
-type AssertPossibleNumeric = (
-    value: unknown,
-    strict?: boolean,
-) => asserts value is number | string
-type AssertScientific = (value: unknown) => asserts value is string
-type AssertStartsWith = (
-    value: string,
-    prefix: string,
-) => asserts value is string
-// Assertion function types
-type AssertString = (value: unknown) => asserts value is string
-
-// Guard-derived assertions
-const assertIsString: AssertString = guardToAssertion(isString)
-const assertIsBigInt: AssertBigInt = guardToAssertion(isBigInt)
-const assertIsNumeric: AssertNumber = guardToAssertion(isNumeric)
-/** Wrap to widen the parameter to unknown */
-const assertIsPossibleNumeric: AssertPossibleNumeric = (value, strict) =>
-    (guardToAssertion(isPossibleNumeric as any) as any)(value as any, strict)
-const assertIsPlainObject: AssertPlainObject = (value) =>
-    (guardToAssertion(isPlainObject as any) as any)(value as any)
-const assertIsJsonArray: AssertJsonArray = guardToAssertion(isJsonifiableArray)
+// Guard-derived assertions (no casts needed)
+const assertIsString: AssertionFn<string> = guardToAssertion(isString)
+const assertIsBigInt: AssertionFn<bigint> = guardToAssertion(isBigInt)
+const assertIsNumeric: AssertionFn<bigint | number> =
+    guardToAssertion(isNumeric)
+const assertIsPossibleNumeric: AssertionFunctionFromGuard<
+    typeof isPossibleNumeric
+> = guardToAssertion(isPossibleNumeric)
+const assertIsPlainObject: AssertionFunctionFromGuard<typeof isPlainObject> =
+    guardToAssertion(isPlainObject)
+const assertIsJsonArray: AssertionFn<Array<unknown>> =
+    guardToAssertion(isJsonifiableArray)
 
 // Predicate-based assertions
-const assertMinLen: AssertMinLen = predicateToAssertion(
-    minLen as any,
-) as unknown as AssertMinLen
-const assertStartsWithPrefix: AssertStartsWith = predicateToAssertion(
-    startsWithPrefix as any,
-) as unknown as AssertStartsWith
-const assertIsValidScientific: AssertScientific = (value) =>
-    (predicateToAssertion(isValidScientificNumber as any) as any)(value as any)
+const assertMinLen: AssertionFunctionFromPredicate<typeof minLen> =
+    predicateToAssertion(minLen)
+const assertStartsWithPrefix: AssertionFunctionFromPredicate<
+    typeof startsWithPrefix
+> = predicateToAssertion(startsWithPrefix)
+
+const assertIsValidScientific: AssertionFn<number | string> = guardToAssertion(
+    isValidScientificNumber,
+)
 
 describe('typeguards', () => {
     test('string', () => {
@@ -92,7 +87,9 @@ describe('typeguards', () => {
         expect(() => {
             assertIsNumeric('2')
         }).toThrow()
+
         assertIsPossibleNumeric(2)
+
         expect(() => {
             assertIsPossibleNumeric('2tt', true)
         }).toThrow()

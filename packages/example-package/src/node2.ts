@@ -4,11 +4,13 @@ export type NodeRuntimeValue = {
     runtime: 'node'
     value: string
 }
-export const testme = { helllo: dumbVariable1 }
+export const testme: {
+    helllo: string
+} = { helllo: dumbVariable1 }
 
 export const testme2 = { 'another key here': 'im an object' }
 
-export const gbtT = { ...testme, ...testme2 }
+export const gbtT: typeof testme & typeof testme2 = { ...testme, ...testme2 }
 
 export function asNodeRuntimeValue(value: string): NodeRuntimeValue {
     return {

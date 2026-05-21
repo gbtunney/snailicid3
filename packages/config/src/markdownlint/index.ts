@@ -18,8 +18,22 @@ const BASE_IGNORES = [
     '**/tmp/**',
     '**/.github/instructions/nx.instructions.md',
 ]
-
-export const markdownlint = {
+type MarkdownlintApi = {
+    config: (
+        option_overrides?: MarkdownlintRuleConfiguration,
+        ignore_overrides?: Array<string>,
+        includes?: Array<string>,
+        useBaseConfig?: boolean,
+    ) => MarkdownlintConfiguration
+    rules: {
+        baseConfig: () => MarkdownlintRuleConfiguration
+        merge: (
+            option_overrides?: MarkdownlintRuleConfiguration,
+            useBaseConfig?: boolean,
+        ) => MarkdownlintRuleConfiguration
+    }
+}
+export const markdownlint: MarkdownlintApi = {
     config: (
         option_overrides: MarkdownlintRuleConfiguration = {},
         ignore_overrides: Array<string> = [],
@@ -33,7 +47,10 @@ export const markdownlint = {
 
     rules: {
         baseConfig: getBaseConfig,
-        merge: getMergedRuleConfiguration,
+        merge: (
+            option_overrides: MarkdownlintRuleConfiguration = {},
+            useBaseConfig: boolean = true,
+        ) => getMergedRuleConfiguration(option_overrides, useBaseConfig),
     },
 }
 

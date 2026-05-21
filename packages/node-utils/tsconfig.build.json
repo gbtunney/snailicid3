@@ -4,6 +4,6 @@
     "exclude": ["**/*.test.ts", "**/*.test.mts", "**/*.test.cts"],
     "compilerOptions": {
         "types": ["node"],
-        "outDir": "./types"
+        "noEmit": true
     }
 }

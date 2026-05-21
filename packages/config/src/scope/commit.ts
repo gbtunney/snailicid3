@@ -30,7 +30,7 @@ type ParsedArgs = {
     validateOnly: boolean
 }
 
-export function main(args = process.argv.slice(2)): void {
+export function main(args: Array<string> = process.argv.slice(2)): void {
     const parsed = parseArgs(args)
     const repoRoot = getRepoRoot()
     if (parsed.validateOnly) {

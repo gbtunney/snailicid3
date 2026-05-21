@@ -4,6 +4,7 @@
     "exclude": ["**/*.test.ts", "**/*.test.mts", "**/*.test.cts"],
     "compilerOptions": {
         "types": ["node"],
-        "noEmit": true
+        "noEmit": true,
+        "isolatedDeclarations": true
     }
 }

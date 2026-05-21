@@ -33,12 +33,7 @@
             "check:ts": {},
             "build:ts": {},
             "build:tsdown": {},
-            "build": {
-                "dependsOn": [
-                    "build:ts",
-                    "build:tsdown"
-                ]
-            },
+            "build": {},
             "api:report": {},
             "api:check": {},
             "test": {},

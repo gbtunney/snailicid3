@@ -17,7 +17,7 @@
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
         "dev:nx": "nx run $npm_package_name:dev",
-        "test:coverage": "vitest run --coverage"
+        "demo": "node ./bin/logger-demo.js"
     },
     "buildConfig": {
         "runtime": "node",
@@ -32,12 +32,9 @@
             "build:ts": {},
             "check:ts": {},
             "build:tsdown": {},
-            "build": {
-                "dependsOn": [
-                    "build:ts",
-                    "build:tsdown"
-                ]
-            },
+            "build": {},
+            "api:report": {},
+            "api:check": {},
             "test": {},
             "test:watch": {},
             "lint": {},
@@ -58,10 +55,12 @@
             "import": "./dist/index.js",
             "require": "./dist/index.cjs"
         },
+        "./demo": "./dist/demo.mjs",
         "./package.json": "./package.json"
     },
     "files": [
         "CHANGELOG.md",
+        "bin",
         "dist",
         "types"
     ],
@@ -79,10 +78,10 @@
         "@snailicid3/color": "workspace:*",
         "@snailicid3/utils": "workspace:*",
         "chalk": "^5.6.2",
-        "dayjs": "^1.11.20",
-        "zod": "^4.3.6"
+        "dayjs": "^1.11.20"
     },
     "devDependencies": {
+        "@microsoft/api-extractor": "^7.58.7",
         "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
         "@types/node": "^25.8.0",

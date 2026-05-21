@@ -1,6 +1,5 @@
 import chalk, { modifierNames } from 'chalk'
 import dayjs from 'dayjs'
-import z from 'zod'
 import { fmt, formatArgs } from './pretty.print.js'
 import {
     type ChalkColor,
@@ -38,7 +37,7 @@ type ExtractKeys<
 > =
     Type extends ReadonlyArray<infer U>
         ? Extract<U, PropertyKey>
-        : Type extends Record<keyof any, unknown>
+        : Type extends Record<PropertyKey, unknown>
           ? keyof Type
           : never
 
@@ -63,10 +62,38 @@ export const LEVEL_COLORS: LoggerRecord<ChalkColor> = {
 }
 const LEVEL_STYLES = modifierNames
 
-const isBrowser = (): boolean =>
-    typeof window !== 'undefined' && typeof window.document !== 'undefined'
+const isBrowser = (): boolean => 'document' in globalThis
 
 const RESET = '\x1b[0m'
+
+export type Logger = {
+    child: (name: string, overrides?: Partial<LoggerOpts>) => Logger
+    debug: <Type extends Array<unknown>>(...a: Type) => void
+    error: <Type extends Array<unknown>>(...a: Type) => void
+    fatal: <Type extends Array<unknown>>(...a: Type) => void
+    info: <Type extends Array<unknown>>(...a: Type) => void
+    readonly level: LogLevelName
+    readonly name: string | undefined
+    setLevel: (level: LogLevelName) => void
+    trace: <Type extends Array<unknown>>(...a: Type) => void
+    warn: <Type extends Array<unknown>>(...a: Type) => void
+}
+
+export type LoggerOpts = {
+    colors?: Partial<LoggerRecord<LogLevelColors>>
+    level?: LogLevelName
+    name?: string
+    time_format?: string
+    time_stamp?: boolean
+}
+
+type LoggerConfig = {
+    colors: LoggerRecord<LogLevelColors>
+    level: LogLevelName
+    name?: string | undefined
+    time_format: string
+    time_stamp: boolean
+}
 
 /** TODO: use hex color in config */
 function colorizeBrowser(
@@ -93,47 +120,31 @@ function pickConsole(level: LogLevelName): (...args: Array<unknown>) => void {
     }
 }
 
-const schemaLoggerOpts = z.object({
-    colors: z
-        .transform<
-            Partial<LoggerRecord<LogLevelColors>>,
-            LoggerRecord<LogLevelColors>
-        >((val) => {
-            return { ...LEVEL_COLORS, ...val }
-        })
-        .prefault({}),
-    level: z.enum(LEVEL_NAMES).default('info'),
-    name: z.string().trim().optional(),
-    time_format: z.string().default('hh:mm:ss'),
-    time_stamp: z.boolean().default(false),
-})
+const isLogLevelName = (value: string): value is LogLevelName =>
+    LEVEL_NAMES.includes(value as LogLevelName)
 
-export type Logger = {
-    child: (
-        name: string,
-        overrides?: Partial<z.input<typeof schemaLoggerOpts>>,
-    ) => Logger
-    debug: <Type extends Array<unknown>>(...a: Type) => void
-    error: <Type extends Array<unknown>>(...a: Type) => void
-    fatal: <Type extends Array<unknown>>(...a: Type) => void
-    info: <Type extends Array<unknown>>(...a: Type) => void
-    readonly level: LogLevelName
-    readonly name: string | undefined
-    setLevel: (level: LogLevelName) => void
-    trace: <Type extends Array<unknown>>(...a: Type) => void
-    warn: <Type extends Array<unknown>>(...a: Type) => void
+const normalizeLoggerOpts = (opts: LoggerOpts = {}): LoggerConfig => {
+    const level: string = opts.level ?? 'info'
+    if (!isLogLevelName(level)) {
+        throw new Error(`Invalid logger level: ${level}`)
+    }
+
+    const name = opts.name?.trim()
+
+    return {
+        colors: {
+            ...LEVEL_COLORS,
+            ...(opts.colors ?? {}),
+        },
+        level: level,
+        name: name ? name : undefined,
+        time_format: opts.time_format ?? 'hh:mm:ss',
+        time_stamp: opts.time_stamp ?? false,
+    }
 }
 
-export type LoggerOpts = z.input<typeof schemaLoggerOpts>
 export const createLogger = (opts?: LoggerOpts): Logger => {
-    // Resolve/validate options
-    const parsed = schemaLoggerOpts.safeParse(opts ?? {})
-    if (!parsed.success) {
-        console.error('Invalid logger configuration:')
-        console.error(z.prettifyError(parsed.error))
-        throw new Error('Invalid logger configuration')
-    }
-    const cfg = parsed.data
+    const cfg = normalizeLoggerOpts(opts)
 
     // Internal state (captured by closure)
     /** (cfg.name ?? '').trim() */
@@ -143,11 +154,7 @@ export const createLogger = (opts?: LoggerOpts): Logger => {
     let minLevel: number = LOG_LEVELS[cfg.level]
     const showTime: boolean = cfg.time_stamp
     const timeFormat = cfg.time_format
-    // If your schema already merged colors, this is already LogLevelColors
-    const colors: LoggerRecord<LogLevelColors> = {
-        ...LEVEL_COLORS,
-        ...(cfg.colors ?? {}),
-    }
+    const colors: LoggerRecord<LogLevelColors> = cfg.colors
 
     const shouldLog = (level: LogLevelName): boolean =>
         LOG_LEVELS[level] >= minLevel && level !== 'silent'
@@ -182,10 +189,12 @@ export const createLogger = (opts?: LoggerOpts): Logger => {
         }
     }
 
-    const _levelName = (): LogLevelName =>
-        (Object.entries(LOG_LEVELS).find(
+    const _levelName = (): LogLevelName => {
+        const levelEntry = Object.entries(LOG_LEVELS).find(
             ([, levelNumber]) => levelNumber === minLevel,
-        )?.[0] as LogLevelName) ?? 'info'
+        )
+        return levelEntry ? (levelEntry[0] as LogLevelName) : 'info'
+    }
 
     return {
         child: (childName, overrides = {}): Logger =>
@@ -236,10 +245,7 @@ let loggerInstance: Logger | undefined
  * - With opts: returns a new, non-singleton instance configured with those opts.
  */
 /** ...existing code... */
-export const getLogger = (
-    opts?: z.input<typeof schemaLoggerOpts>,
-    makeDefault = false,
-): Logger => {
+export const getLogger = (opts?: LoggerOpts, makeDefault = false): Logger => {
     if (!loggerInstance) {
         loggerInstance = createLogger(opts)
         return loggerInstance

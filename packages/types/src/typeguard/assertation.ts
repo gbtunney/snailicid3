@@ -1,3 +1,13 @@
+import type {
+    AnyBooleanFn,
+    FirstArgOf,
+    NarrowedOf,
+    RestArgsOf,
+    TypeGuardExtraParameters,
+    TypeGuardFn,
+    TypeGuardInputValue,
+} from './../types/utility.js'
+
 export type AssertionFunctionFromGuard<Guard extends TypeGuardFunction> = (
     value: TypeGuardInputValue<Guard>,
     ...args: TypeGuardExtraParameters<Guard>
@@ -18,36 +28,23 @@ export type AssertionFunctionFromPredicate<
     ...args: PredicateExtraParameters<Predicate>
 ) => asserts value is Narrowed
 
-export type BooleanPredicateFunction = (
-    value: unknown,
-    ...args: Array<unknown>
-) => boolean
+export type BooleanPredicateFunction = AnyBooleanFn
 
 export type PredicateExtraParameters<
     Predicate extends BooleanPredicateFunction,
-> = Parameters<Predicate> extends [unknown, ...infer Rest] ? Rest : never
+> = RestArgsOf<Predicate>
 
 export type PredicateInputValue<Predicate extends BooleanPredicateFunction> =
-    Parameters<Predicate>[0]
+    FirstArgOf<Predicate>
 
-export type TypeGuardExtraParameters<Guard extends TypeGuardFunction> =
-    TypeGuardParameters<Guard> extends [unknown, ...infer Rest] ? Rest : never
-
-export type TypeGuardFunction = (
-    value: unknown,
-    ...args: Array<unknown>
-) => value is unknown
-
-export type TypeGuardInputValue<Guard extends TypeGuardFunction> =
-    TypeGuardParameters<Guard>[0]
+export type TypeGuardFunction<
+    InputValue = any,
+    Narrowed extends InputValue = InputValue,
+    RestArgs extends Array<unknown> = Array<any>,
+> = TypeGuardFn<InputValue, Narrowed, RestArgs>
 
 export type TypeGuardNarrowedType<Guard extends TypeGuardFunction> =
-    Guard extends (
-        value: unknown,
-        ...args: Array<unknown>
-    ) => value is infer Narrowed
-        ? Narrowed
-        : never
+    NarrowedOf<Guard>
 
 export type TypeGuardParameters<Guard extends TypeGuardFunction> =
     Parameters<Guard>
@@ -70,16 +67,12 @@ export function guardToAssertion<Guard extends TypeGuardFunction>(
     guard: Guard,
     message = 'Assertion failed',
 ): AssertionFunctionFromGuard<Guard> {
-    return (
-        value: TypeGuardInputValue<Guard>,
-        ...args: TypeGuardExtraParameters<Guard>
-    ): asserts value is TypeGuardNarrowedType<Guard> => {
+    return ((value, ...args) => {
         if (!guard(value, ...args)) {
             throw new TypeError(message)
         }
-    }
+    }) as AssertionFunctionFromGuard<Guard>
 }
-
 /**
  * Builds an assertion from a boolean-returning predicate.
  *

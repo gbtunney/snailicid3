@@ -1,10 +1,102 @@
 import type { PascalCase } from 'type-fest'
+import type {
+    AnyBooleanFn,
+    AnyTypeGuardFn,
+    AsBooleanFn,
+    FirstArgOf,
+    NarrowedOf,
+    RestArgsOf,
+} from './../types/utility.js'
 
-export type BoolPredicate = (inputValue: unknown) => boolean
-export type Predicate<Type = unknown> = (
-    inputValue: unknown,
-) => inputValue is Type
+export type BoolPredicate<
+    InputValue = unknown,
+    RestArgs extends Array<unknown> = [],
+> = (inputValue: InputValue, ...args: RestArgs) => boolean
 
+export type BoolValidatorResult<
+    BaseName extends string,
+    InputValue = unknown,
+    RestArgs extends Array<unknown> = [],
+    PositivePrefix extends string = 'is',
+    NegativePrefix extends string = 'isNot',
+> = {
+    [Key in ValidatorKey<NegativePrefix, BaseName>]: (
+        inputValue: InputValue,
+        ...args: RestArgs
+    ) => boolean
+} & {
+    [Key in ValidatorKey<PositivePrefix, BaseName>]: (
+        inputValue: InputValue,
+        ...args: RestArgs
+    ) => boolean
+}
+
+/** A type-guard predicate. `Narrowed` must be assignable to `InputValue` (required by TS for `value is Narrowed`). */
+export type Predicate<
+    Narrowed extends InputValue,
+    InputValue = unknown,
+    RestArgs extends Array<unknown> = [],
+> = (inputValue: InputValue, ...args: RestArgs) => inputValue is Narrowed
+
+export type ValidatorFn<FunctionType extends AnyBooleanFn = AnyBooleanFn> =
+    AsBooleanFn<FunctionType>
+
+export type ValidatorPrefixes<
+    PositivePrefix extends string = 'is',
+    NegativePrefix extends string = 'isNot',
+> = {
+    negativePrefix?: NegativePrefix
+    positivePrefix?: PositivePrefix
+}
+
+export type ValidatorResult<
+    Narrowed extends InputValue,
+    BaseName extends string,
+    InputValue = unknown,
+    RestArgs extends Array<unknown> = [],
+    PositivePrefix extends string = 'is',
+    NegativePrefix extends string = 'isNot',
+> = {
+    [Key in ValidatorKey<NegativePrefix, BaseName>]: (
+        inputValue: InputValue,
+        ...args: RestArgs
+    ) => boolean
+} & {
+    [Key in ValidatorKey<PositivePrefix, BaseName>]: (
+        inputValue: InputValue,
+        ...args: RestArgs
+    ) => inputValue is Narrowed
+}
+
+export type ValidatorReturn<
+    PredicateFunction extends AnyBooleanFn,
+    BaseName extends string,
+    PositivePrefix extends string = 'is',
+    NegativePrefix extends string = 'isNot',
+> = PredicateFunction extends AnyTypeGuardFn
+    ? // Ensure the narrowed type is assignable to the input type (required for `value is Narrowed`)
+      NarrowedOf<PredicateFunction> extends FirstArgOf<PredicateFunction>
+        ? ValidatorResult<
+              NarrowedOf<PredicateFunction>,
+              BaseName,
+              FirstArgOf<PredicateFunction>,
+              RestArgsOf<PredicateFunction>,
+              PositivePrefix,
+              NegativePrefix
+          >
+        : never
+    : BoolValidatorResult<
+          BaseName,
+          FirstArgOf<PredicateFunction>,
+          RestArgsOf<PredicateFunction>,
+          PositivePrefix,
+          NegativePrefix
+      >
+
+type ValidatorKey<
+    Prefix extends string,
+    BaseName extends string,
+> = `${Prefix}${PascalCase<BaseName>}`
 /** Split on delimiters & camelCase transitions, then PascalCase. */
 const toPascal = (rawName: string): string => {
     const parts: Array<string> = rawName
@@ -20,44 +112,122 @@ const toPascal = (rawName: string): string => {
         .join('')
 }
 
-export type BoolValidatorResult<BaseName extends string> = {
-    [Key in IsKey<BaseName>]: BoolPredicate
-} & {
-    [Key in IsNotKey<BaseName>]: BoolPredicate
-}
-export type ValidatorResult<Type, BaseName extends string> = {
-    [Key in IsKey<BaseName>]: (inputValue: unknown) => inputValue is Type
-} & {
-    [Key in IsNotKey<BaseName>]: (inputValue: unknown) => boolean
-}
-
-type IsKey<BaseName extends string> = `is${PascalCase<BaseName>}`
-
-type IsNotKey<BaseName extends string> = `isNot${PascalCase<BaseName>}`
-
-export function factoryValidator<Type, BaseName extends string>(
-    predicateFunction: Predicate<Type>,
+/**
+ * Upgrade a boolean predicate into a typed type guard by explicitly supplying `Narrowed`.
+ *
+ * `Narrowed` must be assignable to the predicate's first-arg type.
+ */
+export function factoryTypeGuard<
+    Narrowed extends FirstArgOf<PredicateFunction>,
+    BaseName extends string,
+    PredicateFunction extends AnyBooleanFn,
+    PositivePrefix extends string = 'is',
+    NegativePrefix extends string = 'isNot',
+>(
+    predicateFunction: PredicateFunction,
     baseName: BaseName,
-): ValidatorResult<Type, BaseName>
-export function factoryValidator<BaseName extends string>(
-    predicateFunction: BoolPredicate,
-    baseName: BaseName,
-): BoolValidatorResult<BaseName>
-export function factoryValidator<ValueType, BaseName extends string>(
-    predicateFunction: BoolPredicate | Predicate<ValueType>,
-    baseName: BaseName,
-): BoolValidatorResult<BaseName> | ValidatorResult<ValueType, BaseName> {
+    prefixes: ValidatorPrefixes<PositivePrefix, NegativePrefix> = {},
+): ValidatorResult<
+    Narrowed,
+    BaseName,
+    FirstArgOf<PredicateFunction>,
+    RestArgsOf<PredicateFunction>,
+    PositivePrefix,
+    NegativePrefix
+> {
     const pascalCaseName = toPascal(baseName) as PascalCase<BaseName>
-    const isKeyName: IsKey<BaseName> = `is${pascalCaseName}`
-    const isNotKeyName: IsNotKey<BaseName> = `isNot${pascalCaseName}`
+    const positivePrefix = (prefixes.positivePrefix ?? 'is') as PositivePrefix
+    const negativePrefix = (prefixes.negativePrefix ??
+        'isNot') as NegativePrefix
+    const positiveKeyName =
+        `${positivePrefix}${pascalCaseName}` as ValidatorKey<
+            PositivePrefix,
+            BaseName
+        >
+    const negativeKeyName =
+        `${negativePrefix}${pascalCaseName}` as ValidatorKey<
+            NegativePrefix,
+            BaseName
+        >
 
-    const isFunction: (inputValue: unknown) => boolean = (inputValue) =>
-        predicateFunction(inputValue)
-    const isNotFunction: (inputValue: unknown) => boolean = (inputValue) =>
-        !isFunction(inputValue)
+    type InputValue = FirstArgOf<PredicateFunction>
+    type RestArgs = RestArgsOf<PredicateFunction>
+
+    const isGuard = (
+        inputValue: InputValue,
+        ...args: RestArgs
+    ): inputValue is Narrowed => predicateFunction(inputValue, ...args)
+
+    const isNotFunction = (
+        inputValue: InputValue,
+        ...args: RestArgs
+    ): boolean => !predicateFunction(inputValue, ...args)
 
     return {
-        [isKeyName]: isFunction,
-        [isNotKeyName]: isNotFunction,
-    } as BoolValidatorResult<BaseName> | ValidatorResult<ValueType, BaseName>
+        [negativeKeyName]: isNotFunction,
+        [positiveKeyName]: isGuard,
+    } as ValidatorResult<
+        Narrowed,
+        BaseName,
+        InputValue,
+        RestArgs,
+        PositivePrefix,
+        NegativePrefix
+    >
+}
+
+/**
+ * For boolean predicates: returns `{ isX: boolean, isNotX: boolean }`. For type-guard predicates: returns `{ isX:
+ * type-guard, isNotX: boolean }`.
+ */
+export function factoryValidator<
+    BaseName extends string,
+    PredicateFunction extends AnyBooleanFn,
+    PositivePrefix extends string = 'is',
+    NegativePrefix extends string = 'isNot',
+>(
+    predicateFunction: PredicateFunction,
+    baseName: BaseName,
+    prefixes: ValidatorPrefixes<PositivePrefix, NegativePrefix> = {},
+): ValidatorReturn<
+    PredicateFunction,
+    BaseName,
+    PositivePrefix,
+    NegativePrefix
+> {
+    const pascalCaseName = toPascal(baseName) as PascalCase<BaseName>
+    const positivePrefix = (prefixes.positivePrefix ?? 'is') as PositivePrefix
+    const negativePrefix = (prefixes.negativePrefix ??
+        'isNot') as NegativePrefix
+    const positiveKeyName =
+        `${positivePrefix}${pascalCaseName}` as ValidatorKey<
+            PositivePrefix,
+            BaseName
+        >
+    const negativeKeyName =
+        `${negativePrefix}${pascalCaseName}` as ValidatorKey<
+            NegativePrefix,
+            BaseName
+        >
+
+    type InputValue = FirstArgOf<PredicateFunction>
+    type RestArgs = RestArgsOf<PredicateFunction>
+
+    const isFunction = (inputValue: InputValue, ...args: RestArgs): boolean =>
+        predicateFunction(inputValue, ...args)
+
+    const isNotFunction = (
+        inputValue: InputValue,
+        ...args: RestArgs
+    ): boolean => !isFunction(inputValue, ...args)
+
+    return {
+        [negativeKeyName]: isNotFunction,
+        [positiveKeyName]: isFunction,
+    } as ValidatorReturn<
+        PredicateFunction,
+        BaseName,
+        PositivePrefix,
+        NegativePrefix
+    >
 }
