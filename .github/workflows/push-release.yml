@@ -230,7 +230,7 @@ jobs:
             # Publishes only when: no pending changesets AND the triggering commit is a version bump.
             - name: Publish packages and create GitHub releases
               if: needs.detect.outputs.should_publish == 'true'
-              uses: changesets/action@v1
+              uses: changesets/action@v1.7.0
               with:
                   publish: pnpm changeset publish
                   createGithubReleases: true
