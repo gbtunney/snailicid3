@@ -1,0 +1,514 @@
+name: Call Detect Release State
+
+# ─────────────────────────────────────────────────────────────
+# WORKFLOW: Detect Release State
+# TYPE: reusable workflow_call
+#
+# Purpose:
+#   Answer this question for one checked-out ref/SHA:
+#
+#     “What release-related state exists right now?”
+#
+# This workflow is state-based, not commit-shape-based.
+#
+# Old style:
+#   - Look at HEAD^..HEAD.
+#   - Guess whether the last commit looked like a Changesets version commit.
+#
+# New style:
+#   - Count pending .changeset/*.md files.
+#   - Build a package inventory from package.json files.
+#   - Ask npm whether each public local package version already exists.
+#   - Emit clear machine-readable outputs and a readable summary table.
+#
+# This workflow intentionally does not install dependencies.
+# It only needs checkout + Node/npm, which are available on GitHub runners.
+# ─────────────────────────────────────────────────────────────
+
+on:
+    workflow_call:
+        inputs:
+            ref:
+                description: >
+                    Git ref, branch, tag, or SHA to inspect. Leave empty to inspect the triggering commit. For PR callers, pass github.event.pull_request.head.sha to inspect the PR head.
+
+
+                required: false
+                type: string
+                default: ''
+
+        outputs:
+            checked_ref:
+                description: The resolved commit SHA that was inspected.
+                value: ${{ jobs.detect.outputs.checked_ref }}
+
+            changeset_count:
+                description: Number of pending .changeset/*.md files, excluding README.md.
+                value: ${{ jobs.detect.outputs.changeset_count }}
+
+            has_pending_changesets:
+                description: "'true' when pending changeset files exist."
+                value: ${{ jobs.detect.outputs.has_pending_changesets }}
+
+            package_inventory_json:
+                description: JSON array of discovered package.json files with npm publish state.
+                value: ${{ jobs.detect.outputs.package_inventory_json }}
+
+            package_count:
+                description: Total package.json files discovered.
+                value: ${{ jobs.detect.outputs.package_count }}
+
+            public_package_count:
+                description: Non-private packages with name and version.
+                value: ${{ jobs.detect.outputs.public_package_count }}
+
+            private_package_count:
+                description: Private packages discovered.
+                value: ${{ jobs.detect.outputs.private_package_count }}
+
+            invalid_package_count:
+                description: Packages missing name or version.
+                value: ${{ jobs.detect.outputs.invalid_package_count }}
+
+            new_package_count:
+                description: Public packages whose package name does not exist on npm.
+                value: ${{ jobs.detect.outputs.new_package_count }}
+
+            new_version_count:
+                description: Public packages whose name exists on npm but local version is new.
+                value: ${{ jobs.detect.outputs.new_version_count }}
+
+            already_published_count:
+                description: Public packages whose exact local version already exists on npm.
+                value: ${{ jobs.detect.outputs.already_published_count }}
+
+            lookup_failed_count:
+                description: Packages whose npm lookup was inconclusive.
+                value: ${{ jobs.detect.outputs.lookup_failed_count }}
+
+            publish_candidate_count:
+                description: Number of package versions that appear eligible for the publish flow.
+                value: ${{ jobs.detect.outputs.publish_candidate_count }}
+
+            publish_candidates:
+                description: Space-delimited package@version entries that appear eligible for publish.
+                value: ${{ jobs.detect.outputs.publish_candidates }}
+
+            has_publish_candidates:
+                description: "'true' when at least one public local package version is not on npm."
+                value: ${{ jobs.detect.outputs.has_publish_candidates }}
+
+            should_version:
+                description: "'true' when pending changesets exist."
+                value: ${{ jobs.detect.outputs.should_version }}
+
+            should_publish:
+                description: "'true' when no changesets remain and publish candidates exist."
+                value: ${{ jobs.detect.outputs.should_publish }}
+
+            should_skip:
+                description: "'true' when no versioning or publishing action is needed."
+                value: ${{ jobs.detect.outputs.should_skip }}
+
+permissions:
+    contents: read
+
+jobs:
+    detect:
+        name: detect release state
+        runs-on: ubuntu-latest
+
+        outputs:
+            checked_ref: ${{ steps.detect.outputs.checked_ref }}
+            changeset_count: ${{ steps.detect.outputs.changeset_count }}
+            has_pending_changesets: ${{ steps.detect.outputs.has_pending_changesets }}
+            package_inventory_json: ${{ steps.detect.outputs.package_inventory_json }}
+            package_count: ${{ steps.detect.outputs.package_count }}
+            public_package_count: ${{ steps.detect.outputs.public_package_count }}
+            private_package_count: ${{ steps.detect.outputs.private_package_count }}
+            invalid_package_count: ${{ steps.detect.outputs.invalid_package_count }}
+            new_package_count: ${{ steps.detect.outputs.new_package_count }}
+            new_version_count: ${{ steps.detect.outputs.new_version_count }}
+            already_published_count: ${{ steps.detect.outputs.already_published_count }}
+            lookup_failed_count: ${{ steps.detect.outputs.lookup_failed_count }}
+            publish_candidate_count: ${{ steps.detect.outputs.publish_candidate_count }}
+            publish_candidates: ${{ steps.detect.outputs.publish_candidates }}
+            has_publish_candidates: ${{ steps.detect.outputs.has_publish_candidates }}
+            should_version: ${{ steps.detect.outputs.should_version }}
+            should_publish: ${{ steps.detect.outputs.should_publish }}
+            should_skip: ${{ steps.detect.outputs.should_skip }}
+
+        steps:
+            - name: Checkout ref
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  ref: ${{ inputs.ref || github.sha }}
+
+            - name: Detect release state
+              id: detect
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  checked_ref="$(git rev-parse HEAD)"
+
+                  echo "::group::Detect pending changesets"
+
+                  changeset_count="$(
+                    find .changeset -name "*.md" ! -name "README.md" 2>/dev/null \
+                      | wc -l \
+                      | tr -d ' '
+                  )"
+
+                  has_pending_changesets=false
+                  if [ "$changeset_count" -gt 0 ]; then
+                    has_pending_changesets=true
+                  fi
+
+                  echo "changeset_count=$changeset_count"
+                  echo "has_pending_changesets=$has_pending_changesets"
+                  echo "::endgroup::"
+
+                  echo "::group::Build package inventory"
+
+                  package_inventory_json="$(node <<'NODE'
+                  const fs = require('node:fs');
+                  const path = require('node:path');
+                  const { execFileSync } = require('node:child_process');
+
+                  /**
+                   * Package-level publish classification.
+                   *
+                   * private:
+                   *   package.json has "private": true.
+                   *
+                   * invalid:
+                   *   package.json is missing name or version.
+                   *
+                   * new-package:
+                   *   package name does not exist on npm.
+                   *
+                   * new-version:
+                   *   package name exists on npm, but this local version does not.
+                   *
+                   * already-published:
+                   *   this exact local name@version exists on npm.
+                   *
+                   * lookup-failed:
+                   *   npm lookup failed in a way that was not classified as "not found".
+                   */
+                  const PublishStatus = {
+                    Private: 'private',
+                    Invalid: 'invalid',
+                    NewPackage: 'new-package',
+                    NewVersion: 'new-version',
+                    AlreadyPublished: 'already-published',
+                    LookupFailed: 'lookup-failed',
+                  };
+
+                  const ignoredParts = new Set([
+                    '.git',
+                    'node_modules',
+                    'dist',
+                    'types',
+                    'coverage',
+                    'tmp',
+                    'temp',
+                    '.nx',
+                    '.turbo',
+                  ]);
+
+                  const packageJsonFiles = [];
+
+                  function walk(directory) {
+                    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+                      if (ignoredParts.has(entry.name)) continue;
+
+                      const fullPath = path.join(directory, entry.name);
+
+                      if (entry.isDirectory()) {
+                        walk(fullPath);
+                        continue;
+                      }
+
+                      if (entry.isFile() && entry.name === 'package.json') {
+                        packageJsonFiles.push(fullPath);
+                      }
+                    }
+                  }
+
+                  function npmView(args) {
+                    try {
+                      const value = execFileSync('npm', ['view', ...args], {
+                        encoding: 'utf8',
+                        stdio: ['ignore', 'pipe', 'pipe'],
+                      }).trim();
+
+                      return { ok: true, value };
+                    } catch (error) {
+                      const stderr = String(error?.stderr ?? '');
+                      const stdout = String(error?.stdout ?? '');
+                      const message = `${stdout}\n${stderr}`;
+
+                      if (
+                        message.includes('E404') ||
+                        message.includes('404 Not Found') ||
+                        message.includes('is not in this registry')
+                      ) {
+                        return { ok: false, reason: 'not-found' };
+                      }
+
+                      return { ok: false, reason: 'lookup-failed' };
+                    }
+                  }
+
+                  function getPublishInfo(name, version, isPrivate) {
+                    if (isPrivate) {
+                      return {
+                        latest_version: null,
+                        published_version: null,
+                        publish_status: PublishStatus.Private,
+                        publish_candidate: false,
+                      };
+                    }
+
+                    if (!name || !version) {
+                      return {
+                        latest_version: null,
+                        published_version: null,
+                        publish_status: PublishStatus.Invalid,
+                        publish_candidate: false,
+                      };
+                    }
+
+                    const latest = npmView([name, 'version']);
+                    const exact = npmView([`${name}@${version}`, 'version']);
+
+                    if (exact.ok && exact.value === version) {
+                      return {
+                        latest_version: latest.ok ? latest.value : null,
+                        published_version: exact.value,
+                        publish_status: PublishStatus.AlreadyPublished,
+                        publish_candidate: false,
+                      };
+                    }
+
+                    if (latest.ok) {
+                      return {
+                        latest_version: latest.value,
+                        published_version: null,
+                        publish_status: PublishStatus.NewVersion,
+                        publish_candidate: true,
+                      };
+                    }
+
+                    if (latest.reason === 'not-found') {
+                      return {
+                        latest_version: null,
+                        published_version: null,
+                        publish_status: PublishStatus.NewPackage,
+                        publish_candidate: true,
+                      };
+                    }
+
+                    return {
+                      latest_version: null,
+                      published_version: null,
+                      publish_status: PublishStatus.LookupFailed,
+                      publish_candidate: false,
+                    };
+                  }
+
+                  walk('.');
+
+                  const inventory = packageJsonFiles
+                    .sort()
+                    .map((filePath) => {
+                      const raw = fs.readFileSync(filePath, 'utf8');
+                      const parsed = JSON.parse(raw);
+
+                      const name = typeof parsed.name === 'string' ? parsed.name : '';
+                      const version = typeof parsed.version === 'string' ? parsed.version : '';
+                      const isPrivate = parsed.private === true;
+                      const publishInfo = getPublishInfo(name, version, isPrivate);
+
+                      return {
+                        path: filePath.replace(/^\.\//, ''),
+                        directory: path.dirname(filePath).replace(/^\.$/, '.').replace(/^\.\//, ''),
+                        name,
+                        version,
+                        private: isPrivate,
+                        ...publishInfo,
+                      };
+                    });
+
+                  process.stdout.write(JSON.stringify(inventory));
+                  NODE
+                  )"
+
+                  package_stats_json="$(node -e '
+                    const inventory = JSON.parse(process.argv[1]);
+                    const count = (status) => inventory.filter((pkg) => pkg.publish_status === status).length;
+                    const candidates = inventory.filter((pkg) => pkg.publish_candidate === true);
+
+                    const stats = {
+                      package_count: inventory.length,
+                      public_package_count: inventory.filter((pkg) => pkg.name && pkg.version && pkg.private !== true).length,
+                      private_package_count: count("private"),
+                      invalid_package_count: count("invalid"),
+                      new_package_count: count("new-package"),
+                      new_version_count: count("new-version"),
+                      already_published_count: count("already-published"),
+                      lookup_failed_count: count("lookup-failed"),
+                      publish_candidate_count: candidates.length,
+                      publish_candidates: candidates.map((pkg) => `${pkg.name}@${pkg.version}`).join(" "),
+                    };
+
+                    process.stdout.write(JSON.stringify(stats));
+                  ' "$package_inventory_json")"
+
+                  package_count="$(node -e 'console.log(JSON.parse(process.argv[1]).package_count)' "$package_stats_json")"
+                  public_package_count="$(node -e 'console.log(JSON.parse(process.argv[1]).public_package_count)' "$package_stats_json")"
+                  private_package_count="$(node -e 'console.log(JSON.parse(process.argv[1]).private_package_count)' "$package_stats_json")"
+                  invalid_package_count="$(node -e 'console.log(JSON.parse(process.argv[1]).invalid_package_count)' "$package_stats_json")"
+                  new_package_count="$(node -e 'console.log(JSON.parse(process.argv[1]).new_package_count)' "$package_stats_json")"
+                  new_version_count="$(node -e 'console.log(JSON.parse(process.argv[1]).new_version_count)' "$package_stats_json")"
+                  already_published_count="$(node -e 'console.log(JSON.parse(process.argv[1]).already_published_count)' "$package_stats_json")"
+                  lookup_failed_count="$(node -e 'console.log(JSON.parse(process.argv[1]).lookup_failed_count)' "$package_stats_json")"
+                  publish_candidate_count="$(node -e 'console.log(JSON.parse(process.argv[1]).publish_candidate_count)' "$package_stats_json")"
+                  publish_candidates="$(node -e 'console.log(JSON.parse(process.argv[1]).publish_candidates)' "$package_stats_json")"
+
+                  echo "package_count=$package_count"
+                  echo "public_package_count=$public_package_count"
+                  echo "private_package_count=$private_package_count"
+                  echo "invalid_package_count=$invalid_package_count"
+                  echo "new_package_count=$new_package_count"
+                  echo "new_version_count=$new_version_count"
+                  echo "already_published_count=$already_published_count"
+                  echo "lookup_failed_count=$lookup_failed_count"
+                  echo "publish_candidate_count=$publish_candidate_count"
+                  echo "publish_candidates=$publish_candidates"
+                  echo "::endgroup::"
+
+                  has_publish_candidates=false
+                  if [ "$publish_candidate_count" -gt 0 ]; then
+                    has_publish_candidates=true
+                  fi
+
+                  should_version=false
+                  should_publish=false
+                  should_skip=false
+
+                  if [ "$has_pending_changesets" = "true" ]; then
+                    should_version=true
+                  elif [ "$has_publish_candidates" = "true" ]; then
+                    should_publish=true
+                  else
+                    should_skip=true
+                  fi
+
+                  {
+                    echo "checked_ref=$checked_ref"
+                    echo "changeset_count=$changeset_count"
+                    echo "has_pending_changesets=$has_pending_changesets"
+                    echo "package_count=$package_count"
+                    echo "public_package_count=$public_package_count"
+                    echo "private_package_count=$private_package_count"
+                    echo "invalid_package_count=$invalid_package_count"
+                    echo "new_package_count=$new_package_count"
+                    echo "new_version_count=$new_version_count"
+                    echo "already_published_count=$already_published_count"
+                    echo "lookup_failed_count=$lookup_failed_count"
+                    echo "publish_candidate_count=$publish_candidate_count"
+                    echo "publish_candidates=$publish_candidates"
+                    echo "has_publish_candidates=$has_publish_candidates"
+                    echo "should_version=$should_version"
+                    echo "should_publish=$should_publish"
+                    echo "should_skip=$should_skip"
+                    echo "package_inventory_json<<EOF"
+                    echo "$package_inventory_json"
+                    echo "EOF"
+                  } >> "$GITHUB_OUTPUT"
+
+            - name: Write release state summary
+              if: ${{ always() }}
+              shell: bash
+              env:
+                  PACKAGE_INVENTORY_JSON: ${{ steps.detect.outputs.package_inventory_json }}
+              run: |
+                  {
+                    echo "## Release state detector"
+                    echo ""
+                    echo "This job inspects one checked-out ref and reports what release action, if any, should happen next."
+                    echo ""
+
+                    echo "### Inputs"
+                    echo ""
+                    echo "| Input | Value |"
+                    echo "|---|---|"
+                    echo "| requested ref | \`${{ inputs.ref || github.sha }}\` |"
+                    echo "| checked ref | \`${{ steps.detect.outputs.checked_ref }}\` |"
+                    echo "| event | \`${{ github.event_name }}\` |"
+                    echo "| repository | \`${{ github.repository }}\` |"
+                    echo ""
+
+                    echo "### Package inventory"
+                    echo ""
+                    echo "| Path | Name | Local | Latest npm | Published local | Private | Status | Candidate |"
+                    echo "|---|---|---:|---:|---:|---:|---|---:|"
+
+                    node <<'NODE'
+                    const inventory = JSON.parse(process.env.PACKAGE_INVENTORY_JSON || '[]');
+
+                    for (const pkg of inventory) {
+                      const name = pkg.name || '—';
+                      const version = pkg.version || '—';
+                      const latest = pkg.latest_version ?? '—';
+                      const published = pkg.published_version ?? '—';
+
+                      console.log(
+                        `| \`${pkg.path}\` | \`${name}\` | \`${version}\` | \`${latest}\` | \`${published}\` | \`${pkg.private}\` | \`${pkg.publish_status}\` | \`${pkg.publish_candidate}\` |`
+                      );
+                    }
+                    NODE
+
+                    echo ""
+                    echo "### Stats"
+                    echo ""
+                    echo "| Stat | Value |"
+                    echo "|---|---:|"
+                    echo "| changeset_count | \`${{ steps.detect.outputs.changeset_count }}\` |"
+                    echo "| has_pending_changesets | \`${{ steps.detect.outputs.has_pending_changesets }}\` |"
+                    echo "| package_count | \`${{ steps.detect.outputs.package_count }}\` |"
+                    echo "| public_package_count | \`${{ steps.detect.outputs.public_package_count }}\` |"
+                    echo "| private_package_count | \`${{ steps.detect.outputs.private_package_count }}\` |"
+                    echo "| invalid_package_count | \`${{ steps.detect.outputs.invalid_package_count }}\` |"
+                    echo "| new_package_count | \`${{ steps.detect.outputs.new_package_count }}\` |"
+                    echo "| new_version_count | \`${{ steps.detect.outputs.new_version_count }}\` |"
+                    echo "| already_published_count | \`${{ steps.detect.outputs.already_published_count }}\` |"
+                    echo "| lookup_failed_count | \`${{ steps.detect.outputs.lookup_failed_count }}\` |"
+                    echo "| publish_candidate_count | \`${{ steps.detect.outputs.publish_candidate_count }}\` |"
+                    echo "| publish_candidates | \`${{ steps.detect.outputs.publish_candidates }}\` |"
+                    echo "| has_publish_candidates | \`${{ steps.detect.outputs.has_publish_candidates }}\` |"
+                    echo ""
+
+                    echo "### Decision"
+                    echo ""
+                    echo "| Output | Value | Meaning |"
+                    echo "|---|---:|---|"
+                    echo "| should_version | \`${{ steps.detect.outputs.should_version }}\` | Caller should run Changesets version flow. |"
+                    echo "| should_publish | \`${{ steps.detect.outputs.should_publish }}\` | Caller should run publish flow. |"
+                    echo "| should_skip | \`${{ steps.detect.outputs.should_skip }}\` | Caller should do nothing release-related. |"
+                    echo ""
+
+                    if [ "${{ steps.detect.outputs.should_version }}" = "true" ]; then
+                      echo "Pending changesets exist, so the next release action is **version packages**."
+                    elif [ "${{ steps.detect.outputs.should_publish }}" = "true" ]; then
+                      echo "No pending changesets exist, and at least one package is a publish candidate, so the next release action is **publish packages**."
+                    elif [ "${{ steps.detect.outputs.should_skip }}" = "true" ]; then
+                      echo "No pending changesets and no publish candidates were found, so the next release action is **skip**."
+                    else
+                      echo "The detector did not produce a clean decision. Check the previous step logs."
+                    fi
+                  } >> "$GITHUB_STEP_SUMMARY"
