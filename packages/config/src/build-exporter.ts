@@ -11,16 +11,6 @@ const API_EXTRACTOR_CONFIG = isPlainObject<JsonObject>(_apiExtractorConfig)
     ? _apiExtractorConfig
     : {}
 
-// Debug: log what will be written
-console.log(
-    '[build-exporter] API_EXTRACTOR_CONFIG keys:',
-    Object.keys(API_EXTRACTOR_CONFIG),
-)
-console.log(
-    '[build-exporter] API_EXTRACTOR_CONFIG preview:',
-    JSON.stringify(API_EXTRACTOR_CONFIG, null, 2).slice(0, 400),
-)
-
 const MARKDOWN_LINT_CONFIG = isPlainObject<JsonObject>(markdownlint.config())
     ? markdownlint.config()
     : {}

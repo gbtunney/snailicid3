@@ -4,6 +4,11 @@
         "types": ["node"],
         "outDir": "./dist"
     },
-    "include": ["./src/**/*.ts", "./src/**/*.cts", "./src/**/*.mts"],
+    "include": [
+        "./src/**/*.ts",
+        "./src/**/*.cts",
+        "./src/**/*.mts",
+        "./src/**/*.json"
+    ],
     "exclude": ["**/*.test.ts", "**/*.test.mts", "**/*.test.cts"]
 }
