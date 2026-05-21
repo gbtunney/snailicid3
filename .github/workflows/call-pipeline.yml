@@ -106,6 +106,23 @@ on:
                 default: false
                 type: boolean
 
+            # Nx Cloud is always disabled during pnpm install (NX_NO_CLOUD is set at the job
+            # level so it covers the postinstall hook). Set nx_cloud: true here to re-enable
+            # it for the actual nx build/test commands that run after install.
+            nx_cloud:
+                description: Re-enable Nx Cloud for nx commands (default false — install postinstall is always local regardless).
+                required: false
+                default: false
+                type: boolean
+
+            # API report — run pnpm api:report (api-extractor) after the build.
+            # The generated etc/*.api.md files are tracked; if stale, require_clean_repo will fail.
+            run_api_report:
+                description: Run pnpm api:report after build to regenerate tracked API surface files (etc/*.api.md). Stale reports will fail require_clean_repo.
+                required: false
+                default: false
+                type: boolean
+
         outputs:
             is_repo_dirty:
                 description: Whether repository is dirty at end ('true'|'false')
@@ -133,6 +150,11 @@ jobs:
     pipeline:
         runs-on: ubuntu-latest
         name: pipeline
+        env:
+            # Always disable Nx Cloud to avoid free-tier rate-limit errors.
+            # Nx's postinstall hook runs before any step can set this, so it must
+            # live here at the job level — not inside a step.
+            NX_NO_CLOUD: 'true'
         outputs:
             is_repo_dirty: ${{ steps.repo_dirty.outputs.is_repo_dirty }}
             workspace_artifact_name: ${{ steps.artifact_name.outputs.name }}
@@ -144,7 +166,7 @@ jobs:
               with:
                   fetch-depth: 0
 
-            - uses: pnpm/action-setup@v4
+            - uses: pnpm/action-setup@v6
               with:
                   run_install: false
                   cache: ${{ inputs.pnpm_cache }}
@@ -177,6 +199,8 @@ jobs:
                     echo "- use_nx_affected: \`${{ inputs.use_nx_affected }}\`"
                     echo "- nx_targets: \`${{ inputs.nx_targets }}\`"
                     echo "- nx_fix_ci: \`${{ inputs.nx_fix_ci }}\`"
+                    echo "- nx_cloud: \`${{ inputs.nx_cloud }}\`"
+                    echo "- run_api_report: \`${{ inputs.run_api_report }}\`"
                   } | tee -a "$GITHUB_STEP_SUMMARY"
 
             # ── Install attempts ─────────────────────────────────────
@@ -197,8 +221,16 @@ jobs:
                   exit 1
 
             # ── Nx affected SHA detection ────────────────────────────
-            - uses: nrwl/nx-set-shas@v4
+            - uses: nrwl/nx-set-shas@v5
               if: ${{ inputs.use_nx_affected }}
+
+            # ── Nx Cloud (opt-in, post-install only) ─────────────────
+            # NX_NO_CLOUD=true is set at the job level so pnpm install's
+            # postinstall hook never hits Nx Cloud. If nx_cloud: true is
+            # passed, flip it off here so the nx build/test steps can use cloud.
+            - name: ⚡ Re-enable Nx Cloud
+              if: ${{ inputs.nx_cloud == true }}
+              run: echo "NX_NO_CLOUD=false" >> "$GITHUB_ENV"
 
             # ── Reporting ────────────────────────────
             - name: 🩺 Report Environment
@@ -223,7 +255,7 @@ jobs:
 
             - name: 🧱 Nx Report
               if: ${{ always() }}
-              continue-on-error: ${{ inputs.mode == 'report' }}
+              continue-on-error: true # informational only — nx report should never block the pipeline
               run: pnpm exec nx report
 
             # ── Cache resets ─────────────────────────────────────────
@@ -291,6 +323,16 @@ jobs:
               if: ${{ inputs.run_docs_build && !inputs.use_nx_affected }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm run docs:build
+
+            # ── API report (tracked etc/*.api.md) ───────────────────
+            # Regenerates API surface files via api-extractor. Because these
+            # files ARE tracked in git, a stale report makes the repo dirty
+            # and will fail require_clean_repo. Run pnpm api:report locally
+            # (or trigger dispatch-build-docs) to refresh them.
+            - name: 📋 Run API Report
+              if: ${{ inputs.run_api_report && inputs.run_build && !inputs.use_nx_affected }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm api:report
 
             # ── Clean repo gate + dirty output ──────────────────────
             - name: 🧼 Require Clean Repo

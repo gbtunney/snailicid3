@@ -91,6 +91,16 @@ on:
                 required: true
                 default: false
                 type: boolean
+            nx_cloud:
+                description: Re-enable Nx Cloud for nx commands. Install postinstall is always local. Only useful if you have an active paid plan.
+                required: false
+                default: false
+                type: boolean
+            run_api_report:
+                description: Run pnpm api:report after build (updates tracked etc/*.api.md files)
+                required: false
+                default: false
+                type: boolean
 
 permissions:
     contents: read
@@ -115,6 +125,8 @@ jobs:
             use_nx_affected: ${{ inputs.use_nx_affected }}
             nx_targets: ${{ inputs.nx_targets }}
             nx_fix_ci: ${{ inputs.nx_fix_ci }}
+            nx_cloud: ${{ inputs.nx_cloud }}
+            run_api_report: ${{ inputs.run_api_report }}
 
     summary:
         name: Summarize pipeline outputs
