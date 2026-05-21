@@ -106,6 +106,22 @@ on:
                 default: false
                 type: boolean
 
+            # Nx Cloud — disabled by default to avoid hitting the free-tier rate limit in CI.
+            # Set nx_cloud: true only if you have a paid plan or know the run is within quota.
+            nx_cloud:
+                description: Enable Nx Cloud integration. Defaults to false to avoid free-tier rate limits.
+                required: false
+                default: false
+                type: boolean
+
+            # API report — run pnpm api:report (api-extractor) after the build.
+            # The generated etc/*.api.md files are tracked; if stale, require_clean_repo will fail.
+            run_api_report:
+                description: Run pnpm api:report after build to regenerate tracked API surface files (etc/*.api.md). Stale reports will fail require_clean_repo.
+                required: false
+                default: false
+                type: boolean
+
         outputs:
             is_repo_dirty:
                 description: Whether repository is dirty at end ('true'|'false')
@@ -177,6 +193,8 @@ jobs:
                     echo "- use_nx_affected: \`${{ inputs.use_nx_affected }}\`"
                     echo "- nx_targets: \`${{ inputs.nx_targets }}\`"
                     echo "- nx_fix_ci: \`${{ inputs.nx_fix_ci }}\`"
+                    echo "- nx_cloud: \`${{ inputs.nx_cloud }}\`"
+                    echo "- run_api_report: \`${{ inputs.run_api_report }}\`"
                   } | tee -a "$GITHUB_STEP_SUMMARY"
 
             # ── Install attempts ─────────────────────────────────────
@@ -199,6 +217,20 @@ jobs:
             # ── Nx affected SHA detection ────────────────────────────
             - uses: nrwl/nx-set-shas@v4
               if: ${{ inputs.use_nx_affected }}
+
+            # ── Nx Cloud configuration ───────────────────────────────
+            # Set NX_NO_CLOUD=true by default to prevent free-tier rate limit
+            # errors from breaking the pipeline. Pass nx_cloud: true to re-enable
+            # (only if you have a paid plan or know you're within quota).
+            - name: ⚡ Configure Nx Cloud
+              shell: bash
+              run: |
+                  if [[ "${{ inputs.nx_cloud }}" == "true" ]]; then
+                    echo "ℹ️ Nx Cloud enabled (nx_cloud: true)"
+                  else
+                    echo "NX_NO_CLOUD=true" >> "$GITHUB_ENV"
+                    echo "ℹ️ Nx Cloud disabled — running locally (pass nx_cloud: true to enable)"
+                  fi
 
             # ── Reporting ────────────────────────────
             - name: 🩺 Report Environment
@@ -223,7 +255,7 @@ jobs:
 
             - name: 🧱 Nx Report
               if: ${{ always() }}
-              continue-on-error: ${{ inputs.mode == 'report' }}
+              continue-on-error: true # informational only — nx report should never block the pipeline
               run: pnpm exec nx report
 
             # ── Cache resets ─────────────────────────────────────────
@@ -291,6 +323,16 @@ jobs:
               if: ${{ inputs.run_docs_build && !inputs.use_nx_affected }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm run docs:build
+
+            # ── API report (tracked etc/*.api.md) ───────────────────
+            # Regenerates API surface files via api-extractor. Because these
+            # files ARE tracked in git, a stale report makes the repo dirty
+            # and will fail require_clean_repo. Run pnpm api:report locally
+            # (or trigger dispatch-build-docs) to refresh them.
+            - name: 📋 Run API Report
+              if: ${{ inputs.run_api_report && inputs.run_build && !inputs.use_nx_affected }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm api:report
 
             # ── Clean repo gate + dirty output ──────────────────────
             - name: 🧼 Require Clean Repo

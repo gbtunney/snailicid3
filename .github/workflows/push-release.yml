@@ -226,6 +226,17 @@ jobs:
               env:
                   GH_TOKEN: ${{ github.token }}
 
+            # Trigger docs build on the release branch so API reports and docs
+            # are refreshed automatically. dispatch-build-docs commits any dirty
+            # tracked files (etc/*.api.md) back to release/main. If GH_PAT is
+            # not set the push will use GITHUB_TOKEN and won't re-trigger CI,
+            # but the files will still be committed.
+            - name: Trigger docs build on release branch
+              if: needs.detect.outputs.should_version == 'true'
+              run: gh workflow run dispatch-build-docs.yml --ref release/main
+              env:
+                  GH_TOKEN: ${{ github.token }}
+
             # ── Phase 2 — publish ─────────────────────────────────────────
             # Publishes only when: no pending changesets AND the triggering commit is a version bump.
             - name: Publish packages and create GitHub releases
