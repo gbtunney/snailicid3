@@ -1,0 +1,47 @@
+# Runs on every pull_request to main and on workflow_dispatch (used by
+# push-release.yml to validate the generated release/main PR).
+#
+# Replaces three separate per-kind workflows:
+#   pr-main.yml               → normal PR   (no docs / no api-report)
+#   pr-release.yml            → release PR  (docs + api-report)
+#   pr-changesets-version.yml → changeset PR (docs + api-report)
+#
+# A single `required` job always runs — no if: condition — so branch
+# protection only needs one rule and there is never a "skipped" ambiguity.
+# run_docs_build / run_api_report are flipped by the detect outputs.
+name: PR Checks
+
+on:
+    pull_request:
+        branches:
+            - main
+    workflow_dispatch:
+
+concurrency:
+    group: pr-${{ github.event.pull_request.number || github.ref_name }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+
+env:
+    HUSKY: 0
+
+jobs:
+    detect:
+        uses: ./.github/workflows/call-detect-pr-kind.yml
+
+    required:
+        name: required
+        needs: detect
+        uses: ./.github/workflows/call-pipeline.yml
+        with:
+            mode: abort_on_error
+            check_mode: check
+            require_lockfile: true
+            require_clean_repo: true
+            run_build: true
+            run_test: true
+            run_docs_build: ${{ needs.detect.outputs.is_release_pr == 'true' || needs.detect.outputs.has_added_or_modified_changeset == 'true' }}
+            run_api_report: ${{ needs.detect.outputs.is_release_pr == 'true' || needs.detect.outputs.has_added_or_modified_changeset == 'true' }}
+            pnpm_cache: true
