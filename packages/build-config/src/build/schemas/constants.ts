@@ -1,9 +1,9 @@
-export const SEMVER_REGEX =
+export const SEMVER_REGEX: RegExp =
     /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[\dA-Za-z-]+(?:\.[\dA-Za-z-]+)*)?(?:\+[\dA-Za-z-]+(?:\.[\dA-Za-z-]+)*)?$/
 
-export const PACKAGE_NAME_REGEX =
+export const PACKAGE_NAME_REGEX: RegExp =
     /^(@[\da-z~-][\d._a-z~-]*\/)?[\da-z~-][\d._a-z~-]*$/
-export const SLUG_LIKE_REGEX = /^[\da-z]+(?:[._-][\da-z]+)*$/
+export const SLUG_LIKE_REGEX: RegExp = /^[\da-z]+(?:[._-][\da-z]+)*$/
 
 export const BUILD_STRATEGY = ['bundle', 'none', 'transpile'] as const
 export const OUTPUT_KINDS = ['ts', 'esm', 'cjs', 'iife', 'umd'] as const
@@ -14,7 +14,11 @@ export const LOG_LEVEL = ['warn', 'error', 'info', 'silent'] as const
  * This is the stupid 'module/commonjs/types' thing that npm uses. will almost alwsys be set to module but is required
  * so shud validate.
  */
-export const PACKAGE_MODULE_TYPES = ['module', 'commonjs', 'types']
+export const PACKAGE_MODULE_TYPES: Array<'commonjs' | 'module' | 'types'> = [
+    'module',
+    'commonjs',
+    'types',
+]
 export const PRODUCT_KINDS = [
     'build_tool',
     'cli',

@@ -1,5 +1,9 @@
 {
     "extends": "@snailicid3/config/tsconfig.library",
+    "compilerOptions": {
+        "outDir": "./dist",
+        "isolatedDeclarations": false
+    },
     "include": ["./src/**/*.ts", "./src/**/*.cts", "./src/**/*.mts"],
     "exclude": ["**/*.test.ts", "**/*.test.mts", "**/*.test.cts"]
 }

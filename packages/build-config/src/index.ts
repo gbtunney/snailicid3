@@ -24,8 +24,8 @@ export {
 } from './build/schemas/index.js'
 export {
     parsePackage,
-    schemaBasePackage,
-    schemaRequiredScripts,
+    // schemaBasePackage,
+    // schemaRequiredScripts,
 } from './build/schemas/package.js'
 
 // ── Typedoc ───────────────────────────────────────────────────────────────────
