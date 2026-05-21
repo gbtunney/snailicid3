@@ -106,6 +106,15 @@ on:
                 default: false
                 type: boolean
 
+            # Nx Cloud is always disabled during pnpm install (NX_NO_CLOUD is set at the job
+            # level so it covers the postinstall hook). Set nx_cloud: true here to re-enable
+            # it for the actual nx build/test commands that run after install.
+            nx_cloud:
+                description: Re-enable Nx Cloud for nx commands (default false — install postinstall is always local regardless).
+                required: false
+                default: false
+                type: boolean
+
             # API report — run pnpm api:report (api-extractor) after the build.
             # The generated etc/*.api.md files are tracked; if stale, require_clean_repo will fail.
             run_api_report:
@@ -190,6 +199,7 @@ jobs:
                     echo "- use_nx_affected: \`${{ inputs.use_nx_affected }}\`"
                     echo "- nx_targets: \`${{ inputs.nx_targets }}\`"
                     echo "- nx_fix_ci: \`${{ inputs.nx_fix_ci }}\`"
+                    echo "- nx_cloud: \`${{ inputs.nx_cloud }}\`"
                     echo "- run_api_report: \`${{ inputs.run_api_report }}\`"
                   } | tee -a "$GITHUB_STEP_SUMMARY"
 
@@ -213,6 +223,14 @@ jobs:
             # ── Nx affected SHA detection ────────────────────────────
             - uses: nrwl/nx-set-shas@v5
               if: ${{ inputs.use_nx_affected }}
+
+            # ── Nx Cloud (opt-in, post-install only) ─────────────────
+            # NX_NO_CLOUD=true is set at the job level so pnpm install's
+            # postinstall hook never hits Nx Cloud. If nx_cloud: true is
+            # passed, flip it off here so the nx build/test steps can use cloud.
+            - name: ⚡ Re-enable Nx Cloud
+              if: ${{ inputs.nx_cloud == true }}
+              run: echo "NX_NO_CLOUD=false" >> "$GITHUB_ENV"
 
             # ── Reporting ────────────────────────────
             - name: 🩺 Report Environment
