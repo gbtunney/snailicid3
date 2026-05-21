@@ -4,6 +4,8 @@
 
 [![CI Main](https://github.com/gbtunney/snailicid3/actions/workflows/ci-main.yml/badge.svg)](https://github.com/gbtunney/snailicid3/actions/workflows/ci-main.yml)
 
+This is a test file!
+
 ## Packages
 
 | Package                                                     | Description                                                            |
