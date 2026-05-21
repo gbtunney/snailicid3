@@ -23,6 +23,29 @@ name: Call Detect Release State
 #
 # This workflow intentionally does not install dependencies.
 # It only needs checkout + Node/npm, which are available on GitHub runners.
+#
+# Package publish statuses:
+#
+#   private
+#     package.json has "private": true.
+#
+#   invalid
+#     package.json is missing name or version.
+#
+#   new-package
+#     package name does not exist on npm.
+#     This is a publish candidate.
+#
+#   new-version
+#     package name exists on npm, but this local version does not.
+#     This is a publish candidate.
+#
+#   already-published
+#     exact local name@version already exists on npm.
+#
+#   lookup-failed
+#     npm lookup was inconclusive.
+#     This is not treated as a publish candidate.
 # ─────────────────────────────────────────────────────────────
 
 on:
@@ -31,7 +54,6 @@ on:
             ref:
                 description: >
                     Git ref, branch, tag, or SHA to inspect. Leave empty to inspect the triggering commit. For PR callers, pass github.event.pull_request.head.sha to inspect the PR head.
-
 
                 required: false
                 type: string
@@ -51,7 +73,9 @@ on:
                 value: ${{ jobs.detect.outputs.has_pending_changesets }}
 
             package_inventory_json:
-                description: JSON array of discovered package.json files with npm publish state.
+                description: >
+                    JSON array of discovered package.json files with fields: path, directory, name, version, private, latest_version, published_version, publish_status, publish_candidate. publish_status is one of: private, invalid, new-package, new-version, already-published, lookup-failed.
+
                 value: ${{ jobs.detect.outputs.package_inventory_json }}
 
             package_count:
@@ -177,27 +201,6 @@ jobs:
                   const path = require('node:path');
                   const { execFileSync } = require('node:child_process');
 
-                  /**
-                   * Package-level publish classification.
-                   *
-                   * private:
-                   *   package.json has "private": true.
-                   *
-                   * invalid:
-                   *   package.json is missing name or version.
-                   *
-                   * new-package:
-                   *   package name does not exist on npm.
-                   *
-                   * new-version:
-                   *   package name exists on npm, but this local version does not.
-                   *
-                   * already-published:
-                   *   this exact local name@version exists on npm.
-                   *
-                   * lookup-failed:
-                   *   npm lookup failed in a way that was not classified as "not found".
-                   */
                   const PublishStatus = {
                     Private: 'private',
                     Invalid: 'invalid',
@@ -458,20 +461,20 @@ jobs:
                     echo "| Path | Name | Local | Latest npm | Published local | Private | Status | Candidate |"
                     echo "|---|---|---:|---:|---:|---:|---|---:|"
 
-                    node <<'NODE'
-                    const inventory = JSON.parse(process.env.PACKAGE_INVENTORY_JSON || '[]');
+                    node -e '
+                      const inventory = JSON.parse(process.env.PACKAGE_INVENTORY_JSON || "[]");
 
-                    for (const pkg of inventory) {
-                      const name = pkg.name || '—';
-                      const version = pkg.version || '—';
-                      const latest = pkg.latest_version ?? '—';
-                      const published = pkg.published_version ?? '—';
+                      for (const pkg of inventory) {
+                        const name = pkg.name || "—";
+                        const version = pkg.version || "—";
+                        const latest = pkg.latest_version ?? "—";
+                        const published = pkg.published_version ?? "—";
 
-                      console.log(
-                        `| \`${pkg.path}\` | \`${name}\` | \`${version}\` | \`${latest}\` | \`${published}\` | \`${pkg.private}\` | \`${pkg.publish_status}\` | \`${pkg.publish_candidate}\` |`
-                      );
-                    }
-                    NODE
+                        console.log(
+                          `| \`${pkg.path}\` | \`${name}\` | \`${version}\` | \`${latest}\` | \`${published}\` | \`${pkg.private}\` | \`${pkg.publish_status}\` | \`${pkg.publish_candidate}\` |`
+                        );
+                      }
+                    '
 
                     echo ""
                     echo "### Stats"
