@@ -45,7 +45,7 @@ jobs:
         steps:
             - uses: actions/checkout@v4
               with:
-                  fetch-depth: 2   # needs HEAD^ HEAD for diff
+                  fetch-depth: 2 # needs HEAD^ HEAD for diff
 
             - name: Detect release phase
               id: release_phase
