@@ -47,7 +47,6 @@ export const typescriptRules = (): Array<Config> => {
             rules: {
                 '@typescript-eslint/no-explicit-any': 'warn',
                 '@typescript-eslint/no-namespace': 'warn',
-
                 '@typescript-eslint/no-unnecessary-condition': 'warn',
                 '@typescript-eslint/no-unsafe-argument': 'warn',
                 '@typescript-eslint/no-unsafe-assignment': 'warn',
@@ -71,9 +70,17 @@ export const typescriptRules = (): Array<Config> => {
         /** Typescript Rules overwritten for files in source folders */
         {
             files: [...expandExtensions(TS_FILE_EXTENSIONS, '**/src/**/*.')],
+
             name: 'Typescript Rules : Explicit Return Type for files in source folders',
             rules: {
                 '@typescript-eslint/explicit-function-return-type': 'error',
+            },
+        },
+        {
+            files: [...expandExtensions(TS_FILE_EXTENSIONS, '**/*.test.')],
+            name: 'Typescript Rules : Disabled Explicit Return Type for files in tests',
+            rules: {
+                '@typescript-eslint/explicit-function-return-type': 'off',
             },
         },
         /* {
