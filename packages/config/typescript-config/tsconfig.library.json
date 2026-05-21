@@ -8,7 +8,6 @@
 
         "composite": true,
         "incremental": true,
-        "isolatedDeclarations": true,
         "declaration": true,
         "sourceMap": true,
         "declarationMap": true,

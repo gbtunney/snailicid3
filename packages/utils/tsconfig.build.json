@@ -3,8 +3,6 @@
     "include": ["./src/**/*.ts", "./src/**/*.cts", "./src/**/*.mts"],
     "exclude": ["**/*.test.ts", "**/*.test.mts", "**/*.test.cts"],
     "compilerOptions": {
-       // "types": ["node"],
-        "outDir": "./types",
-        "isolatedDeclarations":false
+        "types": ["node"]
     }
 }

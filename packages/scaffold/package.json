@@ -35,6 +35,8 @@
             "check:ts": {},
             "build": {},
             "build:tsdown": {},
+            "api:report": {},
+            "api:check": {},
             "test": {},
             "test:watch": {},
             "lint": {},
@@ -49,7 +51,7 @@
     "types": "./dist/index.d.cts",
     "exports": {
         ".": {
-            "import": "./dist/index.js",
+            "import": "./dist/index.mjs",
             "require": "./dist/index.cjs"
         },
         "./package.json": "./package.json"
@@ -77,11 +79,12 @@
         "zod": "^4.3.6"
     },
     "devDependencies": {
+        "@microsoft/api-extractor": "^7.58.7",
         "@snailicid3/config": "workspace:*",
         "@types/node": "^25.8.0",
         "tsdown": "^0.22.0",
         "typescript": "^6.0.2",
         "vitest": "^4.1.4"
     },
-    "module": "./dist/index.js"
+    "module": "./dist/index.mjs"
 }

@@ -32,12 +32,9 @@
             "build:ts": {},
             "check:ts": {},
             "build:tsdown": {},
-            "build": {
-                "dependsOn": [
-                    "build:ts",
-                    "build:tsdown"
-                ]
-            },
+            "build": {},
+            "api:report": {},
+            "api:check": {},
             "test": {},
             "test:watch": {},
             "lint": {},
@@ -58,7 +55,7 @@
             "import": "./dist/index.js",
             "require": "./dist/index.cjs"
         },
-        "./demo": "./dist/demo.js",
+        "./demo": "./dist/demo.mjs",
         "./package.json": "./package.json"
     },
     "files": [
@@ -84,6 +81,7 @@
         "dayjs": "^1.11.20"
     },
     "devDependencies": {
+        "@microsoft/api-extractor": "^7.58.7",
         "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
         "@types/node": "^25.8.0",
