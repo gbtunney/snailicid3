@@ -17,7 +17,7 @@
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
         "dev:nx": "nx run $npm_package_name:dev",
-        "test:coverage": "vitest run --coverage"
+        "demo": "node ./bin/logger-demo.js"
     },
     "buildConfig": {
         "runtime": "node",
@@ -58,10 +58,12 @@
             "import": "./dist/index.js",
             "require": "./dist/index.cjs"
         },
+        "./demo": "./dist/demo.js",
         "./package.json": "./package.json"
     },
     "files": [
         "CHANGELOG.md",
+        "bin",
         "dist",
         "types"
     ],
@@ -79,8 +81,7 @@
         "@snailicid3/color": "workspace:*",
         "@snailicid3/utils": "workspace:*",
         "chalk": "^5.6.2",
-        "dayjs": "^1.11.20",
-        "zod": "^4.3.6"
+        "dayjs": "^1.11.20"
     },
     "devDependencies": {
         "@snailicid3/build-config": "workspace:*",
