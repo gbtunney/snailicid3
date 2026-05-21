@@ -19,10 +19,10 @@ name: Call Detect Release State
 #   - Count pending .changeset/*.md files.
 #   - Build a package inventory from package.json files.
 #   - Ask npm whether each public local package version already exists.
-#   - Emit clear machine-readable outputs and a readable summary table.
+#   - Emit compact machine-readable stats and a readable summary table.
 #
 # This workflow intentionally does not install dependencies.
-#  It only needs checkout + Node/npm, which are available on GitHub runners.
+# It only needs checkout + Node/npm, which are available on GitHub runners.
 #
 # Package publish statuses:
 #
@@ -55,7 +55,6 @@ on:
                 description: >
                     Git ref, branch, tag, or SHA to inspect. Leave empty to inspect the triggering commit. For PR callers, pass github.event.pull_request.head.sha to inspect the PR head.
 
-
                 required: false
                 type: string
                 default: ''
@@ -72,13 +71,6 @@ on:
             has_pending_changesets:
                 description: "'true' when pending changeset files exist."
                 value: ${{ jobs.detect.outputs.has_pending_changesets }}
-
-            package_inventory_json:
-                description: >
-                    JSON array of discovered package.json files with fields: path, directory, name, version, private, latest_version, published_version, publish_status, publish_candidate. publish_status is one of: private, invalid, new-package, new-version, already-published, lookup-failed.
-
-
-                value: ${{ jobs.detect.outputs.package_inventory_json }}
 
             package_count:
                 description: Total package.json files discovered.
@@ -148,7 +140,6 @@ jobs:
             checked_ref: ${{ steps.detect.outputs.checked_ref }}
             changeset_count: ${{ steps.detect.outputs.changeset_count }}
             has_pending_changesets: ${{ steps.detect.outputs.has_pending_changesets }}
-            package_inventory_json: ${{ steps.detect.outputs.package_inventory_json }}
             package_count: ${{ steps.detect.outputs.package_count }}
             public_package_count: ${{ steps.detect.outputs.public_package_count }}
             private_package_count: ${{ steps.detect.outputs.private_package_count }}
@@ -396,6 +387,22 @@ jobs:
                   echo "publish_candidates=$publish_candidates"
                   echo "::endgroup::"
 
+                  echo "::group::Package inventory"
+                  node -e '
+                    const inventory = JSON.parse(process.argv[1]);
+                    console.log("Path | Name | Local | Latest npm | Published local | Private | Status | Candidate");
+                    console.log("--- | --- | --- | --- | --- | --- | --- | ---");
+
+                    for (const pkg of inventory) {
+                      const name = pkg.name || "-";
+                      const version = pkg.version || "-";
+                      const latest = pkg.latest_version ?? "-";
+                      const published = pkg.published_version ?? "-";
+                      console.log(`${pkg.path} | ${name} | ${version} | ${latest} | ${published} | ${pkg.private} | ${pkg.publish_status} | ${pkg.publish_candidate}`);
+                    }
+                  ' "$package_inventory_json"
+                  echo "::endgroup::"
+
                   has_publish_candidates=false
                   if [ "$publish_candidate_count" -gt 0 ]; then
                     has_publish_candidates=true
@@ -431,16 +438,11 @@ jobs:
                     echo "should_version=$should_version"
                     echo "should_publish=$should_publish"
                     echo "should_skip=$should_skip"
-                    echo "package_inventory_json<<EOF"
-                    echo "$package_inventory_json"
-                    echo "EOF"
                   } >> "$GITHUB_OUTPUT"
 
             - name: Write release state summary
               if: ${{ always() }}
               shell: bash
-              env:
-                  PACKAGE_INVENTORY_JSON: ${{ steps.detect.outputs.package_inventory_json }}
               run: |
                   {
                     echo "## Release state detector"
@@ -458,27 +460,6 @@ jobs:
                     echo "| repository | \`${{ github.repository }}\` |"
                     echo ""
 
-                    echo "### Package inventory"
-                    echo ""
-                    echo "| Path | Name | Local | Latest npm | Published local | Private | Status | Candidate |"
-                    echo "|---|---|---:|---:|---:|---:|---|---:|"
-
-                    node -e '
-                      const inventory = JSON.parse(process.env.PACKAGE_INVENTORY_JSON || "[]");
-
-                      for (const pkg of inventory) {
-                        const name = pkg.name || "—";
-                        const version = pkg.version || "—";
-                        const latest = pkg.latest_version ?? "—";
-                        const published = pkg.published_version ?? "—";
-
-                        console.log(
-                          `| \`${pkg.path}\` | \`${name}\` | \`${version}\` | \`${latest}\` | \`${published}\` | \`${pkg.private}\` | \`${pkg.publish_status}\` | \`${pkg.publish_candidate}\` |`
-                        );
-                      }
-                    '
-
-                    echo ""
                     echo "### Stats"
                     echo ""
                     echo "| Stat | Value |"
