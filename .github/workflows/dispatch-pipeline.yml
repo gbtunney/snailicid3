@@ -91,7 +91,7 @@ on:
                 required: true
                 default: false
                 type: boolean
-        
+
             run_api_report:
                 description: Run pnpm api:report after build (updates tracked etc/*.api.md files)
                 required: false
