@@ -1,0 +1,67 @@
+name: 🗂️ Report Repository
+description: Report repository state and expose reusable repository metadata outputs.
+
+inputs:
+    print-report:
+        description: Print repository report to logs and GitHub step summary.
+        required: false
+        default: 'true'
+
+outputs:
+    branch:
+        description: Current branch name, or detached.
+        value: ${{ steps.report.outputs.branch }}
+
+    origin:
+        description: Git remote origin URL, or none.
+        value: ${{ steps.report.outputs.origin }}
+
+    timestamp:
+        description: UTC timestamp when the report was generated.
+        value: ${{ steps.report.outputs.timestamp }}
+
+    repo_status:
+        description: clean or dirty.
+        value: ${{ steps.report.outputs.repo_status }}
+
+    tracked_file_count:
+        description: Number of tracked files.
+        value: ${{ steps.report.outputs.tracked_file_count }}
+
+    staged_file_count:
+        description: Number of staged files.
+        value: ${{ steps.report.outputs.staged_file_count }}
+
+    unstaged_file_count:
+        description: Number of unstaged files.
+        value: ${{ steps.report.outputs.unstaged_file_count }}
+
+    untracked_file_count:
+        description: Number of untracked files.
+        value: ${{ steps.report.outputs.untracked_file_count }}
+
+    upstream:
+        description: Upstream branch name, or not set.
+        value: ${{ steps.report.outputs.upstream }}
+
+    ahead_count:
+        description: Number of commits HEAD is ahead of upstream.
+        value: ${{ steps.report.outputs.ahead_count }}
+
+    behind_count:
+        description: Number of commits HEAD is behind upstream.
+        value: ${{ steps.report.outputs.behind_count }}
+
+    last_commit:
+        description: Last commit summary.
+        value: ${{ steps.report.outputs.last_commit }}
+
+runs:
+    using: composite
+    steps:
+        - name: 🗂️ Repository Data
+          id: report
+          shell: bash
+          env:
+              REPORT_PRINT: ${{ inputs.print-report }}
+          run: bash .github/scripts/report-repo.sh

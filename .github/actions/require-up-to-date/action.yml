@@ -1,5 +1,8 @@
 name: Require Branch Up To Date
 description: Fail if branch is not up to date with main (optionally only when changesets exist)
+#steps.repo_report.outputs.is_branch_stale
+#steps.repo_report.outputs.has_pending_changesets
+#steps.repo_report.outputs.changeset_count
 
 inputs:
     base-branch:
