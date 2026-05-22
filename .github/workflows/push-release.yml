@@ -34,7 +34,7 @@ env:
 jobs:
     # ── Detect ──────────────────────────────────────────────────────────────
     detect:
-        uses: ./.github/workflows/call-detect-release-phase.yml
+        uses: ./.github/workflows/bk-call-detect-release-phase.yml
 
     # ── Shared pipeline (build + test, upload built artifact) ───────────────
     pipeline:
