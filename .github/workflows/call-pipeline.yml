@@ -311,47 +311,59 @@ jobs:
                   echo "Repository is dirty after pipeline."
                   exit 1
 
-            - name: 🧾 Set workspace artifact name
+            # ── Artifact upload + outputs ────────────────────────────
+            - name: 🏷️ Compute artifact name
               id: artifact_name
               if: ${{ always() && inputs.upload_workspace_artifact }}
-              run: echo "name=${{ inputs.artifact_name_prefix }}-${{ github.run_id }}-${{ github.run_attempt }}" >> "$GITHUB_OUTPUT"
+              shell: bash
+              run: |
+                  NAME="${{ inputs.artifact_name_prefix }}-${{ github.repository }}-${{ github.run_id }}-${{ github.run_attempt }}"
+                  NAME="${NAME//\//-}"
+                  echo "name=$NAME" >> "$GITHUB_OUTPUT"
+                  echo "Artifact name: $NAME"
 
-            - name: 🧾 Set built artifact name
-              id: built_artifact_name
-              if: ${{ always() && inputs.upload_built_artifact }}
-              run: echo "name=built-${{ github.run_id }}-${{ github.run_attempt }}" >> "$GITHUB_OUTPUT"
+            - name: 📦 Create workspace snapshot
+              id: workspace_snapshot
+              if: ${{ always() && inputs.upload_workspace_artifact }}
+              shell: bash
+              run: |
+                  ARCHIVE_PATH="${{ runner.temp }}/workspace-artifact.tar.gz"
 
-            - name: 📤 Upload workspace artifact
+                  tar -czf "$ARCHIVE_PATH" \
+                    --exclude='.git' \
+                    --exclude='**/node_modules' \
+                    --exclude='**/.nx/cache' \
+                    --exclude='**/.pnpm-store' \
+                    --exclude='**/coverage' \
+                    --exclude='**/.turbo' \
+                    .
+
+                  echo "archive_path=$ARCHIVE_PATH" >> "$GITHUB_OUTPUT"
+                  echo "Workspace snapshot: $ARCHIVE_PATH"
+
+            - name: 📤 Upload workspace snapshot
+              id: upload_workspace
               if: ${{ always() && inputs.upload_workspace_artifact }}
               uses: actions/upload-artifact@v4
               with:
                   name: ${{ steps.artifact_name.outputs.name }}
-                  path: |
-                      .
-                      !.git
-                      !node_modules
-                      !**/node_modules
                   if-no-files-found: error
-
-            - name: 📤 Upload built artifact
-              if: ${{ always() && inputs.upload_built_artifact }}
-              uses: actions/upload-artifact@v4
-              with:
-                  name: ${{ steps.built_artifact_name.outputs.name }}
-                  path: |
-                      packages/*/dist/**
-                      packages/*/types/**
-                  if-no-files-found: warn
+                  path: ${{ steps.workspace_snapshot.outputs.archive_path }}
 
             - name: 🧾 Mark artifact uploaded
               id: artifact_uploaded
               if: ${{ always() }}
+              shell: bash
               run: |
-                  if [ "${{ inputs.upload_workspace_artifact }}" = "true" ]; then
+                  if [ "${{ inputs.upload_workspace_artifact }}" = "true" ] &&
+                    [ "${{ steps.upload_workspace.outcome }}" = "success" ]; then
                     echo "artifact_uploaded=true" >> "$GITHUB_OUTPUT"
                   else
                     echo "artifact_uploaded=false" >> "$GITHUB_OUTPUT"
                   fi
+
+
+
 
             - name: 📝 Output Summary
               if: ${{ always() }}
