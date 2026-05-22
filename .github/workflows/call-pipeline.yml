@@ -154,7 +154,12 @@ jobs:
             # Always disable Nx Cloud to avoid free-tier rate-limit errors.
             # Nx's postinstall hook runs before any step can set this, so it must
             # live here at the job level — not inside a step.
-            NX_NO_CLOUD: 'true'
+            # Default: Nx Cloud OFF.
+            # Nx's flag is inverse:
+            #   true  = no cloud
+            #   false = cloud allowed
+            NX_NO_CLOUD: 'false'
+
         outputs:
             is_repo_dirty: ${{ steps.repo_dirty.outputs.is_repo_dirty }}
             workspace_artifact_name: ${{ steps.artifact_name.outputs.name }}
@@ -224,12 +229,22 @@ jobs:
             - uses: nrwl/nx-set-shas@v5
               if: ${{ inputs.use_nx_affected }}
 
-            # ── Nx Cloud (opt-in, post-install only) ─────────────────
-            # NX_NO_CLOUD=true is set at the job level so pnpm install's
-            # postinstall hook never hits Nx Cloud. If nx_cloud: true is
-            # passed, flip it off here so the nx build/test steps can use cloud.
-            - name: ⚡ Re-enable Nx Cloud
-              if: ${{ inputs.nx_cloud == true }}
+            # ── Nx Cloud (repo-variable opt-in, post-install only) ─────────
+            # Nx Cloud is allowed by default unless Nx's inverse opt-out flag is set:
+            #   NX_NO_CLOUD='true'  → disable Nx Cloud
+            #   NX_NO_CLOUD='false' → allow Nx Cloud
+            #
+            # The job env sets NX_NO_CLOUD='true' so pnpm install/postinstall
+            # never contacts Nx Cloud. After install, this step flips the flag
+            # back off only when the repository variable explicitly opts in:
+            #
+            #   Settings → Secrets and variables → Actions → Variables
+            #   NX_CLOUD_ENABLED=true
+            #
+            # If NX_CLOUD_ENABLED is missing or anything other than 'true',
+            # Nx Cloud stays disabled.
+            - name: ⚡ Enable Nx Cloud
+              if: ${{ vars.NX_CLOUD_ENABLED == 'true' }}
               run: echo "NX_NO_CLOUD=false" >> "$GITHUB_ENV"
 
             # ── Reporting ────────────────────────────
@@ -239,9 +254,12 @@ jobs:
               run: bash .github/scripts/report-env.sh
 
             - name: 🗂️ Report Repository
+              id: repo_report
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
-              run: bash .github/scripts/report-repo.sh
+              uses: ./.github/actions/report-repository
+              with:
+                  print-report: 'true'
 
             - name: 🎀 Report Prettier
               if: ${{ always() }}
