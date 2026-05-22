@@ -1,0 +1,360 @@
+# ─────────────────────────────────────────────────────────────
+# WORKFLOW: Pipeline
+# TYPE: reusable (workflow_call)
+#
+# Notes:
+# - Inputs are typed; outputs are strings (boolean-like outputs use 'true'/'false').
+# - In mode=report, many steps use continue-on-error to produce a full report.
+# - Workspace artifact upload is optional and uploads from filesystem globs (does not respect .gitignore).
+# ─────────────────────────────────────────────────────────────
+
+name: Pipeline 🚰
+
+on:
+    workflow_call:
+        inputs:
+            # options: report | abort_on_error
+            mode:
+                required: false
+                default: report
+                type: string
+
+            # options: fix | check | skip
+            check_mode:
+                required: false
+                default: check
+                type: string
+
+            # If true: frozen-lockfile failure is treated as required.
+            # If false: relaxed install is allowed to recover from lockfile mismatch.
+            require_lockfile:
+                required: false
+                default: false
+                type: boolean
+
+            run_build:
+                required: false
+                default: true
+                type: boolean
+
+            run_test:
+                required: false
+                default: false
+                type: boolean
+
+            run_docs_build:
+                required: false
+                default: false
+                type: boolean
+
+            # If true: fail/report if repo is dirty at the end of the workflow.
+            require_clean_repo:
+                required: false
+                default: false
+                type: boolean
+
+            # Artifact upload options
+            upload_workspace_artifact:
+                required: false
+                default: false
+                type: boolean
+
+            artifact_name_prefix:
+                required: false
+                default: workspace
+                type: string
+
+            # When true, upload a separate artifact containing dist/ and types/ output
+            # (not conditioned on is_repo_dirty, so it works even when nothing is dirty).
+            upload_built_artifact:
+                required: false
+                default: false
+                type: boolean
+
+            node_version:
+                description: Node version to run the pipeline with.
+                required: false
+                default: lts/*
+                type: string
+            # reset caching options
+            nx_cache_reset:
+                required: false
+                default: false
+                type: boolean
+
+            pnpm_cache:
+                required: false
+                default: true
+                type: boolean
+
+            # Nx affected options
+            use_nx_affected:
+                description: Run nx affected instead of full workspace build/test/check routines.
+                required: false
+                default: false
+                type: boolean
+
+            nx_targets:
+                description: Space-delimited Nx targets for affected mode.
+                required: false
+                default: lint test build
+                type: string
+
+            nx_fix_ci:
+                description: Run nx fix-ci after main steps (Nx Cloud self-healing CI).
+                required: false
+                default: false
+                type: boolean
+
+            # API report — run pnpm api:report (api-extractor) after the build.
+            # The generated etc/*.api.md files are tracked; if stale, require_clean_repo will fail.
+            run_api_report:
+                description: Run pnpm api:report after build to regenerate tracked API surface files (etc/*.api.md). Stale reports will fail require_clean_repo.
+                required: false
+                default: false
+                type: boolean
+
+        outputs:
+            is_repo_dirty:
+                description: Whether repository is dirty at end ('true'|'false')
+                value: ${{ jobs.pipeline.outputs.is_repo_dirty }}
+
+            workspace_artifact_name:
+                description: Artifact name if uploaded; empty string otherwise
+                value: ${{ jobs.pipeline.outputs.workspace_artifact_name }}
+
+            artifact_uploaded:
+                description: Whether artifact upload ran successfully ('true'|'false')
+                value: ${{ jobs.pipeline.outputs.artifact_uploaded }}
+
+            built_artifact_name:
+                description: Name of the built-output artifact (dist/types), or empty if not uploaded
+                value: ${{ jobs.pipeline.outputs.built_artifact_name }}
+
+permissions:
+    contents: read
+
+env:
+    HUSKY: 0
+
+jobs:
+    pipeline:
+        runs-on: ubuntu-latest
+        name: pipeline
+        env:
+            # Default: Nx Cloud OFF in CI.
+            # Nx uses an inverse string flag:
+            #   NX_NO_CLOUD='true'  -> disable Nx Cloud
+            #   NX_NO_CLOUD='false' -> allow Nx Cloud
+            #
+            # Keep this at job level so pnpm install/postinstall also sees it.
+            NX_NO_CLOUD: 'true'
+
+        outputs:
+            is_repo_dirty: ${{ steps.repo_dirty.outputs.is_repo_dirty }}
+            workspace_artifact_name: ${{ steps.artifact_name.outputs.name }}
+            artifact_uploaded: ${{ steps.artifact_uploaded.outputs.artifact_uploaded }}
+            built_artifact_name: ${{ steps.built_artifact_name.outputs.name }}
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - uses: pnpm/action-setup@v6
+              with:
+                  run_install: false
+                  cache: ${{ inputs.pnpm_cache }}
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ inputs.node_version }}
+                  cache: ${{ inputs.pnpm_cache && 'pnpm' || '' }}
+
+            # ── Input summary ────────────────────────────────────────
+            # Note: no native foreach over inputs; keep this explicit.
+            - name: 🌸 Input Summary
+              shell: bash
+              run: |
+                  {
+                    echo "## Pipeline inputs"
+                    echo ""
+                    echo "- mode: \`${{ inputs.mode }}\`"
+                    echo "- check_mode: \`${{ inputs.check_mode }}\`"
+                    echo "- require_lockfile: \`${{ inputs.require_lockfile }}\`"
+                    echo "- require_clean_repo: \`${{ inputs.require_clean_repo }}\`"
+                    echo "- run_build: \`${{ inputs.run_build }}\`"
+                    echo "- run_test: \`${{ inputs.run_test }}\`"
+                    echo "- run_docs_build: \`${{ inputs.run_docs_build }}\`"
+                    echo "- nx_cache_reset: \`${{ inputs.nx_cache_reset }}\`"
+                    echo "- pnpm_cache: \`${{ inputs.pnpm_cache }}\`"
+                    echo "- upload_workspace_artifact: \`${{ inputs.upload_workspace_artifact }}\`"
+                    echo "- artifact_name_prefix: \`${{ inputs.artifact_name_prefix }}\`"
+                    echo "- upload_built_artifact: \`${{ inputs.upload_built_artifact }}\`"
+                    echo "- use_nx_affected: \`${{ inputs.use_nx_affected }}\`"
+                    echo "- nx_targets: \`${{ inputs.nx_targets }}\`"
+                    echo "- nx_fix_ci: \`${{ inputs.nx_fix_ci }}\`"
+                    echo "- DISABLE_NX_CLOUD: \`${{ vars.DISABLE_NX_CLOUD || 'unset' }}\`"
+                    echo "- run_api_report: \`${{ inputs.run_api_report }}\`"
+                  } | tee -a "$GITHUB_STEP_SUMMARY"
+
+            # ── Install attempts ─────────────────────────────────────
+            - name: 📦 Install Frozen Lockfile
+              id: install_frozen
+              continue-on-error: true
+              run: pnpm install --frozen-lockfile
+
+            - name: 📦 Install Relaxed Lockfile (fallback)
+              id: install_relaxed
+              if: ${{ steps.install_frozen.outcome == 'failure' && !inputs.require_lockfile }}
+              run: pnpm install --no-frozen-lockfile
+
+            - name: 🚨 Validate Install
+              if: ${{ steps.install_frozen.outcome == 'failure' && (inputs.require_lockfile || steps.install_relaxed.outcome == 'failure') }}
+              run: |
+                  echo "Install failed. Frozen lockfile install failed and either require_lockfile=true or relaxed install also failed."
+                  exit 1
+
+            # ── Nx affected SHA detection ────────────────────────────
+            - uses: nrwl/nx-set-shas@v5
+              if: ${{ inputs.use_nx_affected }}
+
+            # ── Nx Cloud (repo-variable opt-in, post-install only) ─────────
+            # The job starts with NX_NO_CLOUD='true' so pnpm install/postinstall
+            # never contacts Nx Cloud.
+            #
+            # Repository variable:
+            #   DISABLE_NX_CLOUD=true or missing → keep Nx Cloud disabled
+            #   DISABLE_NX_CLOUD=false           → allow Nx Cloud after install
+            #
+            # Missing defaults to disabled because GitHub vars resolve to ''
+            # when unset.
+            - name: ⚡ Enable Nx Cloud
+              if: ${{ vars.DISABLE_NX_CLOUD == 'false' }}
+              run: echo "NX_NO_CLOUD=false" >> "$GITHUB_ENV"
+
+            # ── Reporting ────────────────────────────
+            - name: 🩺 Report Environment
+              if: ${{ always() }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: bash .github/scripts/report-env.sh
+
+            - name: 🗂️ Report Repository
+              id: repo_report
+              if: ${{ always() }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              uses: ./.github/actions/report-repository
+
+            - name: ✨ Report Prettier
+              if: ${{ always() }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: bash .github/scripts/report-prettier.sh
+
+            - name: 📦 Report Workspace
+              if: ${{ always() }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: bash .github/scripts/report-workspace.sh
+
+            - name: 🧱 Nx Report
+              if: ${{ always() }}
+              continue-on-error: true
+              run: pnpm exec nx report
+
+            - name: 🧹 Reset Nx Cache
+              if: ${{ inputs.nx_cache_reset }}
+              run: pnpm exec nx reset
+
+            - name: 🧪 Run Check
+              if: ${{ inputs.check_mode == 'check' }}
+              run: pnpm check
+
+            - name: 🛠️ Run Fix
+              if: ${{ inputs.check_mode == 'fix' }}
+              run: pnpm fix
+
+            - name: 🧪 Run Tests
+              if: ${{ inputs.run_test }}
+              run: pnpm test
+
+            - name: 🏗️ Run Build
+              if: ${{ inputs.run_build }}
+              run: pnpm build
+
+            - name: 📚 Run Docs Build
+              if: ${{ inputs.run_docs_build }}
+              run: pnpm docs:build
+
+            - name: 🧾 Run API Report
+              if: ${{ inputs.run_api_report }}
+              run: pnpm api:report
+
+            - name: 🤖 Nx Fix CI
+              if: ${{ inputs.nx_fix_ci && vars.DISABLE_NX_CLOUD == 'false' }}
+              run: pnpm exec nx fix-ci
+
+            - name: 🧼 Check repository dirty state
+              id: repo_dirty
+              if: ${{ always() }}
+              shell: bash
+              run: |
+                  if [ -n "$(git status --porcelain)" ]; then
+                    echo "is_repo_dirty=true" >> "$GITHUB_OUTPUT"
+                    echo "Repository is dirty:"
+                    git status --short
+                  else
+                    echo "is_repo_dirty=false" >> "$GITHUB_OUTPUT"
+                  fi
+
+            - name: 🚨 Require clean repository
+              if: ${{ inputs.require_clean_repo && steps.repo_dirty.outputs.is_repo_dirty == 'true' }}
+              run: |
+                  echo "Repository is dirty after pipeline."
+                  exit 1
+
+            # ── Artifact upload + outputs ────────────────────────────
+            - name: 🏷️ Compute artifact name
+              id: artifact_name
+              if: ${{ always() && inputs.upload_workspace_artifact }}
+              shell: bash
+              run: |
+                  NAME="${{ inputs.artifact_name_prefix }}-${{ github.repository }}-${{ github.run_id }}-${{ github.run_attempt }}"
+                  NAME="${NAME//\//-}"
+                  echo "name=$NAME" >> "$GITHUB_OUTPUT"
+                  echo "Artifact name: $NAME"
+
+            - name: 📤 Upload workspace snapshot
+              id: upload_workspace
+              if: ${{ always() && inputs.upload_workspace_artifact }}
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ${{ steps.artifact_name.outputs.name }}
+                  if-no-files-found: error
+                  path: ${{ steps.workspace_snapshot.outputs.archive_path }}
+
+            - name: 🧾 Mark artifact uploaded
+              id: artifact_uploaded
+              if: ${{ always() }}
+              shell: bash
+              run: |
+                  if [ "${{ inputs.upload_workspace_artifact }}" = "true" ] &&
+                    [ "${{ steps.upload_workspace.outcome }}" = "success" ]; then
+                    echo "artifact_uploaded=true" >> "$GITHUB_OUTPUT"
+                  else
+                    echo "artifact_uploaded=false" >> "$GITHUB_OUTPUT"
+                  fi
+
+            - name: 📝 Output Summary
+              if: ${{ always() }}
+              run: |
+                  {
+                    echo ""
+                    echo "## Outputs"
+                    echo ""
+                    echo "- is_repo_dirty: \`${{ steps.repo_dirty.outputs.is_repo_dirty }}\`"
+                    echo "- artifact_uploaded: \`${{ steps.artifact_uploaded.outputs.artifact_uploaded }}\`"
+                    echo "- workspace_artifact_name: \`${{ steps.artifact_name.outputs.name }}\`"
+                  } >> "$GITHUB_STEP_SUMMARY"
+
+            - name: ✅ Done
+              if: ${{ always() }}
+              run: echo "Pipeline workflow completed."
