@@ -20,6 +20,16 @@ on:
                     - fix
                     - check
                     - skip
+            api_report_mode:
+                description: Api Report Mode
+                required: true
+                default: skip
+                type: choice
+                options:
+                    - update
+                    - check
+                    - skip
+
             require_lockfile:
                 description: Treat frozen lockfile install as required
                 required: true
@@ -92,12 +102,6 @@ on:
                 default: false
                 type: boolean
 
-            run_api_report:
-                description: Run pnpm api:report after build (updates tracked etc/*.api.md files)
-                required: false
-                default: false
-                type: boolean
-
 permissions:
     contents: read
     actions: read
@@ -108,6 +112,7 @@ jobs:
         with:
             mode: ${{ inputs.mode }}
             check_mode: ${{ inputs.check_mode }}
+            api_report_mode: ${{ inputs.api_report_mode }}
             require_lockfile: ${{ inputs.require_lockfile }}
             require_clean_repo: ${{ inputs.require_clean_repo }}
             run_build: ${{ inputs.run_build }}
@@ -121,7 +126,6 @@ jobs:
             use_nx_affected: ${{ inputs.use_nx_affected }}
             nx_targets: ${{ inputs.nx_targets }}
             nx_fix_ci: ${{ inputs.nx_fix_ci }}
-            run_api_report: ${{ inputs.run_api_report }}
 
     summary:
         name: Summarize pipeline outputs

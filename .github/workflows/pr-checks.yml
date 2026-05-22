@@ -60,7 +60,7 @@ jobs:
             run_build: true
             run_test: true
             run_docs_build: true
-            run_api_report: true
+            api_report_mode: update
             pnpm_cache: true
 
     pending_release:
@@ -76,7 +76,7 @@ jobs:
             run_build: true
             run_test: true
             run_docs_build: true
-            run_api_report: true
+            api_report_mode: check
             pnpm_cache: true
 
     main:
@@ -92,5 +92,4 @@ jobs:
             run_build: true
             run_test: true
             run_docs_build: false
-            run_api_report: false
             pnpm_cache: true

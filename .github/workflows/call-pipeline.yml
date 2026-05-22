@@ -20,9 +20,21 @@ on:
                 type: string
 
             # options: fix | check | skip
+            # Via eslint & prettier
             check_mode:
                 required: false
                 default: check
+                type: string
+
+            # options: update | check | skip
+            # API report via api-extractor after the build
+            # - "update" mode regenerates tracked API surface files (etc/*.api.md)
+            # - "check" compares and fails if not up-to-date (dirty repo)
+            # The generated etc/*.api.md files are tracked; if stale, require_clean_repo will fail.
+
+            api_report_mode:
+                required: false
+                default: skip
                 type: string
 
             # If true: frozen-lockfile failure is treated as required.
@@ -64,13 +76,6 @@ on:
                 default: workspace
                 type: string
 
-            # When true, upload a separate artifact containing dist/ and types/ output
-            # (not conditioned on is_repo_dirty, so it works even when nothing is dirty).
-            upload_built_artifact:
-                required: false
-                default: false
-                type: boolean
-
             node_version:
                 description: Node version to run the pipeline with.
                 required: false
@@ -106,14 +111,6 @@ on:
                 default: false
                 type: boolean
 
-            # API report — run pnpm api:report (api-extractor) after the build.
-            # The generated etc/*.api.md files are tracked; if stale, require_clean_repo will fail.
-            run_api_report:
-                description: Run pnpm api:report after build to regenerate tracked API surface files (etc/*.api.md). Stale reports will fail require_clean_repo.
-                required: false
-                default: false
-                type: boolean
-
         outputs:
             is_repo_dirty:
                 description: Whether repository is dirty at end ('true'|'false')
@@ -126,10 +123,6 @@ on:
             artifact_uploaded:
                 description: Whether artifact upload ran successfully ('true'|'false')
                 value: ${{ jobs.pipeline.outputs.artifact_uploaded }}
-
-            built_artifact_name:
-                description: Name of the built-output artifact (dist/types), or empty if not uploaded
-                value: ${{ jobs.pipeline.outputs.built_artifact_name }}
 
 permissions:
     contents: read
@@ -154,7 +147,6 @@ jobs:
             is_repo_dirty: ${{ steps.repo_dirty.outputs.is_repo_dirty }}
             workspace_artifact_name: ${{ steps.artifact_name.outputs.name }}
             artifact_uploaded: ${{ steps.artifact_uploaded.outputs.artifact_uploaded }}
-            built_artifact_name: ${{ steps.built_artifact_name.outputs.name }}
 
         steps:
             - uses: actions/checkout@v4
@@ -181,6 +173,7 @@ jobs:
                     echo ""
                     echo "- mode: \`${{ inputs.mode }}\`"
                     echo "- check_mode: \`${{ inputs.check_mode }}\`"
+                    echo "- api_report_mode: \`${{ inputs.api_report_mode }}\`"
                     echo "- require_lockfile: \`${{ inputs.require_lockfile }}\`"
                     echo "- require_clean_repo: \`${{ inputs.require_clean_repo }}\`"
                     echo "- run_build: \`${{ inputs.run_build }}\`"
@@ -190,12 +183,10 @@ jobs:
                     echo "- pnpm_cache: \`${{ inputs.pnpm_cache }}\`"
                     echo "- upload_workspace_artifact: \`${{ inputs.upload_workspace_artifact }}\`"
                     echo "- artifact_name_prefix: \`${{ inputs.artifact_name_prefix }}\`"
-                    echo "- upload_built_artifact: \`${{ inputs.upload_built_artifact }}\`"
                     echo "- use_nx_affected: \`${{ inputs.use_nx_affected }}\`"
                     echo "- nx_targets: \`${{ inputs.nx_targets }}\`"
                     echo "- nx_fix_ci: \`${{ inputs.nx_fix_ci }}\`"
                     echo "- DISABLE_NX_CLOUD: \`${{ vars.DISABLE_NX_CLOUD || 'unset' }}\`"
-                    echo "- run_api_report: \`${{ inputs.run_api_report }}\`"
                   } | tee -a "$GITHUB_STEP_SUMMARY"
 
             # ── Install attempts ─────────────────────────────────────
@@ -257,36 +248,70 @@ jobs:
 
             - name: 🧱 Nx Report
               if: ${{ always() }}
-              continue-on-error: true
+              continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm exec nx report
 
+            # ── NX Cache resets ─────────────────────────────────────────
             - name: 🧹 Reset Nx Cache
               if: ${{ inputs.nx_cache_reset }}
-              run: pnpm exec nx reset
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm nx:reset
 
-            - name: 🧪 Run Check
-              if: ${{ inputs.check_mode == 'check' }}
-              run: pnpm check
+            # ── Nx affected mode ─────────────────────────────────────
+            - name: 🎯 Run Nx Affected
+              if: ${{ inputs.use_nx_affected }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm exec nx affected -t ${{ inputs.nx_targets }}
 
-            - name: 🛠️ Run Fix
-              if: ${{ inputs.check_mode == 'fix' }}
-              run: pnpm fix
-
-            - name: 🧪 Run Tests
-              if: ${{ inputs.run_test }}
-              run: pnpm test
-
+              # ── Full workspace routines (skipped when use_nx_affected) ─
             - name: 🏗️ Run Build
-              if: ${{ inputs.run_build }}
+              if: ${{ inputs.run_build && !inputs.use_nx_affected }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm build
 
-            - name: 📚 Run Docs Build
-              if: ${{ inputs.run_docs_build }}
-              run: pnpm docs:build
+            - name: 🧪 Run Test
+              if: ${{ inputs.run_test && !inputs.use_nx_affected }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm test
 
-            - name: 🧾 Run API Report
-              if: ${{ inputs.run_api_report }}
+            - name: 📘 Run Docs Build
+              if: ${{ inputs.run_docs_build && !inputs.use_nx_affected }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm run docs:build
+
+              # ──Lint Routines ────────────────────────────────────────────
+            - name: ✨ Run Fix Routine
+              if: ${{ inputs.check_mode == 'fix' && !inputs.use_nx_affected }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm fix
+
+            - name: ✅ Run Check Routine
+              if: ${{ inputs.check_mode == 'check' && !inputs.use_nx_affected }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm check
+
+            - name: ⏭️ Skip Check Routine
+              if: ${{ inputs.check_mode == 'skip' && !inputs.use_nx_affected }}
+              run: echo "check_mode=skip"
+
+            # ── API report (tracked etc/*.api.md) ───────────────────
+            # Regenerates API surface files via api-extractor. Because these
+            # files ARE tracked in git, a stale report makes the repo dirty
+            # and will fail require_clean_repo. Run pnpm api:report locally
+            # (or trigger dispatch-build-docs) to refresh them.
+            - name: ✨ Run Update Api Report
+              if: ${{ inputs.api_report_mode == 'update' && !inputs.use_nx_affected }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm api:report
+
+            - name: ✅ Run Check Api Report
+              if: ${{ inputs.api_report_mode == 'check' && !inputs.use_nx_affected }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm api:check
+
+            - name: ⏭️ Skip Api Report
+              if: ${{ inputs.check_mode == 'skip' && !inputs.use_nx_affected }}
+              run: echo "api_report_mode=skip"
 
             - name: 🤖 Nx Fix CI
               if: ${{ inputs.nx_fix_ci && vars.DISABLE_NX_CLOUD == 'false' }}
@@ -361,7 +386,12 @@ jobs:
                   else
                     echo "artifact_uploaded=false" >> "$GITHUB_OUTPUT"
                   fi
+            - name: 🗂️ Repository Status
+              id: repository_status
+              if: ${{ always() }}
+              uses: ./.github/actions/report-repository
 
+            #TODO: maybe include more outputs from the repository report in the final summary?
             - name: 📝 Output Summary
               if: ${{ always() }}
               run: |

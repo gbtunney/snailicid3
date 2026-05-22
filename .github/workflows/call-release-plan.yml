@@ -263,7 +263,7 @@ jobs:
             run_build: true
             run_test: true
             run_docs_build: true
-            run_api_report: true
+            api_report_mode: 'check'
             node_version: ${{ inputs.node_version }}
             pnpm_cache: ${{ inputs.pnpm_cache }}
             upload_workspace_artifact: ${{ inputs.upload_workspace_artifact }}
