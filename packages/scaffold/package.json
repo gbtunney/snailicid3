@@ -4,7 +4,7 @@
     "private": true,
     "description": "Package scaffolding generator with TypeScript-function-based templates",
     "keywords": [
-        "typescript",
+              "typescript",
         "snailicid3",
         "monorepo",
         "scaffold",
