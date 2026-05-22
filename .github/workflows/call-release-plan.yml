@@ -1,0 +1,308 @@
+name: Call Release Plan
+
+# ─────────────────────────────────────────────────────────────
+# WORKFLOW: Release Plan
+# TYPE: reusable (workflow_call)
+#
+# Purpose:
+#   Run the release decision tree for one ref/SHA.
+#
+# This is intentionally separate from call-detect-release-state.yml:
+#
+#   call-detect-release-state.yml
+#     Pure inventory/state detection. No build. No mutation. No publish.
+#
+#   call-release-plan.yml
+#     Interprets that detected state as a release workflow plan.
+#     It can be used manually now and by push-main later.
+#
+# Current behavior:
+#   - Always detects release state.
+#   - Always prints a readable plan.
+#   - Optionally runs the validation/snapshot pipeline for publish candidates.
+#   - Does NOT publish to npm yet.
+#   - Does NOT create/update a version PR yet.
+#
+# Safety:
+#   - dry_run=true is the default expected caller behavior.
+#   - dry_run=false is blocked unless the checked ref is main, unless
+#     allow_non_main=true is explicitly passed.
+# ─────────────────────────────────────────────────────────────
+
+on:
+    workflow_call:
+        inputs:
+            ref:
+                description: Branch, tag, or SHA to inspect. Leave empty to inspect the triggering commit.
+                required: false
+                default: ''
+                type: string
+
+            dry_run:
+                description: Print what would happen without mutating or publishing.
+                required: false
+                default: true
+                type: boolean
+
+            allow_non_main:
+                description: Allow non-dry-run actions away from main. Keep false except for controlled tests.
+                required: false
+                default: false
+                type: boolean
+
+            run_pipeline:
+                description: Run the validation pipeline for publish candidates.
+                required: false
+                default: true
+                type: boolean
+
+            upload_workspace_artifact:
+                description: Upload a workspace snapshot artifact from the validation pipeline for inspection/handoff.
+                required: false
+                default: true
+                type: boolean
+
+            require_lockfile:
+                description: Treat frozen lockfile install as required when running the validation pipeline.
+                required: false
+                default: true
+                type: boolean
+
+            node_version:
+                description: Node version to run the validation pipeline with.
+                required: false
+                default: lts/*
+                type: string
+
+            pnpm_cache:
+                description: Control pnpm cache usage in the validation pipeline.
+                required: false
+                default: true
+                type: boolean
+
+        outputs:
+            checked_ref:
+                description: Resolved commit SHA inspected by release-state detection.
+                value: ${{ jobs.detect.outputs.checked_ref }}
+
+            release_phase:
+                description: pending_changeset | pending_release | main
+                value: ${{ jobs.plan.outputs.release_phase }}
+
+            should_version:
+                description: "'true' when pending changesets exist."
+                value: ${{ jobs.detect.outputs.should_version }}
+
+            should_publish:
+                description: "'true' when no changesets remain and publish candidates exist."
+                value: ${{ jobs.detect.outputs.should_publish }}
+
+            should_skip:
+                description: "'true' when no release action is needed."
+                value: ${{ jobs.detect.outputs.should_skip }}
+
+            publish_candidates:
+                description: Space-delimited package@version publish candidates.
+                value: ${{ jobs.detect.outputs.publish_candidates }}
+
+            workspace_artifact_name:
+                description: Workspace snapshot artifact name, when the pipeline ran and uploaded one.
+                value: ${{ jobs.pending_release_pipeline.outputs.workspace_artifact_name }}
+
+permissions:
+    contents: read
+    actions: read
+
+jobs:
+    detect:
+        name: detect release state
+        uses: ./.github/workflows/call-detect-release-state.yml
+        with:
+            ref: ${{ inputs.ref }}
+
+    plan:
+        name: release plan
+        needs: detect
+        runs-on: ubuntu-latest
+
+        outputs:
+            release_phase: ${{ steps.phase.outputs.release_phase }}
+
+        steps:
+            - name: Decide release phase
+              id: phase
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  if [ "${{ needs.detect.outputs.should_version }}" = "true" ]; then
+                    release_phase="pending_changeset"
+                  elif [ "${{ needs.detect.outputs.should_publish }}" = "true" ]; then
+                    release_phase="pending_release"
+                  else
+                    release_phase="main"
+                  fi
+
+                  echo "release_phase=$release_phase" >> "$GITHUB_OUTPUT"
+
+            - name: Print release plan
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  phase="${{ steps.phase.outputs.release_phase }}"
+                  dry_run="${{ inputs.dry_run }}"
+
+                  {
+                    echo "## Release plan"
+                    echo ""
+                    echo "- input ref: \`${{ inputs.ref || 'github.sha' }}\`"
+                    echo "- checked ref: \`${{ needs.detect.outputs.checked_ref }}\`"
+                    echo "- dry run: \`${{ inputs.dry_run }}\`"
+                    echo "- allow non-main: \`${{ inputs.allow_non_main }}\`"
+                    echo "- phase: \`$phase\`"
+                    echo ""
+                    echo "## Release-state outputs"
+                    echo ""
+                    echo "- changeset_count: \`${{ needs.detect.outputs.changeset_count }}\`"
+                    echo "- has_pending_changesets: \`${{ needs.detect.outputs.has_pending_changesets }}\`"
+                    echo "- package_count: \`${{ needs.detect.outputs.package_count }}\`"
+                    echo "- public_package_count: \`${{ needs.detect.outputs.public_package_count }}\`"
+                    echo "- private_package_count: \`${{ needs.detect.outputs.private_package_count }}\`"
+                    echo "- invalid_package_count: \`${{ needs.detect.outputs.invalid_package_count }}\`"
+                    echo "- new_package_count: \`${{ needs.detect.outputs.new_package_count }}\`"
+                    echo "- new_version_count: \`${{ needs.detect.outputs.new_version_count }}\`"
+                    echo "- already_published_count: \`${{ needs.detect.outputs.already_published_count }}\`"
+                    echo "- lookup_failed_count: \`${{ needs.detect.outputs.lookup_failed_count }}\`"
+                    echo "- publish_candidate_count: \`${{ needs.detect.outputs.publish_candidate_count }}\`"
+                    echo "- publish_candidates: \`${{ needs.detect.outputs.publish_candidates }}\`"
+                    echo ""
+                    echo "## Planned action"
+                    echo ""
+
+                    if [ "$phase" = "pending_changeset" ]; then
+                      echo "This ref has pending changesets."
+                      if [ "$dry_run" = "true" ]; then
+                        echo "Dry run: would create or update a Changesets version PR."
+                      else
+                        echo "Real mode: would create or update a Changesets version PR."
+                        echo "Actual version-PR mutation is not implemented in this workflow yet."
+                      fi
+                    elif [ "$phase" = "pending_release" ]; then
+                      echo "This ref has publish candidates and no pending changesets."
+                      if [ "$dry_run" = "true" ]; then
+                        echo "Dry run: would validate and prepare publish candidate artifacts."
+                        echo "Dry run: would publish: \`${{ needs.detect.outputs.publish_candidates }}\`."
+                      else
+                        echo "Real mode: would validate and publish: \`${{ needs.detect.outputs.publish_candidates }}\`."
+                        echo "Actual npm publish is not implemented in this workflow yet."
+                      fi
+                    else
+                      echo "No release action is needed."
+                    fi
+                  } | tee -a "$GITHUB_STEP_SUMMARY"
+
+    guard_real_release:
+        name: guard real release
+        needs: [detect, plan]
+        runs-on: ubuntu-latest
+        if: ${{ inputs.dry_run == false }}
+
+        steps:
+            - name: Block unsafe non-main real release
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  requested_ref="${{ inputs.ref }}"
+                  allow_non_main="${{ inputs.allow_non_main }}"
+
+                  if [ "$allow_non_main" = "true" ]; then
+                    echo "allow_non_main=true; non-main real mode is allowed for this run."
+                    exit 0
+                  fi
+
+                  if [ -z "$requested_ref" ] || [ "$requested_ref" = "main" ] || [ "$requested_ref" = "refs/heads/main" ]; then
+                    echo "Real release mode allowed for main/default triggering ref."
+                    exit 0
+                  fi
+
+                  echo "::error::dry_run=false is only allowed for main unless allow_non_main=true."
+                  echo "requested_ref=$requested_ref"
+                  exit 1
+
+    pending_changeset:
+        name: pending changeset plan
+        needs: [detect, plan, guard_real_release]
+        if: ${{ always() && needs.detect.outputs.should_version == 'true' && (inputs.dry_run == true || needs.guard_real_release.result == 'success') }}
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Plan version PR action
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  if [ "${{ inputs.dry_run }}" = "true" ]; then
+                    echo "Dry run: would create/update a Changesets version PR."
+                    echo "Dry run: pending changeset count = ${{ needs.detect.outputs.changeset_count }}"
+                  else
+                    echo "Real mode requested: version PR mutation is not implemented yet."
+                  fi
+
+    pending_release_pipeline:
+        name: pending release candidate pipeline
+        needs: [detect, plan, guard_real_release]
+        if: ${{ always() && inputs.run_pipeline == true && needs.detect.outputs.should_publish == 'true' && (inputs.dry_run == true || needs.guard_real_release.result == 'success') }}
+        uses: ./.github/workflows/call-pipeline.yml
+        with:
+            mode: abort_on_error
+            check_mode: check
+            require_lockfile: ${{ inputs.require_lockfile }}
+            require_clean_repo: true
+            run_build: true
+            run_test: true
+            run_docs_build: true
+            run_api_report: true
+            node_version: ${{ inputs.node_version }}
+            pnpm_cache: ${{ inputs.pnpm_cache }}
+            upload_workspace_artifact: ${{ inputs.upload_workspace_artifact }}
+            artifact_name_prefix: release-candidate
+
+    pending_release_publish:
+        name: pending release publish plan
+        needs: [detect, plan, guard_real_release, pending_release_pipeline]
+        if: ${{ always() && needs.detect.outputs.should_publish == 'true' && (inputs.dry_run == true || needs.guard_real_release.result == 'success') }}
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Plan publish action
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  {
+                    echo "## Publish plan"
+                    echo ""
+                    echo "- dry run: \`${{ inputs.dry_run }}\`"
+                    echo "- publish candidates: \`${{ needs.detect.outputs.publish_candidates }}\`"
+                    echo "- pipeline result: \`${{ needs.pending_release_pipeline.result }}\`"
+                    echo "- workspace artifact: \`${{ needs.pending_release_pipeline.outputs.workspace_artifact_name }}\`"
+                    echo ""
+
+                    if [ "${{ inputs.dry_run }}" = "true" ]; then
+                      echo "Dry run: would publish the listed candidates after validation."
+                    else
+                      echo "Real mode requested: npm publish is not implemented yet."
+                    fi
+                  } | tee -a "$GITHUB_STEP_SUMMARY"
+
+    main:
+        name: no release action
+        needs: [detect, plan]
+        if: ${{ needs.detect.outputs.should_skip == 'true' }}
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Noop
+              run: echo "No release action needed."
