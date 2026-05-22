@@ -20,9 +20,21 @@ on:
                 type: string
 
             # options: fix | check | skip
+            # Via eslint & prettier
             check_mode:
                 required: false
                 default: check
+                type: string
+
+            # options: update | check | skip
+            # API report via api-extractor after the build
+            # - "update" mode regenerates tracked API surface files (etc/*.api.md)
+            # - "check" compares and fails if not up-to-date (dirty repo)
+            # The generated etc/*.api.md files are tracked; if stale, require_clean_repo will fail.
+
+            api_report_mode:
+                required: false
+                default: skip
                 type: string
 
             # If true: frozen-lockfile failure is treated as required.
@@ -64,13 +76,6 @@ on:
                 default: workspace
                 type: string
 
-            # When true, upload a separate artifact containing dist/ and types/ output
-            # (not conditioned on is_repo_dirty, so it works even when nothing is dirty).
-            upload_built_artifact:
-                required: false
-                default: false
-                type: boolean
-
             node_version:
                 description: Node version to run the pipeline with.
                 required: false
@@ -87,7 +92,7 @@ on:
                 default: true
                 type: boolean
 
-            # Nx Cloud / affected options
+            # Nx affected options
             use_nx_affected:
                 description: Run nx affected instead of full workspace build/test/check routines.
                 required: false
@@ -106,23 +111,6 @@ on:
                 default: false
                 type: boolean
 
-            # Nx Cloud is always disabled during pnpm install (NX_NO_CLOUD is set at the job
-            # level so it covers the postinstall hook). Set nx_cloud: true here to re-enable
-            # it for the actual nx build/test commands that run after install.
-            nx_cloud:
-                description: Re-enable Nx Cloud for nx commands (default false — install postinstall is always local regardless).
-                required: false
-                default: false
-                type: boolean
-
-            # API report — run pnpm api:report (api-extractor) after the build.
-            # The generated etc/*.api.md files are tracked; if stale, require_clean_repo will fail.
-            run_api_report:
-                description: Run pnpm api:report after build to regenerate tracked API surface files (etc/*.api.md). Stale reports will fail require_clean_repo.
-                required: false
-                default: false
-                type: boolean
-
         outputs:
             is_repo_dirty:
                 description: Whether repository is dirty at end ('true'|'false')
@@ -136,10 +124,6 @@ on:
                 description: Whether artifact upload ran successfully ('true'|'false')
                 value: ${{ jobs.pipeline.outputs.artifact_uploaded }}
 
-            built_artifact_name:
-                description: Name of the built-output artifact (dist/types), or empty if not uploaded
-                value: ${{ jobs.pipeline.outputs.built_artifact_name }}
-
 permissions:
     contents: read
 
@@ -151,15 +135,18 @@ jobs:
         runs-on: ubuntu-latest
         name: pipeline
         env:
-            # Always disable Nx Cloud to avoid free-tier rate-limit errors.
-            # Nx's postinstall hook runs before any step can set this, so it must
-            # live here at the job level — not inside a step.
+            # Default: Nx Cloud OFF in CI.
+            # Nx uses an inverse string flag:
+            #   NX_NO_CLOUD='true'  -> disable Nx Cloud
+            #   NX_NO_CLOUD='false' -> allow Nx Cloud
+            #
+            # Keep this at job level so pnpm install/postinstall also sees it.
             NX_NO_CLOUD: 'true'
+
         outputs:
             is_repo_dirty: ${{ steps.repo_dirty.outputs.is_repo_dirty }}
             workspace_artifact_name: ${{ steps.artifact_name.outputs.name }}
             artifact_uploaded: ${{ steps.artifact_uploaded.outputs.artifact_uploaded }}
-            built_artifact_name: ${{ steps.built_artifact_name.outputs.name }}
 
         steps:
             - uses: actions/checkout@v4
@@ -186,6 +173,7 @@ jobs:
                     echo ""
                     echo "- mode: \`${{ inputs.mode }}\`"
                     echo "- check_mode: \`${{ inputs.check_mode }}\`"
+                    echo "- api_report_mode: \`${{ inputs.api_report_mode }}\`"
                     echo "- require_lockfile: \`${{ inputs.require_lockfile }}\`"
                     echo "- require_clean_repo: \`${{ inputs.require_clean_repo }}\`"
                     echo "- run_build: \`${{ inputs.run_build }}\`"
@@ -195,12 +183,10 @@ jobs:
                     echo "- pnpm_cache: \`${{ inputs.pnpm_cache }}\`"
                     echo "- upload_workspace_artifact: \`${{ inputs.upload_workspace_artifact }}\`"
                     echo "- artifact_name_prefix: \`${{ inputs.artifact_name_prefix }}\`"
-                    echo "- upload_built_artifact: \`${{ inputs.upload_built_artifact }}\`"
                     echo "- use_nx_affected: \`${{ inputs.use_nx_affected }}\`"
                     echo "- nx_targets: \`${{ inputs.nx_targets }}\`"
                     echo "- nx_fix_ci: \`${{ inputs.nx_fix_ci }}\`"
-                    echo "- nx_cloud: \`${{ inputs.nx_cloud }}\`"
-                    echo "- run_api_report: \`${{ inputs.run_api_report }}\`"
+                    echo "- DISABLE_NX_CLOUD: \`${{ vars.DISABLE_NX_CLOUD || 'unset' }}\`"
                   } | tee -a "$GITHUB_STEP_SUMMARY"
 
             # ── Install attempts ─────────────────────────────────────
@@ -224,12 +210,18 @@ jobs:
             - uses: nrwl/nx-set-shas@v5
               if: ${{ inputs.use_nx_affected }}
 
-            # ── Nx Cloud (opt-in, post-install only) ─────────────────
-            # NX_NO_CLOUD=true is set at the job level so pnpm install's
-            # postinstall hook never hits Nx Cloud. If nx_cloud: true is
-            # passed, flip it off here so the nx build/test steps can use cloud.
-            - name: ⚡ Re-enable Nx Cloud
-              if: ${{ inputs.nx_cloud == true }}
+            # ── Nx Cloud (repo-variable opt-in, post-install only) ─────────
+            # The job starts with NX_NO_CLOUD='true' so pnpm install/postinstall
+            # never contacts Nx Cloud.
+            #
+            # Repository variable:
+            #   DISABLE_NX_CLOUD=true or missing → keep Nx Cloud disabled
+            #   DISABLE_NX_CLOUD=false           → allow Nx Cloud after install
+            #
+            # Missing defaults to disabled because GitHub vars resolve to ''
+            # when unset.
+            - name: ⚡ Enable Nx Cloud
+              if: ${{ vars.DISABLE_NX_CLOUD == 'false' }}
               run: echo "NX_NO_CLOUD=false" >> "$GITHUB_ENV"
 
             # ── Reporting ────────────────────────────
@@ -239,26 +231,27 @@ jobs:
               run: bash .github/scripts/report-env.sh
 
             - name: 🗂️ Report Repository
+              id: repo_report
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
-              run: bash .github/scripts/report-repo.sh
+              uses: ./.github/actions/report-repository
 
-            - name: 🎀 Report Prettier
+            - name: ✨ Report Prettier
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: bash .github/scripts/report-prettier.sh
 
-            - name: 📚 Report Workspace
+            - name: 📦 Report Workspace
               if: ${{ always() }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: bash .github/scripts/report-workspace.sh
 
             - name: 🧱 Nx Report
               if: ${{ always() }}
-              continue-on-error: true # informational only — nx report should never block the pipeline
+              continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm exec nx report
 
-            # ── Cache resets ─────────────────────────────────────────
+            # ── NX Cache resets ─────────────────────────────────────────
             - name: 🧹 Reset Nx Cache
               if: ${{ inputs.nx_cache_reset }}
               continue-on-error: ${{ inputs.mode == 'report' }}
@@ -270,41 +263,23 @@ jobs:
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm exec nx affected -t ${{ inputs.nx_targets }}
 
-            # ── Full workspace routines (skipped when use_nx_affected) ─
+              # ── Full workspace routines (skipped when use_nx_affected) ─
             - name: 🏗️ Run Build
               if: ${{ inputs.run_build && !inputs.use_nx_affected }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm build
-
-            # ── Built output artifact (for release — not conditioned on dirty) ──
-            - name: 🏷️ Compute built artifact name
-              id: built_artifact_name
-              if: ${{ inputs.upload_built_artifact && inputs.run_build }}
-              shell: bash
-              run: |
-                  NAME="built-output-${{ github.repository }}-${{ github.run_id }}-${{ github.run_attempt }}"
-                  NAME="${NAME//\//-}"
-                  echo "name=$NAME" >> "$GITHUB_OUTPUT"
-                  echo "Built artifact name: $NAME"
-
-            - name: 📦 Upload built output artifact
-              id: upload_built
-              if: ${{ inputs.upload_built_artifact && inputs.run_build }}
-              uses: actions/upload-artifact@v4
-              with:
-                  name: ${{ steps.built_artifact_name.outputs.name }}
-                  if-no-files-found: warn
-                  path: |
-                      **/dist/**
-                      **/types/**
-                      !**/node_modules/**
 
             - name: 🧪 Run Test
               if: ${{ inputs.run_test && !inputs.use_nx_affected }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm test
 
-              # ── Routines ────────────────────────────────────────────
+            - name: 📘 Run Docs Build
+              if: ${{ inputs.run_docs_build && !inputs.use_nx_affected }}
+              continue-on-error: ${{ inputs.mode == 'report' }}
+              run: pnpm run docs:build
+
+              # ──Lint Routines ────────────────────────────────────────────
             - name: ✨ Run Fix Routine
               if: ${{ inputs.check_mode == 'fix' && !inputs.use_nx_affected }}
               continue-on-error: ${{ inputs.mode == 'report' }}
@@ -319,45 +294,30 @@ jobs:
               if: ${{ inputs.check_mode == 'skip' && !inputs.use_nx_affected }}
               run: echo "check_mode=skip"
 
-            - name: 📘 Run Docs Build
-              if: ${{ inputs.run_docs_build && !inputs.use_nx_affected }}
-              continue-on-error: ${{ inputs.mode == 'report' }}
-              run: pnpm run docs:build
-
             # ── API report (tracked etc/*.api.md) ───────────────────
             # Regenerates API surface files via api-extractor. Because these
             # files ARE tracked in git, a stale report makes the repo dirty
             # and will fail require_clean_repo. Run pnpm api:report locally
             # (or trigger dispatch-build-docs) to refresh them.
-            - name: 📋 Run API Report
-              if: ${{ inputs.run_api_report && inputs.run_build && !inputs.use_nx_affected }}
+            - name: ✨ Run Update Api Report
+              if: ${{ inputs.api_report_mode == 'update' && !inputs.use_nx_affected }}
               continue-on-error: ${{ inputs.mode == 'report' }}
               run: pnpm api:report
 
-            # ── Clean repo gate + dirty output ──────────────────────
-            - name: 🧼 Require Clean Repo
-              if: ${{ inputs.require_clean_repo }}
+            - name: ✅ Run Check Api Report
+              if: ${{ inputs.api_report_mode == 'check' && !inputs.use_nx_affected }}
               continue-on-error: ${{ inputs.mode == 'report' }}
-              shell: bash
-              run: |
-                  if [ -n "$(git status --porcelain)" ]; then
-                    echo "::error::Repository is dirty after pipeline"
-                    echo
-                    echo "==== git status --short ===="
-                    git status --short
-                    echo
-                    echo "==== tracked changed files ===="
-                    git diff --name-only
-                    echo
-                    echo "==== staged changed files ===="
-                    git diff --cached --name-only
-                    echo
-                    echo "==== untracked files ===="
-                    git ls-files --others --exclude-standard
-                    exit 1
-                  fi
+              run: pnpm api:check
 
-            - name: 🧾 Compute is_repo_dirty output
+            - name: ⏭️ Skip Api Report
+              if: ${{ inputs.api_report_mode == 'skip' && !inputs.use_nx_affected }}
+              run: echo "api_report_mode=skip"
+
+            - name: 🤖 Nx Fix CI
+              if: ${{ inputs.nx_fix_ci && vars.DISABLE_NX_CLOUD == 'false' }}
+              run: pnpm exec nx fix-ci
+
+            - name: 🧼 Check repository dirty state
               id: repo_dirty
               if: ${{ always() }}
               shell: bash
@@ -370,10 +330,16 @@ jobs:
                     echo "is_repo_dirty=false" >> "$GITHUB_OUTPUT"
                   fi
 
+            - name: 🚨 Require clean repository
+              if: ${{ inputs.require_clean_repo && steps.repo_dirty.outputs.is_repo_dirty == 'true' }}
+              run: |
+                  echo "Repository is dirty after pipeline."
+                  exit 1
+
             # ── Artifact upload + outputs ────────────────────────────
             - name: 🏷️ Compute artifact name
               id: artifact_name
-              if: ${{ inputs.upload_workspace_artifact && steps.repo_dirty.outputs.is_repo_dirty == 'true'}}
+              if: ${{ always() && inputs.upload_workspace_artifact }}
               shell: bash
               run: |
                   NAME="${{ inputs.artifact_name_prefix }}-${{ github.repository }}-${{ github.run_id }}-${{ github.run_attempt }}"
@@ -381,12 +347,13 @@ jobs:
                   echo "name=$NAME" >> "$GITHUB_OUTPUT"
                   echo "Artifact name: $NAME"
 
-            - name: 📦 Upload workspace artifact
-              id: upload_workspace
-              if: ${{ inputs.upload_workspace_artifact && steps.repo_dirty.outputs.is_repo_dirty == 'true' }}
+            - name: 📦 Create workspace snapshot
+              id: workspace_snapshot
+              if: ${{ always() && inputs.upload_workspace_artifact }}
               shell: bash
               run: |
                   ARCHIVE_PATH="${{ runner.temp }}/workspace-artifact.tar.gz"
+
                   tar -czf "$ARCHIVE_PATH" \
                     --exclude='.git' \
                     --exclude='**/node_modules' \
@@ -397,35 +364,36 @@ jobs:
                     .
 
                   echo "archive_path=$ARCHIVE_PATH" >> "$GITHUB_OUTPUT"
+                  echo "Workspace snapshot: $ARCHIVE_PATH"
 
-            - name: 📦 Upload workspace artifact file
-              id: upload_workspace_file
-              if: ${{ inputs.upload_workspace_artifact && steps.repo_dirty.outputs.is_repo_dirty == 'true' }}
+            - name: 📤 Upload workspace snapshot
+              id: upload_workspace
+              if: ${{ always() && inputs.upload_workspace_artifact }}
               uses: actions/upload-artifact@v4
               with:
                   name: ${{ steps.artifact_name.outputs.name }}
                   if-no-files-found: error
-                  path: ${{ steps.upload_workspace.outputs.archive_path }}
+                  path: ${{ steps.workspace_snapshot.outputs.archive_path }}
 
-            - name: 🧾 Compute artifact_uploaded output
+            - name: 🧾 Mark artifact uploaded
               id: artifact_uploaded
-              if: ${{ steps.repo_dirty.outputs.is_repo_dirty == 'true'}}
+              if: ${{ always() }}
               shell: bash
               run: |
-                  if [ "${{ inputs.upload_workspace_artifact }}" != "true" ]; then
-                    echo "artifact_uploaded=false" >> "$GITHUB_OUTPUT"
-                    exit 0
-                  fi
-
-                  if [ "${{ steps.upload_workspace_file.outcome }}" = "success" ]; then
+                  if [ "${{ inputs.upload_workspace_artifact }}" = "true" ] &&
+                    [ "${{ steps.upload_workspace.outcome }}" = "success" ]; then
                     echo "artifact_uploaded=true" >> "$GITHUB_OUTPUT"
                   else
                     echo "artifact_uploaded=false" >> "$GITHUB_OUTPUT"
                   fi
-
-            - name: 🧾 Output Summary
+            - name: 🗂️ Repository Status
+              id: repository_status
               if: ${{ always() }}
-              shell: bash
+              uses: ./.github/actions/report-repository
+
+            #TODO: maybe include more outputs from the repository report in the final summary?
+            - name: 📝 Output Summary
+              if: ${{ always() }}
               run: |
                   {
                     echo ""
@@ -436,12 +404,6 @@ jobs:
                     echo "- workspace_artifact_name: \`${{ steps.artifact_name.outputs.name }}\`"
                   } >> "$GITHUB_STEP_SUMMARY"
 
-            # ── Nx Cloud self-healing CI ─────────────────────────────
-            - name: 🔧 Nx Cloud Fix CI
-              if: ${{ always() && inputs.nx_fix_ci }}
-              continue-on-error: true
-              run: pnpm exec nx fix-ci
-
-            - name: 🌈 Done
+            - name: ✅ Done
               if: ${{ always() }}
               run: echo "Pipeline workflow completed."

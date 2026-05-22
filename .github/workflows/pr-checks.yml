@@ -1,14 +1,27 @@
-# Runs on every pull_request to main and on workflow_dispatch (used by
-# push-release.yml to validate the generated release/main PR).
+# Runs on every pull_request to main and on workflow_dispatch.
 #
-# Replaces three separate per-kind workflows:
-#   pr-main.yml               → normal PR   (no docs / no api-report)
-#   pr-release.yml            → release PR  (docs + api-report)
-#   pr-changesets-version.yml → changeset PR (docs + api-report)
+# This workflow uses the same state detector as the release workflow:
 #
-# A single `required` job always runs — no if: condition — so branch
-# protection only needs one rule and there is never a "skipped" ambiguity.
-# run_docs_build / run_api_report are flipped by the detect outputs.
+#   .github/workflows/call-detect-release-state.yml
+#
+# The detector classifies the checked-out ref into one of three PR-check phases:
+#
+#   pending_changeset
+#     A changeset file exists. This is source-work PR state.
+#     Run the heavier validation set because docs/API surfaces may need updates.
+#
+#   pending_release
+#     No changesets remain, but at least one public package version is not on npm.
+#     This is version-bump/release PR state.
+#     Run the heavier validation set before allowing merge/publish.
+#
+#   main
+#     No changesets and no publish candidates.
+#     This is a normal PR state.
+#     Run the normal required build/test pipeline.
+#
+# The three pipeline jobs are intentionally explicit instead of one combined block
+# with many ternary-style inputs. This makes the Actions UI show which phase ran.
 name: PR Checks
 
 on:
@@ -29,11 +42,15 @@ env:
 
 jobs:
     detect:
-        uses: ./.github/workflows/call-detect-pr-kind.yml
+        name: detect release state
+        uses: ./.github/workflows/call-detect-release-state.yml
+        with:
+            ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
-    required:
-        name: required
+    pending_changeset:
+        name: pending changeset
         needs: detect
+        if: ${{ needs.detect.outputs.should_version == 'true' }}
         uses: ./.github/workflows/call-pipeline.yml
         with:
             mode: abort_on_error
@@ -42,6 +59,37 @@ jobs:
             require_clean_repo: true
             run_build: true
             run_test: true
-            run_docs_build: ${{ needs.detect.outputs.is_release_pr == 'true' || needs.detect.outputs.has_added_or_modified_changeset == 'true' }}
-            run_api_report: ${{ needs.detect.outputs.is_release_pr == 'true' || needs.detect.outputs.has_added_or_modified_changeset == 'true' }}
+            run_docs_build: true
+            api_report_mode: update
+            pnpm_cache: true
+
+    pending_release:
+        name: pending release
+        needs: detect
+        if: ${{ needs.detect.outputs.should_publish == 'true' }}
+        uses: ./.github/workflows/call-pipeline.yml
+        with:
+            mode: abort_on_error
+            check_mode: check
+            require_lockfile: true
+            require_clean_repo: true
+            run_build: true
+            run_test: true
+            run_docs_build: true
+            api_report_mode: check
+            pnpm_cache: true
+
+    main:
+        name: main
+        needs: detect
+        if: ${{ needs.detect.outputs.should_skip == 'true' }}
+        uses: ./.github/workflows/call-pipeline.yml
+        with:
+            mode: abort_on_error
+            check_mode: check
+            require_lockfile: true
+            require_clean_repo: true
+            run_build: true
+            run_test: true
+            run_docs_build: false
             pnpm_cache: true

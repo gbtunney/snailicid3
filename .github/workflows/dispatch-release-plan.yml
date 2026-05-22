@@ -1,0 +1,97 @@
+name: Dispatch Release Plan
+
+on:
+    workflow_dispatch:
+        inputs:
+            ref:
+                description: Branch, tag, or SHA to inspect. Leave empty to inspect the triggering commit.
+                required: false
+                default: ''
+                type: string
+
+            dry_run:
+                description: Print what would happen without mutating or publishing.
+                required: true
+                default: true
+                type: boolean
+
+            allow_non_main:
+                description: Allow non-dry-run actions away from main.
+                required: true
+                default: false
+                type: boolean
+
+            run_pipeline:
+                description: Run the validation pipeline for publish candidates.
+                required: true
+                default: true
+                type: boolean
+
+            upload_workspace_artifact:
+                description: Upload a workspace snapshot artifact for inspection/handoff.
+                required: true
+                default: true
+                type: boolean
+
+            require_lockfile:
+                description: Treat frozen lockfile install as required.
+                required: true
+                default: true
+                type: boolean
+
+            node_version:
+                description: Node version to run the validation pipeline with.
+                required: true
+                default: lts/*
+                type: choice
+                options:
+                    - 'lts/*'
+                    - '20'
+                    - '22'
+                    - '24'
+
+            pnpm_cache:
+                description: Control pnpm cache usage in the validation pipeline.
+                required: true
+                default: true
+                type: boolean
+
+permissions:
+    contents: read
+    actions: read
+
+jobs:
+    release_plan:
+        uses: ./.github/workflows/call-release-plan.yml
+        with:
+            ref: ${{ inputs.ref }}
+            dry_run: ${{ inputs.dry_run }}
+            allow_non_main: ${{ inputs.allow_non_main }}
+            run_pipeline: ${{ inputs.run_pipeline }}
+            upload_workspace_artifact: ${{ inputs.upload_workspace_artifact }}
+            require_lockfile: ${{ inputs.require_lockfile }}
+            node_version: ${{ inputs.node_version }}
+            pnpm_cache: ${{ inputs.pnpm_cache }}
+
+    summary:
+        name: summarize release plan
+        runs-on: ubuntu-latest
+        needs: release_plan
+        if: ${{ always() }}
+
+        steps:
+            - name: 🧾 Release plan summary
+              shell: bash
+              run: |
+                  {
+                    echo "## Release plan dispatch"
+                    echo ""
+                    echo "- workflow result: \`${{ needs.release_plan.result }}\`"
+                    echo "- checked ref: \`${{ needs.release_plan.outputs.checked_ref }}\`"
+                    echo "- release phase: \`${{ needs.release_plan.outputs.release_phase }}\`"
+                    echo "- should_version: \`${{ needs.release_plan.outputs.should_version }}\`"
+                    echo "- should_publish: \`${{ needs.release_plan.outputs.should_publish }}\`"
+                    echo "- should_skip: \`${{ needs.release_plan.outputs.should_skip }}\`"
+                    echo "- publish_candidates: \`${{ needs.release_plan.outputs.publish_candidates }}\`"
+                    echo "- workspace_artifact_name: \`${{ needs.release_plan.outputs.workspace_artifact_name }}\`"
+                  } >> "$GITHUB_STEP_SUMMARY"
