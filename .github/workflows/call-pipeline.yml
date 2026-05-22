@@ -310,7 +310,7 @@ jobs:
               run: pnpm api:check
 
             - name: ⏭️ Skip Api Report
-              if: ${{ inputs.check_mode == 'skip' && !inputs.use_nx_affected }}
+              if: ${{ inputs.api_report_mode == 'skip' && !inputs.use_nx_affected }}
               run: echo "api_report_mode=skip"
 
             - name: 🤖 Nx Fix CI
