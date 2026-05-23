@@ -298,7 +298,7 @@ jobs:
             # Regenerates API surface files via api-extractor. Because these
             # files ARE tracked in git, a stale report makes the repo dirty
             # and will fail require_clean_repo. Run pnpm api:report locally
-            # (or trigger dispatch-build-docs) to refresh them.
+            # (or trigger dispatch-workspace-update) to refresh them.
             - name: ✨ Run Update Api Report
               if: ${{ inputs.api_report_mode == 'update' && !inputs.use_nx_affected }}
               continue-on-error: ${{ inputs.mode == 'report' }}
