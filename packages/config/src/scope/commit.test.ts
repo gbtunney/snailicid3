@@ -88,4 +88,18 @@ describe('scope-commit messages', () => {
 
         expect(output).toBe('chore(actions): test scope message')
     })
+
+    it('can use an explicit scope for generated commits', () => {
+        const output = captureConsoleLog(() => {
+            main([
+                '--message',
+                'chore',
+                'test scope message',
+                '--scope',
+                'config',
+            ])
+        })
+
+        expect(output).toBe('chore(config): test scope message')
+    })
 })
