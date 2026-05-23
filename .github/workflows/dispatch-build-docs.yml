@@ -67,9 +67,10 @@ jobs:
         needs: pipeline_build_docs
         if: ${{ needs.pipeline_build_docs.result == 'success' && needs.pipeline_build_docs.outputs.artifact_uploaded == 'true' }}
         uses: ./.github/workflows/call-apply-workspace-artifact.yml
+        secrets: inherit
         with:
             ref: ${{ github.ref_name }}
             artifact_name: ${{ needs.pipeline_build_docs.outputs.workspace_artifact_name }}
             commit_mode: commit_if_dirty
-            commit_message: ${{ format('{0}(root): {1}', inputs.commit_message_type, inputs.commit_message_subject) }}
+            commit_message: "${{ format('{0}(root): {1}', inputs.commit_message_type, inputs.commit_message_subject) }}"
             push_branch: ${{ github.ref_name }}
