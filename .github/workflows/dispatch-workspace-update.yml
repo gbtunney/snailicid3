@@ -1,0 +1,97 @@
+name: Dispatch Workspace Update & Commit
+
+on:
+    workflow_dispatch:
+        inputs:
+            run_fix:
+                description: Run fix routine
+                required: true
+                default: false
+                type: boolean
+
+            run_docs:
+                description: Run docs build routine
+                required: true
+                default: false
+                type: boolean
+
+            run_api_report:
+                description: Run API report update routine
+                required: true
+                default: false
+                type: boolean
+
+            commit_message_type:
+                description: Conventional commit type prefix
+                required: false
+                default: docs
+                type: choice
+                options: [chore, fix, docs, build]
+
+            commit_message_subject:
+                description: Commit subject without type/scope.
+                required: false
+                default: workspace update
+                type: string
+
+permissions:
+    contents: write
+    actions: read
+    id-token: write
+
+env:
+    HUSKY: 0
+
+jobs:
+    guard:
+        name: Guard
+        runs-on: ubuntu-latest
+        steps:
+            - name: Refuse main and empty selection
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  if [[ "${{ github.ref_name }}" == "main" ]]; then
+                    echo "::error::Workspace update cannot run on main. Checkout a feature or fix branch first."
+                    exit 1
+                  fi
+
+                  if [[ "${{ inputs.run_fix }}" != "true" &&
+                        "${{ inputs.run_docs }}" != "true" &&
+                        "${{ inputs.run_api_report }}" != "true" ]]; then
+                    echo "::error::Select at least one routine: fix, docs, or API report."
+                    exit 1
+                  fi
+
+                  echo "Branch: ${{ github.ref_name }}"
+
+    pipeline_workspace_update:
+        name: Run selected pipeline routines
+        needs: guard
+        uses: ./.github/workflows/call-pipeline.yml
+        with:
+            mode: report
+            check_mode: ${{ inputs.run_fix && 'fix' || 'skip' }}
+            require_lockfile: false
+            run_build: false
+            run_test: false
+            run_docs_build: ${{ inputs.run_docs }}
+            api_report_mode: ${{ inputs.run_api_report && 'update' || 'skip' }}
+            require_clean_repo: false
+            upload_workspace_artifact: true
+            artifact_name_prefix: workspace-update
+
+    apply_workspace_artifact:
+        name: Apply artifact and commit
+        needs: pipeline_workspace_update
+        if: ${{ needs.pipeline_workspace_update.result == 'success' && needs.pipeline_workspace_update.outputs.artifact_uploaded == 'true' }}
+        uses: ./.github/workflows/call-apply-workspace-artifact.yml
+        secrets: inherit
+        with:
+            ref: ${{ github.ref_name }}
+            artifact_name: ${{ needs.pipeline_workspace_update.outputs.workspace_artifact_name }}
+            commit_mode: commit_if_dirty
+            commit_message: "${{ format('{0}(root): {1}', inputs.commit_message_type, inputs.commit_message_subject) }}"
+            scoped_commit_message: true
+            push_branch: ${{ github.ref_name }}
