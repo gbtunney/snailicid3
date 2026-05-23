@@ -2,6 +2,11 @@ name: Call Apply Workspace Artifact
 
 on:
     workflow_call:
+        secrets:
+            GH_PAT:
+                description: Optional token used for checkout/push so follow-up workflows can be triggered.
+                required: false
+
         inputs:
             ref:
                 description: Branch, tag, or SHA to checkout before applying the artifact.
