@@ -9,12 +9,12 @@ import { Entries } from 'type-fest';
 import { Entry } from 'type-fest';
 import { Integer } from 'type-fest';
 import { IsLiteral } from 'type-fest';
-import { JsonArray } from 'type-fest';
+import type { JsonArray } from 'type-fest';
 import { Jsonifiable } from 'type-fest';
 import { Jsonify } from 'type-fest';
-import { JsonObject } from 'type-fest';
-import { JsonPrimitive } from 'type-fest';
-import { JsonValue } from 'type-fest';
+import type { JsonObject } from 'type-fest';
+import type { JsonPrimitive } from 'type-fest';
+import type { JsonValue } from 'type-fest';
 import { KeyAsString } from 'type-fest';
 import { LiteralToPrimitive } from 'type-fest';
 import { LiteralToPrimitiveDeep } from 'type-fest';
@@ -25,13 +25,31 @@ import { PartialDeep } from 'type-fest';
 import { Primitive } from 'type-fest';
 import { Simplify } from 'type-fest';
 import { SimplifyDeep } from 'type-fest';
+import { Spread } from 'type-fest';
 import { Stringified } from 'type-fest';
 import { UnknownArray } from 'type-fest';
 import { UnknownRecord } from 'type-fest';
 import { ValueOf } from 'type-fest';
 
-// @public (undocumented)
-export type DeepPartial<Type> = Type extends object ? { [Prop in keyof Type]?: DeepPartial<Type[Prop]> } : Type;
+// @public
+export type AnyBooleanFn = (...args: Array<any>) => boolean;
+
+// @public
+export type AnyFn = (...args: Array<any>) => any;
+
+// @public
+export type AnyTypeGuardFn = (inputValue: any, ...args: Array<any>) => inputValue is any;
+
+// @public
+export type AsBooleanFn<FnType extends AnyFn> = (...args: Parameters<FnType>) => boolean;
+
+// @public
+export type AssertionFn<Type, Args extends Array<unknown> = []> = (value: unknown, ...args: Args) => asserts value is Type;
+
+// @public
+export type DeepPartial<Type> = Type extends object ? {
+    [Prop in keyof Type]?: DeepPartial<Type[Prop]>;
+} : Type;
 
 // @public
 export type EmptyArray = readonly [];
@@ -43,27 +61,35 @@ export type EmptyString = '';
 
 export { Entries }
 
-// @public (undocumented)
+// @public
 export type EntriesOf<Type extends object> = Entries<Type>;
 
 export { Entry }
 
-// @public (undocumented)
+// @public
 export type EntryOf<Type extends object> = Entry<Type>;
 
 // @public
 export type ExhaustiveRecordFrom<Type extends ReadonlyArray<unknown> | Record<keyof unknown, unknown>, Value = unknown> = Record<ExtractKeys<Type>, Value>;
 
-// @public (undocumented)
+// @public
 export type ExtractKeys<Type extends ReadonlyArray<unknown> | Record<keyof unknown, unknown>> = Type extends ReadonlyArray<infer U> ? Extract<U, PropertyKey> : Type extends Record<keyof any, unknown> ? keyof Type : never;
 
 // @public
 export type Falsy = 0 | 'Nan' | EmptyString | false | null | undefined;
 
-// @public (undocumented)
-export type FromEntriesTuples<TupleArrayType extends ReadonlyArray<readonly [PropertyKey, unknown]>> = { [Tuple in TupleArrayType[number] as PropertyKey & Tuple[0]]: Tuple[1] };
+// @public
+export type FirstArgOf<FunctionType extends (...args: Array<any>) => any> = Head<Parameters<FunctionType>>;
 
-// @public (undocumented)
+// @public
+export type FromEntriesTuples<TupleArrayType extends ReadonlyArray<readonly [PropertyKey, unknown]>> = {
+    [Tuple in TupleArrayType[number] as PropertyKey & Tuple[0]]: Tuple[1];
+};
+
+// @public
+export type Head<Tuple extends ReadonlyArray<unknown>> = Tuple extends readonly [infer First, ...Array<unknown>] ? First : never;
+
+// @public
 export type IsArray<Type> = Type extends UnknownArray ? true : false;
 
 // @public (undocumented)
@@ -84,7 +110,7 @@ export { Jsonify }
 
 export { KeyAsString }
 
-// @public (undocumented)
+// @public
 export type KeysOf<Type extends object> = keyof Type;
 
 export { LiteralToPrimitive }
@@ -98,6 +124,9 @@ export { Merge }
 export { MergeDeep }
 
 // @public
+export type NarrowedOf<GuardFunction extends AnyFn> = GuardFunction extends (inputValue: any, ...args: Array<any>) => inputValue is infer Narrowed ? Extract<Narrowed, TypeGuardInputValue<GuardFunction>> : never;
+
+// @public
 export type NilLike = EmptyString | Nullish;
 
 // @public
@@ -108,16 +137,21 @@ export type Nullish = null | undefined;
 
 export { PartialDeep }
 
-// @public (undocumented)
+// @public
 export type PlainObject = {
     [x: string]: unknown;
     [y: number]: never;
 };
 
-// @public (undocumented)
-export type PrefixProperties<Type extends object, Prefix extends string> = { [Key in keyof Type as `${Prefix}${Key extends string ? Key : never}`]: Type[Key] };
+// @public
+export type PrefixProperties<Type extends object, Prefix extends string> = {
+    [Key in keyof Type as `${Prefix}${Key extends string ? Key : never}`]: Type[Key];
+};
 
 export { Primitive }
+
+// @public
+export type RestArgsOf<FunctionType extends (...args: Array<any>) => any> = Tail<Parameters<FunctionType>>;
 
 export { Simplify }
 
@@ -125,61 +159,33 @@ export { SimplifyDeep }
 
 export { Stringified }
 
-// @public (undocumented)
-export type SuffixProperties<Type extends object, Suffix extends string> = { [Key in keyof Type as `${Key extends string ? Key : never}${Suffix}`]: Type[Key] };
+// @public
+export type SuffixProperties<Type extends object, Suffix extends string> = {
+    [Key in keyof Type as `${Key extends string ? Key : never}${Suffix}`]: Type[Key];
+};
 
 // @public
-export const tg: {
-    guardToAssertion: typeof guardToAssertion;
-    predicateToAssertion: typeof predicateToAssertion;
-    isJsonifiable: <Type extends Jsonifiable>(value: unknown) => value is Type extends Jsonifiable ? Type : never;
-    isJsonValue: <Type extends Json.Value>(value: Type) => value is Type extends Json.Value ? Type : never;
-    isJsonifiableObjectLike: <Type extends Json.Array | Json.Object>(value: Type) => value is Type extends Json.Array | Json.Object ? Type : never;
-    isJsonifiableObject: <Type extends PlainObject>(value: unknown) => value is Type extends Json.Object ? Type : Json.Object;
-    isJsonifiableArray: <Type extends Json.Array>(value: unknown) => value is Type extends Json.Array ? Type : never;
-    isTruthy: <Type>(value: Falsy | Type) => value is Type;
-    isFalsy: <Type>(value: Falsy | Type) => value is Falsy;
-    isNilOrEmpty: <Type>(value: NilOrEmpty | Type) => value is NilOrEmpty;
-    isNotNilOrEmpty: <Type>(value: NilOrEmpty | Type) => value is Type;
-    isEmptyString: <Type extends string = EmptyString>(value: Type) => value is Type;
-    isString: <Type extends string>(value: unknown) => value is Type;
-    isNotString: <Type = unknown>(value: string | Type) => value is Exclude<Type, "string">;
-    isBigInt: <Type extends bigint>(value: unknown) => value is Type;
-    isNumber: <Type extends number>(value: unknown) => value is Type;
-    isNotNumber: <Type extends number>(value: unknown) => value is Exclude<Type, number>;
-    isInteger: <Type extends number>(value: unknown) => value is Integer<Type>;
-    isNotInteger: <Type extends number, TypeNumber = (Type extends number ? never : Type)>(value: unknown) => value is TypeNumber;
-    isPrimitive: <Type extends Primitive>(value: unknown) => value is Type;
-    isNotPrimitive: <Type = unknown>(value: Primitive | Type) => value is Type;
-    isNilLike: <Type>(value: NilLike | Type) => value is NilLike;
-    isNotNilLike: <Type>(value: NilLike | Type) => value is Type;
-    isNullish: <Type>(value: NilLike | Type) => value is undefined;
-    isNotNullish: <Type>(value: NilLike | Type) => value is Type;
-    isNull: (value: unknown) => value is null;
-    isNotNull: <Type extends NonNullable<unknown>>(value: unknown) => value is Type;
-    isUndefined: <Type>(value: Nullish | Type) => value is undefined;
-    isNotUndefined: <Type>(value: Nullish | Type) => value is Type;
-    isEmptyArray: <Type extends UnknownArray>(value: Type) => value is Type;
-    isNonEmptyArray: <Type extends UnknownArray>(value: Type) => value is Type;
-    isArray: <Type extends UnknownArray>(value: unknown) => value is Type;
-    isNonEmptyObject: <Type extends PlainObject | Record<string, unknown>>(value: Type) => value is Type;
-    isEmptyObject: <Type extends UnknownRecord>(value: Type) => value is Type;
-    isPlainObject: <Type extends PlainObject | Record<string, unknown>>(value: Type) => value is Type;
-    isRegExp: <Type extends RegExp>(value: unknown) => value is Type;
-    isNotError: <Type>(value: Type) => value is IsLiteral<"ERROR"> extends false ? Type : never;
-    isError: (value: unknown) => value is IsLiteral<"ERROR"> extends true ? "ERROR" : never;
-};
+export type Tail<Tuple extends ReadonlyArray<unknown>> = Tuple extends readonly [unknown, ...infer Rest] ? Rest : [];
+
+// Warning: (ae-forgotten-export) The symbol "TG" needs to be exported by the entry point index.d.ts
+//
+// @public
+export const tg: TG;
+
+// @public
+export type TypeGuardExtraParameters<GuardFunction extends AnyFn> = GuardFunction extends (inputValue: any, ...args: infer RestArgs extends Array<unknown>) => inputValue is any ? RestArgs : never;
+
+// @public
+export type TypeGuardFn<InputValue = unknown, Narrowed extends InputValue = InputValue, RestArgs extends Array<unknown> = Array<unknown>> = (inputValue: InputValue, ...args: RestArgs) => inputValue is Narrowed;
+
+// @public
+export type TypeGuardInputValue<GuardFunction extends AnyFn> = GuardFunction extends (inputValue: infer InputValue, ...args: Array<any>) => inputValue is any ? InputValue : never;
 
 export { UnknownArray }
 
 export { UnknownRecord }
 
 export { ValueOf }
-
-// Warnings were encountered during analysis:
-//
-// dist/index.d.ts:63:3 - (ae-forgotten-export) The symbol "guardToAssertion" needs to be exported by the entry point index.d.ts
-// dist/index.d.ts:64:3 - (ae-forgotten-export) The symbol "predicateToAssertion" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

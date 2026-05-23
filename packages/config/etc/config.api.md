@@ -22,6 +22,7 @@ import type { Merge } from 'type-fest';
 import { merge } from 'ts-deepmerge';
 import type { Options } from 'prettier-plugin-jsdoc';
 import { Options as Options_2 } from 'prettier';
+import type { Spread } from 'type-fest';
 import { Config as TsConfig } from 'typescript-eslint';
 import type { UnknownRecord } from 'type-fest';
 
@@ -83,7 +84,7 @@ export const JS_FILE_EXTENSIONS: readonly ["js", "mjs", "cjs", "jsx"];
 export type JSFileExtensions = ArrayValues<typeof JS_FILE_EXTENSIONS>;
 
 // @public (undocumented)
-export const JSLIKE_FILE_EXTENSIONS: readonly ["js", "mjs", "cjs", "jsx", "ts", "mts", "cts", "tsx"];
+export const JSLIKE_FILE_EXTENSIONS: Spread<typeof JS_FILE_EXTENSIONS, typeof TS_FILE_EXTENSIONS>;
 
 // @public (undocumented)
 export type JSLikeFileExtensions = ArrayValues<typeof JSLIKE_FILE_EXTENSIONS>;
@@ -128,14 +129,10 @@ export const MARKDOWN_FILE_EXTENSIONS: readonly ["md", "markdown"];
 // @public (undocumented)
 export type MarkdownFileExtensions = ArrayValues<typeof MARKDOWN_FILE_EXTENSIONS>;
 
+// Warning: (ae-forgotten-export) The symbol "MarkdownlintApi" needs to be exported by the entry point index.d.ts
+//
 // @public (undocumented)
-export const markdownlint: {
-    config: (option_overrides?: MarkdownlintRuleConfiguration, ignore_overrides?: Array<string>, includes?: Array<string>, useBaseConfig?: boolean) => MarkdownlintConfiguration;
-    rules: {
-        baseConfig: () => MarkdownlintRuleConfiguration;
-        merge: (overrides: MarkdownlintRuleConfiguration, useBaseConfig?: boolean) => MarkdownlintRuleConfiguration;
-    };
-};
+export const markdownlint: MarkdownlintApi;
 
 // @public (undocumented)
 export type MarkdownlintConfiguration = {
@@ -210,7 +207,7 @@ export type WorkspaceScopesOptions = {
 // src/lint-staged/index.ts:90:5 - (ae-forgotten-export) The symbol "quoteArg" needs to be exported by the entry point index.d.ts
 // src/lint-staged/index.ts:91:5 - (ae-forgotten-export) The symbol "toFileArgs" needs to be exported by the entry point index.d.ts
 // src/prettier/index.ts:17:9 - (ae-forgotten-export) The symbol "PrettierOverrides" needs to be exported by the entry point index.d.ts
-// src/prettier/index.ts:57:5 - (ae-forgotten-export) The symbol "prettierConfiguration" needs to be exported by the entry point index.d.ts
+// src/prettier/index.ts:55:5 - (ae-forgotten-export) The symbol "prettierConfiguration" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
