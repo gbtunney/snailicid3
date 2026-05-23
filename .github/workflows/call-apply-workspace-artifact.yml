@@ -1,0 +1,253 @@
+name: Call Apply Workspace Artifact
+
+on:
+    workflow_call:
+        inputs:
+            ref:
+                description: Branch, tag, or SHA to checkout before applying the artifact.
+                required: false
+                default: ''
+                type: string
+
+            artifact_name:
+                description: Name of the uploaded workspace artifact to download.
+                required: true
+                type: string
+
+            commit_mode:
+                description: How to handle dirty state after overlay. One of skip, commit_if_dirty, require_dirty_then_commit, require_clean.
+                required: false
+                default: skip
+                type: string
+
+            commit_message:
+                description: Commit message to use when committing overlaid changes.
+                required: false
+                default: 'chore(root): apply workspace artifact'
+                type: string
+
+            push_branch:
+                description: Branch to push committed changes to. Leave empty to skip push.
+                required: false
+                default: ''
+                type: string
+
+            post_overlay_command:
+                description: Optional shell command to run after overlay and dirty-state validation.
+                required: false
+                default: ''
+                type: string
+
+            node_version:
+                description: Node version to set up when post_overlay_command or install_dependencies is used.
+                required: false
+                default: lts/*
+                type: string
+
+            pnpm_cache:
+                description: Control pnpm cache usage when Node is set up.
+                required: false
+                default: true
+                type: boolean
+
+            install_dependencies:
+                description: Run pnpm install before post_overlay_command.
+                required: false
+                default: false
+                type: boolean
+
+            require_lockfile:
+                description: Use --frozen-lockfile when installing dependencies.
+                required: false
+                default: true
+                type: boolean
+
+        outputs:
+            is_dirty:
+                description: Whether overlay left the checkout dirty.
+                value: ${{ jobs.apply.outputs.is_dirty }}
+
+permissions:
+    contents: write
+    actions: read
+
+env:
+    HUSKY: 0
+    NX_NO_CLOUD: 'true'
+
+jobs:
+    apply:
+        name: apply workspace artifact
+        runs-on: ubuntu-latest
+        outputs:
+            is_dirty: ${{ steps.dirty.outputs.is_dirty }}
+
+        steps:
+            - name: Validate commit mode
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  case "${{ inputs.commit_mode }}" in
+                    skip|commit_if_dirty|require_dirty_then_commit|require_clean)
+                      ;;
+                    *)
+                      echo "::error::Invalid commit_mode: ${{ inputs.commit_mode }}"
+                      exit 1
+                      ;;
+                  esac
+
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  ref: ${{ inputs.ref || github.sha }}
+                  token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+
+            - name: Warn if GH_PAT is not set for push
+              if: ${{ inputs.push_branch != '' && env.GH_PAT == '' }}
+              shell: bash
+              run: echo "::warning::GH_PAT secret is not set — push will use GITHUB_TOKEN and may not trigger downstream workflows."
+              env:
+                  GH_PAT: ${{ secrets.GH_PAT }}
+
+            - name: Setup pnpm
+              if: ${{ inputs.post_overlay_command != '' || inputs.install_dependencies }}
+              uses: pnpm/action-setup@v6
+              with:
+                  run_install: false
+
+            - name: Setup Node
+              if: ${{ inputs.post_overlay_command != '' || inputs.install_dependencies }}
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ inputs.node_version }}
+                  cache: ${{ inputs.pnpm_cache && 'pnpm' || '' }}
+                  registry-url: https://registry.npmjs.org
+
+            - name: Install dependencies
+              if: ${{ inputs.install_dependencies }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  if [[ "${{ inputs.require_lockfile }}" == "true" ]]; then
+                    pnpm install --frozen-lockfile
+                  else
+                    pnpm install --no-frozen-lockfile
+                  fi
+
+            - name: Download workspace artifact
+              uses: actions/download-artifact@v4
+              with:
+                  name: ${{ inputs.artifact_name }}
+                  path: ${{ runner.temp }}/workspace-artifact
+
+            - name: Overlay workspace snapshot
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  artifact_dir="${{ runner.temp }}/workspace-artifact"
+                  archive_path="$(find "$artifact_dir" -maxdepth 2 \( -name 'workspace-artifact.tar.gz' -o -name '*.tar.gz' \) | head -n 1)"
+
+                  if [[ -z "$archive_path" ]]; then
+                    echo "::error::Workspace artifact archive not found."
+                    find "$artifact_dir" -maxdepth 3 -type f -print || true
+                    exit 1
+                  fi
+
+                  echo "Archive: $archive_path"
+                  tar -xzf "$archive_path" -C "$GITHUB_WORKSPACE"
+
+            - name: Report dirty state
+              id: dirty
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  status="$(git status --porcelain)"
+
+                  if [[ -n "$status" ]]; then
+                    echo "is_dirty=true" >> "$GITHUB_OUTPUT"
+                    echo "Workspace is dirty after overlay:"
+                    echo "$status"
+                  else
+                    echo "is_dirty=false" >> "$GITHUB_OUTPUT"
+                    echo "Workspace is clean after overlay."
+                  fi
+
+            - name: Validate dirty state
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  mode="${{ inputs.commit_mode }}"
+                  dirty="${{ steps.dirty.outputs.is_dirty }}"
+
+                  case "$mode" in
+                    skip|commit_if_dirty)
+                      ;;
+                    require_dirty_then_commit)
+                      if [[ "$dirty" != "true" ]]; then
+                        echo "::error::Expected dirty workspace, but checkout is clean."
+                        exit 1
+                      fi
+                      ;;
+                    require_clean)
+                      if [[ "$dirty" == "true" ]]; then
+                        echo "::error::Expected clean workspace, but overlay produced changes."
+                        git status --short
+                        exit 1
+                      fi
+                      ;;
+                  esac
+
+            - name: Commit changes
+              if: ${{ steps.dirty.outputs.is_dirty == 'true' && contains(fromJSON('["commit_if_dirty","require_dirty_then_commit"]'), inputs.commit_mode) }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  git config user.name "github-actions[bot]"
+                  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                  git config commit.gpgsign false
+
+                  git add -A
+
+                  if git diff --cached --quiet; then
+                    echo "No staged changes. Skipping commit."
+                    exit 0
+                  fi
+
+                  git commit -m "${{ inputs.commit_message }}" \
+                    -m "Triggered by: @${{ github.actor }}" \
+                    -m "Artifact: ${{ inputs.artifact_name }}" \
+                    -m "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+            - name: Push changes
+              if: ${{ steps.dirty.outputs.is_dirty == 'true' && inputs.push_branch != '' && contains(fromJSON('["commit_if_dirty","require_dirty_then_commit"]'), inputs.commit_mode) }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  git push origin HEAD:${{ inputs.push_branch }}
+
+            - name: Run post-overlay command
+              if: ${{ inputs.post_overlay_command != '' }}
+              shell: bash
+              run: ${{ inputs.post_overlay_command }}
+
+            - name: Summary
+              if: ${{ always() }}
+              shell: bash
+              run: |
+                  {
+                    echo "## Apply workspace artifact"
+                    echo ""
+                    echo "- ref: \`${{ inputs.ref || github.sha }}\`"
+                    echo "- artifact_name: \`${{ inputs.artifact_name }}\`"
+                    echo "- commit_mode: \`${{ inputs.commit_mode }}\`"
+                    echo "- push_branch: \`${{ inputs.push_branch }}\`"
+                    echo "- is_dirty: \`${{ steps.dirty.outputs.is_dirty }}\`"
+                    echo "- post_overlay_command: \`${{ inputs.post_overlay_command }}\`"
+                  } >> "$GITHUB_STEP_SUMMARY"
