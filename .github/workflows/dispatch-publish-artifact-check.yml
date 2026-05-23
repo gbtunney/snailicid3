@@ -1,0 +1,57 @@
+name: Dispatch Publish Artifact Check
+
+on:
+    workflow_dispatch:
+        inputs:
+            ref:
+                description: Branch, tag, or SHA to test.
+                required: false
+                default: ''
+                type: string
+
+            publish_check_mode:
+                description: Safe publish-like command to run after artifact overlay.
+                required: true
+                default: pack
+                type: choice
+                options:
+                    - pack
+                    - publish_dry_run
+                    - changeset_publish_dry_run
+
+            require_lockfile:
+                description: Treat frozen lockfile install as required.
+                required: true
+                default: true
+                type: boolean
+
+            node_version:
+                description: Node version to run with.
+                required: true
+                default: lts/*
+                type: choice
+                options:
+                    - 'lts/*'
+                    - '20'
+                    - '22'
+                    - '24'
+
+            pnpm_cache:
+                description: Control pnpm cache usage.
+                required: true
+                default: true
+                type: boolean
+
+permissions:
+    contents: read
+    actions: read
+
+jobs:
+    publish_artifact_check:
+        uses: ./.github/workflows/call-publish-artifact-check.yml
+        with:
+            ref: ${{ inputs.ref }}
+            publish_check_mode: ${{ inputs.publish_check_mode }}
+            require_lockfile: ${{ inputs.require_lockfile }}
+            node_version: ${{ inputs.node_version }}
+            pnpm_cache: ${{ inputs.pnpm_cache }}
