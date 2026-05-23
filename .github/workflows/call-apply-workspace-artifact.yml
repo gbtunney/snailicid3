@@ -34,6 +34,12 @@ on:
                 default: 'chore(root): apply workspace artifact'
                 type: string
 
+            scoped_commit_message:
+                description: Recompute the commit scope from staged changes before committing.
+                required: false
+                default: false
+                type: boolean
+
             push_branch:
                 description: Branch to push committed changes to. Leave empty to skip push.
                 required: false
@@ -218,7 +224,24 @@ jobs:
                     exit 0
                   fi
 
-                  git commit -m "${{ inputs.commit_message }}" \
+                  commit_message="${{ inputs.commit_message }}"
+
+                  if [[ "${{ inputs.scoped_commit_message }}" == "true" ]]; then
+                    if [[ "$commit_message" =~ ^([a-zA-Z]+)(\([^)]+\))?:[[:space:]]*(.*)$ ]]; then
+                      type="${BASH_REMATCH[1]}"
+                      subject="${BASH_REMATCH[3]}"
+                      commit_message="$(
+                        SCOPE_COMMIT_SKIP_COMMITLINT=1 bash packages/config/bin/scope/commit.sh --staged --message "$type" "$subject" \
+                          2>/dev/null || printf '%s' "$commit_message"
+                      )"
+                    else
+                      echo "::warning::Could not parse commit_message for scope recomputation: $commit_message"
+                    fi
+                  fi
+
+                  echo "Commit message: $commit_message"
+
+                  git commit -m "$commit_message" \
                     -m "Triggered by: @${{ github.actor }}" \
                     -m "Artifact: ${{ inputs.artifact_name }}" \
                     -m "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
@@ -261,5 +284,6 @@ jobs:
                     echo "- commit_mode: \`${{ inputs.commit_mode }}\`"
                     echo "- push_branch: \`${{ inputs.push_branch }}\`"
                     echo "- is_dirty: \`${{ steps.dirty.outputs.is_dirty }}\`"
+                    echo "- scoped_commit_message: \`${{ inputs.scoped_commit_message }}\`"
                     echo "- post_overlay_command: \`${{ inputs.post_overlay_command }}\`"
                   } >> "$GITHUB_STEP_SUMMARY"

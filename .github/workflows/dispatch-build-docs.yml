@@ -13,7 +13,7 @@ on:
             commit_message_subject:
                 description: Commit subject without type/scope.
                 required: false
-                default: Documentation update
+                default: documentation update
                 type: string
 
             run_verify:
@@ -74,4 +74,5 @@ jobs:
             artifact_name: ${{ needs.pipeline_build_docs.outputs.workspace_artifact_name }}
             commit_mode: commit_if_dirty
             commit_message: "${{ format('{0}(root): {1}', inputs.commit_message_type, inputs.commit_message_subject) }}"
+            scoped_commit_message: true
             push_branch: ${{ github.ref_name }}

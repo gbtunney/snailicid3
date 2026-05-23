@@ -20,8 +20,8 @@ name: Call Release Plan
 #   - Always detects release state.
 #   - Always prints a readable plan.
 #   - Optionally runs the validation/snapshot pipeline for publish candidates.
-#   - Does NOT publish to npm yet.
-#   - Does NOT create/update a version PR yet.
+#   - Creates/updates a Changesets version PR when pending changesets exist and dry_run=false.
+#   - Publishes validated release candidates when dry_run=false and no changesets remain.
 #
 # Safety:
 #   - dry_run=true is the default expected caller behavior.
@@ -31,6 +31,14 @@ name: Call Release Plan
 
 on:
     workflow_call:
+        secrets:
+            GH_PAT:
+                description: Optional token used for checkout/push so follow-up workflows can be triggered.
+                required: false
+            NPM_TOKEN:
+                description: Optional npm automation token for real publish runs.
+                required: false
+
         inputs:
             ref:
                 description: Branch, tag, or SHA to inspect. Leave empty to inspect the triggering commit.
@@ -110,8 +118,10 @@ on:
                 value: ${{ jobs.pending_release_pipeline.outputs.workspace_artifact_name }}
 
 permissions:
-    contents: read
-    actions: read
+    contents: write
+    actions: write
+    id-token: write
+    pull-requests: write
 
 jobs:
     detect:
@@ -186,7 +196,6 @@ jobs:
                         echo "Dry run: would create or update a Changesets version PR."
                       else
                         echo "Real mode: would create or update a Changesets version PR."
-                        echo "Actual version-PR mutation is not implemented in this workflow yet."
                       fi
                     elif [ "$phase" = "pending_release" ]; then
                       echo "This ref has publish candidates and no pending changesets."
@@ -195,7 +204,6 @@ jobs:
                         echo "Dry run: would publish: \`${{ needs.detect.outputs.publish_candidates }}\`."
                       else
                         echo "Real mode: would validate and publish: \`${{ needs.detect.outputs.publish_candidates }}\`."
-                        echo "Actual npm publish is not implemented in this workflow yet."
                       fi
                     else
                       echo "No release action is needed."
@@ -232,23 +240,138 @@ jobs:
                   exit 1
 
     pending_changeset:
-        name: pending changeset plan
+        name: pending changeset version PR
         needs: [detect, plan, guard_real_release]
         if: ${{ always() && needs.detect.outputs.should_version == 'true' && (inputs.dry_run == true || needs.guard_real_release.result == 'success') }}
         runs-on: ubuntu-latest
 
         steps:
             - name: Plan version PR action
+              if: ${{ inputs.dry_run == true }}
               shell: bash
               run: |
                   set -euo pipefail
 
-                  if [ "${{ inputs.dry_run }}" = "true" ]; then
-                    echo "Dry run: would create/update a Changesets version PR."
-                    echo "Dry run: pending changeset count = ${{ needs.detect.outputs.changeset_count }}"
+                  echo "Dry run: would create/update a Changesets version PR."
+                  echo "Dry run: pending changeset count = ${{ needs.detect.outputs.changeset_count }}"
+                  echo "Dry run: target branch would be release/main."
+                  echo "Dry run: commit/PR title would use release(root): version packages unless scope detection narrows it."
+
+            - name: Checkout release source
+              if: ${{ inputs.dry_run == false }}
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  ref: ${{ inputs.ref || github.sha }}
+                  token: ${{ secrets.GH_PAT || github.token }}
+
+            - name: Setup pnpm
+              if: ${{ inputs.dry_run == false }}
+              uses: pnpm/action-setup@v6
+              with:
+                  run_install: false
+
+            - name: Setup Node
+              if: ${{ inputs.dry_run == false }}
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ inputs.node_version }}
+                  cache: ${{ inputs.pnpm_cache && 'pnpm' || '' }}
+
+            - name: Install dependencies
+              if: ${{ inputs.dry_run == false }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  if [[ "${{ inputs.require_lockfile }}" == "true" ]]; then
+                    pnpm install --frozen-lockfile
                   else
-                    echo "Real mode requested: version PR mutation is not implemented yet."
+                    pnpm install --no-frozen-lockfile
                   fi
+
+            - name: Version packages
+              if: ${{ inputs.dry_run == false }}
+              run: pnpm changeset version
+
+            - name: Stage and compute release title
+              id: version_msg
+              if: ${{ inputs.dry_run == false }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  git add -A
+
+                  if git diff --cached --quiet; then
+                    echo "::error::Changesets version produced no staged changes."
+                    exit 1
+                  fi
+
+                  msg="$(pnpm exec scope-commit --staged --message release "version packages" \
+                    2>/dev/null || echo "release(root): version packages")"
+
+                  echo "message=$msg" >> "$GITHUB_OUTPUT"
+                  echo "Release title: $msg"
+
+            - name: Commit version changes
+              if: ${{ inputs.dry_run == false }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  git config user.name "github-actions[bot]"
+                  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                  git config commit.gpgsign false
+
+                  git commit -m "${{ steps.version_msg.outputs.message }}" \
+                    -m "Triggered by: @${{ github.actor }}" \
+                    -m "Source ref: ${{ inputs.ref || github.sha }}" \
+                    -m "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+            - name: Push release branch
+              if: ${{ inputs.dry_run == false }}
+              run: git push origin HEAD:refs/heads/release/main --force
+
+            - name: Create or update version PR
+              if: ${{ inputs.dry_run == false }}
+              shell: bash
+              env:
+                  GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
+              run: |
+                  set -euo pipefail
+
+                  title="${{ steps.version_msg.outputs.message }}"
+                  body="Automated version bump from Changesets. Merge this PR to publish packages to npm."
+
+                  pr="$(gh pr list --head release/main --base main --state open --json number -q '.[0].number' 2>/dev/null || true)"
+
+                  if [[ -z "$pr" ]]; then
+                    gh pr create --head release/main --base main --title "$title" --body "$body"
+                  else
+                    gh pr edit "$pr" --title "$title" --body "$body"
+                  fi
+
+            - name: Trigger version PR validation
+              if: ${{ inputs.dry_run == false }}
+              shell: bash
+              env:
+                  GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
+              run: gh workflow run pr-checks.yml --ref release/main
+
+            - name: Version PR summary
+              if: ${{ always() }}
+              shell: bash
+              run: |
+                  {
+                    echo "## Pending changeset version PR"
+                    echo ""
+                    echo "- dry_run: \`${{ inputs.dry_run }}\`"
+                    echo "- source_ref: \`${{ inputs.ref || github.sha }}\`"
+                    echo "- changeset_count: \`${{ needs.detect.outputs.changeset_count }}\`"
+                    echo "- target_branch: \`release/main\`"
+                    echo "- title: \`${{ steps.version_msg.outputs.message || 'release(root): version packages' }}\`"
+                  } >> "$GITHUB_STEP_SUMMARY"
 
     pending_release_pipeline:
         name: pending release candidate pipeline
@@ -269,10 +392,10 @@ jobs:
             upload_workspace_artifact: ${{ inputs.upload_workspace_artifact }}
             artifact_name_prefix: release-candidate
 
-    pending_release_publish:
+    pending_release_publish_plan:
         name: pending release publish plan
         needs: [detect, plan, guard_real_release, pending_release_pipeline]
-        if: ${{ always() && needs.detect.outputs.should_publish == 'true' && (inputs.dry_run == true || needs.guard_real_release.result == 'success') }}
+        if: ${{ always() && inputs.dry_run == true && needs.detect.outputs.should_publish == 'true' }}
         runs-on: ubuntu-latest
 
         steps:
@@ -292,10 +415,24 @@ jobs:
 
                     if [ "${{ inputs.dry_run }}" = "true" ]; then
                       echo "Dry run: would publish the listed candidates after validation."
-                    else
-                      echo "Real mode requested: npm publish is not implemented yet."
                     fi
                   } | tee -a "$GITHUB_STEP_SUMMARY"
+
+    pending_release_publish:
+        name: pending release publish
+        needs: [detect, plan, guard_real_release, pending_release_pipeline]
+        if: ${{ always() && inputs.dry_run == false && needs.guard_real_release.result == 'success' && needs.detect.outputs.should_publish == 'true' && needs.pending_release_pipeline.result == 'success' && needs.pending_release_pipeline.outputs.artifact_uploaded == 'true' }}
+        uses: ./.github/workflows/call-apply-workspace-artifact.yml
+        secrets: inherit
+        with:
+            ref: ${{ inputs.ref || github.sha }}
+            artifact_name: ${{ needs.pending_release_pipeline.outputs.workspace_artifact_name }}
+            commit_mode: skip
+            install_dependencies: true
+            require_lockfile: ${{ inputs.require_lockfile }}
+            node_version: ${{ inputs.node_version }}
+            pnpm_cache: ${{ inputs.pnpm_cache }}
+            post_overlay_command: npm whoami && pnpm changeset publish
 
     main:
         name: no release action

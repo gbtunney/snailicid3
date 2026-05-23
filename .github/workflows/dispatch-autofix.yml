@@ -78,4 +78,5 @@ jobs:
             artifact_name: ${{ needs.pipeline_fix.outputs.workspace_artifact_name }}
             commit_mode: commit_if_dirty
             commit_message: "${{ format('{0}(root): {1}', inputs.commit_message_type, inputs.commit_message_subject) }}"
+            scoped_commit_message: true
             push_branch: ${{ github.ref_name }}
