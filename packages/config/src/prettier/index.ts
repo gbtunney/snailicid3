@@ -23,8 +23,6 @@ export type PrettierOverrides = Array<
     Merge<IterableElement<Config['overrides']>, { options: PrettierOptions }>
 >
 
-//SHARED_FORMATTING_RULES.tabWidth,
-
 export const prettierConfiguration = (
     isBundled: boolean = true,
     _options?: PrettierOptions,

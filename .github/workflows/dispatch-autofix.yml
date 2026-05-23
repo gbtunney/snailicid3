@@ -7,9 +7,8 @@ name: Dispatch Fix & Commit
 # Flow:
 # - Refuses to run on main.
 # - Runs the reusable pipeline in fix mode.
-# - Downloads the pipeline workspace artifact and overlays it onto checkout.
+# - Applies the pipeline workspace artifact through the reusable apply workflow.
 # - Commits only if the restored workspace differs from the checked out branch.
-# - Optional verify job controlled by input `run_verify`.
 # ─────────────────────────────────────────────────────────────
 
 on:
@@ -28,20 +27,8 @@ on:
                 default: autofix
                 type: string
 
-            commit_user_name:
-                description: Git author name + email local-part (email becomes "<name>@<domain>")
-                required: false
-                default: github-actions[bot]
-                type: string
-
-            commit_user_domain:
-                description: Git author email domain (email becomes "<name>@<domain>")
-                required: false
-                default: users.noreply.github.com
-                type: string
-
             run_verify:
-                description: Run ci-core verify job (report mode) after committing
+                description: Reserved for follow-up verification workflow wiring.
                 required: false
                 default: true
                 type: boolean
@@ -79,121 +66,15 @@ jobs:
             upload_workspace_artifact: true
             artifact_name_prefix: autofix-workspace
 
-    autofix:
+    apply_workspace_artifact:
         name: Apply artifact and commit
-        runs-on: ubuntu-latest
         needs: pipeline_fix
         if: ${{ needs.pipeline_fix.result == 'success' && needs.pipeline_fix.outputs.artifact_uploaded == 'true' }}
-
-        steps:
-            # ── Checkout ──────────────────────────────────────────────
-            # Use GH_PAT so the push below triggers downstream PR workflows.
-            # GITHUB_TOKEN pushes are silently blocked from triggering CI.
-            # Create a PAT with repo scope and store it as secret GH_PAT.
-            - uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-                  token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
-
-            - name: ⚠️ Warn if GH_PAT is not set
-              if: ${{ env.GH_PAT == '' }}
-              shell: bash
-              run: echo "::warning::GH_PAT secret is not set — push will use GITHUB_TOKEN and will NOT trigger PR workflows. Add a repo-scoped PAT as secret GH_PAT to enable CI re-runs."
-              env:
-                  GH_PAT: ${{ secrets.GH_PAT }}
-
-            # ── Restore pipeline artifact ────────────────────────────
-            - name: 📥 Download workspace artifact
-              uses: actions/download-artifact@v4
-              with:
-                  name: ${{ needs.pipeline_fix.outputs.workspace_artifact_name }}
-                  path: ${{ runner.temp }}/workspace-artifact
-
-            - name: ♻️ Overlay artifact onto repo
-              shell: bash
-              run: |
-                  ARTIFACT_DIR="${{ runner.temp }}/workspace-artifact"
-                  ARCHIVE_PATH="$(find "$ARTIFACT_DIR" -maxdepth 1 -name '*.tar.gz' | head -n 1)"
-
-                  if [ -z "$ARCHIVE_PATH" ]; then
-                    echo "❌ Workspace artifact archive not found."
-                    exit 1
-                  fi
-
-                  tar -xzf "$ARCHIVE_PATH" -C "$GITHUB_WORKSPACE"
-
-            # ── Check if repo is dirty ────────────────────────────────
-            - name: 🧼 Check repo status
-              id: dirty
-              shell: bash
-              run: |
-                  STATUS=$(git status --porcelain)
-                  if [ -n "$STATUS" ]; then
-                    echo "dirty=true" >> "$GITHUB_OUTPUT"
-                    echo "⚠️ Repo is dirty. Files to commit:"
-                    echo "$STATUS"
-                  else
-                    echo "dirty=false" >> "$GITHUB_OUTPUT"
-                    echo "✅ Nothing to commit."
-                  fi
-
-            # ── Commit and push ───────────────────────────────────────
-            - name: 🏷️ Compute scoped commit message
-              id: scoped_message
-              if: ${{ steps.dirty.outputs.dirty == 'true' }}
-              shell: bash
-              env:
-                  SCOPE_COMMIT_SKIP_COMMITLINT: '1'
-              run: |
-                  TYPE="${{ inputs.commit_message_type }}"
-                  SUBJECT="${{ inputs.commit_message_subject }}"
-
-                  git add -A
-                  MESSAGE="$(bash packages/config/bin/scope/commit.sh --staged --message "$TYPE" "$SUBJECT" 2>/dev/null || echo "$TYPE(root): $SUBJECT")"
-                  echo "message=$MESSAGE" >> "$GITHUB_OUTPUT"
-                  echo "✅ Scoped message: $MESSAGE"
-
-            - name: 📝 Commit changes
-              if: ${{ steps.dirty.outputs.dirty == 'true' }}
-              shell: bash
-              run: |
-                  git config user.name  "${{ inputs.commit_user_name }}"
-                  git config user.email "${{ inputs.commit_user_name }}@${{ inputs.commit_user_domain }}"
-                  git config commit.gpgsign false
-
-                  if git diff --cached --quiet; then
-                    echo "No staged changes after message generation. Skipping commit."
-                    exit 0
-                  fi
-
-                  git commit -m "${{ steps.scoped_message.outputs.message }}" \
-                    -m "Triggered by: @${{ github.actor }} via workflow_dispatch" \
-                    -m "Branch: ${{ github.ref_name }}" \
-                    -m "Pipeline artifact: ${{ needs.pipeline_fix.outputs.workspace_artifact_name }}" \
-                    -m "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-
-                  echo "✅ Committed: ${{ steps.scoped_message.outputs.message }}"
-
-            - name: 🚀 Push
-              if: ${{ steps.dirty.outputs.dirty == 'true' }}
-              run: git push origin ${{ github.ref_name }}
-
-            - name: ℹ️ Nothing to commit
-              if: ${{ steps.dirty.outputs.dirty == 'false' }}
-              run: echo "No changes detected — skipping commit and push."
-
-            - name: 🧾 Summary
-              if: ${{ always() }}
-              shell: bash
-              run: |
-                  {
-                    echo "## Autofix summary"
-                    echo ""
-                    echo "- branch: \`${{ github.ref_name }}\`"
-                    echo "- dirty: \`${{ steps.dirty.outputs.dirty }}\`"
-                    echo "- pipeline result: \`${{ needs.pipeline_fix.result }}\`"
-                    echo "- artifact_uploaded: \`${{ needs.pipeline_fix.outputs.artifact_uploaded }}\`"
-                    echo "- workspace_artifact_name: \`${{ needs.pipeline_fix.outputs.workspace_artifact_name }}\`"
-                    echo "- verify: \`${{ inputs.run_verify }}\`"
-                    echo "- computed_message: \`${{ steps.scoped_message.outputs.message }}\`"
-                  } >> "$GITHUB_STEP_SUMMARY"
+        uses: ./.github/workflows/call-apply-workspace-artifact.yml
+        secrets: inherit
+        with:
+            ref: ${{ github.ref_name }}
+            artifact_name: ${{ needs.pipeline_fix.outputs.workspace_artifact_name }}
+            commit_mode: commit_if_dirty
+            commit_message: "${{ format('{0}(root): {1}', inputs.commit_message_type, inputs.commit_message_subject) }}"
+            push_branch: ${{ github.ref_name }}

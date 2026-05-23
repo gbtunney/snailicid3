@@ -43,15 +43,67 @@ on:
                 type: boolean
 
 permissions:
-    contents: read
+    contents: write
     actions: read
 
 jobs:
-    publish_artifact_check:
-        uses: ./.github/workflows/call-publish-artifact-check.yml
+    publish_command:
+        name: Select publish check command
+        runs-on: ubuntu-latest
+        outputs:
+            command: ${{ steps.command.outputs.command }}
+        steps:
+            - name: Select command
+              id: command
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  case "${{ inputs.publish_check_mode }}" in
+                    pack)
+                      echo "command=pnpm -r pack --dry-run" >> "$GITHUB_OUTPUT"
+                      ;;
+                    publish_dry_run)
+                      echo "command=pnpm -r publish --dry-run --no-git-checks" >> "$GITHUB_OUTPUT"
+                      ;;
+                    changeset_publish_dry_run)
+                      echo "command=pnpm changeset publish --dry-run" >> "$GITHUB_OUTPUT"
+                      ;;
+                    *)
+                      echo "::error::Unknown publish_check_mode: ${{ inputs.publish_check_mode }}"
+                      exit 1
+                      ;;
+                  esac
+
+    pipeline:
+        name: Build snapshot artifact
+        uses: ./.github/workflows/call-pipeline.yml
         with:
-            ref: ${{ inputs.ref }}
-            publish_check_mode: ${{ inputs.publish_check_mode }}
+            mode: abort_on_error
+            check_mode: check
+            api_report_mode: skip
+            require_lockfile: ${{ inputs.require_lockfile }}
+            require_clean_repo: true
+            run_build: true
+            run_test: true
+            run_docs_build: false
+            node_version: ${{ inputs.node_version }}
+            pnpm_cache: ${{ inputs.pnpm_cache }}
+            upload_workspace_artifact: true
+            artifact_name_prefix: publish-check
+
+    apply_workspace_artifact:
+        name: Apply artifact and run publish check
+        needs: [publish_command, pipeline]
+        if: ${{ needs.pipeline.outputs.artifact_uploaded == 'true' }}
+        uses: ./.github/workflows/call-apply-workspace-artifact.yml
+        secrets: inherit
+        with:
+            ref: ${{ inputs.ref || github.sha }}
+            artifact_name: ${{ needs.pipeline.outputs.workspace_artifact_name }}
+            commit_mode: skip
+            install_dependencies: true
             require_lockfile: ${{ inputs.require_lockfile }}
             node_version: ${{ inputs.node_version }}
             pnpm_cache: ${{ inputs.pnpm_cache }}
+            post_overlay_command: ${{ needs.publish_command.outputs.command }}

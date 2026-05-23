@@ -2,6 +2,11 @@ name: Call Apply Workspace Artifact
 
 on:
     workflow_call:
+        secrets:
+            GH_PAT:
+                description: Optional token used for checkout/push so follow-up workflows can be triggered.
+                required: false
+
         inputs:
             ref:
                 description: Branch, tag, or SHA to checkout before applying the artifact.
@@ -39,13 +44,13 @@ on:
                 type: string
 
             node_version:
-                description: Node version to set up when post_overlay_command is provided.
+                description: Node version to set up when post_overlay_command or install_dependencies is used.
                 required: false
                 default: lts/*
                 type: string
 
             pnpm_cache:
-                description: Control pnpm cache usage when post_overlay_command is provided.
+                description: Control pnpm cache usage when Node is set up.
                 required: false
                 default: true
                 type: boolean
@@ -102,7 +107,7 @@ jobs:
               with:
                   fetch-depth: 0
                   ref: ${{ inputs.ref || github.sha }}
-                  token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+                  token: ${{ secrets.GH_PAT || github.token }}
 
             - name: Warn if GH_PAT is not set for push
               if: ${{ inputs.push_branch != '' && env.GH_PAT == '' }}
@@ -125,18 +130,6 @@ jobs:
                   cache: ${{ inputs.pnpm_cache && 'pnpm' || '' }}
                   registry-url: https://registry.npmjs.org
 
-            - name: Install dependencies
-              if: ${{ inputs.install_dependencies }}
-              shell: bash
-              run: |
-                  set -euo pipefail
-
-                  if [[ "${{ inputs.require_lockfile }}" == "true" ]]; then
-                    pnpm install --frozen-lockfile
-                  else
-                    pnpm install --no-frozen-lockfile
-                  fi
-
             - name: Download workspace artifact
               uses: actions/download-artifact@v4
               with:
@@ -149,7 +142,7 @@ jobs:
                   set -euo pipefail
 
                   artifact_dir="${{ runner.temp }}/workspace-artifact"
-                  archive_path="$(find "$artifact_dir" -maxdepth 2 -name 'workspace-artifact.tar.gz' -o -name '*.tar.gz' | head -n 1)"
+                  archive_path="$(find "$artifact_dir" -maxdepth 2 \( -name 'workspace-artifact.tar.gz' -o -name '*.tar.gz' \) | head -n 1)"
 
                   if [[ -z "$archive_path" ]]; then
                     echo "::error::Workspace artifact archive not found."
@@ -231,6 +224,18 @@ jobs:
               run: |
                   set -euo pipefail
                   git push origin HEAD:${{ inputs.push_branch }}
+
+            - name: Install dependencies
+              if: ${{ inputs.install_dependencies }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  if [[ "${{ inputs.require_lockfile }}" == "true" ]]; then
+                    pnpm install --frozen-lockfile
+                  else
+                    pnpm install --no-frozen-lockfile
+                  fi
 
             - name: Run post-overlay command
               if: ${{ inputs.post_overlay_command != '' }}
