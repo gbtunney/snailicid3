@@ -24,6 +24,10 @@ outputs:
         description: clean or dirty.
         value: ${{ steps.report.outputs.repo_status }}
 
+    is_repo_dirty:
+        description: "'true' when repo_status is dirty."
+        value: ${{ steps.report.outputs.is_repo_dirty }}
+
     tracked_file_count:
         description: Number of tracked files.
         value: ${{ steps.report.outputs.tracked_file_count }}

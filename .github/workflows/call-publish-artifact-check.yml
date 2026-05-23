@@ -1,35 +1,5 @@
 name: Call Publish Artifact Check
 
-# ─────────────────────────────────────────────────────────────
-# WORKFLOW: Publish Artifact Check
-# TYPE: reusable (workflow_call)
-#
-# Purpose:
-#   Minimal handoff test:
-#     1. Run the reusable pipeline.
-#     2. Upload a workspace snapshot artifact.
-#     3. Download that artifact in a fresh job.
-#     4. Extract/overlay workspace-artifact.tar.gz onto checkout.
-#     5. Run a safe publish-like command.
-#
-# This is intentionally simpler than release-plan/push-release.
-# It exists to prove that the artifact handoff works before real release logic
-# depends on it.
-#
-# Safe command modes:
-#   pack
-#     pnpm -r pack --dry-run
-#     Best first test. Exercises package file inclusion without publishing.
-#
-#   publish_dry_run
-#     pnpm -r publish --dry-run --no-git-checks
-#     Closer to publish, but still no registry mutation.
-#
-#   changeset_publish_dry_run
-#     pnpm changeset publish --dry-run
-#     Closest to Changesets publish flow, but can be fussier about state.
-# ─────────────────────────────────────────────────────────────
-
 on:
     workflow_call:
         inputs:
@@ -98,6 +68,9 @@ jobs:
         name: overlay artifact and check publish
         runs-on: ubuntu-latest
         needs: pipeline
+        env:
+            HUSKY: 0
+            NX_NO_CLOUD: 'true'
 
         steps:
             - name: Checkout repository
