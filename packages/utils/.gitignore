@@ -154,6 +154,8 @@ dist
 #Husky
 .husky/_
 
+docs
+
 # Scratch Files
 scratch
 examples

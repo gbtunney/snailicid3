@@ -35,6 +35,8 @@ export type BuildPlanEntryBase = z.output<typeof schemaBuildPlanEntrySpec>;
 // @public (undocumented)
 export type BuildPlanEntryInput = Partial<z.input<typeof schemaBuildPlanEntrySpec>>;
 
+// Warning: (ae-forgotten-export) The symbol "schemaBasePackage" needs to be exported by the entry point index.d.ts
+//
 // @public (undocumented)
 export type BuildPlanPackage = z.output<typeof schemaBasePackage>;
 
@@ -135,38 +137,6 @@ export type ResolvedBuildPlanEntry = BuildPlanEntryBase & {
 export const RUNTIME_KINDS: readonly ["browser", "edge", "node", "universal"];
 
 // @public (undocumented)
-export const schemaBasePackage: z.ZodObject<{
-    author: z.ZodObject<{
-        email: z.ZodEmail;
-        name: z.ZodString;
-    }, z.core.$strip>;
-    description: z.ZodString;
-    license: z.ZodDefault<z.ZodEnum<{
-        MIT: "MIT";
-        ISC: "ISC";
-        "GPL-3.0": "GPL-3.0";
-        "Apache-2.0": "Apache-2.0";
-        UNLICENSED: "UNLICENSED";
-    }>>;
-    name: z.ZodString;
-    private: z.ZodBoolean;
-    repository: z.ZodUnion<readonly [z.ZodString, z.ZodObject<{
-        directory: z.ZodOptional<z.ZodString>;
-        type: z.ZodDefault<z.ZodEnum<{
-            git: "git";
-            svn: "svn";
-            hg: "hg";
-            bzr: "bzr";
-        }>>;
-        url: z.ZodURL;
-    }, z.core.$strip>]>;
-    type: z.ZodEnum<{
-        [x: string]: string;
-    }>;
-    version: z.ZodString;
-}, z.core.$loose>;
-
-// @public (undocumented)
 export const schemaPackageMetaBanner: z.ZodObject<{
     author: z.ZodObject<{
         email: z.ZodEmail;
@@ -192,14 +162,6 @@ export const schemaPackageMetaBanner: z.ZodObject<{
         url: z.ZodURL;
     }, z.core.$strip>]>;
     version: z.ZodString;
-}, z.core.$strip>;
-
-// @public (undocumented)
-export const schemaRequiredScripts: z.ZodObject<{
-    'build:docs:nx': z.ZodOptional<z.ZodDefault<z.ZodString>>;
-    'build:nx': z.ZodDefault<z.ZodString>;
-    'clean:nx': z.ZodDefault<z.ZodString>;
-    'test:nx': z.ZodDefault<z.ZodString>;
 }, z.core.$strip>;
 
 // @public (undocumented)

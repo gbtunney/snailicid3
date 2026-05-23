@@ -1,10 +1,11 @@
 # Runs only after merge to `main`.
 #
-# Phase detection (call-detect-release-phase.yml) decides what to do:
+# Release-state detection decides what to do:
 #   🔖 version packages — pending changesets exist → bump versions, push
 #                          release/main, create/update PR, trigger pr-checks.
 #   📦 publish packages — last commit was a version bump → publish to npm,
-#                          create GitHub releases.
+#                          using the same workspace artifact apply path as
+#                          manual publish checks.
 #   (skip)              — unrelated commit → only detect runs.
 #
 # The split into version-release / publish-release jobs makes the GitHub UI
@@ -34,9 +35,9 @@ env:
 jobs:
     # ── Detect ──────────────────────────────────────────────────────────────
     detect:
-        uses: ./.github/workflows/bk-call-detect-release-phase.yml
+        uses: ./.github/workflows/call-detect-release-state.yml
 
-    # ── Shared pipeline (build + test, upload built artifact) ───────────────
+    # ── Shared pipeline (build + test, upload workspace artifact) ───────────
     pipeline:
         needs: detect
         if: >-
@@ -56,7 +57,8 @@ jobs:
             run_test: true
             run_docs_build: false
             pnpm_cache: true
-            upload_built_artifact: true
+            upload_workspace_artifact: true
+            artifact_name_prefix: release-workspace
 
     # ── Phase 1 — version packages ──────────────────────────────────────────
     # Bump versions, compute scoped commit message, push to release/main,
@@ -86,20 +88,6 @@ jobs:
 
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
-
-            # ── Restore built output from pipeline ───────────────────────
-            - name: 📥 Download built output artifact
-              uses: actions/download-artifact@v4
-              with:
-                  name: ${{ needs.pipeline.outputs.built_artifact_name }}
-                  path: ${{ runner.temp }}/built-output
-
-            - name: ♻️ Overlay built output onto workspace
-              shell: bash
-              run: |
-                  rsync -a \
-                    --exclude='.git/' \
-                    "${{ runner.temp }}/built-output"/ "$GITHUB_WORKSPACE"/
 
             # ── Version packages ─────────────────────────────────────────
             - name: Version packages
@@ -153,55 +141,20 @@ jobs:
                   GH_TOKEN: ${{ github.token }}
 
     # ── Phase 2 — publish packages ──────────────────────────────────────────
-    # Publishes only when: no pending changesets AND the triggering commit is
-    # a version bump (is_version_packages_diff).
+    # Publishes only when no pending changesets remain and local package
+    # versions are not yet present on npm.
     publish-release:
         name: '📦 publish packages'
-        runs-on: ubuntu-latest
         needs: [detect, pipeline]
-        if: needs.detect.outputs.should_publish == 'true'
-
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-
-            - name: Setup pnpm
-              uses: pnpm/action-setup@v6
-              with:
-                  run_install: false
-
-            - name: Setup Node
-              uses: actions/setup-node@v4
-              with:
-                  node-version: lts/*
-                  cache: pnpm
-                  registry-url: https://registry.npmjs.org
-
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
-
-            # ── Restore built output from pipeline ───────────────────────
-            - name: 📥 Download built output artifact
-              uses: actions/download-artifact@v4
-              with:
-                  name: ${{ needs.pipeline.outputs.built_artifact_name }}
-                  path: ${{ runner.temp }}/built-output
-
-            - name: ♻️ Overlay built output onto workspace
-              shell: bash
-              run: |
-                  rsync -a \
-                    --exclude='.git/' \
-                    "${{ runner.temp }}/built-output"/ "$GITHUB_WORKSPACE"/
-
-            # ── Publish ──────────────────────────────────────────────────
-            - name: Publish packages and create GitHub releases
-              uses: changesets/action@v1.7.0
-              with:
-                  publish: pnpm changeset publish
-                  createGithubReleases: true
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        if: ${{ needs.detect.outputs.should_publish == 'true' && needs.pipeline.outputs.artifact_uploaded == 'true' }}
+        uses: ./.github/workflows/call-apply-workspace-artifact.yml
+        secrets: inherit
+        with:
+            ref: ${{ github.sha }}
+            artifact_name: ${{ needs.pipeline.outputs.workspace_artifact_name }}
+            commit_mode: skip
+            install_dependencies: true
+            require_lockfile: true
+            node_version: lts/*
+            pnpm_cache: true
+            post_overlay_command: npm whoami && pnpm changeset publish

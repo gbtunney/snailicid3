@@ -57,12 +57,15 @@ on:
                 type: boolean
 
 permissions:
-    contents: read
-    actions: read
+    contents: write
+    actions: write
+    id-token: write
+    pull-requests: write
 
 jobs:
     release_plan:
         uses: ./.github/workflows/call-release-plan.yml
+        secrets: inherit
         with:
             ref: ${{ inputs.ref }}
             dry_run: ${{ inputs.dry_run }}
