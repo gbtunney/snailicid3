@@ -6,6 +6,9 @@ on:
             GH_PAT:
                 description: Optional token used for checkout/push so follow-up workflows can be triggered.
                 required: false
+            NPM_TOKEN:
+                description: Optional npm automation token for post-overlay publish commands.
+                required: false
 
         inputs:
             ref:
@@ -56,7 +59,7 @@ on:
                 type: boolean
 
             install_dependencies:
-                description: Run pnpm install before post_overlay_command.
+                description: Run pnpm install after overlay and before post_overlay_command.
                 required: false
                 default: false
                 type: boolean
@@ -75,9 +78,11 @@ on:
 permissions:
     contents: write
     actions: read
+    id-token: write
 
 env:
     HUSKY: 0
+    NPM_CONFIG_PROVENANCE: 'true'
     NX_NO_CLOUD: 'true'
 
 jobs:
@@ -240,6 +245,8 @@ jobs:
             - name: Run post-overlay command
               if: ${{ inputs.post_overlay_command != '' }}
               shell: bash
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
               run: ${{ inputs.post_overlay_command }}
 
             - name: Summary

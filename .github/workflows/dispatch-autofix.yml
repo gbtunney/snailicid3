@@ -36,6 +36,7 @@ on:
 permissions:
     contents: write
     actions: read
+    id-token: write
 
 env:
     HUSKY: 0
