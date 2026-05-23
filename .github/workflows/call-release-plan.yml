@@ -1,5 +1,3 @@
-name: Call Release Plan
-
 # ─────────────────────────────────────────────────────────────
 # WORKFLOW: Release Plan
 # TYPE: reusable (workflow_call)
@@ -29,6 +27,7 @@ name: Call Release Plan
 #     allow_non_main=true is explicitly passed.
 # ─────────────────────────────────────────────────────────────
 
+name: z🗄️ Call Release Plan
 on:
     workflow_call:
         secrets:

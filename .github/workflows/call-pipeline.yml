@@ -8,8 +8,7 @@
 # - Workspace artifact upload is optional and uploads from filesystem globs (does not respect .gitignore).
 # ─────────────────────────────────────────────────────────────
 
-name: Pipeline 🚰
-
+name: z🚰 Pipeline
 on:
     workflow_call:
         inputs:

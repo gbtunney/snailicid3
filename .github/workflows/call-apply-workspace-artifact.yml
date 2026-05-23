@@ -1,5 +1,18 @@
-name: Call Apply Workspace Artifact
+# Reusable workflow only.
+#
+# Applies a workspace snapshot produced by `call-pipeline.yml`.
+# This workflow is intentionally responsible for all artifact restore behavior:
+# checkout target ref, download artifact, find/extract the workspace tarball,
+# report dirty state, optionally commit/push, and optionally run one command
+# against the restored workspace.
+#
+# Dispatch workflows should stay thin:
+#   dispatch-* -> call-pipeline.yml -> call-apply-workspace-artifact.yml
+#
+# Do not duplicate checkout/download/overlay/dirty/commit shell logic in
+# dispatch workflows. Add behavior here instead.
 
+name: z🗄️ Call Apply Workspace Artifact
 on:
     workflow_call:
         secrets:

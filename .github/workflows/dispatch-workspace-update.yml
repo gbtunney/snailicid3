@@ -1,4 +1,4 @@
-name: Dispatch Workspace Update & Commit
+name: 📚 Dispatch Workspace Update & Commit
 
 on:
     workflow_dispatch:
