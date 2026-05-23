@@ -75,6 +75,7 @@ logRepoReport() {
 
 if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
     github_output "repo_status" "not-a-repository"
+    github_output "is_repo_dirty" "false"
 
     if [[ "$report_print" == "true" ]]; then
         snail_sh section "Repository"
@@ -98,11 +99,13 @@ unstaged_file_count="$(printf '%s\n' "$unstaged" | grep -c '.' || true)"
 untracked_file_count="$(printf '%s\n' "$untracked" | grep -c '.' || true)"
 
 repo_status="clean"
+is_repo_dirty="false"
 
 if [[ "$staged_file_count" -gt 0 ]] \
     || [[ "$unstaged_file_count" -gt 0 ]] \
     || [[ "$untracked_file_count" -gt 0 ]]; then
     repo_status="dirty"
+    is_repo_dirty="true"
 fi
 
 upstream="$(git_output rev-parse --abbrev-ref --symbolic-full-name '@{u}')"
@@ -120,6 +123,7 @@ github_output "branch" "${branch:-detached}"
 github_output "origin" "${origin:-none}"
 github_output "timestamp" "$timestamp"
 github_output "repo_status" "$repo_status"
+github_output "is_repo_dirty" "$is_repo_dirty"
 github_output "tracked_file_count" "$tracked_file_count"
 github_output "staged_file_count" "$staged_file_count"
 github_output "unstaged_file_count" "$unstaged_file_count"
