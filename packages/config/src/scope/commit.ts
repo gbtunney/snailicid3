@@ -21,6 +21,7 @@ type OutputMode = 'commit' | 'message' | 'scope'
 
 type ParsedArgs = {
     dryRun: boolean
+    explicitScope: string
     keepPrefix: boolean
     mode: ChangeMode
     outputMode: OutputMode
@@ -64,16 +65,9 @@ export function main(args: Array<string> = process.argv.slice(2)): void {
         runCheckedPrecommit(repoRoot)
     }
 
-    const paths =
-        inputPaths.length > 0
-            ? inputPaths
-            : collectChangedPaths(repoRoot, parsed.mode)
-
-    const scopes =
-        paths.length > 0
-            ? collectScopes(repoRoot, paths, parsed.keepPrefix)
-            : ['root']
-
+    const scopes = parsed.explicitScope
+        ? splitExplicitScope(parsed.explicitScope)
+        : collectScopesForInput(repoRoot, inputPaths, parsed)
     const scopeValue = formatScopes(scopes, 'csv')
 
     if (parsed.outputMode === 'message' || parsed.outputMode === 'commit') {
@@ -142,6 +136,21 @@ function collectScopes(
     )
 }
 
+function collectScopesForInput(
+    repoRoot: string,
+    inputPaths: ReadonlyArray<string>,
+    parsed: ParsedArgs,
+): Array<string> {
+    const paths =
+        inputPaths.length > 0
+            ? inputPaths
+            : collectChangedPaths(repoRoot, parsed.mode)
+
+    return paths.length > 0
+        ? collectScopes(repoRoot, paths, parsed.keepPrefix)
+        : ['root']
+}
+
 function makeMessage(
     type: string,
     scopeValue: string,
@@ -153,6 +162,7 @@ function makeMessage(
 function parseArgs(args: Array<string>): ParsedArgs {
     const parsed: ParsedArgs = {
         dryRun: false,
+        explicitScope: '',
         keepPrefix: false,
         mode: 'staged',
         outputMode: 'scope',
@@ -162,7 +172,9 @@ function parseArgs(args: Array<string>): ParsedArgs {
         validateOnly: false,
     }
 
-    for (const arg of args) {
+    for (let index = 0; index < args.length; index += 1) {
+        const arg = args[index]
+
         switch (arg) {
             case '--all':
                 parsed.mode = 'all'
@@ -214,6 +226,10 @@ function parseArgs(args: Array<string>): ParsedArgs {
                 parsed.outputMode = 'message'
                 break
 
+            case '--scope':
+                parsed.explicitScope = readNextValue(args, ++index, arg)
+                break
+
             default:
                 if (arg.startsWith('--')) {
                     throw new Error(`Unknown argument: ${arg}`)
@@ -232,8 +248,8 @@ function printHelp(): void {
   pnpm exec scope-commit [--staged|--all] [--csv|--list] [--keep-prefix] [file ...]
   pnpm exec scope-commit --validate-type <type>
   pnpm exec scope-commit --message <type> <subject> [--staged|--all] [--keep-prefix] [file ...]
-  pnpm exec scope-commit --commit <type> <subject> [--staged|--all] [--keep-prefix] [--dry-run] [file ...]
-  pnpm exec scope-commit --checked-commit <type> <subject> [--staged|--all] [--keep-prefix] [--dry-run] [file ...]
+  pnpm exec scope-commit --commit <type> <subject> [--scope <scope>] [--staged|--all] [--keep-prefix] [--dry-run] [file ...]
+  pnpm exec scope-commit --checked-commit <type> <subject> [--scope <scope>] [--staged|--all] [--keep-prefix] [--dry-run] [file ...]
 
 Examples:
   pnpm exec scope-commit
@@ -242,8 +258,23 @@ Examples:
   pnpm exec scope-commit --csv --keep-prefix
   pnpm exec scope-commit --message chore autofix
   pnpm exec scope-commit --commit --dry-run chore autofix
+  pnpm exec scope-commit --message chore autofix --scope config
   pnpm exec scope-commit --checked-commit chore autofix
   pnpm exec scope-commit .github/workflows/call-pipeline.yml`)
+}
+
+function readNextValue(
+    args: ReadonlyArray<string>,
+    index: number,
+    flag: string,
+): string {
+    const value = args[index]
+
+    if (!value || value.startsWith('--')) {
+        throw new Error(`${flag} requires a value`)
+    }
+
+    return value
 }
 
 function runCheckedPrecommit(repoRoot: string): void {
@@ -301,6 +332,13 @@ function scopeForPath(
     if (isRootPackageName(packageName)) return 'root'
 
     return shortenScopeName(packageName, keepPrefix)
+}
+
+function splitExplicitScope(scopeValue: string): Array<string> {
+    return scopeValue
+        .split(',')
+        .map((scope) => scope.trim())
+        .filter(Boolean)
 }
 
 function validateCommitMessage(repoRoot: string, message: string): void {
