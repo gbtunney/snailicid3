@@ -24,9 +24,9 @@ on:
             commit_message_type:
                 description: Conventional commit type prefix
                 required: false
-                default: docs
+                default: chore
                 type: choice
-                options: [chore, fix, docs, build]
+                options: [chore, style, docs, build, fix]
 
             commit_message_subject:
                 description: Commit subject without type/scope.
