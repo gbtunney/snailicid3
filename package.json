@@ -14,7 +14,7 @@
         "\n========== TEST >> ==========": "",
         "test": "pnpm nx:test",
         "nx:test": "pnpm exec nx run-many --target=test",
-                  "\n========== DOCUMENTATION >> ==========": "",
+        "\n========== DOCUMENTATION >> ==========": "",
         "docs:build": "pnpm nx:docs:build",
         "nx:docs:build": "pnpm exec nx run-many -t docs:build",
         "\n========== API REPORT >> ==========": "",
