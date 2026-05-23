@@ -1,18 +1,5 @@
 name: Call Publish Artifact Check
 
-# ─────────────────────────────────────────────────────────────
-# WORKFLOW: Publish Artifact Check
-# TYPE: reusable (workflow_call)
-#
-# Purpose:
-#   Minimal handoff test:
-#     1. Run the reusable pipeline.
-#     2. Upload a workspace snapshot artifact.
-#     3. Download that artifact in a fresh job.
-#     4. Extract/overlay workspace-artifact.tar.gz onto checkout.
-#     5. Run a safe publish-like command.
-# ─────────────────────────────────────────────────────────────
-
 on:
     workflow_call:
         inputs:
@@ -91,3 +78,91 @@ jobs:
               with:
                   fetch-depth: 0
                   ref: ${{ inputs.ref || github.sha }}
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v6
+              with:
+                  run_install: false
+
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ inputs.node_version }}
+                  cache: ${{ inputs.pnpm_cache && 'pnpm' || '' }}
+                  registry-url: https://registry.npmjs.org
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Download workspace artifact
+              uses: actions/download-artifact@v4
+              with:
+                  name: ${{ needs.pipeline.outputs.workspace_artifact_name }}
+                  path: ${{ runner.temp }}/workspace-artifact
+
+            - name: Overlay workspace snapshot
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  artifact_dir="${{ runner.temp }}/workspace-artifact"
+                  archive_path="$(find "$artifact_dir" -maxdepth 1 -name '*.tar.gz' | head -n 1)"
+
+                  if [ -z "$archive_path" ]; then
+                    echo "::error::Workspace artifact archive not found."
+                    find "$artifact_dir" -maxdepth 2 -type f -print || true
+                    exit 1
+                  fi
+
+                  echo "Archive: $archive_path"
+                  tar -xzf "$archive_path" -C "$GITHUB_WORKSPACE"
+
+            - name: Report overlaid workspace
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  echo "## Overlaid workspace" >> "$GITHUB_STEP_SUMMARY"
+                  echo "" >> "$GITHUB_STEP_SUMMARY"
+                  echo "- artifact: \`${{ needs.pipeline.outputs.workspace_artifact_name }}\`" >> "$GITHUB_STEP_SUMMARY"
+                  echo "- publish_check_mode: \`${{ inputs.publish_check_mode }}\`" >> "$GITHUB_STEP_SUMMARY"
+                  echo "" >> "$GITHUB_STEP_SUMMARY"
+                  git status --short
+
+            - name: Run publish-like check
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  mode="${{ inputs.publish_check_mode }}"
+
+                  case "$mode" in
+                    pack)
+                      echo "Running pnpm -r pack --dry-run"
+                      pnpm -r pack --dry-run
+                      ;;
+                    publish_dry_run)
+                      echo "Running pnpm -r publish --dry-run --no-git-checks"
+                      pnpm -r publish --dry-run --no-git-checks
+                      ;;
+                    changeset_publish_dry_run)
+                      echo "Running pnpm changeset publish --dry-run"
+                      pnpm changeset publish --dry-run
+                      ;;
+                    *)
+                      echo "::error::Unknown publish_check_mode: $mode"
+                      exit 1
+                      ;;
+                  esac
+
+            - name: Summary
+              if: ${{ always() }}
+              shell: bash
+              run: |
+                  {
+                    echo ""
+                    echo "## Publish artifact check"
+                    echo ""
+                    echo "- artifact_uploaded: \`${{ needs.pipeline.outputs.artifact_uploaded }}\`"
+                    echo "- workspace_artifact_name: \`${{ needs.pipeline.outputs.workspace_artifact_name }}\`"
+                    echo "- publish_check_mode: \`${{ inputs.publish_check_mode }}\`"
+                  } >> "$GITHUB_STEP_SUMMARY"
