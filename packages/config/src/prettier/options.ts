@@ -52,13 +52,13 @@ export const getDefaultOverrides: () => PrettierOverrides = () => [
             tabWidth: SHARED_FORMATTING_RULES.markdownTabWidth,
         },
     },
-    /* TODO: implement this {
+    {
         files: ['.yml', '.yaml'],
         options: {
-        printWidth: getScaledWidth('markdown'),
-        proseWrap: 'always',
+            printWidth: getScaledWidth('markdown'),
+            proseWrap: 'always',
         },
-    },*/
+    },
     {
         files: '.husky/*',
         options: {
