@@ -1,6 +1,6 @@
 {
     "name": "@snailicid3/types",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "private": false,
     "description": "Pure TypeScript types, utility types and typeguards",
     "scripts": {

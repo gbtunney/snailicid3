@@ -1,6 +1,6 @@
 {
     "name": "@snailicid3/logger",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "private": false,
     "description": "Unified Node logger with chalk output and shell script counterpart",
     "keywords": [
