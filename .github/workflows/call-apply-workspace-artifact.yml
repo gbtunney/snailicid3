@@ -227,9 +227,15 @@ jobs:
                   commit_message="${{ inputs.commit_message }}"
 
                   if [[ "${{ inputs.scoped_commit_message }}" == "true" ]]; then
-                    if [[ "$commit_message" =~ ^([a-zA-Z]+)(\([^)]+\))?:[[:space:]]*(.*)$ ]]; then
-                      type="${BASH_REMATCH[1]}"
-                      subject="${BASH_REMATCH[3]}"
+                    if [[ "$commit_message" == *": "* ]]; then
+                      header="${commit_message%%: *}"
+                      subject="${commit_message#*: }"
+                      type="${header%%(*}"
+
+                      if [[ "$type" == "$header" ]]; then
+                        type="$header"
+                      fi
+
                       commit_message="$(
                         SCOPE_COMMIT_SKIP_COMMITLINT=1 bash packages/config/bin/scope/commit.sh --staged --message "$type" "$subject" \
                           2>/dev/null || printf '%s' "$commit_message"
