@@ -1,10 +1,39 @@
 #!/usr/bin/env bash
 set -euo pipefail
-snail_sh() {
-    pnpm exec snail-sh "$@"
+
+# START SH BOOTSTRAP LOADER
+SCRIPT_SOURCE_PATH="${BASH_SOURCE[0]}"
+LOADER_DIR="$(CDPATH= cd -- "$(dirname -- "$SCRIPT_SOURCE_PATH")" && pwd)"
+
+resolve_bootstrap_path() {
+    local current_dir="${1:-$LOADER_DIR}"
+
+    while [[ "$current_dir" != "/" ]]; do
+        if [[ -f "$current_dir/bin/bootstrap.sh" ]]; then
+            printf '%s\n' "$current_dir/bin/bootstrap.sh"
+            return 0
+        fi
+
+        current_dir="$(dirname "$current_dir")"
+    done
+
+    return 1
 }
 
-snail-sh section "Installing pnpm completions for zsh and bash..."
+BOOTSTRAP_PATH="$(resolve_bootstrap_path "$LOADER_DIR" || true)"
+[[ -n "$BOOTSTRAP_PATH" ]] || {
+    printf '\n\033[41m[CRITICAL] unable to locate bootstrap.sh!\033[0m\n' >&2
+    printf '\033[90m%s\033[0m\n' "loader dir: $LOADER_DIR" >&2
+    exit 1
+}
+
+BOOTSTRAP_CALLER_SOURCE="$SCRIPT_SOURCE_PATH"
+# shellcheck source=/dev/null
+. "$BOOTSTRAP_PATH"
+unset BOOTSTRAP_CALLER_SOURCE
+# END SH BOOTSTRAP LOADER
+
+section "Installing pnpm completions for zsh and bash..."
 
 ########################################
 # ZSH
@@ -16,8 +45,8 @@ mkdir -p "$ZSH_COMPLETIONS_DIR"
 if pnpm completion zsh > /dev/null 2>&1; then
     pnpm completion zsh > "$ZSH_COMPLETIONS_DIR/_pnpm"
 
-    snail-sh spacer 2
-    snail-sh status_pair "zsh completions" "✓ installed" "success"
+    spacer 1
+    status_pair "zsh completions" "✓ installed" "success"
 
     ZSHRC="$HOME/.zshrc"
     MARKER_BEGIN="# >>> pnpm completions >>>"
@@ -34,15 +63,14 @@ if pnpm completion zsh > /dev/null 2>&1; then
             echo 'compinit -i'
             echo "$MARKER_END"
         } >> "$ZSHRC"
-        echo "✓ updated .zshrc"
+        success "✓ updated .zshrc"
     else
-        snail-sh status_pair " " "✓ already configured" "success"
-        snail-sh spacer 2
+        status_pair " " "✓ already configured" "success"
     fi
 
     rm -f "$HOME"/.zcompdump*
 else
-    echo "✗ pnpm zsh completion not supported"
+    err "✗ pnpm zsh completion not supported"
 fi
 
 ########################################
@@ -54,7 +82,9 @@ mkdir -p "$BASH_COMPLETIONS_DIR"
 
 if pnpm completion bash > /dev/null 2>&1; then
     pnpm completion bash > "$BASH_COMPLETIONS_DIR/pnpm"
-    echo "✓ bash completions installed"
+
+    spacer 1
+    status_pair "bash completions" "✓ installed" "success"
 
     BASHRC="$HOME/.bashrc"
     MARKER_BEGIN="# >>> pnpm completions >>>"
@@ -71,27 +101,30 @@ if pnpm completion bash > /dev/null 2>&1; then
             echo 'fi'
             echo "$MARKER_END"
         } >> "$BASHRC"
-        echo "✓ updated .bashrc"
+        success "✓ updated .bashrc"
     else
-        echo "• .bashrc already configured"
+        status_pair " " "✓ already configured" "success"
     fi
 else
-    echo "✗ pnpm bash completion not supported"
+    err "✗ pnpm bash completion not supported"
 fi
 
 ########################################
 # RELOAD CURRENT SHELL ONLY
 ########################################
 
-echo ""
-echo "Reloading current shell..."
+spacer 1
+rule "-" 100% fg-dark-grey
+spacer 1
+info "Reloading current shell..."
+success "Complete!"
+spacer 1
 
 if [ -n "${ZSH_VERSION:-}" ]; then
     exec zsh
 elif [ -n "${BASH_VERSION:-}" ]; then
     exec bash
 else
-    echo "Unknown shell. Run manually:"
-    echo "  exec zsh   or   exec bash"
+    warn "Unknown shell. Run manually:"
+    log "  exec zsh   or   exec bash"
 fi
-EOF

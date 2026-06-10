@@ -1,6 +1,40 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# START SH BOOTSTRAP LOADER
+SCRIPT_SOURCE_PATH="${BASH_SOURCE[0]}"
+LOADER_DIR="$(CDPATH= cd -- "$(dirname -- "$SCRIPT_SOURCE_PATH")" && pwd)"
+
+resolve_bootstrap_path() {
+    local current_dir="${1:-$LOADER_DIR}"
+
+    while [[ "$current_dir" != "/" ]]; do
+        if [[ -f "$current_dir/bin/bootstrap.sh" ]]; then
+            printf '%s\n' "$current_dir/bin/bootstrap.sh"
+            return 0
+        fi
+
+        current_dir="$(dirname "$current_dir")"
+    done
+
+    return 1
+}
+
+BOOTSTRAP_PATH="$(resolve_bootstrap_path "$LOADER_DIR" || true)"
+[[ -n "$BOOTSTRAP_PATH" ]] || {
+    printf '\n\033[41m[CRITICAL] unable to locate bootstrap.sh!\033[0m\n' >&2
+    printf '\033[90m%s\033[0m\n' "loader dir: $LOADER_DIR" >&2
+    exit 1
+}
+
+BOOTSTRAP_CALLER_SOURCE="$SCRIPT_SOURCE_PATH"
+# shellcheck source=/dev/null
+. "$BOOTSTRAP_PATH"
+unset BOOTSTRAP_CALLER_SOURCE
+# END SH BOOTSTRAP LOADER
+PREFIX="${PREFIX_OVERRIDE:-${PREFIX:-changeset}}"
+ALLOW_DIRTY="${ALLOW_DIRTY:-false}"
+
 detect_default_branch() {
     # Prefer origin/HEAD if available
     git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2> /dev/null \
@@ -8,28 +42,7 @@ detect_default_branch() {
         || true
 }
 
-SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2> /dev/null || pwd)"
-LOGGER_PATH="$SCRIPT_DIR/snail-sh-logger.sh"
-
-PREFIX="${PREFIX_OVERRIDE:-${PREFIX:-changeset}}"
-ALLOW_DIRTY="${ALLOW_DIRTY:-false}"
-cd "$ROOT_DIR"
-
-[[ -f "$LOGGER_PATH" ]] || {
-    printf 'Error: logger not found: %s\n' "$LOGGER_PATH" >&2
-    exit 1
-}
-
-# shellcheck source=/dev/null
-. "$LOGGER_PATH"
-
-die() {
-    critical "$@"
-    spacer 2
-    exit 1
-}
-
+cd "$REPO_DIR"
 spacer 1
 line "-" "50%" cyan
 spacer 1
