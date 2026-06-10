@@ -16,7 +16,7 @@ mkdir -p "$ZSH_COMPLETIONS_DIR"
 if pnpm completion zsh > /dev/null 2>&1; then
     pnpm completion zsh > "$ZSH_COMPLETIONS_DIR/_pnpm"
 
-    snail-sh spacer 2
+    snail-sh spacer 1
     snail-sh status_pair "zsh completions" "✓ installed" "success"
 
     ZSHRC="$HOME/.zshrc"
@@ -34,15 +34,14 @@ if pnpm completion zsh > /dev/null 2>&1; then
             echo 'compinit -i'
             echo "$MARKER_END"
         } >> "$ZSHRC"
-        echo "✓ updated .zshrc"
+        snail-sh success "✓ updated .zshrc"
     else
         snail-sh status_pair " " "✓ already configured" "success"
-        snail-sh spacer 2
     fi
 
     rm -f "$HOME"/.zcompdump*
 else
-    echo "✗ pnpm zsh completion not supported"
+    snail-sh err "✗ pnpm zsh completion not supported"
 fi
 
 ########################################
@@ -54,7 +53,9 @@ mkdir -p "$BASH_COMPLETIONS_DIR"
 
 if pnpm completion bash > /dev/null 2>&1; then
     pnpm completion bash > "$BASH_COMPLETIONS_DIR/pnpm"
-    echo "✓ bash completions installed"
+
+    snail-sh spacer 1
+    snail-sh status_pair "bash completions" "✓ installed" "success"
 
     BASHRC="$HOME/.bashrc"
     MARKER_BEGIN="# >>> pnpm completions >>>"
@@ -71,27 +72,31 @@ if pnpm completion bash > /dev/null 2>&1; then
             echo 'fi'
             echo "$MARKER_END"
         } >> "$BASHRC"
-        echo "✓ updated .bashrc"
+        snail-sh success "✓ updated .bashrc"
     else
-        echo "• .bashrc already configured"
+        snail-sh status_pair " " "✓ already configured" "success"
     fi
 else
-    echo "✗ pnpm bash completion not supported"
+    snail-sh err "✗ pnpm bash completion not supported"
 fi
 
 ########################################
 # RELOAD CURRENT SHELL ONLY
 ########################################
 
-echo ""
-echo "Reloading current shell..."
+snail-sh spacer 1
+snail-sh rule "-" 100% fg-dark-grey
+snail-sh spacer 1
+snail-sh info "Reloading current shell..."
+snail-sh success "Complete!"
+snail-sh spacer 1
 
 if [ -n "${ZSH_VERSION:-}" ]; then
     exec zsh
 elif [ -n "${BASH_VERSION:-}" ]; then
     exec bash
 else
-    echo "Unknown shell. Run manually:"
-    echo "  exec zsh   or   exec bash"
+    snail-sh warn "Unknown shell. Run manually:"
+    snail-sh log "  exec zsh   or   exec bash"
 fi
 EOF

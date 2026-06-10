@@ -491,7 +491,7 @@ log() {
     printf '%b\n' "${color}${message}${RESET}"
 }
 
-success() { log "[success] OK ${1:-}" green; }
+success() { log "[success] ✓ ${1:-}" green; }
 info() { log "[info] i ${1:-}" grey; }
 warn() { log $'\n'"[warn] ${1:-}" yellow; }
 critical() { log $'\n'"[critical] ${1:-}" bg-red; }
