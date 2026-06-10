@@ -499,6 +499,11 @@ err() { log "[error] ${1:-}" red stderr; }
 warning() { warn "${1:-}"; }
 created() { printf '%b  OK created:%b %s\n' "$(resolve_style green)" "$RESET" "${1:-}"; }
 skipped() { printf '%b  - skipped:%b %s\n' "$(resolve_style grey)" "$RESET" "${1:-}"; }
+die() {
+    critical "${1:-}"
+    spacer 2
+    exit 1
+}
 
 status_color_for_value() {
     local value="${1:-}"

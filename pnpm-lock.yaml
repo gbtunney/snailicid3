@@ -5448,10 +5448,10 @@ packages:
             }
         engines: { node: '>=8' }
 
-    devframe@0.5.2:
+    devframe@0.5.4:
         resolution:
             {
-                integrity: sha512-8dIdlOmuY+6NcCsaI2qS0uRLTZ3SvpejY8OYVbXvdWSQV7pvjdWaYNZhVfOfCSd/a5dSCgSge4vW4DCyJSf7+g==,
+                integrity: sha512-dbHU/LuptR1aMXcizjHUeY3gu7qVaRQoFYqbbyyGuO6Y+avFA4uQtwinHtG1qa7lRel/7b8JrBDm0nbnxU3vqg==,
             }
         peerDependencies:
             '@modelcontextprotocol/sdk': ^1.0.0
@@ -11725,7 +11725,7 @@ snapshots:
             ansis: 4.3.1
             cac: 7.0.0
             chokidar: 5.0.0
-            devframe: 0.5.2(typescript@6.0.3)
+            devframe: 0.5.4(typescript@6.0.3)
             eslint: 10.4.1(jiti@2.7.0)
             jiti: 2.7.0
             tinyglobby: 0.2.17
@@ -13711,7 +13711,7 @@ snapshots:
 
     detect-libc@2.1.2: {}
 
-    devframe@0.5.2(typescript@6.0.3):
+    devframe@0.5.4(typescript@6.0.3):
         dependencies:
             '@valibot/to-json-schema': 1.7.1(valibot@1.4.1(typescript@6.0.3))
             birpc: 4.0.0

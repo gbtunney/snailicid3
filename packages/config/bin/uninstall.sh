@@ -1,12 +1,37 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2> /dev/null || pwd)"
-LOGGER_PATH="$SCRIPT_DIR/snail-sh-logger.sh"
+# START SH BOOTSTRAP LOADER
+SCRIPT_SOURCE_PATH="${BASH_SOURCE[0]}"
+LOADER_DIR="$(CDPATH= cd -- "$(dirname -- "$SCRIPT_SOURCE_PATH")" && pwd)"
 
+resolve_bootstrap_path() {
+    local current_dir="${1:-$LOADER_DIR}"
+
+    while [[ "$current_dir" != "/" ]]; do
+        if [[ -f "$current_dir/bin/bootstrap.sh" ]]; then
+            printf '%s\n' "$current_dir/bin/bootstrap.sh"
+            return 0
+        fi
+
+        current_dir="$(dirname "$current_dir")"
+    done
+
+    return 1
+}
+
+BOOTSTRAP_PATH="$(resolve_bootstrap_path "$LOADER_DIR" || true)"
+[[ -n "$BOOTSTRAP_PATH" ]] || {
+    printf '\n\033[41m[CRITICAL] unable to locate bootstrap.sh!\033[0m\n' >&2
+    printf '\033[90m%s\033[0m\n' "loader dir: $LOADER_DIR" >&2
+    exit 1
+}
+
+BOOTSTRAP_CALLER_SOURCE="$SCRIPT_SOURCE_PATH"
 # shellcheck source=/dev/null
-. "$LOGGER_PATH"
+. "$BOOTSTRAP_PATH"
+unset BOOTSTRAP_CALLER_SOURCE
+# END SH BOOTSTRAP LOADER
 
 remove_if_exists() {
     local target="$1"
@@ -39,7 +64,7 @@ remove_node_modules() {
     local count
 
     count="$(
-        find "$ROOT_DIR" \
+        find "$REPO_DIR" \
             -type d \
             -name node_modules \
             -prune \
@@ -55,7 +80,7 @@ remove_node_modules() {
 
     kv_pair "node_modules dirs" "$count"
 
-    find "$ROOT_DIR" \
+    find "$REPO_DIR" \
         -type d \
         -name node_modules \
         -prune \
@@ -67,11 +92,11 @@ remove_node_modules() {
 }
 
 header "Snailicid3 uninstall"
-kv_pair "root" "$ROOT_DIR"
+kv_pair "root" "$REPO_DIR"
 
 section "preflight"
 
-if [[ ! -d "$ROOT_DIR/node_modules" ]]; then
+if [[ ! -d "$REPO_DIR/node_modules" ]]; then
     critical "repo does not appear to be installed :("
     info "continuing anyway"
 else
@@ -80,9 +105,9 @@ fi
 
 section "clean builds"
 
-if [[ -f "$ROOT_DIR/package.json" ]] && command -v pnpm > /dev/null 2>&1; then
+if [[ -f "$REPO_DIR/package.json" ]] && command -v pnpm > /dev/null 2>&1; then
     (
-        cd "$ROOT_DIR"
+        cd "$REPO_DIR"
         pnpm run clean || warn "pnpm clean failed"
     )
 else
@@ -101,9 +126,9 @@ section "remove node_modules"
 remove_node_modules
 
 section "remove lockfiles"
-remove_if_exists "$ROOT_DIR/pnpm-lock.yaml"
-remove_if_exists "$ROOT_DIR/package-lock.json"
-remove_if_exists "$ROOT_DIR/yarn.lock"
+remove_if_exists "$REPO_DIR/pnpm-lock.yaml"
+remove_if_exists "$REPO_DIR/package-lock.json"
+remove_if_exists "$REPO_DIR/yarn.lock"
 
 section "done"
 success "uninstall cleanup complete"
