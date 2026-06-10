@@ -1,5 +1,15 @@
 # @snailicid3/build-config
 
+## 0.0.6
+
+### Patch Changes
+
+- 95815ae: - Improved shell logging and completion output behavior in config scripts.
+  - Added commitlint support and convenience scripts.
+  - Added bootstrap support for shell scripts across config/root.
+  - Fixed and restored preferred shell handling, including zsh-related flow.
+  - Updated dependencies across the monorepo, including build-config and config.
+
 ## 0.0.5
 
 ### Patch Changes
