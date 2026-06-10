@@ -15,7 +15,7 @@
         "commit:direct": "git commit --no-verify -m",
         "\n========== BUILD >> ==========": "",
         "build": "pnpm nx:build",
-        "build:self": "pnpm exec nx run @snailicid3/root:build",
+        "build:self": "pnpm exec nx run $npm_package_name:build",
         "nx:build": "pnpm exec nx run-many -t build",
         "\n========== TEST >> ==========": "",
         "test": "pnpm nx:test",
@@ -27,7 +27,7 @@
         "api:report": "pnpm exec nx run-many --target=api:report",
         "api:check": "pnpm exec nx run-many --target=api:check",
         "\n========== PUBLISH >> ==========": "",
-        "changeset:create": "pnpm exec gbt-changeset && pnpm changeset:prepare && pnpm exec gbt-changeset",
+        "changeset:create": "pnpm exec gbt-changeset && pnpm changeset:prepare",
         "changeset:prepare": "pnpm run fix && pnpm run test && pnpm docs:build && pnpm api:report",
         "release:archive": "pnpm -r exec mkdir -p ./releases &&  pnpm -r --access public pack --pack-destination='./releases'",
         "registry:start": "pnpm exec verdaccio",
@@ -49,13 +49,13 @@
         "nx:reset": "pnpm exec nx reset",
         "\n========== CHECK >> ==========": "",
         "check": "pnpm exec nx run-many -t lint",
-        "check:md": "pnpm exec nx run @snailicid3/root:lint:md",
+        "check:md": "pnpm exec nx run $npm_package_name:lint:md",
         "\n========== FIX >> ==========": "",
         "fix": "pnpm exec nx run-many -t fix",
-        "fix:md": "pnpm exec nx run @snailicid3/root:fix:md",
+        "fix:md": "pnpm exec nx run $npm_package_name:fix:md",
         "\n========== CLEAN >> ==========": "",
         "clean": "pnpm exec nx run-many -t clean",
-        "clean:self": "pnpm exec nx run @snailicid3/root:clean"
+        "clean:self": "pnpm exec nx run $npm_package_name:clean"
     },
     "devDependencies": {
         "@changesets/cli": "^2.31.0",
@@ -87,8 +87,8 @@
     },
     "packageManager": "pnpm@10.30.2",
     "engines": {
-        "node": ">=20.x",
-        "pnpm": ">=10.0.0"
+        "node": ">=20.0.0",
+        "pnpm": ">=10.30.2 <11"
     },
     "type": "module"
 }
