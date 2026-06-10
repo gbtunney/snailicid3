@@ -5,6 +5,13 @@
     "scripts": {
         "\n========== COMMIT >> ==========": "",
         "commit": "pnpm build:self && pnpm exec scope-commit --checked-commit",
+        "commit:feat": "pnpm run commit feat",
+        "commit:fix": "pnpm run commit fix",
+        "commit:chore": "pnpm run commit chore",
+        "commit:refactor": "pnpm run commit refactor",
+        "commit:test": "pnpm run commit test",
+        "commit:build": "pnpm run commit build",
+        "commit:docs": "pnpm run commit docs",
         "commit:direct": "git commit --no-verify -m",
         "\n========== BUILD >> ==========": "",
         "build": "pnpm nx:build",
