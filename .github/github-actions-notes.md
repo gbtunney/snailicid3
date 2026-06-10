@@ -2,154 +2,118 @@
 
 ## Naming conventions
 
-- `dispatch-*` — manual `workflow_dispatch` workflows
-- `push-*` — push-triggered workflows
-- `pr-*` — pull-request-triggered workflows
-- `call-*` — reusable `workflow_call` workflows
+- `dispatch-*` - manual `workflow_dispatch` workflows
+- `push-*` - push-triggered workflows
+- `pr-*` - pull-request-triggered workflows
+- `call-*` - reusable `workflow_call` workflows
 
 ## Reusable workflows
 
-- `call-pipeline.yml` — reusable build/test/check/docs runner.
-- `call-detect-pr-kind.yml` — reusable PR classifier.
+- `call-pipeline.yml` - reusable build/test/check/docs runner
+- `call-detect-release-state.yml` - reusable release-state detector
+- `call-release-plan.yml` - reusable release planner and executor
+- `call-apply-workspace-artifact.yml` - reusable artifact overlay/apply flow
 
-> `pipeline` should stay dumb. It should not know about releases, changesets, publishing, or PR
-> kinds.
+`call-pipeline.yml` should stay generic and not contain release-specific branching logic.
 
-## PR classifier
+## Release-state detector
 
-`call-detect-pr-kind.yml` classifies a PR by diff shape.
+`call-detect-release-state.yml` classifies one checked ref by current repository state.
 
-Outputs:
+Key outputs:
 
-- `has_added_or_modified_changeset`
-- `has_deleted_changeset`
-- `has_package_changes`
-- `has_changelog_changes`
-- `is_release_pr`
+- `should_version`
+- `should_publish`
+- `should_skip`
+- `changeset_count`
+- `changeset_slugs`
+- `primary_changeset_slug`
+- `publish_candidates`
 
-A generated release PR is true only when:
+`changeset_slugs` and `primary_changeset_slug` are consumed by `call-release-plan.yml` to derive
+deterministic `release/<slug>` branch names.
 
-- source branch is `release/main`
-- PR deletes consumed `.changeset/*.md`
-- PR changes `package.json`
-- PR changes `CHANGELOG.md`
+Decision model:
 
-## PR workflows
+- `should_version == true` when pending `.changeset/*.md` files exist
+- `should_publish == true` when no changesets remain and publish candidates exist
+- `should_skip == true` when no release action is needed
 
-### Normal PRs
+## PR workflow
 
-`pr-main.yml`
+### Unified PR router
 
-Runs when:
+`pr-checks.yml` is the PR entrypoint for `main`.
 
-- PR targets `main`
-- PR is not a generated release PR
-- PR does not add/modify `.changeset/*.md`
+Behavior:
 
-Runs:
+- checks out the PR merge ref to verify mergeability
+- runs `call-detect-release-state.yml` on the PR head SHA
+- routes to one phase job:
+  - `pending changeset`
+  - `pending release`
+  - `main`
+- enforces exactly one selected phase result with a final `required` gate job
 
-- build
-- test
-- check
-- no docs build
+Phase behavior:
 
-### Changeset / release-intent PRs
-
-`pr-changesets-version.yml`
-
-Runs when:
-
-- PR targets `main`
-- PR adds or modifies `.changeset/*.md`
-
-Runs stricter validation:
-
-- build
-- test
-- check
-- docs build
-- require clean repo
-
-This catches cases where docs generation changes tracked files.
-
-### Generated release/version PRs
-
-`pr-release.yml`
-
-Runs when:
-
-- PR targets `main`
-- `call-detect-pr-kind` says `is_release_pr == true`
-
-Generated release PR shape:
-
-- source branch is `release/main`
-- deletes consumed `.changeset/*.md`
-- changes package versions
-- changes changelogs
-
-Runs:
-
-- build
-- test
-- check
-- docs build
-- require clean repo
+- `pending changeset`: build + test + check + docs build
+- `pending release`: build + test + check + docs build
+- `main`: build + test + check, no docs build
 
 ## Push release flow
 
 `push-release.yml` runs on pushes to `main`.
 
-It first runs a cheap detect job.
+It delegates directly to `call-release-plan.yml` with `dry_run=false` and `ref=github.sha`.
 
-### If no release work is needed
+`call-release-plan.yml` performs release-state detection, phase planning, optional pipeline run,
+version PR mutation, and publish execution.
 
-- detect runs
-- pipeline skips
-- release skips
+### If pending changesets exist (`should_version == true`)
 
-### If pending changesets exist
-
-Condition:
-
-- current `main` contains `.changeset/*.md`
-
-Then:
-
-- pipeline runs
+- release branch is derived from pending changeset filename slug(s)
 - `pnpm changeset version` runs
 - generated version/changelog/package changes are committed
-- branch `release/main` is force-pushed
-- version PR `release/main → main` is created or updated
+- computed release branch is force-pushed
+- version PR `<computed release branch> -> main` is created or updated
+- `pr-checks.yml` is dispatched for that computed release branch
 
-### If generated version PR was merged
+Branch naming rule:
 
-Condition:
+- single pending changeset file: `.changeset/mighty-wombats-greet.md` ->
+  `release/mighty-wombats-greet`
+- multiple pending changeset files: deterministic combined slug using first sorted slug plus
+  `-plus-N-more`
 
-- no pending `.changeset/*.md`
-- head commit message contains `: version packages`
+### If publish candidates exist (`should_publish == true`)
 
-Then:
-
-- pipeline runs
-- `pnpm changeset publish` runs through `changesets/action`
+- release pipeline validates the ref
+- workspace artifact is applied
+- `pnpm changeset publish` runs
 - npm publish happens
-- GitHub releases/tags are created by publish flow
+
+## Release plan workflows
+
+`call-release-plan.yml` is a reusable planner/executor.
+
+Current caller:
+
+- `dispatch-release-plan.yml` (manual dispatch)
+
+The reusable release plan uses the same dynamic release-branch derivation rule as `push-release.yml`
+for pending changeset version PRs.
 
 ## Intended release sequence
 
 1. Feature branch adds code and, when needed, adds `.changeset/*.md`.
 2. PR into `main` opens.
-3. If no changeset was added, `pr-main` runs normal CI.
-4. If a changeset was added/modified, `pr-changesets-version` runs stricter CI with docs build and
-   clean repo requirement.
-5. After merge to `main`, `push-release` sees pending changesets.
-6. `push-release` creates or updates `release/main`.
-7. `pr-release` validates the generated version PR.
-8. If docs build changes tracked files, the generated release PR fails until docs are committed.
-9. Merge `release/main`.
-10. `push-release` sees a version-packages merge and publishes.
-11. Tags/releases are created only by the publish job, not by PR validation jobs.
+3. `pr-checks` runs and selects the correct phase.
+4. PR merges into `main`.
+5. `push-release` sees pending changesets and creates/updates `release/<changeset-slug>` PR.
+6. `pr-checks` validates that generated version PR.
+7. Merge generated release PR into `main`.
+8. `push-release` sees publish candidates and runs publish.
 
 ## Required branch protection checks for `main`
 
@@ -157,12 +121,23 @@ Use stable, unique job names.
 
 Recommended:
 
-- `push-main / required` or `ci-main / required`
-- `pr-main / required`
-- `pr-changesets-version / required`
-- `pr-release / required`
+- `push-main / required` (if present in your policy)
+- `pr-checks / required`
 
-Do not make report/autofix jobs required.
+Do not make report or autofix jobs required.
 
-Watch out: if skipped required checks cause GitHub branch protection problems, collapse PR routing
-later into one `pr.yml` router with one final always-present required job, such as `pr / required`.
+## Current plan snapshot
+
+1. Keep release orchestration centralized in `call-release-plan.yml`.
+2. Keep `push-release.yml` as a thin wrapper that calls `call-release-plan.yml` in real mode.
+3. Keep branch naming deterministic from pending changeset slug outputs (`changeset_slugs`,
+   `primary_changeset_slug`).
+4. Keep `call-pipeline.yml` generic, with optional `disable_nx_cloud` input override and fallback to
+   `vars.DISABLE_NX_CLOUD`.
+5. Keep local actions/workflows in this repository for now; extraction into a dedicated actions
+   repository is intentionally deferred.
+
+### Deferred work
+
+- Externalize shared actions/workflows into a dedicated repository later, after current release-flow
+  stabilization.
