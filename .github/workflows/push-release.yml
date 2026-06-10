@@ -32,7 +32,7 @@ jobs:
         uses: ./.github/workflows/call-release-plan.yml
         secrets: inherit
         with:
-            ref: ${{ github.sha }}
+            ref: ''
             dry_run: false
             allow_non_main: false
             run_pipeline: true
