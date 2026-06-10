@@ -24,7 +24,7 @@ export const CONVENTIONAL_COMMIT_TYPES: Array<ConventionalCommitType> =
 
 export const COMMIT_TYPES: Array<LiteralUnion<ConventionalCommitType, string>> =
     [...CONVENTIONAL_COMMIT_TYPES, 'changeset', 'release'] as const
-/** [ 'feat', 'fix', 'wip', 'build', 'chore', 'docs', 'release', 'ci', 'perf', 'refactor', 'revert', 'style', 'test', ] */
+/** [ 'feat', 'fix', 'build', 'chore', 'docs', 'release', 'perf', 'refactor', 'revert', 'style', 'test', ] */
 
 export const configuration = (
     scope_options: WorkspaceScopesOptions = {},

@@ -77,8 +77,8 @@
         "directory": "packages/build-config"
     },
     "dependencies": {
-        "@arethetypeswrong/core": "^0.18.2",
-        "@rollup/plugin-commonjs": "^29.0.2",
+        "@arethetypeswrong/core": "^0.18.3",
+        "@rollup/plugin-commonjs": "^29.0.3",
         "@rollup/plugin-json": "^6.1.0",
         "@rollup/plugin-node-resolve": "^16.0.3",
         "@rollup/plugin-terser": "^1.0.0",
@@ -87,29 +87,29 @@
         "esbuild": "^0.28.0",
         "publint": "^0.3.21",
         "remark-toc": "^9.0.0",
-        "rollup": "^4.60.1",
+        "rollup": "^4.61.1",
         "rollup-plugin-node-externals": "^9.0.1",
         "rollup-plugin-polyfill-node": "^0.13.0",
-        "ts-deepmerge": "^7.0.3",
+        "ts-deepmerge": "^8.0.0",
         "ts-extras": "^1.0.0",
-        "tsdown": "^0.22.0",
-        "type-fest": "^5.6.0",
+        "tsdown": "^0.22.2",
+        "type-fest": "^5.7.0",
         "typedoc": "^0.28.19",
         "typedoc-material-theme": "^1.4.1",
-        "typedoc-plugin-markdown": "^4.11.0",
+        "typedoc-plugin-markdown": "^4.12.0",
         "typedoc-plugin-remark": "^2.0.1",
         "typedoc-plugin-zod": "^1.4.3",
         "unified-prettier": "^2.0.1",
         "unplugin-unused": "^0.5.7",
-        "vite": "^8.0.8",
-        "vite-plugin-dts": "^5.0.0",
+        "vite": "^8.0.16",
+        "vite-plugin-dts": "^5.0.2",
         "zod": "^4.4.2"
     },
     "devDependencies": {
-        "@microsoft/api-extractor": "^7.58.7",
+        "@microsoft/api-extractor": "^7.58.8",
         "@snailicid3/config": "workspace:*",
-        "@types/node": "^25.8.0",
+        "@types/node": "^25.9.2",
         "typescript": "^6.0.2",
-        "vitest": "^4.1.4"
+        "vitest": "^4.1.8"
     }
 }

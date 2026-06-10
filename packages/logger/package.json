@@ -78,16 +78,16 @@
         "@snailicid3/color": "workspace:*",
         "@snailicid3/utils": "workspace:*",
         "chalk": "^5.6.2",
-        "dayjs": "^1.11.20"
+        "dayjs": "^1.11.21"
     },
     "devDependencies": {
-        "@microsoft/api-extractor": "^7.58.7",
+        "@microsoft/api-extractor": "^7.58.8",
         "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
-        "@types/node": "^25.8.0",
-        "tsdown": "^0.22.0",
+        "@types/node": "^25.9.2",
+        "tsdown": "^0.22.2",
         "typescript": "^6.0.2",
-        "vitest": "^4.1.4"
+        "vitest": "^4.1.8"
     },
     "module": "./dist/index.js"
 }

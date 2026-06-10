@@ -74,10 +74,10 @@
     "devDependencies": {
         "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
-        "@types/node": "^25.8.0",
-        "tsdown": "^0.22.0",
+        "@types/node": "^25.9.2",
+        "tsdown": "^0.22.2",
         "typescript": "^6.0.2",
-        "vitest": "^4.1.4"
+        "vitest": "^4.1.8"
     },
     "module": "./dist/index.js"
 }
