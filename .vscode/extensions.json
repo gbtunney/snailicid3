@@ -12,9 +12,7 @@
         "christian-kohler.path-intellisense",
         "gruntfuggly.todo-tree",
         "imekachi.webstorm-darcula",
-        "linbudu.pnpm-vscode-helper",
         "alefragnani.bookmarks",
-        "adrianwilczynski.terminal-commands",
         "github.codespaces",
         "github.copilot",
         "ms-vscode.vscode-speech",
@@ -24,6 +22,7 @@
         "anseki.vscode-color",
         "openai.chatgpt",
         "esbenp.prettier-vscode",
-        "ms-vscode.vscode-chat-customizations-evaluations"
+        "ms-vscode.vscode-chat-customizations-evaluations",
+        "formulahendry.auto-close-tag"
     ]
 }

@@ -119,12 +119,4 @@ spacer 1
 info "Reloading current shell..."
 success "Complete!"
 spacer 1
-
-if [ -n "${ZSH_VERSION:-}" ]; then
-    exec zsh
-elif [ -n "${BASH_VERSION:-}" ]; then
-    exec bash
-else
-    warn "Unknown shell. Run manually:"
-    log "  exec zsh   or   exec bash"
-fi
+reload_preferred_shell

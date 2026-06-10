@@ -366,15 +366,30 @@ visible_length() {
 
 resolve_kabob_side_widths() {
     local width_spec="${1:-auto}"
-    local available_width="${2:-0}"
+    local term_width="${2:-0}"
+    local middle_width="${3:-0}"
+    local available_width=0
     local left_width=0
     local right_width=0
     local total_rule_width=0
 
-    if ! [[ "$available_width" =~ ^-?[0-9]+$ ]]; then
-        available_width=0
+    if ! [[ "$term_width" =~ ^-?[0-9]+$ ]]; then
+        term_width=0
     fi
 
+    if ! [[ "$middle_width" =~ ^-?[0-9]+$ ]]; then
+        middle_width=0
+    fi
+
+    if ((term_width < 0)); then
+        term_width=0
+    fi
+
+    if ((middle_width < 0)); then
+        middle_width=0
+    fi
+
+    available_width=$((term_width - middle_width))
     if ((available_width < 0)); then
         available_width=0
     fi
@@ -388,19 +403,20 @@ resolve_kabob_side_widths() {
             ;;
         *%)
             if [[ "$width_spec" =~ ^([0-9]+)%$ ]]; then
-                total_rule_width=$((available_width * ${BASH_REMATCH[1]} / 100))
+                total_rule_width=$((term_width * ${BASH_REMATCH[1]} / 100 - middle_width))
+                if ((total_rule_width % 2 != 0)); then
+                    total_rule_width=$((total_rule_width - 1))
+                fi
             else
                 total_rule_width="$available_width"
             fi
             ;;
         *)
             if [[ "$width_spec" =~ ^[0-9]+$ ]]; then
-                left_width="$width_spec"
-                right_width="$width_spec"
-                printf '%s %s\n' "$left_width" "$right_width"
-                return
+                total_rule_width="$width_spec"
+            else
+                total_rule_width="$available_width"
             fi
-            total_rule_width="$available_width"
             ;;
     esac
 
@@ -576,6 +592,16 @@ line() {
     log "$output" "$color"
 }
 kabob() {
+
+    # local title="${1:-}"
+    #local width='auto'
+    #local color='cyan'
+    #local marker='='
+    #local invert='false'
+    #local padding='1'
+    #local newline='true'
+    #local text_style=''
+
     local text="${1:-}"
     local width="${2:-auto}"
     local color="${3:-cyan}"
@@ -587,7 +613,6 @@ kabob() {
     local resolved_width
     local text_width
     local middle_width
-    local available_width
     local left_width
     local right_width
     local side_widths
@@ -612,12 +637,7 @@ kabob() {
     term_width="$(resolve_width auto)"
     text_width="$(visible_length "$text")"
     middle_width=$((text_width + (padding * 2)))
-    available_width=$((term_width - middle_width))
-    if ((available_width < 0)); then
-        available_width=0
-    fi
-
-    side_widths="$(resolve_kabob_side_widths "$width" "$available_width")"
+    side_widths="$(resolve_kabob_side_widths "$width" "$term_width" "$middle_width")"
     left_width="${side_widths%% *}"
     right_width="${side_widths##* }"
     outer_style="$(resolve_style "$color")"
