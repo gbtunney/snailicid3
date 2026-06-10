@@ -13,7 +13,7 @@ export type WorkspaceScopesOptions = {
     mergeScopes?: ReadonlyArray<string>
 }
 
-const BASE_COMMITLINT_SCOPES = ['root', 'actions', 'notes', 'scripts'] as const
+const BASE_COMMITLINT_SCOPES = ['root', 'actions'] as const
 
 export const workspaceScopes = (
     options: WorkspaceScopesOptions = {},
