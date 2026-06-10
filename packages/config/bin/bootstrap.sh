@@ -7,9 +7,9 @@ set -euo pipefail
 # - PACKAGE_DIR: nearest package directory containing package.json and bin/snail-sh-logger.sh.
 # - REPO_DIR: repository root resolved from PACKAGE_DIR via git.
 # - LOGGER_PATH: absolute path to bin/snail-sh-logger.sh within PACKAGE_DIR.
-# - Test shell with `echo "SHELL=$SHELL  argv0=$0  pid=$$  proc=$(ps -p $$ -o comm=)" && DEBUG_PATHS=true <script> && echo "SHELL=$SHELL  argv0=$0  pid=$$  proc=$(ps -p $$ -o comm=)" `
-# TURN ON DEBUG PATHS WITH: `DEBUG_PATHS=true pnpm run <script>`
-DEBUG_PATHS="${DEBUG_PATHS:-false}"
+# - Test shell with `echo "SHELL=$SHELL  argv0=$0  pid=$$  proc=$(ps -p $$ -o comm=)" && LOGGING=true <script> && echo "SHELL=$SHELL  argv0=$0  pid=$$  proc=$(ps -p $$ -o comm=)" `
+# TURN ON DEBUG PATHS WITH: `LOGGING=true pnpm run <script>`
+LOGGING="${LOGGING:-false}"
 SCRIPT_SOURCE_PATH="${BOOTSTRAP_CALLER_SOURCE:-${BASH_SOURCE[1]:-${BASH_SOURCE[0]}}}"
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$SCRIPT_SOURCE_PATH")" && pwd)"
 
@@ -46,19 +46,23 @@ LOGGER_PATH="$PACKAGE_DIR/bin/snail-sh-logger.sh"
 # shellcheck source=/dev/null
 . "$LOGGER_PATH"
 
-debug_paths_enabled() {
-    [[ "$DEBUG_PATHS" == "true" || "$DEBUG_PATHS" == "1" ]]
+logging_enabled() {
+    [[ "$LOGGING" == "true" || "$LOGGING" == "1" ]]
 }
 
-if debug_paths_enabled; then
-    printf 'SCRIPT_DIR=%s\n' "$SCRIPT_DIR"
-    printf 'PACKAGE_DIR=%s\n' "$PACKAGE_DIR"
-    printf 'REPO_DIR=%s\n' "$REPO_DIR"
-    printf 'LOGGER_PATH=%s\n' "$LOGGER_PATH"
+if logging_enabled; then
+    # Debugging: Log the path variables
+    spacer 1
+    kabob "[debug] variable file paths" "80%" "fg-dark-grey" true
+    kv_pair 'SCRIPT_DIR' "$SCRIPT_DIR"
+    kv_pair 'PACKAGE_DIR' "$PACKAGE_DIR"
+    kv_pair 'REPO_DIR' "$REPO_DIR"
+    kv_pair 'LOGGER_PATH' "$LOGGER_PATH"
 
     # Debugging: Log the current shell
+    spacer 1
+    kabob "[debug] shell info" "80%" "fg-dark-grey" true
     kv_pair "Current shell" "$SHELL"
-
     kv_pair "ZSH_VERSION: ${ZSH_VERSION:-not set}"
     kv_pair "BASH_VERSION: ${BASH_VERSION:-not set}"
 
@@ -116,11 +120,15 @@ reload_preferred_shell() {
         tty_stdout="true"
     fi
 
-    if debug_paths_enabled; then
-        kv_pair "reload_preferred_shell:SHELL" "${SHELL:-unset}"
-        kv_pair "reload_preferred_shell:tty stdin" "$tty_stdin"
-        kv_pair "reload_preferred_shell:tty stdout" "$tty_stdout"
+    if logging_enabled; then
+        spacer 1
+        kabob "[debug] reload_preferred_shell" "80%" "fg-dark-grey" true
+        kv_pair "SHELL" "${SHELL:-unset}"
+        kv_pair "tty stdin" "$tty_stdin"
+        kv_pair "tty stdout" "$tty_stdout"
         kv_pair "reload_preferred_shell:target" "${preferred_shell:-unset}"
+        spacer 1
+
     fi
 
     if [[ ! -t 0 || ! -t 1 ]]; then

@@ -119,5 +119,4 @@ spacer 1
 info "Reloading current shell..."
 success "Complete!"
 spacer 1
-
 reload_preferred_shell

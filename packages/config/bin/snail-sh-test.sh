@@ -288,3 +288,11 @@ kabob "${CONTENT_TEXT}" "30" "$COLOR" true "----|" 2
 kabob "${CONTENT_TEXT}" "50" "$COLOR" true "--|" 2
 
 section "Flexible Section" 50% bright-cyan "=" true 4
+
+#width test
+kabob "[debug]" "100%" "fg-light-grey" true "=" 8
+kabob "[debug] reload_preferred_shell_reload" "100%" "fg-light-grey" true "=" 8
+kabob "[debug]" "100%" "fg-light-grey" true "=" 1
+kabob "[debug] reload_preferred_shell_reload" "100%" "fg-light-grey" true "=" 1
+kabob "[debug]" "60%" "fg-light-grey" true "=" 1
+kabob "[debug] reload_preferred_shell_reload" "60%" "fg-light-grey" true "=" 1
