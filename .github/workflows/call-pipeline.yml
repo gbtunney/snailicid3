@@ -6,6 +6,7 @@
 # - Inputs are typed; outputs are strings (boolean-like outputs use 'true'/'false').
 # - In mode=report, many steps use continue-on-error to produce a full report.
 # - Workspace artifact upload is optional and uploads from filesystem globs (does not respect .gitignore).
+# - disable_nx_cloud input is optional; when omitted, DISABLE_NX_CLOUD repo variable is used.
 # ─────────────────────────────────────────────────────────────
 
 name: Pipeline 🚰
@@ -98,6 +99,12 @@ on:
                 default: true
                 type: boolean
 
+            disable_nx_cloud:
+                description: Optional override for vars.DISABLE_NX_CLOUD ('true'|'false'). If set, this input takes precedence; if empty, the workflow falls back to vars.DISABLE_NX_CLOUD.
+                required: false
+                default: ''
+                type: string
+
             # Nx affected options
             use_nx_affected:
                 description: Run nx affected instead of full workspace build/test/check routines.
@@ -170,6 +177,36 @@ jobs:
                   node-version: ${{ inputs.node_version }}
                   cache: ${{ inputs.pnpm_cache && 'pnpm' || '' }}
 
+            - name: 🔧 Resolve Nx Cloud Policy
+              id: nx_cloud_policy
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  input_value="${{ inputs.disable_nx_cloud }}"
+                  variable_value="${{ vars.DISABLE_NX_CLOUD || '' }}"
+
+                  if [ -n "$input_value" ]; then
+                    policy_source="input:disable_nx_cloud"
+                    effective_disable_nx_cloud="$input_value"
+                  elif [ -n "$variable_value" ]; then
+                    policy_source="vars.DISABLE_NX_CLOUD"
+                    effective_disable_nx_cloud="$variable_value"
+                  else
+                    policy_source="fallback-default"
+                    effective_disable_nx_cloud="true"
+                  fi
+
+                  effective_disable_nx_cloud="$(printf '%s' "$effective_disable_nx_cloud" | tr '[:upper:]' '[:lower:]')"
+                  if [ "$effective_disable_nx_cloud" != "true" ] && [ "$effective_disable_nx_cloud" != "false" ]; then
+                    echo "::warning::Invalid Nx Cloud policy '$effective_disable_nx_cloud'. Falling back to true (disabled)."
+                    effective_disable_nx_cloud="true"
+                    policy_source="fallback-invalid"
+                  fi
+
+                  echo "effective_disable_nx_cloud=$effective_disable_nx_cloud" >> "$GITHUB_OUTPUT"
+                  echo "policy_source=$policy_source" >> "$GITHUB_OUTPUT"
+
             # ── Input summary ────────────────────────────────────────
             # Note: no native foreach over inputs; keep this explicit.
             - name: 🌸 Input Summary
@@ -189,6 +226,9 @@ jobs:
                     echo "- run_docs_build: \`${{ inputs.run_docs_build }}\`"
                     echo "- nx_cache_reset: \`${{ inputs.nx_cache_reset }}\`"
                     echo "- pnpm_cache: \`${{ inputs.pnpm_cache }}\`"
+                    echo "- disable_nx_cloud (input): \`${{ inputs.disable_nx_cloud || 'unset' }}\`"
+                    echo "- disable_nx_cloud (resolved): \`${{ steps.nx_cloud_policy.outputs.effective_disable_nx_cloud }}\`"
+                    echo "- disable_nx_cloud (source): \`${{ steps.nx_cloud_policy.outputs.policy_source }}\`"
                     echo "- upload_workspace_artifact: \`${{ inputs.upload_workspace_artifact }}\`"
                     echo "- artifact_name_prefix: \`${{ inputs.artifact_name_prefix }}\`"
                     echo "- use_nx_affected: \`${{ inputs.use_nx_affected }}\`"
@@ -229,7 +269,7 @@ jobs:
             # Missing defaults to disabled because GitHub vars resolve to ''
             # when unset.
             - name: ⚡ Enable Nx Cloud
-              if: ${{ vars.DISABLE_NX_CLOUD == 'false' }}
+              if: ${{ steps.nx_cloud_policy.outputs.effective_disable_nx_cloud == 'false' }}
               run: echo "NX_NO_CLOUD=false" >> "$GITHUB_ENV"
 
             # ── Reporting ────────────────────────────
@@ -322,7 +362,7 @@ jobs:
               run: echo "api_report_mode=skip"
 
             - name: 🤖 Nx Fix CI
-              if: ${{ inputs.nx_fix_ci && vars.DISABLE_NX_CLOUD == 'false' }}
+              if: ${{ inputs.nx_fix_ci && steps.nx_cloud_policy.outputs.effective_disable_nx_cloud == 'false' }}
               run: pnpm exec nx fix-ci
 
             - name: 🧼 Check repository dirty state

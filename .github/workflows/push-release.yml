@@ -1,15 +1,9 @@
 # Runs only after merge to `main`.
 #
-# Release-state detection decides what to do:
-#   🔖 version packages — pending changesets exist → bump versions, push
-#                          release/main, create/update PR, trigger pr-checks.
-#   📦 publish packages — last commit was a version bump → publish to npm,
-#                          using the same workspace artifact apply path as
-#                          manual publish checks.
-#   (skip)              — unrelated commit → only detect runs.
-#
-# The split into version-release / publish-release jobs makes the GitHub UI
-# immediately show which phase ran without opening the logs.
+# This workflow is intentionally a thin wrapper around call-release-plan.yml.
+# Release branching, version PR management, and publish decisions are all
+# centralized in the reusable workflow so manual dispatch and push-triggered
+# releases share one implementation.
 name: Push Release
 
 on:
@@ -33,128 +27,16 @@ env:
     NX_NO_CLOUD: 'true'
 
 jobs:
-    # ── Detect ──────────────────────────────────────────────────────────────
-    detect:
-        uses: ./.github/workflows/call-detect-release-state.yml
-
-    # ── Shared pipeline (build + test, upload workspace artifact) ───────────
-    pipeline:
-        needs: detect
-        if: >-
-            ${{
-              needs.detect.outputs.should_version == 'true' ||
-              needs.detect.outputs.should_publish == 'true'
-            }}
-
-
-        uses: ./.github/workflows/call-pipeline.yml
-        with:
-            mode: abort_on_error
-            check_mode: check
-            require_lockfile: true
-            require_clean_repo: true
-            run_build: true
-            run_test: true
-            run_docs_build: false
-            pnpm_cache: true
-            upload_workspace_artifact: true
-            artifact_name_prefix: release-workspace
-
-    # ── Phase 1 — version packages ──────────────────────────────────────────
-    # Bump versions, compute scoped commit message, push to release/main,
-    # create/update the version PR, trigger pr-checks on the new branch.
-    version-release:
-        name: '🔖 version packages'
-        runs-on: ubuntu-latest
-        needs: [detect, pipeline]
-        if: needs.detect.outputs.should_version == 'true'
-
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-
-            - name: Setup pnpm
-              uses: pnpm/action-setup@v6
-              with:
-                  run_install: false
-
-            - name: Setup Node
-              uses: actions/setup-node@v4
-              with:
-                  node-version: lts/*
-                  cache: pnpm
-
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
-
-            # ── Version packages ─────────────────────────────────────────
-            - name: Version packages
-              run: pnpm changeset version
-
-            - name: Stage and compute scoped commit message
-              id: version_msg
-              shell: bash
-              run: |
-                  git add -A
-                  MSG="$(pnpm exec scope-commit --staged --message release "version packages" \
-                          2>/dev/null || echo "release(root): version packages")"
-                  echo "message=$MSG" >> "$GITHUB_OUTPUT"
-                  echo "Commit message: $MSG"
-
-            - name: Commit version changes
-              shell: bash
-              run: |
-                  git config user.name  "github-actions[bot]"
-                  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-                  git config commit.gpgsign false
-
-                  if git diff --cached --quiet; then
-                    echo "No staged version changes to commit."
-                    exit 0
-                  fi
-
-                  git commit -m "${{ steps.version_msg.outputs.message }}"
-
-            - name: Push to release/main branch
-              run: git push origin HEAD:refs/heads/release/main --force
-
-            - name: Create or update version PR
-              shell: bash
-              run: |
-                  TITLE="${{ steps.version_msg.outputs.message }}"
-                  BODY="Automated version bump. Merge this PR to publish packages to npm."
-                  PR=$(gh pr list --head release/main --base main --state open \
-                          --json number -q '.[0].number' 2>/dev/null || true)
-                  if [ -z "$PR" ]; then
-                    gh pr create --head release/main --base main --title "$TITLE" --body "$BODY"
-                  else
-                    gh pr edit "$PR" --title "$TITLE" --body "$BODY"
-                  fi
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: Trigger PR validation
-              run: gh workflow run pr-checks.yml --ref release/main
-              env:
-                  GH_TOKEN: ${{ github.token }}
-
-    # ── Phase 2 — publish packages ──────────────────────────────────────────
-    # Publishes only when no pending changesets remain and local package
-    # versions are not yet present on npm.
-    publish-release:
-        name: '📦 publish packages'
-        needs: [detect, pipeline]
-        if: ${{ needs.detect.outputs.should_publish == 'true' && needs.pipeline.outputs.artifact_uploaded == 'true' }}
-        uses: ./.github/workflows/call-apply-workspace-artifact.yml
+    release_plan:
+        name: release plan
+        uses: ./.github/workflows/call-release-plan.yml
         secrets: inherit
         with:
             ref: ${{ github.sha }}
-            artifact_name: ${{ needs.pipeline.outputs.workspace_artifact_name }}
-            commit_mode: skip
-            install_dependencies: true
+            dry_run: false
+            allow_non_main: false
+            run_pipeline: true
+            upload_workspace_artifact: true
             require_lockfile: true
             node_version: lts/*
             pnpm_cache: true
-            post_overlay_command: npm whoami && pnpm changeset publish

@@ -175,6 +175,8 @@ jobs:
                     echo "## Release-state outputs"
                     echo ""
                     echo "- changeset_count: \`${{ needs.detect.outputs.changeset_count }}\`"
+                    echo "- changeset_slugs: \`${{ needs.detect.outputs.changeset_slugs }}\`"
+                    echo "- primary_changeset_slug: \`${{ needs.detect.outputs.primary_changeset_slug }}\`"
                     echo "- has_pending_changesets: \`${{ needs.detect.outputs.has_pending_changesets }}\`"
                     echo "- package_count: \`${{ needs.detect.outputs.package_count }}\`"
                     echo "- public_package_count: \`${{ needs.detect.outputs.public_package_count }}\`"
@@ -246,6 +248,55 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
+            - name: Checkout release source
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  ref: ${{ inputs.ref || github.sha }}
+                  token: ${{ secrets.GH_PAT || github.token }}
+
+            - name: Derive release branch from pending changesets
+              id: release_branch
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  changeset_count="${{ needs.detect.outputs.changeset_count }}"
+                  primary_changeset_slug="${{ needs.detect.outputs.primary_changeset_slug }}"
+
+                  if [[ "$changeset_count" -eq 0 || -z "$primary_changeset_slug" ]]; then
+                    echo "::error::No pending changeset files were found to derive the release branch slug."
+                    exit 1
+                  fi
+
+                  if [[ "$changeset_count" -eq 1 ]]; then
+                    release_slug="$primary_changeset_slug"
+                  else
+                    first_slug="$primary_changeset_slug"
+                    remaining_count="$((changeset_count - 1))"
+                    release_slug="${first_slug}-plus-${remaining_count}-more"
+                  fi
+
+                  release_slug="$(printf '%s' "$release_slug" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9._-]+/-/g; s/^-+//; s/-+$//; s/-{2,}/-/g')"
+
+                  if [[ -z "$release_slug" ]]; then
+                    short_sha="${GITHUB_SHA:-$(git rev-parse --short HEAD)}"
+                    release_slug="changeset-${short_sha:0:8}"
+                  fi
+
+                  max_slug_length=120
+                  if [[ "${#release_slug}" -gt "$max_slug_length" ]]; then
+                    release_slug="${release_slug:0:max_slug_length}"
+                    release_slug="${release_slug%-}"
+                  fi
+
+                  release_branch="release/${release_slug}"
+
+                  echo "slug=$release_slug" >> "$GITHUB_OUTPUT"
+                  echo "branch=$release_branch" >> "$GITHUB_OUTPUT"
+                  echo "count=$changeset_count" >> "$GITHUB_OUTPUT"
+                  echo "Resolved release branch: $release_branch"
+
             - name: Plan version PR action
               if: ${{ inputs.dry_run == true }}
               shell: bash
@@ -254,16 +305,8 @@ jobs:
 
                   echo "Dry run: would create/update a Changesets version PR."
                   echo "Dry run: pending changeset count = ${{ needs.detect.outputs.changeset_count }}"
-                  echo "Dry run: target branch would be release/main."
+                  echo "Dry run: target branch would be ${{ steps.release_branch.outputs.branch }}."
                   echo "Dry run: commit/PR title would use release(root): version packages unless scope detection narrows it."
-
-            - name: Checkout release source
-              if: ${{ inputs.dry_run == false }}
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-                  ref: ${{ inputs.ref || github.sha }}
-                  token: ${{ secrets.GH_PAT || github.token }}
 
             - name: Setup pnpm
               if: ${{ inputs.dry_run == false }}
@@ -331,7 +374,7 @@ jobs:
 
             - name: Push release branch
               if: ${{ inputs.dry_run == false }}
-              run: git push origin HEAD:refs/heads/release/main --force
+              run: git push origin HEAD:refs/heads/${{ steps.release_branch.outputs.branch }} --force
 
             - name: Create or update version PR
               if: ${{ inputs.dry_run == false }}
@@ -343,11 +386,12 @@ jobs:
 
                   title="${{ steps.version_msg.outputs.message }}"
                   body="Automated version bump from Changesets. Merge this PR to publish packages to npm."
+                  release_branch="${{ steps.release_branch.outputs.branch }}"
 
-                  pr="$(gh pr list --head release/main --base main --state open --json number -q '.[0].number' 2>/dev/null || true)"
+                  pr="$(gh pr list --head \"$release_branch\" --base main --state open --json number -q '.[0].number' 2>/dev/null || true)"
 
                   if [[ -z "$pr" ]]; then
-                    gh pr create --head release/main --base main --title "$title" --body "$body"
+                    gh pr create --head "$release_branch" --base main --title "$title" --body "$body"
                   else
                     gh pr edit "$pr" --title "$title" --body "$body"
                   fi
@@ -357,7 +401,7 @@ jobs:
               shell: bash
               env:
                   GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
-              run: gh workflow run pr-checks.yml --ref release/main
+              run: gh workflow run pr-checks.yml --ref "${{ steps.release_branch.outputs.branch }}"
 
             - name: Version PR summary
               if: ${{ always() }}
@@ -369,7 +413,7 @@ jobs:
                     echo "- dry_run: \`${{ inputs.dry_run }}\`"
                     echo "- source_ref: \`${{ inputs.ref || github.sha }}\`"
                     echo "- changeset_count: \`${{ needs.detect.outputs.changeset_count }}\`"
-                    echo "- target_branch: \`release/main\`"
+                    echo "- target_branch: \`${{ steps.release_branch.outputs.branch }}\`"
                     echo "- title: \`${{ steps.version_msg.outputs.message || 'release(root): version packages' }}\`"
                   } >> "$GITHUB_STEP_SUMMARY"
 

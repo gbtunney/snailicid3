@@ -17,6 +17,8 @@ name: Call Detect Release State
 #
 # New style:
 #   - Count pending .changeset/*.md files.
+#   - Emit changeset slug outputs (`changeset_slugs`, `primary_changeset_slug`)
+#     so release planners can derive deterministic release branch names.
 #   - Build a package inventory from package.json files.
 #   - Ask npm whether each public local package version already exists.
 #   - Emit compact machine-readable stats and a readable summary table.
@@ -68,6 +70,14 @@ on:
             changeset_count:
                 description: Number of pending .changeset/*.md files, excluding README.md.
                 value: ${{ jobs.detect.outputs.changeset_count }}
+
+            changeset_slugs:
+                description: Sorted, space-delimited pending changeset file basenames without .md.
+                value: ${{ jobs.detect.outputs.changeset_slugs }}
+
+            primary_changeset_slug:
+                description: First sorted pending changeset basename without .md, or empty when none.
+                value: ${{ jobs.detect.outputs.primary_changeset_slug }}
 
             has_pending_changesets:
                 description: "'true' when pending changeset files exist."
@@ -140,6 +150,8 @@ jobs:
         outputs:
             checked_ref: ${{ steps.detect.outputs.checked_ref }}
             changeset_count: ${{ steps.detect.outputs.changeset_count }}
+            changeset_slugs: ${{ steps.detect.outputs.changeset_slugs }}
+            primary_changeset_slug: ${{ steps.detect.outputs.primary_changeset_slug }}
             has_pending_changesets: ${{ steps.detect.outputs.has_pending_changesets }}
             package_count: ${{ steps.detect.outputs.package_count }}
             public_package_count: ${{ steps.detect.outputs.public_package_count }}
@@ -179,12 +191,27 @@ jobs:
                       | tr -d ' '
                   )"
 
+                  mapfile -t changeset_slug_values < <(
+                    find .changeset -maxdepth 1 -type f -name '*.md' ! -name 'README.md' -printf '%f\n' 2>/dev/null \
+                      | sed 's/\.md$//' \
+                      | LC_ALL=C sort
+                  )
+
+                  changeset_slugs=""
+                  primary_changeset_slug=""
+                  if [ "${#changeset_slug_values[@]}" -gt 0 ]; then
+                    changeset_slugs="$(printf '%s\n' "${changeset_slug_values[@]}" | paste -sd ' ' -)"
+                    primary_changeset_slug="${changeset_slug_values[0]}"
+                  fi
+
                   has_pending_changesets=false
                   if [ "$changeset_count" -gt 0 ]; then
                     has_pending_changesets=true
                   fi
 
                   echo "changeset_count=$changeset_count"
+                  echo "changeset_slugs=$changeset_slugs"
+                  echo "primary_changeset_slug=$primary_changeset_slug"
                   echo "has_pending_changesets=$has_pending_changesets"
                   echo "::endgroup::"
 
@@ -424,6 +451,8 @@ jobs:
                   {
                     echo "checked_ref=$checked_ref"
                     echo "changeset_count=$changeset_count"
+                    echo "changeset_slugs=$changeset_slugs"
+                    echo "primary_changeset_slug=$primary_changeset_slug"
                     echo "has_pending_changesets=$has_pending_changesets"
                     echo "package_count=$package_count"
                     echo "public_package_count=$public_package_count"
@@ -466,6 +495,8 @@ jobs:
                     echo "| Stat | Value |"
                     echo "|---|---:|"
                     echo "| changeset_count | \`${{ steps.detect.outputs.changeset_count }}\` |"
+                    echo "| changeset_slugs | \`${{ steps.detect.outputs.changeset_slugs }}\` |"
+                    echo "| primary_changeset_slug | \`${{ steps.detect.outputs.primary_changeset_slug }}\` |"
                     echo "| has_pending_changesets | \`${{ steps.detect.outputs.has_pending_changesets }}\` |"
                     echo "| package_count | \`${{ steps.detect.outputs.package_count }}\` |"
                     echo "| public_package_count | \`${{ steps.detect.outputs.public_package_count }}\` |"
