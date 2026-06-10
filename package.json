@@ -27,7 +27,7 @@
         "api:report": "pnpm exec nx run-many --target=api:report",
         "api:check": "pnpm exec nx run-many --target=api:check",
         "\n========== PUBLISH >> ==========": "",
-        "changeset:create": "pnpm exec gbt-changeset && pnpm changeset:prepare && pnpm exec gbt-changeset",
+        "changeset:create": "pnpm exec gbt-changeset && pnpm changeset:prepare",
         "changeset:prepare": "pnpm run fix && pnpm run test && pnpm docs:build && pnpm api:report",
         "release:archive": "pnpm -r exec mkdir -p ./releases &&  pnpm -r --access public pack --pack-destination='./releases'",
         "registry:start": "pnpm exec verdaccio",
