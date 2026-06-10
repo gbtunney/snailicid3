@@ -15,7 +15,7 @@
         "commit:direct": "git commit --no-verify -m",
         "\n========== BUILD >> ==========": "",
         "build": "pnpm nx:build",
-        "build:self": "pnpm exec nx run @snailicid3/root:build",
+        "build:self": "pnpm exec nx run $npm_package_name:build",
         "nx:build": "pnpm exec nx run-many -t build",
         "\n========== TEST >> ==========": "",
         "test": "pnpm nx:test",
@@ -49,13 +49,13 @@
         "nx:reset": "pnpm exec nx reset",
         "\n========== CHECK >> ==========": "",
         "check": "pnpm exec nx run-many -t lint",
-        "check:md": "pnpm exec nx run @snailicid3/root:lint:md",
+        "check:md": "pnpm exec nx run $npm_package_name:lint:md",
         "\n========== FIX >> ==========": "",
         "fix": "pnpm exec nx run-many -t fix",
-        "fix:md": "pnpm exec nx run @snailicid3/root:fix:md",
+        "fix:md": "pnpm exec nx run $npm_package_name:fix:md",
         "\n========== CLEAN >> ==========": "",
         "clean": "pnpm exec nx run-many -t clean",
-        "clean:self": "pnpm exec nx run @snailicid3/root:clean"
+        "clean:self": "pnpm exec nx run $npm_package_name:clean"
     },
     "devDependencies": {
         "@changesets/cli": "^2.31.0",
