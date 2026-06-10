@@ -1,6 +1,6 @@
 {
     "name": "@snailicid3/scaffold",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "private": true,
     "description": "Package scaffolding generator with TypeScript-function-based templates",
     "keywords": [

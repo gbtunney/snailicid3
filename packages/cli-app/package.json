@@ -1,6 +1,6 @@
 {
     "name": "@snailicid3/cli-app",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "private": true,
     "description": "Zod-backed CLI app framework",
     "scripts": {
