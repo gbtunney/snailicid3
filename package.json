@@ -87,8 +87,8 @@
     },
     "packageManager": "pnpm@10.30.2",
     "engines": {
-        "node": ">=20.x",
-        "pnpm": ">=10.0.0"
+        "node": ">=20.0.0",
+        "pnpm": ">=10.30.2 <11"
     },
     "type": "module"
 }
