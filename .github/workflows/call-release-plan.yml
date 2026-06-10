@@ -396,13 +396,6 @@ jobs:
                     gh pr edit "$pr" --title "$title" --body "$body"
                   fi
 
-            - name: Trigger version PR validation
-              if: ${{ inputs.dry_run == false }}
-              shell: bash
-              env:
-                  GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
-              run: gh workflow run pr-checks.yml --ref "${{ steps.release_branch.outputs.branch }}"
-
             - name: Version PR summary
               if: ${{ always() }}
               shell: bash
