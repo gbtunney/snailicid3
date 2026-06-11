@@ -318,9 +318,6 @@ function scopeForPath(
         return 'actions'
     }
 
-    //if (relativePath.startsWith('notes/')) return 'notes'
-    if (relativePath.startsWith('scripts/')) return 'scripts'
-
     const packageJsonPath = findNearestPackageJson(repoRoot, relativePath)
 
     if (!packageJsonPath) return 'root'
