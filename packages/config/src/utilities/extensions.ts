@@ -18,8 +18,22 @@ const ensureTrailingDot = (value: string): string => {
 }
 
 type FileExtensionHint = LiteralUnion<AllowedExtensions, string>
+/**
+ * Expands a list of file extensions by appending them to a normalized base pattern.
+ *
+ * @example
+ *     const extensions = ['js', 'ts']
+ *     const result = expandExtensions(extensions, 'src/')
+ *     //result: ['src/.js', 'src/.ts']
+ */
+
 export const expandExtensions = (
+    /** An string array of file extensions to expand. */
     extensions: ReadonlyArray<FileExtensionHint>,
+    /**
+     * A base pattern to prepend to each extension. If provided, it ensures the base pattern ends with a dot. Default is
+     * `''`
+     */
     basePattern: string = '',
 ): Array<string> => {
     const normalizedBasePattern = ensureTrailingDot(basePattern)

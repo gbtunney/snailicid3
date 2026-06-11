@@ -58,7 +58,7 @@
             "cache": true,
             "dependsOn": ["build:ts"],
             "inputs": ["{projectRoot}/**/*.md"],
-            "command": "pnpm exec prettier './**/*.md' --write &&  pnpm exec markdownlint-cli2 --fix",
+            "command": "pnpm exec prettier './**/*.md' '!**/*.api.md' --write &&  pnpm exec markdownlint-cli2 --fix",
             "options": { "cwd": "{projectRoot}" }
         }
     }

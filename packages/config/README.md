@@ -65,37 +65,176 @@ $ npm install @snailicid3/config --save-dev
 
 ### ESLint
 
+#### Example: Basic Config
+
 ```ts
 /* @file eslint.config.ts */
 import { EsLint } from '@snailicid3/config'
+import url from 'node:url'
 
-const FLAT_CONFIG = await EsLint.flatConfig()
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
+const CONFIG = EsLint.config(__dirname)
 
-export default [
-  ...FLAT_CONFIG,
-  {
-    ignores: ['packages/**/docs/**/*'],
-  },
+export default EsLint.defineConfig(CONFIG)
+```
+
+#### Example: Overriding Config
+
+This overrides eslint config to ignore everything in package docs foldders
+
+```ts
+import { EsLint,EslintConfig } from '@snailicid3/config'
+import url from 'node:url'
+
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
+const override_example:EslintConfig=
+const CONFIG:EslintConfig[] = [...EsLint.config(__dirname),
+    { ignores: ['packages/**/docs/**/*'],}
 ]
+export default EsLint.defineConfig(CONFIG)
+
+```
+
+#### Example: Overriding Rules
+
+This overrides eslint config to add or change default rules. This example shows how to add camelcase
+naming convention to specific files.
+
+```ts
+import { EsLint, EslintConfig, expandExtensions, TS_FILE_EXTENSIONS } from '@snailicid3/config'
+import url from 'node:url'
+
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
+const override_example: EslintConfig = {
+  /** Expands a list of file extensions by appending them to a normalized base pattern. */
+  files: expandExtensions(TS_FILE_EXTENSIONS, '**/src/**/*'),
+  name: 'Naming: allow ids for paramaters',
+  rules: {
+    '@typescript-eslint/naming-convention': [
+      'error',
+      {
+        custom: {
+          match: true,
+          regex: '^([a-zA-Z][a-zA-Z0-9_]{2,}|id|db|fs|ctx|req|res)$',
+        },
+        format: ['camelCase'],
+        selector: 'parameter',
+      },
+    ],
+  },
+}
+
+const CONFIG: EslintConfig[] = [...EsLint.config(__dirname), override_example]
+export default EsLint.defineConfig(CONFIG)
 ```
 
 ### Prettier
 
-```json5
-/* @file package.json */
-{
-  prettier: '@snailicid3/config/prettier',
+#### Example: Standard Config
+
+Does not emit js files, checks all files in package including .test.ts files
+
+```ts
+/** @file Prettier.config.ts */
+import { Prettier } from '@snailicid3/config'
+export default Prettier.configuration()
+```
+
+#### Example: Standard Config
+
+```ts
+/* @file prettier.config.ts */
+//TODO update after refactor with defineConfig function
+import { Prettier } from '@snailicid3/config'
+import type { Config as PrettierConfig } from 'prettier'
+
+const configOption: PrettierConfig = {
+  endOfLine: 'lf',
+  printWidth: 100,
+  semi: false,
+  singleQuote: true,
+  tabWidth: 4,
+  trailingComma: 'all',
 }
+
+const overrides = [
+  {
+    files: '**/*.json',
+    options: {
+      tabWidth: 4,
+    },
+  },
+]
+
+export default Prettier.configuration(
+  true,
+  {
+    endOfLine: 'lf',
+    printWidth: 100,
+    semi: false,
+    singleQuote: true,
+    tabWidth: 4,
+    trailingComma: 'all',
+  },
+  overrides,
+)
 ```
 
 ### TypeScript
 
+#### Example: Type Check
+
+Does not emit js files, checks all files in package including .test.ts files
+
 ```json5
-/* @file tsconfig.json */
+// @file tsconfig.json
 {
-  extends: '@snailicid3/config/tsconfig/typecheck',
-  include: ['**/*.ts'],
-  exclude: ['node_modules'],
+  extends: '@snailicid3/config/tsconfig.typecheck',
+  exclude: ['./node_modules'],
+  files: ['package.json'],
+  include: [
+    './*.ts',
+    './*.cts',
+    './*.mts',
+    './src/**/*.ts',
+    './src/**/*.cts',
+    './src/**/*.mts',
+    './**/*.test.ts',
+    './**/*.test.mts',
+    './**/*.test.cts',
+  ],
+}
+```
+
+```json5
+{}
+```
+
+#### Example: Library
+
+Creates a folder of declarations & js files in `<configDir>/types`, suitable for a library package.
+
+```json5
+/* @file tsconfig.build.json */
+{
+  extends: '@snailicid3/config/tsconfig.library',
+  include: ['./src/**/*.ts', './src/**/*.cts', './src/**/*.mts'],
+  exclude: ['**/*.test.ts', '**/*.test.mts', '**/*.test.cts'],
+}
+```
+
+Change outDir to `<configDir>/dist` if not using a bundler this example overrides the
+compilerOptions to create dist folder of js files.
+
+```json5
+/* @file tsconfig.build.json */
+{
+  extends: '@snailicid3/config/tsconfig.library',
+  include: ['./src/**/*.ts', './src/**/*.cts', './src/**/*.mts'],
+  exclude: ['**/*.test.ts', '**/*.test.mts', '**/*.test.cts'],
+  compilerOptions: {
+    outDir: './dist',
+  },
 }
 ```
 
@@ -110,20 +249,8 @@ export default commitlint.configuration(['root', 'my-package'])
 
 ## Shell Completions
 
-The shell helper can be called through pnpm:
+The shell completion install helper can be called through pnpm:
 
 ```sh
-pnpm exec snail-sh line "-|" "50%" bg-cyan
-```
-
-Bash:
-
-```sh
-source ./node_modules/@snailicid3/config/completions/snail-sh.bash
-```
-
-For completions while still running through pnpm, add a small wrapper:
-
-```sh
-snail-sh() { pnpm exec snail-sh "$@"; }
+pnpm exec gbt-setup
 ```
