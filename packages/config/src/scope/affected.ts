@@ -80,7 +80,9 @@ function collectDirtyRepoScopes(
     const untracked = runCommand(
         'git',
         ['ls-files', '--others', '--exclude-standard'],
-        { cwd: repoRoot },
+        {
+            cwd: repoRoot,
+        },
     ).stdout
 
     return splitLines(`${staged}\n${unstaged}\n${untracked}`).flatMap(
