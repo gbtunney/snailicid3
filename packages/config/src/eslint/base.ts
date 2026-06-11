@@ -14,10 +14,10 @@ import { typescriptRules } from './rules/typescript.js'
 import { JS_FILE_EXTENSIONS, TS_FILE_EXTENSIONS } from '../shared.js'
 import { expandExtensions } from '../utilities/extensions.js'
 
-const base_files: Array<string> = [
+export const BASE_FILES: Array<string> = [
     ...expandExtensions(TS_FILE_EXTENSIONS, '*.'),
 ]
-const base_ignores = [
+export const BASE_IGNORES: Array<string> = [
     '**/dist/**/*',
     '**/node_modules/**',
     '**/dist/**',
@@ -35,17 +35,56 @@ const base_ignores = [
     ...expandExtensions(JS_FILE_EXTENSIONS, '**/types/**/*.'),
 ]
 
-export const flatEslintConfig = (__dirname: string): Array<Config> => {
+export type EslintConfigOptions = {
+    /** Appended to whichever `files` list is in effect (array concat — applies even if `files` is given). */
+    additionalFiles?: Array<string>
+    /** Used as `tsconfigRootDir` for typescript-eslint's `projectService`. Defaults to `process.cwd()`. */
+    cwd?: string
+    /** Replaces `BASE_FILES` entirely if provided. */
+    files?: Array<string>
+    /** Appended to `BASE_IGNORES` (array concat). */
+    ignores?: Array<string>
+    /** Extra flat-config objects appended last (highest precedence in ESLint's cascade). */
+    overrides?: Array<Config>
+}
+
+export const resolveEslintFiles = ({
+    additionalFiles = [],
+    files = BASE_FILES,
+}: Pick<
+    EslintConfigOptions,
+    'additionalFiles' | 'files'
+> = {}): Array<string> => [...files, ...additionalFiles]
+
+/**
+ * Builds the recommended flat ESLint config array.
+ *
+ * - `files`: replaces `EsLint.files.base()` if provided.
+ * - `additionalFiles`: always appended to whichever `files` list is in effect.
+ * - `ignores`: appended to `BASE_IGNORES`.
+ * - `overrides`: extra flat-config objects appended last.
+ * - `cwd`: used as `tsconfigRootDir`. Defaults to `process.cwd()`.
+ */
+export const buildEslintConfig = ({
+    additionalFiles,
+    cwd = process.cwd(),
+    files,
+    ignores = [],
+    overrides = [],
+}: EslintConfigOptions = {}): Array<Config> => {
     const EslintConfig: Array<Config> = [
-        { ignores: base_ignores, name: 'Base: ignored paths' },
+        { ignores: [...BASE_IGNORES, ...ignores], name: 'Base: ignored paths' },
         ...defineConfig(
-            { files: base_files, name: 'Base: included file extensions' },
+            {
+                files: resolveEslintFiles({ additionalFiles, files }),
+                name: 'Base: included file extensions',
+            },
             {
                 languageOptions: {
                     globals: { ...globals.browser, ...globals.node },
                     parserOptions: {
                         projectService: true,
-                        tsconfigRootDir: __dirname,
+                        tsconfigRootDir: cwd,
                     },
                 },
                 name: 'Base: globals and projectService',
@@ -67,9 +106,11 @@ export const flatEslintConfig = (__dirname: string): Array<Config> => {
 
             /** File-pattern overrides — all exceptions in one place */
             ...filePatternOverrides(),
+
+            ...overrides,
         ),
     ]
     return EslintConfig
 }
 
-export default flatEslintConfig
+export default buildEslintConfig

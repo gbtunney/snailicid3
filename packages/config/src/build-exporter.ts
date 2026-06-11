@@ -1,6 +1,6 @@
 import type { JsonObject } from 'type-fest'
 import { apiExtractor } from './api-extractor/index.js'
-import { markdownlint } from './markdownlint/index.js'
+import { Markdownlint } from './markdownlint/index.js'
 import { getPrettierPluginsList } from './prettier/plugins.js'
 import { exportJSONFile, isPlainObject } from './utilities/json.js'
 import { Prettier } from './index.js'
@@ -11,12 +11,12 @@ const API_EXTRACTOR_CONFIG = isPlainObject<JsonObject>(_apiExtractorConfig)
     ? _apiExtractorConfig
     : {}
 
-const MARKDOWN_LINT_CONFIG = isPlainObject<JsonObject>(markdownlint.config())
-    ? markdownlint.config()
+const MARKDOWN_LINT_CONFIG = isPlainObject<JsonObject>(Markdownlint.config())
+    ? Markdownlint.config()
     : {}
 
 const _prettierMergedConfig = {
-    ...Prettier.configuration(),
+    ...Prettier.config(),
     // Build artifact must keep plugin package names, not bundled plugin objects.
     plugins: getPrettierPluginsList(),
 }

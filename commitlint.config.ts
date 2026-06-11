@@ -3,16 +3,18 @@
  * @author Gillian Tunney
  * @see [commitlint - Lint commit messages](https://commitlint.js.org/#/)
  */
-import { commitlint, type CommitlintUserConfig } from '@snailicid3/config'
+import { Commitlint, type CommitlintUserConfig } from '@snailicid3/config'
 
 /**
  * @example
  *     ;```ts
- *     commitlint.configuration({
- *     mergeScopes: ['stupid'],
- *     mergeTypes: ['derp'],
+ *     Commitlint.config({
+ *         scopeOptions: { mergeScopes: ['stupid'] },
+ *         appendTypes: ['derp'],
  *     })
  *     ```
  */
-const configuration: CommitlintUserConfig = commitlint.configuration()
+const configuration: CommitlintUserConfig = Commitlint.defineConfig(
+    Commitlint.config(),
+)
 export default configuration

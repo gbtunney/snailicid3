@@ -12,6 +12,7 @@ import {
     workspaceScopesCsv,
     type WorkspaceScopesOptions,
 } from './workspace.scopes.js'
+import { type ConfigApi, defineConfig } from '../core/index.js'
 
 export type ConventionalCommitType =
     keyof typeof config_conventional.prompt.questions.type.enum
@@ -26,14 +27,32 @@ export const COMMIT_TYPES: Array<LiteralUnion<ConventionalCommitType, string>> =
     [...CONVENTIONAL_COMMIT_TYPES, 'changeset', 'release'] as const
 /** [ 'feat', 'fix', 'build', 'chore', 'docs', 'release', 'perf', 'refactor', 'revert', 'style', 'test', ] */
 
-export const configuration = (
-    scope_options: WorkspaceScopesOptions = {},
-    append_type_enum: Array<LiteralUnion<ConventionalCommitType, string>> = [],
-): CommitlintUserConfig => {
-    const type_enum = [...COMMIT_TYPES, ...append_type_enum]
+export type CommitlintConfigOptions = {
+    /** Appended to `commitTypes` for the `type-enum` rule (array concat). */
+    appendTypes?: Array<LiteralUnion<ConventionalCommitType, string>>
+    /** Reserved for future workspace-discovery cwd support. Defaults to `process.cwd()`. */
+    cwd?: string
+    /** Forwarded to `workspaceScopes()` for the `scope-enum` rule. */
+    scopeOptions?: WorkspaceScopesOptions
+}
 
-    const _scopes = workspaceScopes(scope_options)
-    const baseConfig: CommitlintUserConfig = {
+/**
+ * Builds the recommended commitlint config (extends `@commitlint/config-conventional`).
+ *
+ * - `appendTypes`: appended to `commitTypes` for the `type-enum` rule.
+ * - `scopeOptions`: forwarded to `workspaceScopes()` to compute `scope-enum`.
+ * - `cwd`: reserved for future workspace-discovery cwd support; currently unused.
+ *
+ * `prompt` and the conventional-commit base rules are fixed.
+ */
+const buildCommitlintConfig = ({
+    appendTypes = [],
+    scopeOptions = {},
+}: CommitlintConfigOptions = {}): CommitlintUserConfig => {
+    const type_enum = [...COMMIT_TYPES, ...appendTypes]
+    const _scopes = workspaceScopes(scopeOptions)
+
+    return {
         extends: ['@commitlint/config-conventional'],
         prompt: {
             messages: {
@@ -54,20 +73,20 @@ export const configuration = (
             'type-enum': [2, 'always', type_enum],
         },
     }
-    return baseConfig
 }
 
-export type Commitlint = {
-    commit_types: typeof COMMIT_TYPES
-    configuration: typeof configuration
-    workspaceScopes: typeof workspaceScopes
-    workspaceScopesCsv: typeof workspaceScopesCsv
-}
-
-/** @ignore */
-export const commitlint: Commitlint = {
-    commit_types: COMMIT_TYPES,
-    configuration,
+export const Commitlint: ConfigApi<
+    CommitlintUserConfig,
+    CommitlintConfigOptions,
+    {
+        commitTypes: typeof COMMIT_TYPES
+        workspaceScopes: typeof workspaceScopes
+        workspaceScopesCsv: typeof workspaceScopesCsv
+    }
+> = {
+    commitTypes: COMMIT_TYPES,
+    config: buildCommitlintConfig,
+    defineConfig,
     workspaceScopes,
     workspaceScopesCsv,
 }

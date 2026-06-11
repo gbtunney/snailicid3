@@ -72,8 +72,8 @@ $ npm install @snailicid3/config --save-dev
 import { EsLint } from '@snailicid3/config'
 import url from 'node:url'
 
-const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
-const CONFIG = EsLint.config(__dirname)
+const cwd = url.fileURLToPath(new URL('.', import.meta.url))
+const CONFIG = EsLint.config({ cwd })
 
 export default EsLint.defineConfig(CONFIG)
 ```
@@ -83,16 +83,15 @@ export default EsLint.defineConfig(CONFIG)
 This overrides eslint config to ignore everything in package docs foldders
 
 ```ts
-import { EsLint,EslintConfig } from '@snailicid3/config'
+import { EsLint } from '@snailicid3/config'
 import url from 'node:url'
 
-const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
-const override_example:EslintConfig=
-const CONFIG:EslintConfig[] = [...EsLint.config(__dirname),
-    { ignores: ['packages/**/docs/**/*'],}
-]
+const cwd = url.fileURLToPath(new URL('.', import.meta.url))
+const CONFIG = EsLint.config({
+  cwd,
+  ignores: ['packages/**/docs/**/*'],
+})
 export default EsLint.defineConfig(CONFIG)
-
 ```
 
 #### Example: Overriding Rules
@@ -104,7 +103,7 @@ naming convention to specific files.
 import { EsLint, EslintConfig, expandExtensions, TS_FILE_EXTENSIONS } from '@snailicid3/config'
 import url from 'node:url'
 
-const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
+const cwd = url.fileURLToPath(new URL('.', import.meta.url))
 const override_example: EslintConfig = {
   /** Expands a list of file extensions by appending them to a normalized base pattern. */
   files: expandExtensions(TS_FILE_EXTENSIONS, '**/src/**/*'),
@@ -124,7 +123,7 @@ const override_example: EslintConfig = {
   },
 }
 
-const CONFIG: EslintConfig[] = [...EsLint.config(__dirname), override_example]
+const CONFIG = EsLint.config({ cwd, overrides: [override_example] })
 export default EsLint.defineConfig(CONFIG)
 ```
 
@@ -137,46 +136,34 @@ Does not emit js files, checks all files in package including .test.ts files
 ```ts
 /** @file Prettier.config.ts */
 import { Prettier } from '@snailicid3/config'
-export default Prettier.configuration()
+export default Prettier.defineConfig(Prettier.config())
 ```
 
-#### Example: Standard Config
+#### Example: Overriding Config
 
 ```ts
 /* @file prettier.config.ts */
-//TODO update after refactor with defineConfig function
 import { Prettier } from '@snailicid3/config'
-import type { Config as PrettierConfig } from 'prettier'
 
-const configOption: PrettierConfig = {
-  endOfLine: 'lf',
-  printWidth: 100,
-  semi: false,
-  singleQuote: true,
-  tabWidth: 4,
-  trailingComma: 'all',
-}
-
-const overrides = [
-  {
-    files: '**/*.json',
+export default Prettier.defineConfig(
+  Prettier.config({
     options: {
+      endOfLine: 'lf',
+      printWidth: 100,
+      semi: false,
+      singleQuote: true,
       tabWidth: 4,
+      trailingComma: 'all',
     },
-  },
-]
-
-export default Prettier.configuration(
-  true,
-  {
-    endOfLine: 'lf',
-    printWidth: 100,
-    semi: false,
-    singleQuote: true,
-    tabWidth: 4,
-    trailingComma: 'all',
-  },
-  overrides,
+    overrides: [
+      {
+        files: '**/*.json',
+        options: {
+          tabWidth: 4,
+        },
+      },
+    ],
+  }),
 )
 ```
 
@@ -242,9 +229,11 @@ compilerOptions to create dist folder of js files.
 
 ```ts
 /* @file commitlint.config.ts */
-import { commitlint } from '@snailicid3/config'
+import { Commitlint } from '@snailicid3/config'
 
-export default commitlint.configuration(['root', 'my-package'])
+export default Commitlint.defineConfig(
+  Commitlint.config({ scopeOptions: { mergeScopes: ['my-package'] } }),
+)
 ```
 
 ## Shell Completions

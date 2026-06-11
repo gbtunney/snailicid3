@@ -4,8 +4,9 @@ import type {
     MarkdownlintConfiguration,
     MarkdownlintRuleConfiguration,
 } from './schema.js'
+import { type ConfigApi, defineConfig } from '../core/index.js'
 
-const BASE_IGNORES = [
+export const BASE_IGNORES = [
     '**/node_modules/**',
     '**/dist/**',
     '**/build/**',
@@ -18,39 +19,52 @@ const BASE_IGNORES = [
     '**/tmp/**',
     '**/.github/instructions/nx.instructions.md',
 ]
-type MarkdownlintApi = {
-    config: (
-        option_overrides?: MarkdownlintRuleConfiguration,
-        ignore_overrides?: Array<string>,
-        includes?: Array<string>,
-        useBaseConfig?: boolean,
-    ) => MarkdownlintConfiguration
-    rules: {
-        baseConfig: () => MarkdownlintRuleConfiguration
-        merge: (
-            option_overrides?: MarkdownlintRuleConfiguration,
-            useBaseConfig?: boolean,
-        ) => MarkdownlintRuleConfiguration
-    }
-}
-export const markdownlint: MarkdownlintApi = {
-    config: (
-        option_overrides: MarkdownlintRuleConfiguration = {},
-        ignore_overrides: Array<string> = [],
-        includes: Array<string> = ['**/*.md'],
-        useBaseConfig: boolean = true,
-    ): MarkdownlintConfiguration => ({
-        config: getMergedRuleConfiguration(option_overrides, useBaseConfig),
-        globs: includes,
-        ignores: [...BASE_IGNORES, ...ignore_overrides],
-    }),
 
+export type MarkdownlintConfigOptions = {
+    /** Reserved for future use. Defaults to `process.cwd()`. */
+    cwd?: string
+    /** Appended to `BASE_IGNORES` (array concat). */
+    ignores?: Array<string>
+    /** Replaces the default `['**\/*.md']` glob list if provided. */
+    includes?: Array<string>
+    /** Deep-merged onto `Markdownlint.rules.base()` via `ts-deepmerge` when `useBaseConfig` is true. */
+    rules?: MarkdownlintRuleConfiguration
+    /** When true (default), `rules` merges onto the base config; when false, used as-is. */
+    useBaseConfig?: boolean
+}
+
+export const Markdownlint: ConfigApi<
+    MarkdownlintConfiguration,
+    MarkdownlintConfigOptions,
+    {
+        rules: {
+            base: typeof getBaseConfig
+            merge: typeof getMergedRuleConfiguration
+        }
+    }
+> = {
+    /**
+     * Builds the recommended markdownlint-cli2 config object.
+     *
+     * - `rules`: merged onto `Markdownlint.rules.base()` (default) or used as-is when `useBaseConfig` is false.
+     * - `includes`: replaces the default `['**\/*.md']` glob list if provided.
+     * - `ignores`: appended to `BASE_IGNORES`.
+     * - `cwd`: reserved for future use; currently unused.
+     */
+    config: ({
+        ignores = [],
+        includes = ['**/*.md'],
+        rules = {},
+        useBaseConfig = true,
+    }: MarkdownlintConfigOptions = {}): MarkdownlintConfiguration => ({
+        config: getMergedRuleConfiguration(rules, useBaseConfig),
+        globs: includes,
+        ignores: [...BASE_IGNORES, ...ignores],
+    }),
+    defineConfig,
     rules: {
-        baseConfig: getBaseConfig,
-        merge: (
-            option_overrides: MarkdownlintRuleConfiguration = {},
-            useBaseConfig: boolean = true,
-        ) => getMergedRuleConfiguration(option_overrides, useBaseConfig),
+        base: getBaseConfig,
+        merge: getMergedRuleConfiguration,
     },
 }
 

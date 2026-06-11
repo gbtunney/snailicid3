@@ -5,19 +5,34 @@
  * @see [typescript-eslint](https://typescript-eslint.io/getting-started/)
  * @see Styleguide: _(rule motivation and reference)_ {@link [TypeScript Style Guide](https://mkosir.github.io/typescript-style-guide/) }
  */
-import { defineConfig } from '@eslint/config-helpers'
-import { flatEslintConfig } from './base.js'
-// TODO reimplement check files for different file types in eslint
-/** @ignore */
+import { type Config, defineConfig } from '@eslint/config-helpers'
+import {
+    BASE_FILES,
+    buildEslintConfig,
+    type EslintConfigOptions,
+    resolveEslintFiles,
+} from './base.js'
+
+// `@eslint/config-helpers`'s `defineConfig` is variadic (flattens/validates a
+// list of flat-config objects), so it doesn't fit the single-argument
+// `DefineConfig<TConfig>` shape from `../core/index.js` — keep it as its own type.
 export const EsLint: {
-    config: typeof flatEslintConfig
+    config: (options?: EslintConfigOptions) => Array<Config>
     defineConfig: typeof defineConfig
+    files: {
+        base: () => Array<string>
+        resolve: typeof resolveEslintFiles
+    }
 } = {
-    config: flatEslintConfig,
+    config: buildEslintConfig,
     defineConfig,
+    files: {
+        base: () => BASE_FILES,
+        resolve: resolveEslintFiles,
+    },
 }
 
-export { flatEslintConfig } from './base.js'
-export { flatEslintConfig as config } from './base.js'
+export { type EslintConfigOptions } from './base.js'
 export type { Config as EslintConfig } from '@eslint/config-helpers'
+
 export type { Config as TsConfig } from 'typescript-eslint'

@@ -5,9 +5,11 @@
  */
 import { type Config, type Options } from 'prettier'
 import type { Options as JsDocOptions } from 'prettier-plugin-jsdoc'
-import type { IterableElement, Merge, OmitIndexSignature } from 'type-fest'
+import type { IterableElement, Merge } from 'type-fest'
 import { getDefaultOptions, getDefaultOverrides } from './options.js'
 import { getPrettierPluginsBundled, getPrettierPluginsList } from './plugins.js'
+import { type ConfigApi, defineConfig } from '../core/index.js'
+
 export const BASE_IGNORES = ['**/*.api.md', 'tmp', 'temp'] as const
 
 export type PrettierConfig = Merge<
@@ -16,52 +18,46 @@ export type PrettierConfig = Merge<
         overrides: PrettierOverrides
     }
 >
-type PrettierOptionsStrict = OmitIndexSignature<Options>
-
-const definePrettierConfig = <Type extends PrettierConfig>(
-    config: Type,
-): Type => config
-
-export default definePrettierConfig({
-    overrides: [],
-    plugins: [],
-    semi: true,
-    singleQuote: true,
-})
-
+export type PrettierConfigOptions = {
+    /** Reserved for future path-relative resolution. Defaults to `process.cwd()`. */
+    cwd?: string
+    /** Bundle plugin objects directly (default) vs. plugin package-name strings only. */
+    isBundled?: boolean
+    /** Shallow-merged on top of `Prettier.options.base()` (caller keys win). */
+    options?: PrettierOptions
+    /** Appended after `Prettier.overrides.base()` (array concat). */
+    overrides?: PrettierOverrides
+}
 export type PrettierOptions = JsDocOptions & Options
+
 export type PrettierOverrides = Array<
     Merge<IterableElement<Config['overrides']>, { options: PrettierOptions }>
 >
 
 /**
- * TODO: update language and order for these options. technically 'options' is means 'override options' and 'overrrudes'
- * means to append to the default overrides, but this is not clear. maybe 'baseOptions' and 'additionalOverrides' or
- * something like that? also, should we have a separate function for getting the default config and then a function for
- * merging with custom options? or should we just have one function that does both? maybe we can have a function that
- * returns the default config and then another function that takes custom options and merges them with the default
- * config? this way we can have more control over how the merging is done and we can also have more flexibility in terms
- * of how the options are structured. just some thoughts.
+ * Builds the recommended Prettier config.
+ *
+ * - `options`: shallow-merged on top of `Prettier.options.base()` (caller keys win).
+ * - `overrides`: appended after `Prettier.overrides.base()` (array concat, no per-`files` merge).
+ * - `isBundled`: selects resolved plugin objects (default) vs. plugin package-name strings.
+ * - `cwd`: reserved for future use; currently unused.
  */
-export const prettierConfiguration = (
-    isBundled: boolean = true,
-    _options?: PrettierOptions,
-    _overrides?: PrettierOverrides,
-): PrettierConfig => {
-    const defaultOverrides = getDefaultOverrides()
+const buildPrettierConfig = ({
+    isBundled = true,
+    options,
+    overrides,
+}: PrettierConfigOptions = {}): PrettierConfig => {
     const defaultOptions = getDefaultOptions()
-    const myoption: PrettierOptions =
-        _options !== undefined
-            ? { ...defaultOptions, ..._options }
-            : defaultOptions
+    const defaultOverrides = getDefaultOverrides()
 
-    const __overrides: PrettierOverrides =
-        _overrides !== undefined
-            ? [...defaultOverrides, ..._overrides]
-            : [...defaultOverrides]
     return {
-        ...myoption,
-        overrides: __overrides, //(overrides !== undefined ? { overrides } : []),
+        ...(options !== undefined
+            ? { ...defaultOptions, ...options }
+            : defaultOptions),
+        overrides:
+            overrides !== undefined
+                ? [...defaultOverrides, ...overrides]
+                : [...defaultOverrides],
         plugins: [
             ...(isBundled
                 ? getPrettierPluginsBundled()
@@ -70,28 +66,26 @@ export const prettierConfiguration = (
     }
 }
 
-//todo get rid of this wierd function call?  reorder the properties?  prettierConfiguration(), should be get default config?
-//improvements
-/** @ignore */
-export const Prettier: {
-    config: PrettierConfig
-    configuration: typeof prettierConfiguration
-    defineConfig: typeof definePrettierConfig
-    options: PrettierOptions
-} = {
-    config: prettierConfiguration(),
-    configuration: prettierConfiguration,
-    //TODO pls ensure it is clear this will be returning ,lets upfate to use same struct as eslint
-    //added defineConfig
-    /*export const EsLint: {
-        config: typeof flatEslintConfig
-        defineConfig: typeof defineConfig
-    } = {
-        config: flatEslintConfig,
-        defineConfig,
-    }*/
-    defineConfig: definePrettierConfig,
-    options: getDefaultOptions(),
+export const Prettier: ConfigApi<
+    PrettierConfig,
+    PrettierConfigOptions,
+    {
+        options: { base: typeof getDefaultOptions }
+        overrides: { base: typeof getDefaultOverrides }
+        plugins: {
+            bundled: typeof getPrettierPluginsBundled
+            list: typeof getPrettierPluginsList
+        }
+    }
+> = {
+    config: buildPrettierConfig,
+    defineConfig,
+    options: { base: getDefaultOptions },
+    overrides: { base: getDefaultOverrides },
+    plugins: {
+        bundled: getPrettierPluginsBundled,
+        list: getPrettierPluginsList,
+    },
 }
 
 export { getScaledWidth, SHARED_FORMATTING_RULES } from '../shared.js'

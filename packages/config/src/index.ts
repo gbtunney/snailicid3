@@ -5,7 +5,7 @@
  * @see [Commitizen](https://commitizen-tools.github.io/commitizen/)
  */
 
-export { commitlint } from './commitlint/index.js'
+export { Commitlint } from './commitlint/index.js'
 export type * from './commitlint/index.js'
 export {
     workspaceScopes,
@@ -14,13 +14,24 @@ export {
 export type { WorkspaceScopesOptions } from './commitlint/workspace.scopes.js'
 
 /**
+ * @namespace Core Configuration
+ * @see Shared `defineConfig` identity helper and the `ConfigApi` adapter shape used by every tool namespace.
+ */
+export { defineConfig } from './core/index.js'
+export type { ConfigApi, DefineConfig } from './core/index.js'
+
+/**
  * @namespace Eslint / Tslint Configuration
  * @see [eslint - Find and fix problems in your JavaScript code.](https://eslint.org/)
  * @see [typescript-eslint](https://typescript-eslint.io/getting-started/)
  */
 export { EsLint } from './eslint/index.js'
 // Do not re-export all types to avoid duplicate identifier error
-export type { EslintConfig, TsConfig } from './eslint/index.js'
+export type {
+    EslintConfig,
+    EslintConfigOptions,
+    TsConfig,
+} from './eslint/index.js'
 
 /**
  * @namespace LintStaged Configuration
@@ -35,7 +46,7 @@ export type { LintStagedConfiguration } from './lint-staged/index.js'
  * @see [igorshubovych/markdownlint-cli:](https://github.com/igorshubovych/markdownlint-cli)
  * @see [davidAnson/markdownlint](https://github.com/DavidAnson/markdownlint)
  */
-export { markdownlint } from './markdownlint/index.js'
+export { Markdownlint } from './markdownlint/index.js'
 
 export type * from './markdownlint/index.js'
 /**
@@ -44,7 +55,12 @@ export type * from './markdownlint/index.js'
  */
 export { Prettier } from './prettier/index.js'
 
-export type { PrettierConfig, PrettierOptions } from './prettier/index.js'
+export type {
+    PrettierConfig,
+    PrettierConfigOptions,
+    PrettierOptions,
+    PrettierOverrides,
+} from './prettier/index.js'
 /* SHARED CONFIGURATIONS */
 export {
     JS_FILE_EXTENSIONS,
