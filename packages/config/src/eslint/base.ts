@@ -1,7 +1,7 @@
 import { type Config, defineConfig } from '@eslint/config-helpers'
 import globals from 'globals'
 import { filePatternOverrides } from './overrides/files.js'
-import pluginsConfig from './plugins.js'
+import { getBuiltInPlugins } from './plugins.js'
 import { baseRules } from './rules/base.js'
 import { codeStyleRules } from './rules/codestyle.js'
 import { commentsRules } from './rules/comments.js'
@@ -14,10 +14,10 @@ import { typescriptRules } from './rules/typescript.js'
 import { JS_FILE_EXTENSIONS, TS_FILE_EXTENSIONS } from '../shared.js'
 import { expandExtensions } from '../utilities/extensions.js'
 
-const base_files: Array<string> = [
+export const BASE_FILES: Array<string> = [
     ...expandExtensions(TS_FILE_EXTENSIONS, '*.'),
 ]
-const base_ignores = [
+export const BASE_IGNORES: Array<string> = [
     '**/dist/**/*',
     '**/node_modules/**',
     '**/dist/**',
@@ -35,22 +35,44 @@ const base_ignores = [
     ...expandExtensions(JS_FILE_EXTENSIONS, '**/types/**/*.'),
 ]
 
-export const flatEslintConfig = (__dirname: string): Array<Config> => {
+/**
+ * Builds the recommended flat ESLint config array.
+ *
+ * - `cwd`: used as `tsconfigRootDir`. Defaults to `process.cwd()`.
+ * - `ignores`: appended to `BASE_IGNORES`.
+ * - `global_files`: override the global files
+ */
+export const buildDefaultEslintConfig = ({
+    cwd,
+    globalFiles = BASE_FILES,
+    globalIgnores = [],
+}: {
+    cwd: string
+    globalFiles?: Array<string>
+    globalIgnores?: Array<string>
+}): Array<Config> => {
     const EslintConfig: Array<Config> = [
-        { ignores: base_ignores, name: 'Base: ignored paths' },
+        {
+            ignores: [...BASE_IGNORES, ...globalIgnores],
+            name: 'Base: ignored paths',
+        },
         ...defineConfig(
-            { files: base_files, name: 'Base: included file extensions' },
+            {
+                files: globalFiles,
+                name: 'Base: included file extensions',
+            },
             {
                 languageOptions: {
                     globals: { ...globals.browser, ...globals.node },
                     parserOptions: {
                         projectService: true,
-                        tsconfigRootDir: __dirname,
+                        tsconfigRootDir: cwd,
                     },
                 },
                 name: 'Base: globals and projectService',
             },
-            ...pluginsConfig(),
+            /** PLUGIN CONFIG */
+            ...getBuiltInPlugins(),
 
             /** Global defaults */
             ...baseRules(),
@@ -72,4 +94,4 @@ export const flatEslintConfig = (__dirname: string): Array<Config> => {
     return EslintConfig
 }
 
-export default flatEslintConfig
+export default buildDefaultEslintConfig

@@ -10,9 +10,9 @@ export const keysOf = <ObjectType extends UnknownRecord>(
     obj: ObjectType,
 ): Array<KeysOf<ObjectType>> => Object.keys(obj) as Array<KeysOf<ObjectType>>
 
-type AnyPrettierPlugin = PrettierPlugin
+export type AnyPrettierPlugin = PrettierPlugin
 
-type PrettierPluginName =
+export type PrettierPluginName =
     | '@prettier/plugin-php'
     | '@prettier/plugin-xml'
     | 'prettier-plugin-jsdoc'

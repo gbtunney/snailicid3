@@ -1,3 +1,3 @@
 import { Prettier } from '@snailicid3/config'
 
-export default Prettier.configuration()
+export default Prettier.defineConfig(Prettier.config())
