@@ -18,7 +18,12 @@ export type { WorkspaceScopesOptions } from './commitlint/workspace.scopes.js'
  * @see Shared `defineConfig` identity helper and the `ConfigApi` adapter shape used by every tool namespace.
  */
 export { defineConfig } from './core/index.js'
-export type { ConfigApi, DefineConfig } from './core/index.js'
+export type {
+    AnyDefineConfig,
+    ConfigBuilder,
+    ConfigToolApi,
+    IdentityDefineConfig,
+} from './core/index.js'
 
 /**
  * @namespace Eslint / Tslint Configuration

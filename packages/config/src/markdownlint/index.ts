@@ -4,7 +4,11 @@ import type {
     MarkdownlintConfiguration,
     MarkdownlintRuleConfiguration,
 } from './schema.js'
-import { type ConfigApi, defineConfig } from '../core/index.js'
+import {
+    type ConfigToolApi,
+    type IdentityDefineConfig,
+    defineConfig,
+} from '../core/index.js'
 
 export const BASE_IGNORES = [
     '**/node_modules/**',
@@ -33,16 +37,7 @@ export type MarkdownlintConfigOptions = {
     useBaseConfig?: boolean
 }
 
-export const Markdownlint: ConfigApi<
-    MarkdownlintConfiguration,
-    MarkdownlintConfigOptions,
-    {
-        rules: {
-            base: typeof getBaseConfig
-            merge: typeof getMergedRuleConfiguration
-        }
-    }
-> = {
+export const Markdownlint = {
     /**
      * Builds the recommended markdownlint-cli2 config object.
      *
@@ -66,7 +61,17 @@ export const Markdownlint: ConfigApi<
         base: getBaseConfig,
         merge: getMergedRuleConfiguration,
     },
-}
+} satisfies ConfigToolApi<
+    MarkdownlintConfiguration,
+    MarkdownlintConfigOptions,
+    IdentityDefineConfig<MarkdownlintConfiguration>,
+    {
+        rules: {
+            base: typeof getBaseConfig
+            merge: typeof getMergedRuleConfiguration
+        }
+    }
+>
 
 export type {
     MarkdownlintConfiguration,

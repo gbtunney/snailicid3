@@ -8,6 +8,17 @@ import type {
 } from 'type-fest'
 import fs from 'node:fs'
 import path from 'node:path'
+import {merge as deep_merge}from 'ts-deepmerge'
+export type PlainObject = {
+    [x: string]: unknown
+    [y: number]: never
+}
+export type MergeArrayModes="append"|"replace"
+ export const deepMerge = <Type extends PlainObject[]>( array_mode:MergeArrayModes="append",...value: PlainObject[]): PlainObject => {
+return (array_mode === "append" )?
+deep_merge.withOptions( { mergeArrays: true },...value)
+:deep_merge.withOptions( { mergeArrays: false },...value)
+ }
 
 type TraceLogger = {
     error: (...args: Array<unknown>) => void

@@ -1,3 +1,3 @@
 import { lintstaged } from '@snailicid3/config'
 
-export default lintstaged.configuration()
+export default lintstaged.defineConfig( lintstaged.config())

@@ -384,7 +384,8 @@ jobs:
               run: |
                   set -euo pipefail
 
-                  title="${{ steps.version_msg.outputs.message }}"
+                  release_slug="${{ steps.release_branch.outputs.slug }}"
+                  title="release(${release_slug}): version packages"
                   body="Automated version bump from Changesets. Merge this PR to publish packages to npm."
                   release_branch="${{ steps.release_branch.outputs.branch }}"
 
@@ -395,13 +396,6 @@ jobs:
                   else
                     gh pr edit "$pr" --title "$title" --body "$body"
                   fi
-
-            - name: Trigger version PR validation
-              if: ${{ inputs.dry_run == false }}
-              shell: bash
-              env:
-                  GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
-              run: gh workflow run pr-checks.yml --ref "${{ steps.release_branch.outputs.branch }}"
 
             - name: Version PR summary
               if: ${{ always() }}
@@ -414,7 +408,7 @@ jobs:
                     echo "- source_ref: \`${{ inputs.ref || github.sha }}\`"
                     echo "- changeset_count: \`${{ needs.detect.outputs.changeset_count }}\`"
                     echo "- target_branch: \`${{ steps.release_branch.outputs.branch }}\`"
-                    echo "- title: \`${{ steps.version_msg.outputs.message || 'release(root): version packages' }}\`"
+                    echo "- title: \`release(${{ steps.release_branch.outputs.slug }}): version packages\`"
                   } >> "$GITHUB_STEP_SUMMARY"
 
     pending_release_pipeline:

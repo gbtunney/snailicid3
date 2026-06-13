@@ -2,17 +2,17 @@ import { type Configuration } from 'lint-staged'
 
 /// the above didnt error even tho it was not listed as a dependency - figure out why??
 export type LintStagedConfiguration = Configuration
+import { type ConfigToolApi, type IdentityDefineConfig } from '../core/index.js'
 import {
     filterFileArrByGlob,
     JSLIKE_FILE_EXTENSIONS,
     PRETTIER_FILE_EXTENSIONS,
 } from './../shared.js'
 
-export function defineLintStagedConfig<
-    const Type extends LintStagedConfiguration,
->(config: Type): Type {
-    return config
-}
+/** Identity `defineConfig` helper for lint-staged config files. */
+export const defineLintStagedConfig = <const Type extends LintStagedConfiguration>(
+    config: Type,
+): Type => config
 
 export const extensionsToGlob = (extensions: ReadonlyArray<string>): string =>
     `*.{${extensions.join(',')}}`
@@ -34,7 +34,7 @@ export const toFileArgs = (
  *     hello: 'hi',
  *     } satisfies LintStagedConfiguration
  *
- *     export default lintstaged.configuration(test)
+ *     export default lintstaged.config(test)
  *     ```
  */
 
@@ -82,18 +82,21 @@ export const lintStagedConfig = (
         merged !== undefined ? Object.assign(config, merged) : config
     return defineLintStagedConfig(config)
 }
-export const lintstaged: {
-    configuration: (merged?: LintStagedConfiguration) => LintStagedConfiguration
-    defineLintStagedConfig: typeof defineLintStagedConfig
-    extensionsToGlob: typeof extensionsToGlob
-    filterFileArrByGlob: typeof filterFileArrByGlob
-    quoteArg: typeof quoteArg
-    toFileArgs: typeof toFileArgs
-} = {
-    configuration: lintStagedConfig,
-    defineLintStagedConfig,
+export const lintstaged = {
+    config: lintStagedConfig,
+    defineConfig: defineLintStagedConfig,
     extensionsToGlob,
     filterFileArrByGlob,
     quoteArg,
     toFileArgs,
-}
+} satisfies ConfigToolApi<
+    LintStagedConfiguration,
+    LintStagedConfiguration,
+    IdentityDefineConfig<LintStagedConfiguration>,
+    {
+        extensionsToGlob: typeof extensionsToGlob
+        filterFileArrByGlob: typeof filterFileArrByGlob
+        quoteArg: typeof quoteArg
+        toFileArgs: typeof toFileArgs
+    }
+>

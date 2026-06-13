@@ -8,7 +8,11 @@ import type { Options as JsDocOptions } from 'prettier-plugin-jsdoc'
 import type { IterableElement, Merge } from 'type-fest'
 import { getDefaultOptions, getDefaultOverrides } from './options.js'
 import { getPrettierPluginsBundled, getPrettierPluginsList } from './plugins.js'
-import { type ConfigApi, defineConfig } from '../core/index.js'
+import {
+    type ConfigToolApi,
+    type IdentityDefineConfig,
+    defineConfig, ConfigFunctionOptions
+} from '../core/define-config.js'
 
 export const BASE_IGNORES = ['**/*.api.md', 'tmp', 'temp'] as const
 
@@ -18,7 +22,7 @@ export type PrettierConfig = Merge<
         overrides: PrettierOverrides
     }
 >
-export type PrettierConfigOptions = {
+export type PrettierConfigFunctionOptions = ConfigFunctionOptions<{
     /** Reserved for future path-relative resolution. Defaults to `process.cwd()`. */
     cwd?: string
     /** Bundle plugin objects directly (default) vs. plugin package-name strings only. */
@@ -27,7 +31,7 @@ export type PrettierConfigOptions = {
     options?: PrettierOptions
     /** Appended after `Prettier.overrides.base()` (array concat). */
     overrides?: PrettierOverrides
-}
+}>
 export type PrettierOptions = JsDocOptions & Options
 
 export type PrettierOverrides = Array<
@@ -46,7 +50,7 @@ const buildPrettierConfig = ({
     isBundled = true,
     options,
     overrides,
-}: PrettierConfigOptions = {}): PrettierConfig => {
+}: PrettierConfigFunctionOptions = {}): PrettierConfig => {
     const defaultOptions = getDefaultOptions()
     const defaultOverrides = getDefaultOverrides()
 
@@ -66,18 +70,7 @@ const buildPrettierConfig = ({
     }
 }
 
-export const Prettier: ConfigApi<
-    PrettierConfig,
-    PrettierConfigOptions,
-    {
-        options: { base: typeof getDefaultOptions }
-        overrides: { base: typeof getDefaultOverrides }
-        plugins: {
-            bundled: typeof getPrettierPluginsBundled
-            list: typeof getPrettierPluginsList
-        }
-    }
-> = {
+export const Prettier = {
     config: buildPrettierConfig,
     defineConfig,
     options: { base: getDefaultOptions },
@@ -86,6 +79,18 @@ export const Prettier: ConfigApi<
         bundled: getPrettierPluginsBundled,
         list: getPrettierPluginsList,
     },
-}
+} satisfies ConfigToolApi<
+    PrettierConfig,
+    PrettierConfigFunctionOptions,
+    IdentityDefineConfig<PrettierConfig>,
+    {
+        options: { base: typeof getDefaultOptions }
+        overrides: { base: typeof getDefaultOverrides }
+        plugins: {
+            bundled: typeof getPrettierPluginsBundled
+            list: typeof getPrettierPluginsList
+        }
+    }
+>
 
 export { getScaledWidth, SHARED_FORMATTING_RULES } from '../shared.js'

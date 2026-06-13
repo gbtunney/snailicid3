@@ -1,2 +1,9 @@
-export type { ConfigApi, DefineConfig } from './define-config.js'
+export type {
+    AnyDefineConfig,
+    ConfigBuilder,
+    ConfigToolApi,
+    IdentityDefineConfig,
+} from './define-config.js'
+
 export { defineConfig } from './define-config.js'
+

@@ -5,90 +5,88 @@
  * @see [commitlint-config-conventional - Shareable commitlint config](https://www.npmjs.com/package/@commitlint/config-conventional)
  */
 import config_conventional from '@commitlint/config-conventional'
-import type { UserConfig as CommitlintUserConfig } from '@commitlint/types'
-import type { LiteralUnion } from 'type-fest'
+import type { UserConfig as CommitlintUserConfig,RuleConfig } from '@commitlint/types'
+import {ConventionalCommitType,COMMIT_TYPES}from "./types.js"
+import type { LiteralUnion,OmitDeep } from 'type-fest'
 import {
     workspaceScopes,
     workspaceScopesCsv,
     type WorkspaceScopesOptions,
 } from './workspace.scopes.js'
-import { type ConfigApi, defineConfig } from '../core/index.js'
-
-export type ConventionalCommitType =
-    keyof typeof config_conventional.prompt.questions.type.enum
-export const CONVENTIONAL_COMMIT_TYPES: Array<ConventionalCommitType> =
-    Object.keys(config_conventional.prompt.questions.type.enum).filter(
-        (_key: string): boolean => {
-            return _key === 'ci' || _key === 'perf' ? false : true
-        },
-    ) as Array<ConventionalCommitType>
-
-export const COMMIT_TYPES: Array<LiteralUnion<ConventionalCommitType, string>> =
-    [...CONVENTIONAL_COMMIT_TYPES, 'changeset', 'release'] as const
-/** [ 'feat', 'fix', 'build', 'chore', 'docs', 'release', 'perf', 'refactor', 'revert', 'style', 'test', ] */
-
-export type CommitlintConfigOptions = {
+import {
+    type ConfigToolApi,
+    type IdentityDefineConfig,
+    defineConfig, ConfigFunctionOptions
+} from '../core/define-config.js'
+import {merge as deep_merge} from 'ts-deepmerge'
+import {commitlintDefaultConfig}from './base.js'
+import { PlainObject } from '../utilities/json.js';
+/** 
+ * Exported: Each 'tool' should export <ToolPascalCase>ConfigFunctionOptions ie CommitlintConfigFunctionOptions which is the options passed into the helper function.
+ * Exported: true tool config object <ToolPascalCase>Config 
+ * a defineConfig function w tool name defineCommitlintConfig 
+ *  a build<ToolPascalCase>ConfigFunction function that takes the options and returns a true config object for the 'tool'
+ *  Exported: an object export ConfigToolApi which includes the above and any extra exports (e.g. constants, helper functions) as properties.
+ */
+export type CommitlintConfigFunctionOptions = ConfigFunctionOptions<{
     /** Appended to `commitTypes` for the `type-enum` rule (array concat). */
     appendTypes?: Array<LiteralUnion<ConventionalCommitType, string>>
     /** Reserved for future workspace-discovery cwd support. Defaults to `process.cwd()`. */
     cwd?: string
     /** Forwarded to `workspaceScopes()` for the `scope-enum` rule. */
-    scopeOptions?: WorkspaceScopesOptions
-}
+    appendScopes?: WorkspaceScopesOptions
+    /** overrides: merge on top of config */
+    overrides?: CommitlintConfig 
+
+}>
+export type  CommitlintConfig = CommitlintUserConfig
+
+export const defineCommitlintConfig = <
+    const TConfig extends CommitlintUserConfig,
+>(
+    config: TConfig,
+): TConfig => defineConfig(config)
 
 /**
  * Builds the recommended commitlint config (extends `@commitlint/config-conventional`).
  *
- * - `appendTypes`: appended to `commitTypes` for the `type-enum` rule.
- * - `scopeOptions`: forwarded to `workspaceScopes()` to compute `scope-enum`.
  * - `cwd`: reserved for future workspace-discovery cwd support; currently unused.
- *
+ * - `appendTypes`: appended to `commitTypes` for the `type-enum` rule.
+ * - `appendScopes`: forwarded to `workspaceScopes()` to compute `scope-enum`.
+ * - `overrride` ( merge on top of config)
  * `prompt` and the conventional-commit base rules are fixed.
  */
-const buildCommitlintConfig = ({
+const buildCommitlintConfigFunction = ({
     appendTypes = [],
-    scopeOptions = {},
-}: CommitlintConfigOptions = {}): CommitlintUserConfig => {
-    const type_enum = [...COMMIT_TYPES, ...appendTypes]
-    const _scopes = workspaceScopes(scopeOptions)
+    appendScopes = {},
+    overrides ={} 
+}: CommitlintConfigFunctionOptions = {}): CommitlintUserConfig => {
+    /** uses my default commit types, which exclude "ci" and "perf" and add release and changeset.*/
+    const _scopes = workspaceScopes(appendScopes)
+    const typeEnum = [...new Set([...COMMIT_TYPES, ...appendTypes])]
 
-    return {
-        extends: ['@commitlint/config-conventional'],
-        prompt: {
-            messages: {
-                emptyWarning: 'can not be empty',
-                lowerLimitWarning: 'below limit',
-                max: 'upper %d chars',
-                min: '%d chars at least',
-                skip: ':skip',
-                upperLimitWarning: 'over limit',
-            },
-            questions: config_conventional.prompt.questions,
-            settings: { enableMultipleScopes: true, scopeEnumSeparator: ',' },
-        },
-        rules: {
-            'header-max-length': [2, 'always', 150],
-            'scope-empty': [2, 'never'],
+ const enum_rules: PlainObject = { rules: {
             'scope-enum': [2, 'always', _scopes],
-            'type-enum': [2, 'always', type_enum],
-        },
+            'type-enum': [2, 'always', typeEnum],  } }
+    const mergeResult :CommitlintConfig= deep_merge.withOptions(  { mergeArrays: false }, enum_rules,overrides)
+   
+    return mergeResult
     }
-}
 
-export const Commitlint: ConfigApi<
+
+export const Commitlint = {
+    commitTypes: COMMIT_TYPES,
+    config: buildCommitlintConfigFunction,
+     defineConfig: defineCommitlintConfig,
+    workspaceScopes,
+    workspaceScopesCsv,
+} satisfies ConfigToolApi<
     CommitlintUserConfig,
-    CommitlintConfigOptions,
+    CommitlintConfigFunctionOptions,
+    IdentityDefineConfig<CommitlintUserConfig>,
     {
         commitTypes: typeof COMMIT_TYPES
         workspaceScopes: typeof workspaceScopes
         workspaceScopesCsv: typeof workspaceScopesCsv
     }
-> = {
-    commitTypes: COMMIT_TYPES,
-    config: buildCommitlintConfig,
-    defineConfig,
-    workspaceScopes,
-    workspaceScopesCsv,
-}
-
-export type { UserConfig as CommitlintUserConfig } from '@commitlint/types'
+>
