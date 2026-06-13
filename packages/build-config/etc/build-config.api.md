@@ -76,6 +76,18 @@ export function entryKeyToSlug(key: string): string;
 export function entryToTsdownConfig(entry: ResolvedBuildPlanEntry, plan: ResolvedBuildPlan): TsdownBuildConfig;
 
 // @public (undocumented)
+export function entryToViteConfig(entry: ResolvedBuildPlanEntry, plan: ResolvedBuildPlan): UserConfig;
+
+// @public (undocumented)
+export function findPlanEntries(plan: ResolvedBuildPlan, entryKey: string): Array<ResolvedBuildPlanEntry>;
+
+// @public (undocumented)
+export function getPlanEntry(plan: ResolvedBuildPlan, entryKey: string): ResolvedBuildPlanEntry | undefined;
+
+// @public (undocumented)
+export function hasPlanEntry(plan: ResolvedBuildPlan, entryKey: string): boolean;
+
+// @public (undocumented)
 export function isRootEntryKey(key: string): boolean;
 
 export { MarkdownPluginOptions }
@@ -86,6 +98,9 @@ export type MaterialThemeOptions = {
 };
 
 export { merge }
+
+// @public (undocumented)
+export function normalizePlanEntryKey(entryKey: string): string;
 
 // @public (undocumented)
 export const OUTPUT_KINDS: readonly ["ts", "esm", "cjs", "iife", "umd"];
@@ -165,10 +180,10 @@ export const schemaPackageMetaBanner: z.ZodObject<{
 }, z.core.$strip>;
 
 // @public (undocumented)
-export function toPackageExportsPlan2(plan: ResolvedBuildPlan, options?: ToPackageExportsPlan2Options): Record<string, Record<string, string>>;
+export function toPackageExportsPlan(plan: ResolvedBuildPlan, options?: ToPackageExportsPlanOptions): Record<string, Record<string, string>>;
 
 // @public (undocumented)
-export type ToPackageExportsPlan2Options = {
+export type ToPackageExportsPlanOptions = {
     extensionPreset?: PackageExportExtensionPreset;
     outDir?: string;
     resolvePath?: (options: {
@@ -180,7 +195,16 @@ export type ToPackageExportsPlan2Options = {
 };
 
 // @public
+export function toTsdownConfig(plan: ResolvedBuildPlan, entryKey?: string): TsdownBuildConfig;
+
+// @public
 export function toTsdownConfigs(plan: ResolvedBuildPlan): TsdownConfigInput;
+
+// @public (undocumented)
+export function toViteConfig(plan: ResolvedBuildPlan, entryKey?: string): UserConfig;
+
+// @public (undocumented)
+export function toViteConfigs(plan: ResolvedBuildPlan): ViteConfigInput;
 
 // @public (undocumented)
 export type TsdownConfigInput = Array<TsdownBuildConfig>;
@@ -219,6 +243,9 @@ export const typedocStandardConfig: TypedocConfigFunction;
 
 // @public (undocumented)
 export const typedocVitepressConfig: TypedocConfigFunction<Merge<MarkdownPluginOptions, RemarkPluginOptions>>;
+
+// @public (undocumented)
+export type ViteConfigInput = Array<UserConfig>;
 
 // @public (undocumented)
 export const vitest: {

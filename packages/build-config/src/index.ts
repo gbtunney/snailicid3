@@ -1,18 +1,33 @@
 // ── Tsdown adapter — Rolldown-powered library bundling ───────────────────────
 export {
     entryToTsdownConfig,
+    toTsdownConfig,
     toTsdownConfigs,
 } from './adapters/tsdown/index.js'
 export type { TsdownConfigInput } from './adapters/tsdown/index.js'
+
+// ── Vite adapter — Browser/universal library bundling ───────────────────────
+export {
+    entryToViteConfig,
+    toViteConfig,
+    toViteConfigs,
+} from './adapters/vite/index.js'
+export type { ViteConfigInput } from './adapters/vite/index.js'
 
 // ── Banner ────────────────────────────────────────────────────────────────────
 export { createBanner, schemaPackageMetaBanner } from './build/banner.js'
 export type { BannerPackageMeta } from './build/banner.js'
 
-// ── Plan (plan2) ──────────────────────────────────────────────────────────────
-export * from './build/plan2.js'
+// ── Plan ─────────────────────────────────────────────────────────────────────
+export * from './build/plan.js'
 
 // ── Build port ────────────────────────────────────────────────────────────────
+export {
+    findPlanEntries,
+    getPlanEntry,
+    hasPlanEntry,
+    normalizePlanEntryKey,
+} from './build/ports.js'
 export type { BuildAdapter } from './build/ports.js'
 
 // ── Schemas ───────────────────────────────────────────────────────────────────

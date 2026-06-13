@@ -2,7 +2,8 @@ import type { build } from 'tsdown'
 import type {
     ResolvedBuildPlan,
     ResolvedBuildPlanEntry,
-} from '../../build/plan2.js'
+} from '../../build/plan.js'
+import { getPlanEntry } from '../../build/ports.js'
 
 export type TsdownConfigInput = Array<TsdownBuildConfig>
 type TsdownBuildConfig = NonNullable<Parameters<typeof build>[0]>
@@ -105,6 +106,22 @@ export function entryToTsdownConfig(
     })
 
     return config
+}
+
+/** Translate one entry from a {@link ResolvedBuildPlan} into a tsdown build config. */
+export function toTsdownConfig(
+    plan: ResolvedBuildPlan,
+    entryKey = '*',
+): TsdownBuildConfig {
+    const entry = getPlanEntry(plan, entryKey)
+
+    if (!entry) {
+        throw new Error(
+            `Build plan entry not found for key "${entryKey}" in ${plan.packageName}.`,
+        )
+    }
+
+    return entryToTsdownConfig(entry, plan)
 }
 
 /** Translate a {@link ResolvedBuildPlan} into an array of tsdown build configs, one per entry. */
