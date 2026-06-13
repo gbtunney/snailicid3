@@ -5,101 +5,101 @@
  * @see [Commitizen](https://commitizen-tools.github.io/commitizen/)
  */
 
-export { Commitlint } from "./commitlint/index.js";
-export type * from "./commitlint/index.js";
+export { Commitlint } from './commitlint/index.js'
+export type * from './commitlint/index.js'
 export {
-  workspaceScopes,
-  workspaceScopesCsv,
-} from "./commitlint/workspace.scopes.js";
-export type { WorkspaceScopesOptions } from "./commitlint/workspace.scopes.js";
+    workspaceScopes,
+    workspaceScopesCsv,
+} from './commitlint/workspace.scopes.js'
+export type { WorkspaceScopesOptions } from './commitlint/workspace.scopes.js'
 
 /**
  * @namespace Core Configuration
  * @see Shared `defineConfig` identity helper and the `ConfigApi` adapter shape used by every tool namespace.
  */
-export { defineConfig } from "./core/index.js";
+export { defineConfig } from './core/index.js'
 export type {
-  AnyDefineConfig,
-  ConfigBuilder,
-  ConfigToolApi,
-  IdentityDefineConfig,
-} from "./core/index.js";
+    AnyDefineConfig,
+    ConfigBuilder,
+    ConfigToolApi,
+    IdentityDefineConfig,
+} from './core/index.js'
 
 /**
  * @namespace Eslint / Tslint Configuration
  * @see [eslint - Find and fix problems in your JavaScript code.](https://eslint.org/)
  * @see [typescript-eslint](https://typescript-eslint.io/getting-started/)
  */
-export { EsLint } from "./eslint/index.js";
+export { EsLint } from './eslint/index.js'
 // Do not re-export all types to avoid duplicate identifier error
 export type {
-  EsLintConfig,
-  EsLintConfigFunctionOptions,
-  TsConfig,
-} from "./eslint/index.js";
+    EsLintConfig,
+    EsLintConfigFunctionOptions,
+    TsConfig,
+} from './eslint/index.js'
 
 /**
  * @namespace LintStaged Configuration
  * @see [npm Lint Staged](https://www.npmjs.com/package/lint-staged)
  */
-export { LintStaged } from "./lint-staged/index.js";
+export { LintStaged } from './lint-staged/index.js'
 
 export type {
-  LintStagedConfig,
-  LintStagedConfigFunctionOptions,
-} from "./lint-staged/index.js";
+    LintStagedConfig,
+    LintStagedConfigFunctionOptions,
+} from './lint-staged/index.js'
 /**
  * A Node.js command line interface and style checker / lint tool for Markdown files.
  *
  * @see [igorshubovych/markdownlint-cli:](https://github.com/igorshubovych/markdownlint-cli)
  * @see [davidAnson/markdownlint](https://github.com/DavidAnson/markdownlint)
  */
-export { Markdownlint } from "./markdownlint/index.js";
+export { Markdownlint } from './markdownlint/index.js'
 
-export type * from "./markdownlint/index.js";
+export type * from './markdownlint/index.js'
 /**
  * @namespace Prettier Configuration
  * @see [Prettier - Opinionated Code Formatter](https://prettier.io/)
  */
-export { Prettier } from "./prettier/index.js";
+export { Prettier } from './prettier/index.js'
 
 export type {
-  PrettierConfig,
-  PrettierConfigFunctionOptions,
-  PrettierOptions,
-  PrettierOverrides,
-} from "./prettier/index.js";
+    PrettierConfig,
+    PrettierConfigFunctionOptions,
+    PrettierOptions,
+    PrettierOverrides,
+} from './prettier/index.js'
 /* SHARED CONFIGURATIONS */
 export {
-  JS_FILE_EXTENSIONS,
-  JSLIKE_FILE_EXTENSIONS,
-  TS_FILE_EXTENSIONS,
-} from "./shared.js";
+    JS_FILE_EXTENSIONS,
+    JSLIKE_FILE_EXTENSIONS,
+    TS_FILE_EXTENSIONS,
+} from './shared.js'
 export type {
-  JSFileExtensions,
-  JSLikeFileExtensions,
-  TSFileExtensions,
-} from "./shared.js";
-export { PRETTIER_FILE_EXTENSIONS } from "./shared.js";
-export type { PrettierFileExtensions } from "./shared.js";
-export { MARKDOWN_FILE_EXTENSIONS } from "./shared.js";
+    JSFileExtensions,
+    JSLikeFileExtensions,
+    TSFileExtensions,
+} from './shared.js'
+export { PRETTIER_FILE_EXTENSIONS } from './shared.js'
+export type { PrettierFileExtensions } from './shared.js'
+export { MARKDOWN_FILE_EXTENSIONS } from './shared.js'
 
-export type { MarkdownFileExtensions } from "./shared.js";
+export type { MarkdownFileExtensions } from './shared.js'
 /* *  UTILITIES *  */
-export { expandExtensions } from "./utilities/extensions.js";
+export { expandExtensions } from './utilities/extensions.js'
 export {
-  exportJSONFile,
-  //globFileFilter,
-  importJSON,
-  isPlainObject,
-  prettyPrintJSON,
-  safeDeserializeJSON,
-  serializeJSON,
-} from "./utilities/json.js";
+    exportJSONFile,
+    //globFileFilter,
+    importJSON,
+    isPlainObject,
+    prettyPrintJSON,
+    safeDeserializeJSON,
+    serializeJSON,
+} from './utilities/json.js'
 export type {
-  Json,
-  JSONExportConfig,
-  JSONExportEntry,
-} from "./utilities/json.js";
-export { getFilePath } from "./utilities/path.js";
-export { merge } from "ts-deepmerge";
+    Json,
+    JSONExportConfig,
+    JSONExportEntry,
+} from './utilities/json.js'
+export { getFilePath } from './utilities/path.js'
+export { merge } from 'ts-deepmerge'

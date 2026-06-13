@@ -1,3 +1,3 @@
-import { LintStaged } from "@snailicid3/config";
+import { LintStaged } from '@snailicid3/config'
 
-export default LintStaged.defineConfig(LintStaged.config());
+export default LintStaged.defineConfig(LintStaged.config())

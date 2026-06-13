@@ -1,12 +1,12 @@
 export {
-  EsLint,
-  buildEsLintConfigFunction,
-  defineEsLintConfig,
-} from "./api-functions.js";
+    buildEsLintConfigFunction,
+    defineEsLintConfig,
+    EsLint,
+} from './api-functions.js'
 
 export type {
-  EsLintConfig,
-  EsLintConfigFunctionOptions,
-} from "./api-functions.js";
+    EsLintConfig,
+    EsLintConfigFunctionOptions,
+} from './api-functions.js'
 
-export type { Config as TsConfig } from "typescript-eslint";
+export type { Config as TsConfig } from 'typescript-eslint'

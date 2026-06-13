@@ -1,16 +1,16 @@
 export {
-  BASE_IGNORES,
-  Markdownlint,
-  buildMarkdownlintConfigFunction,
-  defineMarkdownlintConfig,
-} from "./api-functions.js";
+    BASE_IGNORES,
+    buildMarkdownlintConfigFunction,
+    defineMarkdownlintConfig,
+    Markdownlint,
+} from './api-functions.js'
 
 export type {
-  MarkdownlintConfig,
-  MarkdownlintConfigFunctionOptions,
-} from "./api-functions.js";
+    MarkdownlintConfig,
+    MarkdownlintConfigFunctionOptions,
+} from './api-functions.js'
 
 export type {
-  MarkdownlintConfiguration,
-  MarkdownlintRuleConfiguration,
-} from "./schema.js";
+    MarkdownlintConfiguration,
+    MarkdownlintRuleConfiguration,
+} from './schema.js'

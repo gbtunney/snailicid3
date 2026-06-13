@@ -163,6 +163,25 @@ export const namingRules = (error: boolean = true): Array<Config> =>
         },
         {
             files: [
+                ...expandExtensions(
+                    TS_FILE_EXTENSIONS,
+                    '**/src/**/api-functions.',
+                ),
+            ],
+            name: 'Naming: overrides for tool API namespace objects',
+            rules: {
+                '@typescript-eslint/naming-convention': [
+                    error ? 'error' : 'warn',
+                    {
+                        format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
+                        modifiers: ['exported', 'const'],
+                        selector: ['variable'],
+                    },
+                ],
+            },
+        },
+        {
+            files: [
                 ...expandExtensions(TS_FILE_EXTENSIONS, '**/*.test.'),
                 ...expandExtensions(TS_FILE_EXTENSIONS, '**/*.spec.'),
             ],

@@ -1,23 +1,23 @@
 export {
-  Commitlint,
-  buildCommitlintConfigFunction,
-  defineCommitlintConfig,
-} from "./api-functions.js";
+    buildCommitlintConfigFunction,
+    Commitlint,
+    defineCommitlintConfig,
+} from './api-functions.js'
 
 export type {
-  CommitlintConfig,
-  CommitlintConfigFunctionOptions,
-} from "./api-functions.js";
+    CommitlintConfig,
+    CommitlintConfigFunctionOptions,
+} from './api-functions.js'
 
 export {
-  COMMIT_TYPES,
-  filterCommitTypes,
-  type CommitType,
-  type ConventionalCommitType,
-} from "./types.js";
+    COMMIT_TYPES,
+    type CommitType,
+    type ConventionalCommitType,
+    filterCommitTypes,
+} from './types.js'
 
 export {
-  workspaceScopes,
-  workspaceScopesCsv,
-  type WorkspaceScopesOptions,
-} from "./workspace.scopes.js";
+    workspaceScopes,
+    workspaceScopesCsv,
+    type WorkspaceScopesOptions,
+} from './workspace.scopes.js'

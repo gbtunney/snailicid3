@@ -1,9 +1,9 @@
 export type {
-  AnyDefineConfig,
-  ConfigBuilder,
-  ConfigFunctionOptions,
-  ConfigToolApi,
-  IdentityDefineConfig,
-} from "./define-config.js";
+    AnyDefineConfig,
+    ConfigBuilder,
+    ConfigFunctionOptions,
+    ConfigToolApi,
+    IdentityDefineConfig,
+} from './define-config.js'
 
-export { defineConfig } from "./define-config.js";
+export { defineConfig } from './define-config.js'
