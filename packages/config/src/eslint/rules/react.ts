@@ -34,7 +34,7 @@ export const reactRules = (): Array<Config> =>
                 'react/no-array-index-key': 'warn',
                 'react/self-closing-comp': 'error',
             },
-            settings: { react: { version: 'detect' } },
+            settings: { react: { version: '19.2' } },
         },
 
         /** Hooks rules — applies to all JS/TS files (hooks can be in non-JSX files) */

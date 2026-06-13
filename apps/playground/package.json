@@ -15,17 +15,33 @@
         "\n========== TEST >> ==========": "",
         "test:watch": "vitest watch"
     },
+    "dependencies": {
+        "react": "^19.2.7",
+        "react-dom": "^19.2.7",
+        "vite": "^8.0.16"
+    },
     "devDependencies": {
         "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
         "@types/node": "^25.9.2",
         "@types/react": "^19.2.17",
         "@types/react-dom": "^19.2.3",
-        "react": "^19.2.7",
-        "react-dom": "^19.2.7",
         "typescript": "^6.0.2",
-        "vite": "^8.0.16",
         "vitest": "^4.1.8"
+    },
+    "buildConfig": {
+        "runtime": "browser",
+        "product": "web_app",
+        "buildStrategy": "bundle"
+    },
+    "author": {
+        "name": "Gillian Tunney",
+        "email": "gbtunney@mac.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/gbtunney/snailicid3",
+        "directory": "apps/playground"
     },
     "nx": {
         "targets": {
@@ -33,22 +49,21 @@
             "dev:ts": {},
             "dev:rollup": {},
             "dev:vite": {},
-            "build:ts": {
-                "command": "echo 'playground: no TS sources'",
-                "options": {
-                    "cwd": "{projectRoot}"
-                }
-            },
+            "build:ts": {},
+            "check:ts": {},
             "build:rollup": {},
             "build:vite": {},
             "build": {
                 "dependsOn": [
-                    "build:ts"
+                    "build:ts",
+                    "build:vite"
                 ]
             },
             "clean": {},
             "clean:ts": {},
-            "clean:build": {}
+            "clean:build": {},
+            "fix": {},
+            "lint": {}
         }
     },
     "type": "module"
