@@ -3,7 +3,7 @@
  * @author Gillian Tunney
  * @see [commitlint - Lint commit messages](https://commitlint.js.org/#/)
  */
-import { Commitlint, type CommitlintUserConfig } from '@snailicid3/config'
+import { Commitlint, type CommitlintConfig } from '@snailicid3/config'
 
 /**
  * @example
@@ -14,7 +14,7 @@ import { Commitlint, type CommitlintUserConfig } from '@snailicid3/config'
  *     })
  *     ```
  */
-const configuration: CommitlintUserConfig = Commitlint.defineConfig(
+const configuration: CommitlintConfig = Commitlint.defineConfig(
     Commitlint.config(),
 )
 export default configuration
