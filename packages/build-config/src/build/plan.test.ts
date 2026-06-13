@@ -7,13 +7,19 @@ import {
     isRootEntryKey,
     packageNameToDisplayName,
     packageNameToModuleName,
-    toPackageExportsPlan2,
-} from './plan2.js'
+    toPackageExportsPlan,
+} from './plan.js'
+import {
+    findPlanEntries,
+    getPlanEntry,
+    hasPlanEntry,
+    normalizePlanEntryKey,
+} from './ports.js'
 import { schemaBasePackage } from './schemas/index.js'
 
 const parsedPkg = schemaBasePackage.parse(pkg)
 
-describe('plan2', () => {
+describe('plan', () => {
     test('detects root entry keys', () => {
         expect(isRootEntryKey('*')).toBe(true)
         expect(isRootEntryKey('.')).toBe(true)
@@ -140,7 +146,7 @@ describe('plan2', () => {
         expect(plan.entries[0]?.bannerContent).toBeUndefined()
     })
 
-    test('toPackageExportsPlan2 includes types for root and named exports', () => {
+    test('toPackageExportsPlan includes types for root and named exports', () => {
         const plan = defineBuildPlan(parsedPkg, {
             entries: [
                 { key: '*', output_formats: ['esm', 'cjs', 'ts'] },
@@ -155,7 +161,7 @@ describe('plan2', () => {
             },
         })
 
-        expect(toPackageExportsPlan2(plan)).toEqual({
+        expect(toPackageExportsPlan(plan)).toEqual({
             '.': {
                 default: './dist/index.js',
                 import: './dist/index.js',
@@ -171,13 +177,13 @@ describe('plan2', () => {
         })
     })
 
-    test('toPackageExportsPlan2 supports strict extension preset', () => {
+    test('toPackageExportsPlan supports strict extension preset', () => {
         const plan = defineBuildPlan(parsedPkg, {
             entries: [{ key: '*', output_formats: ['esm', 'cjs', 'ts'] }],
         })
 
         expect(
-            toPackageExportsPlan2(plan, { extensionPreset: 'strict' }),
+            toPackageExportsPlan(plan, { extensionPreset: 'strict' }),
         ).toEqual({
             '.': {
                 default: './dist/index.mjs',
@@ -188,7 +194,7 @@ describe('plan2', () => {
         })
     })
 
-    test('toPackageExportsPlan2 skips entries with exports:false', () => {
+    test('toPackageExportsPlan skips entries with exports:false', () => {
         const plan = defineBuildPlan(parsedPkg, {
             entries: [
                 {
@@ -201,12 +207,51 @@ describe('plan2', () => {
             ],
         })
 
-        expect(toPackageExportsPlan2(plan)).toEqual({
+        expect(toPackageExportsPlan(plan)).toEqual({
             '.': {
                 default: './dist/index.js',
                 import: './dist/index.js',
                 types: './dist/index.d.ts',
             },
         })
+    })
+
+    test('normalizes equivalent root entry keys', () => {
+        expect(normalizePlanEntryKey('*')).toBe('.')
+        expect(normalizePlanEntryKey('.')).toBe('.')
+        expect(normalizePlanEntryKey('./')).toBe('.')
+        expect(normalizePlanEntryKey('index')).toBe('.')
+        expect(normalizePlanEntryKey('./index')).toBe('.')
+    })
+
+    test('normalizes named entry keys to package export keys', () => {
+        expect(normalizePlanEntryKey('vitest')).toBe('./vitest')
+        expect(normalizePlanEntryKey('./vitest')).toBe('./vitest')
+    })
+
+    test('finds entries by key, export key, and file name', () => {
+        const plan = defineBuildPlan(parsedPkg, {
+            entries: [
+                { key: '*', sourceFile: 'index.ts' },
+                { key: './vitest', sourceFile: 'vitest/index.ts' },
+            ],
+        })
+
+        expect(findPlanEntries(plan, '*')).toEqual([plan.entries[0]])
+        expect(findPlanEntries(plan, '.')).toEqual([plan.entries[0]])
+        expect(findPlanEntries(plan, 'index')).toEqual([plan.entries[0]])
+        expect(findPlanEntries(plan, './vitest')).toEqual([plan.entries[1]])
+        expect(findPlanEntries(plan, 'vitest')).toEqual([plan.entries[1]])
+    })
+
+    test('checks and gets entries through the normalized port lookup', () => {
+        const plan = defineBuildPlan(parsedPkg, {
+            entries: [{ key: './vitest', sourceFile: 'vitest/index.ts' }],
+        })
+
+        expect(hasPlanEntry(plan, 'vitest')).toBe(true)
+        expect(hasPlanEntry(plan, './missing')).toBe(false)
+        expect(getPlanEntry(plan, 'vitest')).toBe(plan.entries[0])
+        expect(getPlanEntry(plan, './missing')).toBeUndefined()
     })
 })

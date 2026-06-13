@@ -149,3 +149,7 @@ console.log(toPackageExports(plan))
 //   }
 // }
 ```
+
+## Vite Config
+
+Todo

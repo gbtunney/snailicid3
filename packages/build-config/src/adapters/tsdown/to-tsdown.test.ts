@@ -1,8 +1,12 @@
 import { describe, expect, test } from 'vitest'
 import pkg from './../../../package.json' with { type: 'json' }
 import { schemaBasePackage } from './../../build/schemas/package.js'
-import { entryToTsdownConfig, toTsdownConfigs } from './to-tsdown.js'
-import { defineBuildPlan } from '../../build/plan2.js'
+import {
+    entryToTsdownConfig,
+    toTsdownConfig,
+    toTsdownConfigs,
+} from './to-tsdown.js'
+import { defineBuildPlan } from '../../build/plan.js'
 
 const parsedPkg = schemaBasePackage.parse(pkg)
 
@@ -24,6 +28,28 @@ describe('tsdownv2 adapter', () => {
         const configs = toTsdownConfigs(plan)
 
         expect(configs).toHaveLength(2)
+    })
+
+    test('maps a single selected entry by normalized key', () => {
+        const plan = defineBuildPlan(parsedPkg, {
+            entries: [
+                { key: '*', sourceFile: 'index.ts' },
+                { key: './vitest', sourceFile: 'vitest/index.ts' },
+            ],
+        })
+        const config = toTsdownConfig(plan, 'vitest')
+
+        expect(config.entry).toEqual({
+            vitest: plan.entries[1]?.sourcePath,
+        })
+    })
+
+    test('throws when selected entry is missing', () => {
+        const plan = defineBuildPlan(parsedPkg)
+
+        expect(() => toTsdownConfig(plan, './missing')).toThrow(
+            'Build plan entry not found',
+        )
     })
 
     test('ts in output_formats sets dts:true and is stripped from format list', () => {
