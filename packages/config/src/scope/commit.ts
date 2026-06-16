@@ -28,6 +28,7 @@ type ParsedArgs = {
     positionals: Array<string>
     runCommitBefore: boolean
     scopeFormat: ScopeFormat
+    skipLintStaged: boolean
     validateOnly: boolean
 }
 
@@ -62,7 +63,9 @@ export function main(args: Array<string> = process.argv.slice(2)): void {
     }
 
     if (parsed.runCommitBefore) {
-        runCheckedPrecommit(repoRoot)
+        runCheckedPrecommit(repoRoot, {
+            skipLintStaged: parsed.skipLintStaged,
+        })
     }
 
     const scopes = parsed.explicitScope
@@ -169,6 +172,7 @@ function parseArgs(args: Array<string>): ParsedArgs {
         positionals: [],
         runCommitBefore: false,
         scopeFormat: 'csv',
+        skipLintStaged: false,
         validateOnly: false,
     }
 
@@ -230,6 +234,10 @@ function parseArgs(args: Array<string>): ParsedArgs {
                 parsed.explicitScope = readNextValue(args, ++index, arg)
                 break
 
+            case '--skip-lint-staged':
+                parsed.skipLintStaged = true
+                break
+
             default:
                 if (arg.startsWith('--')) {
                     throw new Error(`Unknown argument: ${arg}`)
@@ -249,7 +257,7 @@ function printHelp(): void {
   pnpm exec scope-commit --validate-type <type>
   pnpm exec scope-commit --message <type> <subject> [--staged|--all] [--keep-prefix] [file ...]
   pnpm exec scope-commit --commit <type> <subject> [--scope <scope>] [--staged|--all] [--keep-prefix] [--dry-run] [file ...]
-  pnpm exec scope-commit --checked-commit <type> <subject> [--scope <scope>] [--staged|--all] [--keep-prefix] [--dry-run] [file ...]
+  pnpm exec scope-commit --checked-commit <type> <subject> [--scope <scope>] [--staged|--all] [--keep-prefix] [--skip-lint-staged] [--dry-run] [file ...]
 
 Examples:
   pnpm exec scope-commit
@@ -260,6 +268,7 @@ Examples:
   pnpm exec scope-commit --commit --dry-run chore autofix
   pnpm exec scope-commit --message chore autofix --scope config
   pnpm exec scope-commit --checked-commit chore autofix
+  pnpm exec scope-commit --checked-commit --skip-lint-staged chore autofix
   pnpm exec scope-commit .github/workflows/call-pipeline.yml`)
 }
 
@@ -277,7 +286,10 @@ function readNextValue(
     return value
 }
 
-function runCheckedPrecommit(repoRoot: string): void {
+function runCheckedPrecommit(
+    repoRoot: string,
+    options: { skipLintStaged: boolean },
+): void {
     const stagedDiff = runCommand('git', ['diff', '--cached', '--quiet'], {
         cwd: repoRoot,
     })
@@ -288,6 +300,10 @@ function runCheckedPrecommit(repoRoot: string): void {
         if (addResult.status !== 0) {
             throw new Error(addResult.stderr || 'git add -A failed')
         }
+    }
+
+    if (options.skipLintStaged) {
+        return
     }
 
     const lintResult = runCommand(

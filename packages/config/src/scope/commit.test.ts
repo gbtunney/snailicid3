@@ -102,4 +102,18 @@ describe('scope-commit messages', () => {
 
         expect(output).toBe('chore(config): test scope message')
     })
+
+    it('accepts skip-lint-staged without changing generated scopes', () => {
+        const output = captureConsoleLog(() => {
+            main([
+                '--message',
+                'chore',
+                'test scope message',
+                '--skip-lint-staged',
+                'packages/config/package.json',
+            ])
+        })
+
+        expect(output).toBe('chore(config): test scope message')
+    })
 })
