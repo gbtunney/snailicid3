@@ -479,7 +479,6 @@ jobs:
                 # Changesets writes git tags locally. Push them so tag history stays in sync.
                 git push origin --tags
 
-                export GH_TOKEN="${{ secrets.GH_PAT || github.token }}"
                 publish_candidates="${{ needs.detect.outputs.publish_candidates }}"
 
                 if [[ -z "$publish_candidates" ]]; then
