@@ -1,5 +1,17 @@
 # @snailicid3/cli-app
 
+## 0.0.7
+
+### Patch Changes
+
+- Updated dependencies [bbc7d8e]
+  - @snailicid3/build-config@0.0.7
+  - @snailicid3/color@0.0.5
+  - @snailicid3/logger@0.0.5
+  - @snailicid3/node-utils@0.0.5
+  - @snailicid3/types@0.0.3
+  - @snailicid3/utils@0.0.5
+
 ## 0.0.6
 
 ### Patch Changes
