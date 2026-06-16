@@ -9,7 +9,7 @@
 # - disable_nx_cloud input is optional; when omitted, DISABLE_NX_CLOUD repo variable is used.
 # ─────────────────────────────────────────────────────────────
 
-name: Pipeline 🚰
+name: z Pipeline 🚰
 
 on:
     workflow_call:
