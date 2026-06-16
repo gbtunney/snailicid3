@@ -1,0 +1,18 @@
+{
+    "extends": "@snailicid3/config/tsconfig.typecheck",
+    "compilerOptions": {
+        "allowImportingTsExtensions": true,
+        "jsx": "react-jsx",
+        "lib": ["ES2022", "DOM", "DOM.Iterable"],
+        "types": ["node", "vite/client"]
+    },
+    "exclude": ["./dist", "./node_modules", "./*.bk.ts"],
+    "files": ["package.json"],
+    "include": [
+        "./*.ts",
+        "./*.mts",
+        "./*.cts",
+        "./src/**/*.ts",
+        "./src/**/*.tsx"
+    ]
+}

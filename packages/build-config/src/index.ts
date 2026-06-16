@@ -11,6 +11,7 @@ export {
     entryToViteConfig,
     toViteConfig,
     toViteConfigs,
+    viteAdapter,
 } from './adapters/vite/index.js'
 export type { ViteConfigInput } from './adapters/vite/index.js'
 

@@ -11,8 +11,34 @@ export const filePatternOverrides = (): Array<Config> =>
             files: ['**/main.tsx'],
             name: 'Override: main.tsx — React entrypoint (hooks, refresh, camelCase filename)',
             rules: {
-                ...(reactHooks.configs.flat.recommended.rules ?? {}),
-                ...(reactRefresh.configs.vite.rules ?? {}),
+                ...reactHooks.configs.flat.recommended.rules,
+                ...reactRefresh.configs.vite.rules,
+            },
+        },
+        {
+            files: ['**/*.tsx'],
+            name: 'Override: TSX files — allow PascalCase React components',
+            rules: {
+                '@typescript-eslint/naming-convention': [
+                    'error',
+                    {
+                        format: ['camelCase', 'PascalCase'],
+                        selector: ['function'],
+                    },
+                    {
+                        format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
+                        selector: ['variable'],
+                    },
+                    {
+                        format: ['PascalCase'],
+                        selector: 'typeLike',
+                    },
+                    {
+                        format: ['snake_case', 'camelCase'],
+                        leadingUnderscore: 'allowSingleOrDouble',
+                        selector: 'parameter',
+                    },
+                ],
             },
         },
         {

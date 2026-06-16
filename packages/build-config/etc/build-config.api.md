@@ -245,6 +245,9 @@ export const typedocStandardConfig: TypedocConfigFunction;
 export const typedocVitepressConfig: TypedocConfigFunction<Merge<MarkdownPluginOptions, RemarkPluginOptions>>;
 
 // @public (undocumented)
+export const viteAdapter: BuildAdapter;
+
+// @public (undocumented)
 export type ViteConfigInput = Array<UserConfig>;
 
 // @public (undocumented)
