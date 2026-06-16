@@ -122,7 +122,7 @@ git switch -c "$branch"
 log "Committing changeset..."
 spacer 1
 git add "$new_file"
-pnpm exec scope-commit --checked-commit chore "$slug" --scope "$scope"
+pnpm exec scope-commit --checked-commit changeset "$slug" --scope "$scope"
 
 success "Done."
 kv_pair "Branch" "$branch"
