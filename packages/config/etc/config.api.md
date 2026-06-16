@@ -5,20 +5,20 @@
 ```ts
 
 import type { ArrayValues } from 'type-fest';
-import { UserConfig as CommitlintUserConfig } from '@commitlint/types';
-import { Config } from 'prettier';
+import { Config } from '@eslint/config-helpers';
+import { Config as Config_2 } from 'prettier';
 import config_conventional from '@commitlint/config-conventional';
 import { Configuration } from 'lint-staged';
 import { defineConfig as defineConfig_2 } from '@eslint/config-helpers';
-import { Config as EslintConfig } from '@eslint/config-helpers';
 import type { IterableElement } from 'type-fest';
 import type { JsonArray } from 'type-fest';
 import type { Jsonifiable } from 'type-fest';
 import type { JsonObject } from 'type-fest';
 import type { JsonPrimitive } from 'type-fest';
 import type { JsonValue } from 'type-fest';
+import type { KeyAsString } from 'type-fest';
 import type { LiteralUnion } from 'type-fest';
-import type { Merge } from 'type-fest';
+import { Merge } from 'type-fest';
 import { merge } from 'ts-deepmerge';
 import type { Options } from 'prettier-plugin-jsdoc';
 import { Options as Options_2 } from 'prettier';
@@ -26,67 +26,84 @@ import { Plugin } from 'prettier';
 import type { Spread } from 'type-fest';
 import { Config as TsConfig } from 'typescript-eslint';
 import type { UnknownRecord } from 'type-fest';
+import type { UserConfig } from '@commitlint/types';
+
+// @public
+export type AnyDefineConfig = (...args: ReadonlyArray<any>) => unknown;
 
 // @public (undocumented)
 export const BASE_IGNORES: string[];
 
 // @public (undocumented)
-export const COMMIT_TYPES: Array<LiteralUnion<ConventionalCommitType, string>>;
+export const buildCommitlintConfigFunction: (input?: CommitlintConfigFunctionOptions) => CommitlintConfig;
 
 // @public (undocumented)
-export const Commitlint: ConfigApi<CommitlintUserConfig, CommitlintConfigOptions, {
-    commitTypes: typeof COMMIT_TYPES;
-    workspaceScopes: typeof workspaceScopes;
-    workspaceScopesCsv: typeof workspaceScopesCsv;
+export const buildMarkdownlintConfigFunction: (input?: MarkdownlintConfigFunctionOptions) => MarkdownlintConfig;
+
+// @public (undocumented)
+export const COMMIT_TYPES: ("style" | "feat" | "fix" | "docs" | "refactor" | "perf" | "test" | "build" | "ci" | "chore" | "revert" | "changeset" | "release")[];
+
+// @public (undocumented)
+export const Commitlint: {
+    commitTypes: ("style" | "feat" | "fix" | "docs" | "refactor" | "perf" | "test" | "build" | "ci" | "chore" | "revert" | "changeset" | "release")[];
+    config: (input?: CommitlintConfigFunctionOptions) => CommitlintConfig;
+    defineConfig: <const TConfig extends CommitlintConfig>(config: TConfig) => TConfig;
+    filterCommitTypes: (exclude: ReadonlyArray<ConventionalCommitType>) => Array<ConventionalCommitType>;
+    workspaceScopes: (options?: WorkspaceScopesOptions) => Array<string>;
+    workspaceScopesCsv: (options?: Omit<WorkspaceScopesOptions, "format">) => string;
+};
+
+// @public (undocumented)
+export type CommitlintConfig = UserConfig;
+
+// Warning: (ae-forgotten-export) The symbol "ConfigFunctionOptions" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type CommitlintConfigFunctionOptions = ConfigFunctionOptions<{
+    appendScopes?: WorkspaceScopesOptions;
+    appendTypes?: Array<LiteralUnion<ConventionalCommitType, string>>;
+    overrides?: CommitlintConfig;
+    scopeOptions?: WorkspaceScopesOptions;
 }>;
 
 // @public
-export type CommitlintConfigOptions = {
-    appendTypes?: Array<LiteralUnion<ConventionalCommitType, string>>;
-    cwd?: string;
-    scopeOptions?: WorkspaceScopesOptions;
-};
-
-export { CommitlintUserConfig }
-
-// @public (undocumented)
-export type ConfigApi<TConfig, TOptions extends object = object, TExtras extends object = object> = TExtras & {
-    config: (options?: TOptions) => TConfig;
-    defineConfig: DefineConfig<TConfig>;
-};
-
-// @public (undocumented)
-export const CONVENTIONAL_COMMIT_TYPES: Array<ConventionalCommitType>;
-
-// @public (undocumented)
-export type ConventionalCommitType = keyof typeof config_conventional.prompt.questions.type.enum;
+export type CommitType = 'changeset' | 'release' | Exclude<ConventionalCommitType, 'ci' | 'perf'>;
 
 // @public
-export type DefineConfig<TConfig> = <const TValue extends TConfig>(config: TValue) => TValue;
+export type ConfigBuilder<TConfig, TInput extends object = object> = (input?: TInput) => TConfig;
+
+// @public
+export type ConfigToolApi<TConfig, TInput extends object = object, TDefineConfig extends AnyDefineConfig = IdentityDefineConfig<TConfig>, TExtras extends object = object> = TExtras & {
+    config: ConfigBuilder<TConfig, TInput>;
+    defineConfig: TDefineConfig;
+};
+
+// @public (undocumented)
+export type ConventionalCommitType = KeyAsString<typeof config_conventional.prompt.questions.type.enum>;
+
+// @public (undocumented)
+export const defineCommitlintConfig: <const TConfig extends CommitlintConfig>(config: TConfig) => TConfig;
 
 // @public
 export const defineConfig: <const TConfig>(config: TConfig) => TConfig;
 
 // @public (undocumented)
-export const EsLint: {
-    config: (options?: EslintConfigOptions) => Array<EslintConfig>;
-    defineConfig: typeof defineConfig_2;
-    files: {
-        base: () => Array<string>;
-        resolve: typeof resolveEslintFiles;
-    };
-};
-
-export { EslintConfig }
+export const defineMarkdownlintConfig: <const TConfig extends MarkdownlintConfig>(config: TConfig) => TConfig;
 
 // @public (undocumented)
-export type EslintConfigOptions = {
-    additionalFiles?: Array<string>;
-    cwd?: string;
-    files?: Array<string>;
-    ignores?: Array<string>;
-    overrides?: Array<EslintConfig>;
+export const EsLint: {
+    config: (input?: EsLintConfigFunctionOptions) => EsLintConfig;
+    defineConfig: typeof defineConfig_2;
 };
+
+// @public (undocumented)
+export type EsLintConfig = Array<Config>;
+
+// @public (undocumented)
+export type EsLintConfigFunctionOptions = ConfigFunctionOptions<{
+    ignores?: Array<string>;
+    overrides?: Array<Config>;
+}>;
 
 // Warning: (ae-forgotten-export) The symbol "FileExtensionHint" needs to be exported by the entry point index.d.ts
 //
@@ -99,8 +116,14 @@ basePattern?: string) => Array<string>;
 export const exportJSONFile: (config: JSONExportConfig, outdir?: string,
 overwrite?: boolean, logData?: boolean) => boolean;
 
+// @public
+export const filterCommitTypes: (exclude: ReadonlyArray<ConventionalCommitType>) => Array<ConventionalCommitType>;
+
 // @public (undocumented)
 export const getFilePath: (meta: ImportMeta, filePath: string) => string;
+
+// @public
+export type IdentityDefineConfig<TConfig> = <const TValue extends TConfig>(config: TValue) => TValue;
 
 // @public (undocumented)
 export const importJSON: (filename: string) => Promise<JsonValue | undefined>;
@@ -142,17 +165,22 @@ export type JSONExportEntry<Type extends Jsonifiable = JsonValue> = {
 };
 
 // @public (undocumented)
-export const lintstaged: {
-    configuration: (merged?: LintStagedConfiguration) => LintStagedConfiguration;
-    defineLintStagedConfig: typeof defineLintStagedConfig;
-    extensionsToGlob: typeof extensionsToGlob;
-    filterFileArrByGlob: typeof filterFileArrByGlob;
-    quoteArg: typeof quoteArg;
-    toFileArgs: typeof toFileArgs;
+export const LintStaged: {
+    config: (options?: LintStagedConfigFunctionOptions) => LintStagedConfig;
+    defineConfig: <const TConfig extends LintStagedConfig>(config: TConfig) => TConfig;
+    extensionsToGlob: (extensions: ReadonlyArray<string>) => string;
+    filterFileArrByGlob: (files: ReadonlyArray<string>, globs: ReadonlyArray<string>, negate?: boolean) => Array<string>;
+    quoteArg: (path: string) => string;
+    toFileArgs: (staged: ReadonlyArray<string> | string) => Array<string>;
 };
 
 // @public (undocumented)
-export type LintStagedConfiguration = Configuration;
+export type LintStagedConfig = Configuration;
+
+// @public (undocumented)
+export type LintStagedConfigFunctionOptions = LintStagedConfig & {
+    cwd?: string;
+};
 
 // @public (undocumented)
 export const MARKDOWN_FILE_EXTENSIONS: readonly ["md", "markdown"];
@@ -161,21 +189,25 @@ export const MARKDOWN_FILE_EXTENSIONS: readonly ["md", "markdown"];
 export type MarkdownFileExtensions = ArrayValues<typeof MARKDOWN_FILE_EXTENSIONS>;
 
 // @public (undocumented)
-export const Markdownlint: ConfigApi<MarkdownlintConfiguration, MarkdownlintConfigOptions, {
+export const Markdownlint: {
+    config: (input?: MarkdownlintConfigFunctionOptions) => MarkdownlintConfig;
+    defineConfig: <const TConfig extends MarkdownlintConfig>(config: TConfig) => TConfig;
     rules: {
-        base: typeof getBaseConfig;
-        merge: typeof getMergedRuleConfiguration;
+        base: () => MarkdownlintRuleConfiguration;
+        merge: (overrides: MarkdownlintRuleConfiguration, useBaseConfig?: boolean) => MarkdownlintRuleConfiguration;
     };
-}>;
+};
 
 // @public (undocumented)
-export type MarkdownlintConfigOptions = {
-    cwd?: string;
+export type MarkdownlintConfig = MarkdownlintConfiguration;
+
+// @public (undocumented)
+export type MarkdownlintConfigFunctionOptions = ConfigFunctionOptions<{
     ignores?: Array<string>;
     includes?: Array<string>;
     rules?: MarkdownlintRuleConfiguration;
     useBaseConfig?: boolean;
-};
+}>;
 
 // @public (undocumented)
 export type MarkdownlintConfiguration = {
@@ -190,34 +222,36 @@ export type MarkdownlintRuleConfiguration = Record<string, boolean | Record<stri
 export { merge }
 
 // @public (undocumented)
-export const Prettier: ConfigApi<PrettierConfig, PrettierConfigOptions, {
+export const Prettier: {
+    config: (input?: PrettierConfigFunctionOptions) => PrettierConfig;
+    defineConfig: <const TConfig extends PrettierConfig>(config: TConfig) => TConfig;
     options: {
-        base: typeof getDefaultOptions;
+        base: () => PrettierOptions;
     };
     overrides: {
-        base: typeof getDefaultOverrides;
+        base: () => PrettierOverrides;
     };
     plugins: {
-        bundled: typeof getPrettierPluginsBundled;
-        list: typeof getPrettierPluginsList;
+        bundled: () => Array<AnyPrettierPlugin>;
+        list: () => Array<PrettierPluginName>;
     };
-}>;
+};
 
 // @public
 export const PRETTIER_FILE_EXTENSIONS: readonly ["json", "xml", "php", "html", "css", "md", "sh", "yaml", "yml", "graphql"];
 
 // @public (undocumented)
-export type PrettierConfig = Merge<Merge<Config, PrettierOptions>, {
+export type PrettierConfig = Merge<Merge<Config_2, PrettierOptions>, {
     overrides: PrettierOverrides;
 }>;
 
 // @public (undocumented)
-export type PrettierConfigOptions = {
-    cwd?: string;
+export type PrettierConfigFunctionOptions = ConfigFunctionOptions<{
     isBundled?: boolean;
     options?: PrettierOptions;
     overrides?: PrettierOverrides;
-};
+    plugins?: Array<PrettierPlugin>;
+}>;
 
 // @public (undocumented)
 export type PrettierFileExtensions = ArrayValues<typeof PRETTIER_FILE_EXTENSIONS>;
@@ -226,7 +260,7 @@ export type PrettierFileExtensions = ArrayValues<typeof PRETTIER_FILE_EXTENSIONS
 export type PrettierOptions = Options & Options_2;
 
 // @public (undocumented)
-export type PrettierOverrides = Array<Merge<IterableElement<Config['overrides']>, {
+export type PrettierOverrides = Array<Merge<IterableElement<Config_2['overrides']>, {
     options: PrettierOptions;
 }>>;
 
@@ -263,18 +297,9 @@ export type WorkspaceScopesOptions = {
 
 // Warnings were encountered during analysis:
 //
-// src/eslint/index.ts:24:9 - (ae-forgotten-export) The symbol "resolveEslintFiles" needs to be exported by the entry point index.d.ts
-// src/lint-staged/index.ts:87:5 - (ae-forgotten-export) The symbol "defineLintStagedConfig" needs to be exported by the entry point index.d.ts
-// src/lint-staged/index.ts:88:5 - (ae-forgotten-export) The symbol "extensionsToGlob" needs to be exported by the entry point index.d.ts
-// src/lint-staged/index.ts:89:5 - (ae-forgotten-export) The symbol "filterFileArrByGlob" needs to be exported by the entry point index.d.ts
-// src/lint-staged/index.ts:90:5 - (ae-forgotten-export) The symbol "quoteArg" needs to be exported by the entry point index.d.ts
-// src/lint-staged/index.ts:91:5 - (ae-forgotten-export) The symbol "toFileArgs" needs to be exported by the entry point index.d.ts
-// src/markdownlint/index.ts:41:13 - (ae-forgotten-export) The symbol "getBaseConfig" needs to be exported by the entry point index.d.ts
-// src/markdownlint/index.ts:42:13 - (ae-forgotten-export) The symbol "getMergedRuleConfiguration" needs to be exported by the entry point index.d.ts
-// src/prettier/index.ts:73:20 - (ae-forgotten-export) The symbol "getDefaultOptions" needs to be exported by the entry point index.d.ts
-// src/prettier/index.ts:74:22 - (ae-forgotten-export) The symbol "getDefaultOverrides" needs to be exported by the entry point index.d.ts
-// src/prettier/index.ts:76:13 - (ae-forgotten-export) The symbol "getPrettierPluginsBundled" needs to be exported by the entry point index.d.ts
-// src/prettier/index.ts:77:13 - (ae-forgotten-export) The symbol "getPrettierPluginsList" needs to be exported by the entry point index.d.ts
+// src/prettier/api-functions.ts:30:5 - (ae-forgotten-export) The symbol "PrettierPlugin" needs to be exported by the entry point index.d.ts
+// src/prettier/api-functions.ts:37:11 - (ae-forgotten-export) The symbol "AnyPrettierPlugin" needs to be exported by the entry point index.d.ts
+// src/prettier/api-functions.ts:37:11 - (ae-forgotten-export) The symbol "PrettierPluginName" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
