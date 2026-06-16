@@ -6,7 +6,7 @@
         "\n========== COMMIT >> ==========": "",
         "commit": "pnpm build:self && pnpm exec scope-commit --checked-commit",
         "commit:feat": "pnpm run commit feat",
-             "commit:fix": "pnpm run commit fix",
+        "commit:fix": "pnpm run commit fix",
         "commit:chore": "pnpm run commit chore",
         "commit:refactor": "pnpm run commit refactor",
         "commit:test": "pnpm run commit test",
