@@ -164,7 +164,7 @@ jobs:
                   dry_run="${{ inputs.dry_run }}"
 
                   {
-                    echo "## Release plan"
+                    echo "## 🧭 Release plan"
                     echo ""
                     echo "- input ref: \`${{ inputs.ref || 'github.sha' }}\`"
                     echo "- checked ref: \`${{ needs.detect.outputs.checked_ref }}\`"
@@ -172,7 +172,7 @@ jobs:
                     echo "- allow non-main: \`${{ inputs.allow_non_main }}\`"
                     echo "- phase: \`$phase\`"
                     echo ""
-                    echo "## Release-state outputs"
+                    echo "## 📦 Release-state outputs"
                     echo ""
                     echo "- changeset_count: \`${{ needs.detect.outputs.changeset_count }}\`"
                     echo "- changeset_slugs: \`${{ needs.detect.outputs.changeset_slugs }}\`"
@@ -189,7 +189,7 @@ jobs:
                     echo "- publish_candidate_count: \`${{ needs.detect.outputs.publish_candidate_count }}\`"
                     echo "- publish_candidates: \`${{ needs.detect.outputs.publish_candidates }}\`"
                     echo ""
-                    echo "## Planned action"
+                    echo "## ✅ Planned action"
                     echo ""
 
                     if [ "$phase" = "pending_changeset" ]; then
@@ -402,7 +402,7 @@ jobs:
               shell: bash
               run: |
                   {
-                    echo "## Pending changeset version PR"
+                    echo "## 🧾 Pending changeset version PR"
                     echo ""
                     echo "- dry_run: \`${{ inputs.dry_run }}\`"
                     echo "- source_ref: \`${{ inputs.ref || github.sha }}\`"
@@ -443,7 +443,7 @@ jobs:
                   set -euo pipefail
 
                   {
-                    echo "## Publish plan"
+                    echo "## 🚀 Publish plan"
                     echo ""
                     echo "- dry run: \`${{ inputs.dry_run }}\`"
                     echo "- publish candidates: \`${{ needs.detect.outputs.publish_candidates }}\`"
@@ -470,7 +470,41 @@ jobs:
             require_lockfile: ${{ inputs.require_lockfile }}
             node_version: ${{ inputs.node_version }}
             pnpm_cache: ${{ inputs.pnpm_cache }}
-            post_overlay_command: npm whoami && pnpm changeset publish
+            post_overlay_command: |
+                set -euo pipefail
+
+                npm whoami
+                pnpm changeset publish
+
+                # Changesets writes git tags locally. Push them so tag history stays in sync.
+                git push origin --tags
+
+                publish_candidates="${{ needs.detect.outputs.publish_candidates }}"
+
+                if [[ -z "$publish_candidates" ]]; then
+                  echo "No publish candidates detected after publish; skipping GitHub Release creation."
+                  exit 0
+                fi
+
+                for candidate in $publish_candidates; do
+                  tag_name="$candidate"
+
+                  if gh release view "$tag_name" >/dev/null 2>&1; then
+                    echo "GitHub Release already exists for $tag_name."
+                    continue
+                  fi
+
+                  echo "Creating GitHub Release for $tag_name."
+                  gh release create "$tag_name" --title "$tag_name" --generate-notes
+                done
+
+                {
+                  echo "## 🚀 Publish complete"
+                  echo ""
+                  echo "- published candidates: \`${{ needs.detect.outputs.publish_candidates }}\`"
+                  echo "- tags pushed: \`true\`"
+                  echo "- github releases ensured: \`true\`"
+                } >> "$GITHUB_STEP_SUMMARY"
 
     main:
         name: no release action
@@ -481,3 +515,49 @@ jobs:
         steps:
             - name: Noop
               run: echo "No release action needed."
+
+    outcome:
+        name: outcome summary
+        needs: [detect, plan, pending_changeset, pending_release_publish, main]
+        if: ${{ always() }}
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Summarize release outcome
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  phase="${{ needs.plan.outputs.release_phase }}"
+                  changeset_result="${{ needs.pending_changeset.result }}"
+                  publish_result="${{ needs.pending_release_publish.result }}"
+                  main_result="${{ needs.main.result }}"
+
+                  {
+                    echo "## 🎯 Release outcome"
+                    echo ""
+                    echo "- phase: \`$phase\`"
+                    echo "- should_version: \`${{ needs.detect.outputs.should_version }}\`"
+                    echo "- should_publish: \`${{ needs.detect.outputs.should_publish }}\`"
+                    echo ""
+
+                    if [ "$phase" = "pending_changeset" ]; then
+                      if [ "$changeset_result" = "success" ]; then
+                        echo "✅ **Changeset PR flow ran successfully**"
+                      else
+                        echo "❌ **Changeset PR flow did not complete successfully** (result: \`$changeset_result\`)"
+                      fi
+                    elif [ "$phase" = "pending_release" ]; then
+                      if [ "$publish_result" = "success" ]; then
+                        echo "✅ **Publish flow ran successfully**"
+                      else
+                        echo "❌ **Publish flow did not complete successfully** (result: \`$publish_result\`)"
+                      fi
+                    else
+                      if [ "$main_result" = "success" ]; then
+                        echo "ℹ️ **No release action was required**"
+                      else
+                        echo "⚠️ **No-action path did not complete cleanly** (result: \`$main_result\`)"
+                      fi
+                    fi
+                  } >> "$GITHUB_STEP_SUMMARY"

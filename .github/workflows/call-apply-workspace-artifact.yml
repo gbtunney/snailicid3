@@ -275,6 +275,7 @@ jobs:
               if: ${{ inputs.post_overlay_command != '' }}
               shell: bash
               env:
+                  GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
               run: ${{ inputs.post_overlay_command }}
 
