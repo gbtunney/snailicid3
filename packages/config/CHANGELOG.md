@@ -1,5 +1,11 @@
 # @snailicid3/config
 
+## 0.1.1
+
+### Patch Changes
+
+- 096b1da: Updated dependencies, testing release action
+
 ## 0.1.0
 
 ### Minor Changes
