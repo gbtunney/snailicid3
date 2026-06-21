@@ -1,5 +1,8 @@
 import path from 'node:path'
 
+/**
+ *todo : this should use a normalize function in utilities ?
+ */
 export function normalizeRepoPath(repoRoot: string, inputPath: string): string {
     const cleanPath = inputPath.replace(/^\.\//, '')
 

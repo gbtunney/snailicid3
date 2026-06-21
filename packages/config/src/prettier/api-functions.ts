@@ -5,7 +5,6 @@ import type {
     PrettierOverrides,
 } from './options.js'
 import {
-    getBuiltInPrettierPlugins,
     getPrettierPluginsBundled,
     getPrettierPluginsList,
 } from './plugins.js'
@@ -13,12 +12,7 @@ import type {
     PrettierPluginPackageName,
     ResolvedPrettierPlugin,
 } from './plugins/plugin-registry.js'
-import {
-    type ConfigFunctionOptions,
-    type ConfigToolApi,
-    defineConfig,
-    type IdentityDefineConfig,
-} from '../core/index.js'
+import { type ConfigFunctionOptions, defineConfig } from '../core/index.js'
 
 export const BASE_IGNORES = ['**/*.api.md', 'tmp', 'temp'] as const
 
@@ -33,13 +27,13 @@ export type PrettierConfigFunctionOptions = ConfigFunctionOptions<{
     plugins?: Array<PrettierPlugin>
 }>
 
-type PrettierPlugin = PrettierPluginPackageName | ResolvedPrettierPlugin
+export type PrettierPlugin = PrettierPluginPackageName | ResolvedPrettierPlugin
 
 export const definePrettierConfig = <const TConfig extends PrettierConfig>(
     config: TConfig,
 ): TConfig => defineConfig(config)
 
-export const buildPrettierConfigFunction = ({
+export const buildFunctionPrettier = ({
     isBundled = true,
     options,
     overrides = [],
@@ -57,30 +51,5 @@ export const buildPrettierConfigFunction = ({
         plugins: [...defaultPlugins, ...plugins],
     }
 }
-
-export const Prettier = {
-    config: buildPrettierConfigFunction,
-    defineConfig: definePrettierConfig,
-    options: { base: getDefaultOptions },
-    overrides: { base: getDefaultOverrides },
-    plugins: {
-        builtIn: getBuiltInPrettierPlugins,
-        bundled: getPrettierPluginsBundled,
-        list: getPrettierPluginsList,
-    },
-} satisfies ConfigToolApi<
-    PrettierConfig,
-    PrettierConfigFunctionOptions,
-    IdentityDefineConfig<PrettierConfig>,
-    {
-        options: { base: typeof getDefaultOptions }
-        overrides: { base: typeof getDefaultOverrides }
-        plugins: {
-            builtIn: typeof getBuiltInPrettierPlugins
-            bundled: typeof getPrettierPluginsBundled
-            list: typeof getPrettierPluginsList
-        }
-    }
->
 
 export { type PrettierConfig } from './options.js'

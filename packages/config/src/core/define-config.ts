@@ -1,17 +1,33 @@
-import { type Merge } from 'type-fest'
+import { type Spread } from 'type-fest'
 import { type PlainObject } from './../utilities/json.js'
 /**
  * Permissive base constraint for any `defineConfig`-style helper, including variadic tool signatures (e.g.
  * ESLint/Vite).
  */
 export type AnyDefineConfig = (...args: ReadonlyArray<any>) => unknown
+export type BaseConfigFunctionOptions = {
+    /** Reserved for future workspace-discovery cwd support. Defaults to `process.cwd()`. */
+    cwd?: string
+}
 /** The `config` builder function shape shared by every tool namespace. */
 export type ConfigBuilder<TConfig, TInput extends object = object> = (
     input?: TInput,
 ) => TConfig
+
 export type ConfigFunctionOptions<
     ConfigOptions extends PlainObject = PlainObject,
-> = Merge<BaseConfigFunctionOptions, ConfigOptions>
+> = Spread<BaseConfigFunctionOptions, ConfigOptions>
+
+export type ConfigTool<
+    TConfig extends object,
+    TFunctionOptions extends object = ConfigFunctionOptions,
+    TDefineConfig extends AnyDefineConfig = IdentityDefineConfig<TConfig>,
+    TExtras extends object = object,
+> = {
+    api: ConfigToolApi<TConfig, TFunctionOptions, TDefineConfig, TExtras>
+    config: TConfig
+    options: TFunctionOptions
+}
 
 /**
  * Adapter shape every tool namespace (`Prettier`, `EsLint`, `Markdownlint`, `Commitlint`) implements.
@@ -20,7 +36,7 @@ export type ConfigFunctionOptions<
  * signature (e.g. ESLint/Vite).
  */
 export type ConfigToolApi<
-    TConfig,
+    TConfig extends object,
     TInput extends object = object,
     TDefineConfig extends AnyDefineConfig = IdentityDefineConfig<TConfig>,
     TExtras extends object = object,
@@ -34,10 +50,12 @@ export type IdentityDefineConfig<TConfig> = <const TValue extends TConfig>(
     config: TValue,
 ) => TValue
 
-type BaseConfigFunctionOptions = {
-    /** Reserved for future workspace-discovery cwd support. Defaults to `process.cwd()`. */
-    cwd?: string
-}
-
 /** Identity helper: returns the config unchanged, narrowing to a `const` literal type for editor autocomplete. */
 export const defineConfig = <const TConfig>(config: TConfig): TConfig => config
+
+/** Identity helper for declaring a tool namespace with the standard API shape. */
+export const defineConfigTool = <
+    const TTool extends ConfigToolApi<object, any, AnyDefineConfig>,
+>(
+    tool: TTool,
+): TTool => tool

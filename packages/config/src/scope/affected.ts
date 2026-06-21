@@ -2,8 +2,8 @@
 
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import { uniqueSorted } from './../utilities/array.js'
-import { runCommand, splitNonEmptyLines } from './../utilities/command.js'
+import { splitNonEmptyLines, uniqueSorted  } from './../utilities/array.js'
+import { runCommand } from './../utilities/command.js'
 import { runCliIfEntrypoint } from './../utilities/entrypoint.js'
 import { getRepoRoot } from './../workspace/git.js'
 import { normalizeRepoPath } from './../workspace/paths.js'

@@ -33,7 +33,11 @@ export const PRETTIER_PLUGINS = definePrettierPlugins({
     'prettier-plugin-sh': resolvePrettierPlugin(shPlugin),
 })
 
-export type PrettierPluginName = KeysOf<typeof PRETTIER_PLUGINS>
+export type PrettierPluginName =
+    | '@prettier/plugin-php'
+    | '@prettier/plugin-xml'
+    | 'prettier-plugin-jsdoc'
+    | 'prettier-plugin-sh'
 
 export const getBuiltInPrettierPlugins = (): Array<
     PrettierPluginName | ResolvedPrettierPlugin

@@ -1,12 +1,19 @@
 import { describe, expect, test } from 'vitest'
+import * as ConfigPackage from './index.js'
 import {
+    Commitlint,
     defineConfig,
+    EsLint,
     expandExtensions,
     JS_FILE_EXTENSIONS,
     JSLIKE_FILE_EXTENSIONS,
+    LintStaged,
+    Markdownlint,
+    Prettier,
     PRETTIER_FILE_EXTENSIONS,
     TS_FILE_EXTENSIONS,
 } from './index.js'
+import type { ConfigToolRegistry, MarkdownlintTool } from './index.js'
 
 describe('file extension constants', () => {
     test('JS_FILE_EXTENSIONS contains js', () => {
@@ -45,6 +52,52 @@ describe('expandExtensions', () => {
 describe('core defineConfig', () => {
     test('returns the config unchanged', () => {
         expect(defineConfig({ a: 1 })).toEqual({ a: 1 })
+    })
+})
+
+describe('tool namespace API', () => {
+    test.each([
+        ['Commitlint', Commitlint],
+        ['EsLint', EsLint],
+        ['LintStaged', LintStaged],
+        ['Markdownlint', Markdownlint],
+        ['Prettier', Prettier],
+    ])('%s exposes config and defineConfig', (_name, tool) => {
+        expect(typeof tool.config).toBe('function')
+        expect(typeof tool.defineConfig).toBe('function')
+    })
+
+    test('does not expose raw config builder helpers from the root API', () => {
+        expect('buildCommitlintConfigFunction' in ConfigPackage).toBe(false)
+        expect('buildEsLintConfigFunction' in ConfigPackage).toBe(false)
+        expect('buildLintStagedConfigFunction' in ConfigPackage).toBe(false)
+        expect('buildMarkdownlintConfigFunction' in ConfigPackage).toBe(false)
+        expect('buildPrettierConfigFunction' in ConfigPackage).toBe(false)
+        expect('buildFunctionCommitlint' in ConfigPackage).toBe(false)
+        expect('buildFunctionEsLint' in ConfigPackage).toBe(false)
+        expect('buildFunctionLintStaged' in ConfigPackage).toBe(false)
+        expect('buildFunctionMarkdownlint' in ConfigPackage).toBe(false)
+        expect('buildFunctionPrettier' in ConfigPackage).toBe(false)
+    })
+
+    test('registry type map exposes native config and function options', () => {
+        const options: ConfigToolRegistry['markdownlint']['functionOptions'] = {
+            rules: { MD001: false },
+        }
+        const config: ConfigToolRegistry['markdownlint']['config'] =
+            Markdownlint.config(options)
+
+        expect(config.config.MD001).toBe(false)
+    })
+
+    test('tool type aliases expose config, options, and api slots', () => {
+        const options: MarkdownlintTool['options'] = {
+            rules: { MD002: false },
+        }
+        const api: MarkdownlintTool['api'] = Markdownlint
+        const config: MarkdownlintTool['config'] = api.config(options)
+
+        expect(config.config.MD002).toBe(false)
     })
 })
 

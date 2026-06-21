@@ -17,6 +17,9 @@ export function isRootPackageName(packageName: string): boolean {
     return packageName === 'root' || /^@[^/]+\/root$/.test(packageName)
 }
 
+/**
+ *todo: should this be called normalize scope name and trim all the strings. ??
+ */
 export function shortenScopeName(
     scopeName: string,
     keepPrefix = false,

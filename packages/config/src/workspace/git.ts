@@ -1,6 +1,7 @@
 import path from 'node:path'
+import { splitNonEmptyLines } from './../utilities/array.js'
+import { runCommand } from './../utilities/command.js'
 import { getWorkspacePackagesList, type WorkspacePackage } from './packages.js'
-import { runCommand, splitNonEmptyLines } from '../utilities/command.js'
 
 export type GetRepoRootOptions = {
     fallbackToCwd?: boolean

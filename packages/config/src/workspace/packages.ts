@@ -9,6 +9,8 @@ export type WorkspacePackage = {
     private?: boolean
     version: string
 }
+export const validPackageName =
+    /^(@[\da-z~-][\d._a-z~-]*\/)?[\da-z~-][\d._a-z~-]*$/
 
 export function findNearestPackageJson(
     repoRoot: string,

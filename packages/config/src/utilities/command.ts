@@ -59,11 +59,3 @@ export function runCommandOrThrow(
 
     return result.stdout.trim()
 }
-
-export function splitNonEmptyLines(text: string): Array<string> {
-    return text
-        .replaceAll('\r', '')
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean)
-}

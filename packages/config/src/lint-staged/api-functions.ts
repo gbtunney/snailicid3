@@ -4,18 +4,14 @@ import {
     JSLIKE_FILE_EXTENSIONS,
     PRETTIER_FILE_EXTENSIONS,
 } from './../shared.js'
-import {
-    type ConfigToolApi,
-    defineConfig,
-    type IdentityDefineConfig,
-} from '../core/index.js'
+import { type ConfigFunctionOptions, defineConfig } from '../core/index.js'
 
 export type LintStagedConfig = Configuration
 
-export type LintStagedConfigFunctionOptions = LintStagedConfig & {
-    /** Reserved for consistency with other config builders. */
-    cwd?: string
-}
+export type LintStagedConfigFunctionOptions = ConfigFunctionOptions<{
+    /** Merged on top of the default lint-staged config. */
+    overrides?: LintStagedConfig
+}>
 
 export const defineLintStagedConfig = <const TConfig extends LintStagedConfig>(
     config: TConfig,
@@ -31,10 +27,10 @@ export const toFileArgs = (
     staged: ReadonlyArray<string> | string,
 ): Array<string> => (Array.isArray(staged) ? staged : [staged]).map(quoteArg)
 
-export const buildLintStagedConfigFunction = (
+export const buildFunctionLintStaged = (
     options: LintStagedConfigFunctionOptions = {},
 ): LintStagedConfig => {
-    const { cwd: _cwd, ...overrides } = options
+    const { cwd: _cwd, overrides = {} } = options
     const config: LintStagedConfig = {
         '*.md': (staged: ReadonlyArray<string>) => {
             const filtered = filterFileArrByGlob(staged, ['**/*.api.md'], true)
@@ -72,25 +68,6 @@ export const buildLintStagedConfigFunction = (
             return `pnpm exec prettier --write ${files.join(' ')}`
         },
     }
-
-    return defineLintStagedConfig({ ...config, ...overrides })
+    const finalConfig = Object.assign({}, config, overrides)
+    return defineLintStagedConfig(finalConfig)
 }
-
-export const LintStaged = {
-    config: buildLintStagedConfigFunction,
-    defineConfig: defineLintStagedConfig,
-    extensionsToGlob,
-    filterFileArrByGlob,
-    quoteArg,
-    toFileArgs,
-} satisfies ConfigToolApi<
-    LintStagedConfig,
-    LintStagedConfigFunctionOptions,
-    IdentityDefineConfig<LintStagedConfig>,
-    {
-        extensionsToGlob: typeof extensionsToGlob
-        filterFileArrByGlob: typeof filterFileArrByGlob
-        quoteArg: typeof quoteArg
-        toFileArgs: typeof toFileArgs
-    }
->
