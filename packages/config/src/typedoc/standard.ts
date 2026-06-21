@@ -1,4 +1,8 @@
 import { merge as deepmerge } from 'ts-deepmerge'
+import {
+    getDefaultTypedocPluginNames,
+    getTypedocMaterialThemePluginNames,
+} from './plugins/index.js'
 import { fileSharedOptions, resolveTypedocConfigInput } from './shared.js'
 import type { TypedocConfigFunction, TypedocOptions } from './shared.js'
 
@@ -13,7 +17,7 @@ export const buildFunctionTypedoc: TypedocConfigFunction = (input = {}) => {
     const options: TypedocOptions = {
         ...fileOptions,
         excludeExternals: false,
-        plugin: ['typedoc-plugin-zod'],
+        plugin: getDefaultTypedocPluginNames(),
     }
     return deepmerge(options, overrides)
 }
@@ -25,7 +29,7 @@ export const buildFunctionTypedocMaterialTheme: TypedocConfigFunction<
     const standardConfig = buildFunctionTypedoc(input)
     const options: TypedocOptions<MaterialThemeOptions> = {
         ...standardConfig,
-        plugin: ['typedoc-material-theme', 'typedoc-plugin-zod'],
+        plugin: getTypedocMaterialThemePluginNames(),
         themeColor: '#cb9820',
     }
     return deepmerge(options, overrides)

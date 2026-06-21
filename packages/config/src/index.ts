@@ -118,6 +118,10 @@ export type {
     TypedocMarkdownPluginOptions,
     TypedocMaterialThemeConfigFunctionOptions,
     TypedocOptions,
+    TypedocPluginName,
+    TypedocPluginPackageName,
+    TypedocPluginRegistry,
+    TypedocPluginRegistryEntry,
     TypedocTool,
 } from './typedoc/index.js'
 /* *  UTILITIES *  */
