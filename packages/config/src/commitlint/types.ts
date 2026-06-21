@@ -5,7 +5,7 @@ import type { KeyAsString, LiteralUnion } from 'type-fest'
 export type CommitType =
     | 'changeset'
     | 'release'
-    | Exclude<ConventionalCommitType, 'ci' | 'perf'>
+    | Exclude<ConventionalCommitType, 'ci' | 'perf' | 'style'>
 
 export type ConventionalCommitType = KeyAsString<
     typeof config_conventional.prompt.questions.type.enum
@@ -22,7 +22,7 @@ export const filterCommitTypes = (
     ).filter((commitType) => !exclude.includes(commitType))
 
 export const COMMIT_TYPES = [
-    ...filterCommitTypes(['ci', 'perf']),
+    ...filterCommitTypes(['ci', 'perf', 'style']),
     'changeset',
     'release',
 ] satisfies ReadonlyArray<LiteralUnion<CommitType, string>>
