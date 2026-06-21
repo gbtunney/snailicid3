@@ -8,8 +8,8 @@ describe('Prettier export', () => {
     test('has options/overrides/plugins namespaces', () => {
         expect(typeof Prettier.options.base).toBe('function')
         expect(typeof Prettier.overrides.base).toBe('function')
-        expect(typeof Prettier.plugins.bundled).toBe('function')
-        expect(typeof Prettier.plugins.list).toBe('function')
+        expect(typeof Prettier.plugins.default).toBe('function')
+        expect(typeof Prettier.plugins.packageNames).toBe('function')
     })
 })
 

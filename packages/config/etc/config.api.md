@@ -283,9 +283,8 @@ export const Prettier: {
         base: () => PrettierOverrides;
     };
     plugins: {
-        builtIn: () => Array<PrettierPluginName | ResolvedPrettierPlugin>;
-        bundled: () => Array<PrettierPluginName | ResolvedPrettierPlugin>;
-        list: () => Array<PrettierPluginName>;
+        default: () => Array<PrettierPluginName | ResolvedPrettierPlugin>;
+        packageNames: () => Array<PrettierPluginName>;
     };
 };
 
@@ -303,6 +302,7 @@ export type PrettierConfigFunctionOptions = ConfigFunctionOptions<{
     options?: PrettierOptions;
     overrides?: PrettierOverrides;
     plugins?: Array<PrettierPlugin>;
+    useResolvedPlugins?: boolean;
 }>;
 
 // @public (undocumented)
@@ -324,6 +324,12 @@ export type PrettierPluginName = '@prettier/plugin-php' | '@prettier/plugin-xml'
 
 // @public (undocumented)
 export type PrettierPluginPackageName = `@prettier/${string}` | `prettier-plugin-${string}`;
+
+// @public (undocumented)
+export type PrettierPluginRegistry = Partial<Record<PrettierPluginPackageName, PrettierPluginRegistryEntry>>;
+
+// @public (undocumented)
+export type PrettierPluginRegistryEntry = false | ResolvedPrettierPlugin | true;
 
 // @public (undocumented)
 export type PrettierTool = ConfigTool<PrettierConfig, PrettierConfigFunctionOptions, typeof Prettier.defineConfig, Omit<typeof Prettier, 'config' | 'defineConfig'>>;

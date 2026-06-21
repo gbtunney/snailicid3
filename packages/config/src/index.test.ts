@@ -120,6 +120,11 @@ describe('tool namespace API', () => {
         expect(typeof Typedoc.markdown.config).toBe('function')
         expect(typeof Typedoc.materialTheme.config).toBe('function')
         expect(typeof Typedoc.vitepress.config).toBe('function')
+        expect(Typedoc.plugins.default()).toEqual(['typedoc-plugin-zod'])
+        expect(Typedoc.plugins.markdown()).toEqual([
+            'typedoc-plugin-markdown',
+            'typedoc-plugin-zod',
+        ])
     })
 })
 

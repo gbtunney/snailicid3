@@ -59,8 +59,8 @@ importers:
                 specifier: ^6.0.2
                 version: 6.0.3
             verdaccio:
-                specifier: ^6.7.2
-                version: 6.7.2(typanion@3.14.0)
+                specifier: ^6.7.3
+                version: 6.7.3(typanion@3.14.0)
 
     apps/playground:
         dependencies:
@@ -416,6 +416,9 @@ importers:
             typedoc-plugin-zod:
                 specifier: ^1.4.3
                 version: 1.4.3(typedoc@0.28.19(typescript@6.0.3))
+            typedoc-vitepress-theme:
+                specifier: ^1.1.3
+                version: 1.1.3(typedoc-plugin-markdown@4.12.0(typedoc@0.28.19(typescript@6.0.3)))
             typescript-eslint:
                 specifier: ^8.61.1
                 version: 8.61.1(eslint@10.5.0(jiti@2.7.0))(typescript@6.0.3)
@@ -3692,24 +3695,24 @@ packages:
         peerDependencies:
             valibot: ^1.4.0
 
-    '@verdaccio/auth@8.0.2':
+    '@verdaccio/auth@8.0.4':
         resolution:
             {
-                integrity: sha512-Qw5DhIIzNsM1ORbrnYDKQ2iA1ACWZkjWtxXrYFh577at9+H9QR45m3mMokcRVr3t2UBNFEmMb5cGTrReFa5Dzw==,
+                integrity: sha512-hB7LU0Et6l3zkVmGV2SBEcMLCixUR26otiJVb7CpxnU1/j8BxWNVX9/HnwG16vLwXsSICUq4Ez+qROE/GdxLgQ==,
             }
         engines: { node: '>=18' }
 
-    '@verdaccio/config@8.1.1':
+    '@verdaccio/config@8.1.2':
         resolution:
             {
-                integrity: sha512-N9nS1AAME02iuhC2B3v67NnKQp2MkUoN5uUQ2JoS2seWQ6Bjs8dnkWfh4B9N5QTVjUQx4ETYOb3M+UqUJDJT8A==,
+                integrity: sha512-GX8TcEHcFaMxdGVRlkFZGJJvEgsQS2jkA5WjV4xKhK3B7z5UOhr75zEqoqATfVPuBPBT6kM/QkvyAGq4W5GTaA==,
             }
         engines: { node: '>=18' }
 
-    '@verdaccio/core@8.1.1':
+    '@verdaccio/core@8.1.2':
         resolution:
             {
-                integrity: sha512-IIgi8PucT67ymIwxwzc+5CGQF97xAPWlqb7M2nidfIpPtlghPjURDP6xHDcBLuE57adZKcklO24kr6zFSQa7cg==,
+                integrity: sha512-VtpBz9R61GTFUxPiQmBhCOffQZRJZMA2EXO/FzbaoNczm/Xt2KkDJq0PPwV5qmRGeouDRxEKUQ+caJGVN0W7Ww==,
             }
         engines: { node: '>=18' }
 
@@ -3720,31 +3723,31 @@ packages:
             }
         engines: { node: '>=18' }
 
-    '@verdaccio/hooks@8.0.2':
+    '@verdaccio/hooks@8.0.3':
         resolution:
             {
-                integrity: sha512-lneKTW6MDo28+hHqkIin08ruAafTvMake2TYUMdXWp+ah1YFI9XVzj6eo/rKHUB6sC4NxrBVajsGo1NX0OCE+A==,
+                integrity: sha512-5e71ArLhvcc/CFkDZW/gS3GWFkIAgIr0SCmEUXsTYHoqfyLV6VlXIpb6baGCnQ1EoQQ5ZkHtaWNFxSzM96ZlXA==,
             }
         engines: { node: '>=18' }
 
-    '@verdaccio/loaders@8.0.2':
+    '@verdaccio/loaders@8.0.3':
         resolution:
             {
-                integrity: sha512-Hm2xa47EXPI+Rnl3a0oTvEa1OIngze36YDHXNvHEhN35emID9iqJk1BoD5rA4Y2AdR9Jy34wRqzdqcwg9+ftSA==,
+                integrity: sha512-QG7zmQ9YuJgkC63zAMXP0IWafT9wvv/VWx97l0aaWLdXfJqK/l7+B7FgaEK0uZxq92Z+fU6tGaw5h2oe6XIFTg==,
             }
         engines: { node: '>=18' }
 
-    '@verdaccio/local-storage-legacy@11.3.3':
+    '@verdaccio/local-storage-legacy@11.3.4':
         resolution:
             {
-                integrity: sha512-F+cXs0Hy8tQsA6aE0hy0FaimgPfhqmetKbepOOZkstNlzOAhCzhue414VQaswKBJ/ylrmSgXP45HZjst+JNyjA==,
+                integrity: sha512-YdHF9hsn4OhZf1v0rQITtQt5qYn2zw8crHEhW54P0/OgxB5HPxxs93woUh/f0yqftIdB545o5Q38d7AuVgBWvg==,
             }
         engines: { node: '>=18' }
 
-    '@verdaccio/logger-commons@8.0.2':
+    '@verdaccio/logger-commons@8.0.3':
         resolution:
             {
-                integrity: sha512-PzR1+0tVWzDc6aQsPCi6LVywWTXD0bp61f97On8ia4Ihms6ahP9MZzF86Mub6laBw4mBsBo45EBFaqQfotvUoA==,
+                integrity: sha512-EpNnGYtzZd5ZPKOBTllu6cYn6oX2U67RGzI/390T2MRSsX+HBYVSw8JSaqzsgpg7khXL1U2iQvNI5SVfItLJ0w==,
             }
         engines: { node: '>=18' }
 
@@ -3755,24 +3758,24 @@ packages:
             }
         engines: { node: '>=18' }
 
-    '@verdaccio/logger@8.0.2':
+    '@verdaccio/logger@8.0.3':
         resolution:
             {
-                integrity: sha512-yxCVJP9Inr6qfdsDaOUCWWj0g0SzLY6J+62QkBafZLqIqng8IfI1NRe/6n2O3AH+YPThbqxhgaAJQ5MJTvBxOw==,
+                integrity: sha512-fngfyx6gUX416UYL0nqJy2yy0AxKFsfXppy6L4Dggvxu3A/auQucBtiHUj8J02jc4C1HAPTdvwIpt79Uxjr3qg==,
             }
         engines: { node: '>=18' }
 
-    '@verdaccio/middleware@8.0.2':
+    '@verdaccio/middleware@8.0.5':
         resolution:
             {
-                integrity: sha512-CmSoXI1/5lfH25NP3Q7ic9TEUSn6gENqauU00EhYZ/RAk/jYyPCkokSJBi9RhsAsOjOUry4yM4c3vgxLdO8Iwg==,
+                integrity: sha512-jhs7oE4KKuVRrudyk3mOF0yfWelBSi8s7moAHO+bJQwpXNpMNsGFuVRpF/8zBbqSEJshMukxcQYIeKusnsL24A==,
             }
         engines: { node: '>=18' }
 
-    '@verdaccio/package-filter@13.0.2':
+    '@verdaccio/package-filter@13.0.3':
         resolution:
             {
-                integrity: sha512-y9X52mCpP9AKoAB6W/ymYS5XscBNOT7HdSfYIy3BMpNJxD4+rwMO/SwKn3uAY+2RaMAgU1N7NBUmPtQAYFGhww==,
+                integrity: sha512-kfchn7GTxjfpcZqe1kwy9ZfYc2oCYVdzWHz2Nw5RLqpA+tIar5kS2GqlGpOLU7qYfPqDLQcHiv69PtxRstGtew==,
             }
         engines: { node: '>=18' }
 
@@ -3783,10 +3786,10 @@ packages:
             }
         engines: { node: '>=18' }
 
-    '@verdaccio/signature@8.0.2':
+    '@verdaccio/signature@8.0.3':
         resolution:
             {
-                integrity: sha512-0vmv3D2SmyJsLoN0e+O+wvjYdUxu/cxsCSRbchmK3m1dFxrGNyxEdQkdBAKDyOr2sQit5xM0XSwHRIqYrmr8Lw==,
+                integrity: sha512-EBaBMI3aHHdGk+1gABPye/lo5ey7ilRJJtFFaqI7nIup4xC5U6N2Z1ULtKqk/ubzB1O82vDuE2ZFnK8qe6rImg==,
             }
         engines: { node: '>=18' }
 
@@ -3797,30 +3800,30 @@ packages:
             }
         engines: { node: '>=12', npm: '>=5' }
 
-    '@verdaccio/tarball@13.0.2':
+    '@verdaccio/tarball@13.0.3':
         resolution:
             {
-                integrity: sha512-LQHoAlp7yk5Tlhv+uHWJKtExwbMDBvwTvoAsdWMq4sRjCrdJSz8KTfWEBrb0EayxEwPr0LmI0ce8mIriId9Zow==,
+                integrity: sha512-BKdksIRaqhrptP6JmVW71TeUTuA1hHWcGeEabSDzYgi1PXgLS9l8On3HWLs+TZ93PRtTjZiZJGCJPbqoy5itvg==,
             }
         engines: { node: '>=18' }
 
-    '@verdaccio/ui-theme@9.0.0-next-9.14':
+    '@verdaccio/ui-theme@9.0.0-next-9.20':
         resolution:
             {
-                integrity: sha512-0PQW6PV+sHsQdV3gnHQqAcDcVGfT75vHq1TfIeEN2QY5KuEkvli8e5vut+sTe89p+GOTahHKgTMOcL0O3BvsgA==,
+                integrity: sha512-eo4xqFzzUU382zKozJxipJGLp3HUNQvMZ81oTBa0SZ+Q/Bk2Fum82qAiE5ww4hTaVDV0Rjb7fqC4qJeBuLcGww==,
             }
 
-    '@verdaccio/url@13.0.2':
+    '@verdaccio/url@13.0.3':
         resolution:
             {
-                integrity: sha512-dXVBJETBV5Q/jz7R/fTQxnzsTjgnDBEh2v8aOKtngwBEf7YkgzU7LrtyzkGmyRzXUvS5ZSAXWrBAKQ4DEIZ/6w==,
+                integrity: sha512-BGH19Qc0pwoefyafJ100izQkgqKuuSF0EVdNjgipG8154yIluELxyliL8cqvTTDVZLVwz/CBuBq8IpUU9lhv9g==,
             }
         engines: { node: '>=18' }
 
-    '@verdaccio/utils@8.1.2':
+    '@verdaccio/utils@8.1.3':
         resolution:
             {
-                integrity: sha512-LTV6/Kcr8pS//iDjDitfYi1bp0AlKBUuvNoHAbI8tMnj0PLOUtRWJxId5FwuE+z3oNBeDLeOWPoXVtqKjl277Q==,
+                integrity: sha512-tJ3XO0MaFe8gx9oiLBu3Jim8JVyJRC08c2Y4dfx3wd1j9HlVkiWnW5qYOoTHA4NfdMzugsBsI8GlX3v/y/EtPg==,
             }
         engines: { node: '>=18' }
 
@@ -5828,6 +5831,13 @@ packages:
         resolution:
             {
                 integrity: sha512-F2X8g9P1X7uCPZMA3MVf9wcTqlyNp7IhH5qPCI0izhaOIYXaW9L535tGA3qmjRzpH+bZczqq7hVKxTR4NWnu+g==,
+            }
+        engines: { node: '>= 0.10.0' }
+
+    express@4.22.2:
+        resolution:
+            {
+                integrity: sha512-IuL+Elrou2ZvCFHs18/CIzy2Nzvo25nZ1/D2eIZlz7c+QUayAcYoiM2BthCjs+EBHVpjYjcuLDAiCWgeIX3X1Q==,
             }
         engines: { node: '>= 0.10.0' }
 
@@ -9251,10 +9261,10 @@ packages:
         engines: { node: '>=10' }
         hasBin: true
 
-    semver@7.8.0:
+    semver@7.8.2:
         resolution:
             {
-                integrity: sha512-AcM7dV/5ul4EekoQ29Agm5vri8JNqRyj39o0qpX6vDF2GZrtutZl5RwgD1XnZjiTAfncsJhMI48QQH3sN87YNA==,
+                integrity: sha512-c8jsqUZm3omBOI66G90z1Dyw5z622G8oLG+omfsHBJf3CWQTlOcwOjvOG6wtiNfW6anKm/eA39LMwMtMez2TiQ==,
             }
         engines: { node: '>=10' }
         hasBin: true
@@ -10143,6 +10153,14 @@ packages:
         peerDependencies:
             typedoc: 0.23.x || 0.24.x || 0.25.x || 0.26.x || 0.27.x || 0.28.x
 
+    typedoc-vitepress-theme@1.1.3:
+        resolution:
+            {
+                integrity: sha512-EK9iV7e3+R8lFNigdc0rIPWMxqfmDku0uGac3qYUu9tS4Qf1rhWZnyZJ4zu4G3iXrP5mqNPkv2wpODzRlA7jLw==,
+            }
+        peerDependencies:
+            typedoc-plugin-markdown: '>=4.11.0'
+
     typedoc@0.28.19:
         resolution:
             {
@@ -10446,24 +10464,24 @@ packages:
             }
         engines: { node: '>= 0.8' }
 
-    verdaccio-audit@13.0.2:
+    verdaccio-audit@13.0.3:
         resolution:
             {
-                integrity: sha512-J2aq4b0Q6qj/3o+r8dBPCmKNj37x+8BjSZOEoH85zjR3kihiVYQgJ1+2UxKCJpLj4Z/04SekB1p+zTBiViyoMw==,
+                integrity: sha512-n5VYOooGpXr3ZE2DjNx6lJPkCFd2sORDVMmbs0o7Mqx6g0kOHTkfkY5DygZAwOvGtFy0CecufRrl49RzAD9Jkg==,
             }
         engines: { node: '>=18' }
 
-    verdaccio-htpasswd@13.0.2:
+    verdaccio-htpasswd@13.0.3:
         resolution:
             {
-                integrity: sha512-ObyN409utfLKQ4QdGAYyXOprVaOYz0tDvhi0WpK7U71QvL/LOjeXWleDFRJHeaEMTNNdrzPhtC/9kcpfnztabg==,
+                integrity: sha512-xh0VO4zRfcbIR2bpH2SwW4kLHzCEKFYg9lykpuEENJ9OIcoc12mGXH5DTuOuJ9po8Y0mGTzFh3JUZIwXJlmOSw==,
             }
         engines: { node: '>=18' }
 
-    verdaccio@6.7.2:
+    verdaccio@6.7.3:
         resolution:
             {
-                integrity: sha512-o9YQonYX94RxVKQncxcUbsPtLTV26IgDSPQTbcw6rFrtQ6zb7Fx75vTNBps2O7xStMtwROblGwnLlHF7akm0jQ==,
+                integrity: sha512-1sNyMXx/ZMA3Am6HsbGJNz4HK7RTnM5wzw4yQRQgFCPdzB+LDjAc2NoMCu34LcRc0QxWY5bH8lGoQRgnlAHEVg==,
             }
         engines: { node: '>=20' }
         hasBin: true
@@ -12531,28 +12549,28 @@ snapshots:
         dependencies:
             valibot: 1.4.1(typescript@6.0.3)
 
-    '@verdaccio/auth@8.0.2':
+    '@verdaccio/auth@8.0.4':
         dependencies:
-            '@verdaccio/config': 8.1.1
-            '@verdaccio/core': 8.1.1
-            '@verdaccio/loaders': 8.0.2
-            '@verdaccio/signature': 8.0.2
+            '@verdaccio/config': 8.1.2
+            '@verdaccio/core': 8.1.2
+            '@verdaccio/loaders': 8.0.3
+            '@verdaccio/signature': 8.0.3
             debug: 4.4.3
             lodash: 4.18.1
-            verdaccio-htpasswd: 13.0.2
+            verdaccio-htpasswd: 13.0.3
         transitivePeerDependencies:
             - supports-color
 
-    '@verdaccio/config@8.1.1':
+    '@verdaccio/config@8.1.2':
         dependencies:
-            '@verdaccio/core': 8.1.1
+            '@verdaccio/core': 8.1.2
             debug: 4.4.3
             js-yaml: 4.1.1
             lodash: 4.18.1
         transitivePeerDependencies:
             - supports-color
 
-    '@verdaccio/core@8.1.1':
+    '@verdaccio/core@8.1.2':
         dependencies:
             ajv: 8.18.0
             http-errors: 2.0.1
@@ -12565,27 +12583,27 @@ snapshots:
         dependencies:
             lockfile: 1.0.4
 
-    '@verdaccio/hooks@8.0.2':
+    '@verdaccio/hooks@8.0.3':
         dependencies:
-            '@verdaccio/core': 8.1.1
-            '@verdaccio/logger': 8.0.2
+            '@verdaccio/core': 8.1.2
+            '@verdaccio/logger': 8.0.3
             debug: 4.4.3
             got-cjs: 12.5.4
             handlebars: 4.7.9
         transitivePeerDependencies:
             - supports-color
 
-    '@verdaccio/loaders@8.0.2':
+    '@verdaccio/loaders@8.0.3':
         dependencies:
-            '@verdaccio/core': 8.1.1
+            '@verdaccio/core': 8.1.2
             debug: 4.4.3
             lodash: 4.18.1
         transitivePeerDependencies:
             - supports-color
 
-    '@verdaccio/local-storage-legacy@11.3.3':
+    '@verdaccio/local-storage-legacy@11.3.4':
         dependencies:
-            '@verdaccio/core': 8.1.1
+            '@verdaccio/core': 8.1.2
             '@verdaccio/file-locking': 13.0.1
             '@verdaccio/streams': 10.2.5
             debug: 4.4.3
@@ -12597,9 +12615,9 @@ snapshots:
         transitivePeerDependencies:
             - supports-color
 
-    '@verdaccio/logger-commons@8.0.2':
+    '@verdaccio/logger-commons@8.0.3':
         dependencies:
-            '@verdaccio/core': 8.1.1
+            '@verdaccio/core': 8.1.2
             '@verdaccio/logger-prettify': 8.0.1
             colorette: 2.0.20
             debug: 4.4.3
@@ -12615,18 +12633,18 @@ snapshots:
             pino-abstract-transport: 1.2.0
             sonic-boom: 3.8.1
 
-    '@verdaccio/logger@8.0.2':
+    '@verdaccio/logger@8.0.3':
         dependencies:
-            '@verdaccio/logger-commons': 8.0.2
+            '@verdaccio/logger-commons': 8.0.3
             pino: 9.14.0
         transitivePeerDependencies:
             - supports-color
 
-    '@verdaccio/middleware@8.0.2':
+    '@verdaccio/middleware@8.0.5':
         dependencies:
-            '@verdaccio/config': 8.1.1
-            '@verdaccio/core': 8.1.1
-            '@verdaccio/url': 13.0.2
+            '@verdaccio/config': 8.1.2
+            '@verdaccio/core': 8.1.2
+            '@verdaccio/url': 13.0.3
             debug: 4.4.3
             express: 4.22.1
             express-rate-limit: 5.5.1
@@ -12635,9 +12653,9 @@ snapshots:
         transitivePeerDependencies:
             - supports-color
 
-    '@verdaccio/package-filter@13.0.2':
+    '@verdaccio/package-filter@13.0.3':
         dependencies:
-            '@verdaccio/core': 8.1.1
+            '@verdaccio/core': 8.1.2
             debug: 4.4.3
             semver: 7.7.4
         transitivePeerDependencies:
@@ -12650,10 +12668,10 @@ snapshots:
         transitivePeerDependencies:
             - supports-color
 
-    '@verdaccio/signature@8.0.2':
+    '@verdaccio/signature@8.0.3':
         dependencies:
-            '@verdaccio/config': 8.1.1
-            '@verdaccio/core': 8.1.1
+            '@verdaccio/config': 8.1.2
+            '@verdaccio/core': 8.1.2
             debug: 4.4.3
             jsonwebtoken: 9.0.3
         transitivePeerDependencies:
@@ -12661,10 +12679,10 @@ snapshots:
 
     '@verdaccio/streams@10.2.5': {}
 
-    '@verdaccio/tarball@13.0.2':
+    '@verdaccio/tarball@13.0.3':
         dependencies:
-            '@verdaccio/core': 8.1.1
-            '@verdaccio/url': 13.0.2
+            '@verdaccio/core': 8.1.2
+            '@verdaccio/url': 13.0.3
             debug: 4.4.3
             gunzip-maybe: 1.4.2
             tar-stream: 3.1.7
@@ -12673,23 +12691,23 @@ snapshots:
             - react-native-b4a
             - supports-color
 
-    '@verdaccio/ui-theme@9.0.0-next-9.14':
+    '@verdaccio/ui-theme@9.0.0-next-9.20':
         dependencies:
             debug: 4.4.3
         transitivePeerDependencies:
             - supports-color
 
-    '@verdaccio/url@13.0.2':
+    '@verdaccio/url@13.0.3':
         dependencies:
-            '@verdaccio/core': 8.1.1
+            '@verdaccio/core': 8.1.2
             debug: 4.4.3
             validator: 13.15.26
         transitivePeerDependencies:
             - supports-color
 
-    '@verdaccio/utils@8.1.2':
+    '@verdaccio/utils@8.1.3':
         dependencies:
-            '@verdaccio/core': 8.1.1
+            '@verdaccio/core': 8.1.2
             lodash: 4.18.1
             minimatch: 7.4.9
 
@@ -14011,6 +14029,42 @@ snapshots:
         transitivePeerDependencies:
             - supports-color
 
+    express@4.22.2:
+        dependencies:
+            accepts: 1.3.8
+            array-flatten: 1.1.1
+            body-parser: 1.20.5
+            content-disposition: 0.5.4
+            content-type: 1.0.5
+            cookie: 0.7.2
+            cookie-signature: 1.0.7
+            debug: 2.6.9
+            depd: 2.0.0
+            encodeurl: 2.0.0
+            escape-html: 1.0.3
+            etag: 1.8.1
+            finalhandler: 1.3.2
+            fresh: 0.5.2
+            http-errors: 2.0.1
+            merge-descriptors: 1.0.3
+            methods: 1.1.2
+            on-finished: 2.4.1
+            parseurl: 1.3.3
+            path-to-regexp: 0.1.13
+            proxy-addr: 2.0.7
+            qs: 6.15.2
+            range-parser: 1.2.1
+            safe-buffer: 5.2.1
+            send: 0.19.2
+            serve-static: 1.16.3
+            setprototypeof: 1.2.0
+            statuses: 2.0.2
+            type-is: 1.6.18
+            utils-merge: 1.0.1
+            vary: 1.1.2
+        transitivePeerDependencies:
+            - supports-color
+
     exsolve@1.0.8: {}
 
     extend@3.0.2: {}
@@ -14756,7 +14810,7 @@ snapshots:
             lodash.isstring: 4.0.1
             lodash.once: 4.1.1
             ms: 2.1.3
-            semver: 7.8.5
+            semver: 7.8.2
 
     jsprim@2.0.2:
         dependencies:
@@ -16301,7 +16355,7 @@ snapshots:
 
     semver@7.7.4: {}
 
-    semver@7.8.0: {}
+    semver@7.8.2: {}
 
     semver@7.8.5: {}
 
@@ -16883,6 +16937,10 @@ snapshots:
         dependencies:
             typedoc: 0.28.19(typescript@6.0.3)
 
+    typedoc-vitepress-theme@1.1.3(typedoc-plugin-markdown@4.12.0(typedoc@0.28.19(typescript@6.0.3))):
+        dependencies:
+            typedoc-plugin-markdown: 4.12.0(typedoc@0.28.19(typescript@6.0.3))
+
     typedoc@0.28.19(typescript@6.0.3):
         dependencies:
             '@gerrit0/mini-shiki': 3.23.0
@@ -17077,10 +17135,10 @@ snapshots:
 
     vary@1.1.2: {}
 
-    verdaccio-audit@13.0.2:
+    verdaccio-audit@13.0.3:
         dependencies:
-            '@verdaccio/config': 8.1.1
-            '@verdaccio/core': 8.1.1
+            '@verdaccio/config': 8.1.2
+            '@verdaccio/core': 8.1.2
             express: 4.22.1
             https-proxy-agent: 5.0.1
             node-fetch: 2.6.7
@@ -17088,9 +17146,9 @@ snapshots:
             - encoding
             - supports-color
 
-    verdaccio-htpasswd@13.0.2:
+    verdaccio-htpasswd@13.0.3:
         dependencies:
-            '@verdaccio/core': 8.1.1
+            '@verdaccio/core': 8.1.2
             '@verdaccio/file-locking': 13.0.1
             apache-md5: 1.1.8
             bcryptjs: 2.4.3
@@ -17100,25 +17158,25 @@ snapshots:
         transitivePeerDependencies:
             - supports-color
 
-    verdaccio@6.7.2(typanion@3.14.0):
+    verdaccio@6.7.3(typanion@3.14.0):
         dependencies:
             '@cypress/request': 3.0.10
-            '@verdaccio/auth': 8.0.2
-            '@verdaccio/config': 8.1.1
-            '@verdaccio/core': 8.1.1
-            '@verdaccio/hooks': 8.0.2
-            '@verdaccio/loaders': 8.0.2
-            '@verdaccio/local-storage-legacy': 11.3.3
-            '@verdaccio/logger': 8.0.2
-            '@verdaccio/middleware': 8.0.2
-            '@verdaccio/package-filter': 13.0.2
+            '@verdaccio/auth': 8.0.4
+            '@verdaccio/config': 8.1.2
+            '@verdaccio/core': 8.1.2
+            '@verdaccio/hooks': 8.0.3
+            '@verdaccio/loaders': 8.0.3
+            '@verdaccio/local-storage-legacy': 11.3.4
+            '@verdaccio/logger': 8.0.3
+            '@verdaccio/middleware': 8.0.5
+            '@verdaccio/package-filter': 13.0.3
             '@verdaccio/search-indexer': 8.0.2
-            '@verdaccio/signature': 8.0.2
+            '@verdaccio/signature': 8.0.3
             '@verdaccio/streams': 10.2.5
-            '@verdaccio/tarball': 13.0.2
-            '@verdaccio/ui-theme': 9.0.0-next-9.14
-            '@verdaccio/url': 13.0.2
-            '@verdaccio/utils': 8.1.2
+            '@verdaccio/tarball': 13.0.3
+            '@verdaccio/ui-theme': 9.0.0-next-9.20
+            '@verdaccio/url': 13.0.3
+            '@verdaccio/utils': 8.1.3
             JSONStream: 1.3.5
             async: 3.2.6
             clipanion: 4.0.0-rc.4(typanion@3.14.0)
@@ -17126,13 +17184,13 @@ snapshots:
             cors: 2.8.6
             debug: 4.4.3
             envinfo: 7.21.0
-            express: 4.22.1
+            express: 4.22.2
             lodash: 4.18.1
             lru-cache: 7.18.3
             mime: 3.0.0
-            semver: 7.8.0
-            verdaccio-audit: 13.0.2
-            verdaccio-htpasswd: 13.0.2
+            semver: 7.8.2
+            verdaccio-audit: 13.0.3
+            verdaccio-htpasswd: 13.0.3
         transitivePeerDependencies:
             - bare-abort-controller
             - encoding

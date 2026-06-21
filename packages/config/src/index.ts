@@ -76,6 +76,8 @@ export type {
     PrettierPlugin,
     PrettierPluginName,
     PrettierPluginPackageName,
+    PrettierPluginRegistry,
+    PrettierPluginRegistryEntry,
     PrettierTool,
     ResolvedPrettierPlugin,
 } from './prettier/index.js'
@@ -116,6 +118,10 @@ export type {
     TypedocMarkdownPluginOptions,
     TypedocMaterialThemeConfigFunctionOptions,
     TypedocOptions,
+    TypedocPluginName,
+    TypedocPluginPackageName,
+    TypedocPluginRegistry,
+    TypedocPluginRegistryEntry,
     TypedocTool,
 } from './typedoc/index.js'
 /* *  UTILITIES *  */

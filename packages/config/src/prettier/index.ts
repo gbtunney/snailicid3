@@ -8,10 +8,9 @@ import {
 } from './api-functions.js'
 import { getDefaultOptions, getDefaultOverrides } from './options.js'
 import {
-    getBuiltInPrettierPlugins,
-    getPrettierPluginsBundled,
-    getPrettierPluginsList,
-} from './plugins.js'
+    getDefaultPrettierPluginNames,
+    getDefaultPrettierPlugins,
+} from './plugins/index.js'
 import {
     type ConfigTool,
     type ConfigToolApi,
@@ -25,9 +24,8 @@ export const Prettier = defineConfigTool({
     options: { base: getDefaultOptions },
     overrides: { base: getDefaultOverrides },
     plugins: {
-        builtIn: getBuiltInPrettierPlugins,
-        bundled: getPrettierPluginsBundled,
-        list: getPrettierPluginsList,
+        default: getDefaultPrettierPlugins,
+        packageNames: getDefaultPrettierPluginNames,
     },
 } satisfies ConfigToolApi<
     PrettierConfig,
@@ -37,9 +35,8 @@ export const Prettier = defineConfigTool({
         options: { base: typeof getDefaultOptions }
         overrides: { base: typeof getDefaultOverrides }
         plugins: {
-            builtIn: typeof getBuiltInPrettierPlugins
-            bundled: typeof getPrettierPluginsBundled
-            list: typeof getPrettierPluginsList
+            default: typeof getDefaultPrettierPlugins
+            packageNames: typeof getDefaultPrettierPluginNames
         }
     }
 >)
@@ -60,15 +57,17 @@ export type {
 export { BASE_IGNORES } from './api-functions.js'
 
 export type { PrettierOptions, PrettierOverrides } from './options.js'
-export type { PrettierPluginName } from './plugins.js'
+export type { PrettierPluginName } from './plugins/index.js'
 
 export {
-    definePrettierPlugins,
-    resolvePluginRegistry,
+    definePrettierPluginRegistry,
     resolvePrettierPlugin,
-} from './plugins/plugin-registry.js'
+    resolvePrettierPluginRegistry,
+} from './plugins/registry.js'
 
 export type {
     PrettierPluginPackageName,
+    PrettierPluginRegistry,
+    PrettierPluginRegistryEntry,
     ResolvedPrettierPlugin,
-} from './plugins/plugin-registry.js'
+} from './plugins/registry.js'

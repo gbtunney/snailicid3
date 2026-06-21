@@ -4,6 +4,11 @@ import { type ReflectionKind } from 'typedoc'
 import { type PluginOptions as MarkdownPluginOptions } from 'typedoc-plugin-markdown'
 
 import {
+    getTypedocMarkdownPluginNames,
+    getTypedocRemarkPluginNames,
+    getTypedocVitepressPluginNames,
+} from './plugins/index.js'
+import {
     fileSharedOptions,
     resolveTypedocConfigInput,
     type TypedocConfigFunction,
@@ -47,7 +52,7 @@ const markdownBase = (): TypedocMarkdownOptions => {
         parametersFormat: 'table',
 
         /** Typedoc Plugins */
-        plugin: ['typedoc-plugin-markdown', 'typedoc-plugin-zod'],
+        plugin: getTypedocMarkdownPluginNames(),
         propertiesFormat: 'table',
         sanitizeComments: true,
         sort: ['kind', 'source-order'],
@@ -89,7 +94,7 @@ const enableRemarkPlugins = (
 ): TypedocMarkdownOptions => {
     return prettier || toc
         ? {
-              plugin: ['typedoc-plugin-remark'],
+              plugin: getTypedocRemarkPluginNames(),
               remarkPlugins: [
                   ...(prettier ? ['unified-prettier'] : []),
                   ...(toc ? [['remark-toc', { maxDepth }]] : []),
@@ -127,7 +132,7 @@ export const buildFunctionTypedocVitepress: TypedocConfigFunction<
             ...markdownBase(),
             ...enableRemarkPlugins(false, false),
         },
-        { plugin: ['typedoc-vitepress-theme'] },
+        { plugin: getTypedocVitepressPluginNames() },
     )
     return deepmerge(options, overrides)
 }

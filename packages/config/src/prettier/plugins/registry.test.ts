@@ -1,26 +1,26 @@
 import { describe, expect, test } from 'vitest'
 import {
-    definePrettierPlugins,
-    resolvePluginRegistry,
+    definePrettierPluginRegistry,
     resolvePrettierPlugin,
-} from './plugin-registry.js'
+    resolvePrettierPluginRegistry,
+} from './registry.js'
 
 describe('Prettier plugin registry', () => {
-    test('resolves bundled, package-name, and disabled plugin entries', () => {
+    test('resolves plugin object, package-name, and disabled plugin entries', () => {
         const plugin = resolvePrettierPlugin({
             languages: [],
             parsers: {},
             printers: {},
         })
 
-        const registry = definePrettierPlugins({
+        const registry = definePrettierPluginRegistry({
             '@prettier/plugin-php': plugin,
             '@prettier/plugin-xml': true,
             'prettier-plugin-jsdoc': true,
             'prettier-plugin-sh': false,
         })
 
-        expect(resolvePluginRegistry(registry)).toEqual([
+        expect(resolvePrettierPluginRegistry(registry)).toEqual([
             plugin,
             '@prettier/plugin-xml',
             'prettier-plugin-jsdoc',

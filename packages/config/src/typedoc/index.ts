@@ -10,6 +10,13 @@ import {
     buildFunctionTypedocVitepress,
     type RemarkPluginOptions,
 } from './markdown.js'
+import {
+    getDefaultTypedocPluginNames,
+    getTypedocMarkdownPluginNames,
+    getTypedocMaterialThemePluginNames,
+    getTypedocRemarkPluginNames,
+    getTypedocVitepressPluginNames,
+} from './plugins/index.js'
 import type { TypedocConfigFunctionOptions } from './shared.js'
 import {
     buildFunctionTypedoc,
@@ -47,6 +54,13 @@ export const Typedoc = defineConfigTool({
     materialTheme: {
         config: buildFunctionTypedocMaterialTheme,
     },
+    plugins: {
+        default: getDefaultTypedocPluginNames,
+        markdown: getTypedocMarkdownPluginNames,
+        materialTheme: getTypedocMaterialThemePluginNames,
+        remark: getTypedocRemarkPluginNames,
+        vitepress: getTypedocVitepressPluginNames,
+    },
     vitepress: {
         config: buildFunctionTypedocVitepress,
     },
@@ -57,6 +71,13 @@ export const Typedoc = defineConfigTool({
     {
         markdown: { config: typeof buildFunctionTypedocMarkdown }
         materialTheme: { config: typeof buildFunctionTypedocMaterialTheme }
+        plugins: {
+            default: typeof getDefaultTypedocPluginNames
+            markdown: typeof getTypedocMarkdownPluginNames
+            materialTheme: typeof getTypedocMaterialThemePluginNames
+            remark: typeof getTypedocRemarkPluginNames
+            vitepress: typeof getTypedocVitepressPluginNames
+        }
         vitepress: { config: typeof buildFunctionTypedocVitepress }
     }
 >)
@@ -71,6 +92,16 @@ export type TypedocTool = ConfigTool<
 export const typedoc = Typedoc
 
 export type { RemarkPluginOptions, TypedocMarkdownOptions } from './markdown.js'
+export type { TypedocPluginName } from './plugins/index.js'
+export {
+    defineTypedocPluginRegistry,
+    resolveTypedocPluginRegistry,
+} from './plugins/registry.js'
+export type {
+    TypedocPluginPackageName,
+    TypedocPluginRegistry,
+    TypedocPluginRegistryEntry,
+} from './plugins/registry.js'
 export type {
     TypedocConfigFunction,
     TypedocConfigFunctionOptions,
