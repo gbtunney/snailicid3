@@ -83,7 +83,7 @@
     "dependencies": {
         "@snailicid3/types": "workspace:*",
         "@snailicid3/utils": "workspace:*",
-        "@types/ramda": "^0.31.1",
+        "@types/ramda": "^0.32.0",
         "chroma.ts": "^1.0.0",
         "colorjs.io": "^0.6.1",
         "ramda": "^0.32.0"
@@ -92,7 +92,7 @@
         "@microsoft/api-extractor": "^7.58.8",
         "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
-        "@types/node": "^25.9.3",
+        "@types/node": "^26.0.0",
         "tsdown": "^0.22.2",
         "typescript": "^6.0.2",
         "vitest": "^4.1.9"

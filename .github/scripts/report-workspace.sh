@@ -93,3 +93,5 @@ else
     snail_sh status_pair "dependencies" "skipped" "grey"
 fi
 snail_sh spacer 1
+pnpm -r outdated
+snail_sh spacer 1
