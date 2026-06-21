@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isRootPackageName, shortenScopeName } from './lib.js'
+import { isRootPackageName, shortenScopeName } from './scopes.js'
 
 describe('shortenScopeName', () => {
     it('strips arbitrary npm scopes without cutting trailing characters', () => {

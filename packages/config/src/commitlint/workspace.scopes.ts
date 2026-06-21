@@ -1,10 +1,10 @@
+import { uniqueSorted } from './../utilities/array.js'
+import { getWorkspacePackagesList } from './../workspace/packages.js'
 import {
     formatScopes,
     isRootPackageName,
     shortenScopeName,
-    uniqueSorted,
-} from './../scope/lib.js'
-import { getWorkspacePackagesList } from './../workspace/packages.js'
+} from './../workspace/scopes.js'
 
 export type WorkspaceScopesOptions = {
     format?: 'array' | 'csv'

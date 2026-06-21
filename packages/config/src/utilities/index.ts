@@ -1,3 +1,4 @@
+export * from './array.js'
 export * from './command.js'
 export * from './entrypoint.js'
 export * from './extensions.js'

@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { getWorkspacePackagesList, type WorkspacePackage } from './packages.js'
-import { runCommand } from '../utilities/command.js'
+import { runCommand, splitNonEmptyLines } from '../utilities/command.js'
 
 export type GetRepoRootOptions = {
     fallbackToCwd?: boolean
@@ -121,11 +121,4 @@ function isInsideDir(absChildPath: string, absParentDir: string): boolean {
         relativePath === '' ||
         (!relativePath.startsWith('..') && !path.isAbsolute(relativePath))
     )
-}
-
-function splitNonEmptyLines(text: string): Array<string> {
-    return text
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean)
 }

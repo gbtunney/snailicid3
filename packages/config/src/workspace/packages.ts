@@ -1,3 +1,6 @@
+import { existsSync, readFileSync, statSync } from 'node:fs'
+import path from 'node:path'
+import { normalizeRepoPath } from './paths.js'
 import { runCommand } from '../utilities/command.js'
 
 export type WorkspacePackage = {
@@ -5,6 +8,30 @@ export type WorkspacePackage = {
     path: string
     private?: boolean
     version: string
+}
+
+export function findNearestPackageJson(
+    repoRoot: string,
+    inputPath: string,
+): null | string {
+    const relativePath = normalizeRepoPath(repoRoot, inputPath)
+    const absolutePath = path.resolve(repoRoot, relativePath)
+
+    let searchDir = pathExistsAsDirectory(absolutePath)
+        ? absolutePath
+        : path.dirname(absolutePath)
+
+    while (searchDir.startsWith(repoRoot)) {
+        const candidate = path.join(searchDir, 'package.json')
+
+        if (existsSync(candidate)) return candidate
+
+        if (searchDir === repoRoot) break
+
+        searchDir = path.dirname(searchDir)
+    }
+
+    return null
 }
 
 export function getWorkspaceNodeModulesRoot(): string | undefined {
@@ -61,6 +88,21 @@ export function getWorkspacePackagesObject<Result>(
     )
 }
 
+export function readPackageName(packageJsonPath: string): null | string {
+    if (!existsSync(packageJsonPath)) return null
+
+    try {
+        const raw = readFileSync(packageJsonPath, 'utf8')
+        const parsed = JSON.parse(raw) as { name?: unknown }
+
+        return typeof parsed.name === 'string' && parsed.name.trim()
+            ? parsed.name.trim()
+            : null
+    } catch {
+        return null
+    }
+}
+
 export function workspacePackagesToArray(
     input:
         | ReadonlyMap<string, WorkspacePackage>
@@ -85,4 +127,12 @@ function isWorkspacePackage(value: unknown): value is WorkspacePackage {
         (candidate.private === undefined ||
             typeof candidate.private === 'boolean')
     )
+}
+
+function pathExistsAsDirectory(filePath: string): boolean {
+    try {
+        return existsSync(filePath) && statSync(filePath).isDirectory()
+    } catch {
+        return false
+    }
 }
