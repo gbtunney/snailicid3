@@ -1,15 +1,9 @@
-import { getBaseConfig } from './base.config.js'
 import { getMergedRuleConfiguration } from './rules.js'
 import type {
     MarkdownlintConfiguration,
     MarkdownlintRuleConfiguration,
 } from './schema.js'
-import {
-    type ConfigFunctionOptions,
-    type ConfigToolApi,
-    defineConfig,
-    type IdentityDefineConfig,
-} from '../core/index.js'
+import { type ConfigFunctionOptions, defineConfig } from '../core/index.js'
 
 export const BASE_IGNORES = [
     '**/node_modules/**',
@@ -44,7 +38,7 @@ export const defineMarkdownlintConfig = <
     config: TConfig,
 ): TConfig => defineConfig(config)
 
-export const buildMarkdownlintConfigFunction = ({
+export const buildFunctionMarkdownlint = ({
     ignores = [],
     includes = ['**/*.md'],
     rules = {},
@@ -54,22 +48,3 @@ export const buildMarkdownlintConfigFunction = ({
     globs: includes,
     ignores: [...BASE_IGNORES, ...ignores],
 })
-
-export const Markdownlint = {
-    config: buildMarkdownlintConfigFunction,
-    defineConfig: defineMarkdownlintConfig,
-    rules: {
-        base: getBaseConfig,
-        merge: getMergedRuleConfiguration,
-    },
-} satisfies ConfigToolApi<
-    MarkdownlintConfig,
-    MarkdownlintConfigFunctionOptions,
-    IdentityDefineConfig<MarkdownlintConfig>,
-    {
-        rules: {
-            base: typeof getBaseConfig
-            merge: typeof getMergedRuleConfiguration
-        }
-    }
->

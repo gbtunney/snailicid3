@@ -77,19 +77,10 @@ snail_sh kv_pair "changed scopes" "${all_changed_scope:-root}"
 snail_sh kv_pair "affected scopes" "${affected_scope:-workspace}"
 snail_sh kv_pair "affected from main" "${affected_scope_base_main:-workspace}"
 
-if [[ "${REPORT_OUTDATED:-false}" == "true" ]]; then
-    if output="$(pnpm outdated -r 2>&1)"; then
-        snail_sh status_pair "dependencies" "current" "success"
-        if [[ -n "$output" ]]; then
-            snail_sh log "$output" grey
-        fi
-    else
-        snail_sh status_pair "dependencies" "outdated or unavailable" "warn"
-        if [[ -n "$output" ]]; then
-            snail_sh log "$output" grey
-        fi
-    fi
+snail_sh spacer 2
+if pnpm -r outdated; then
+    snail_sh status_pair "dependencies" "current" "success"
 else
-    snail_sh status_pair "dependencies" "skipped" "grey"
+    snail_sh status_pair "dependencies" "outdated" "warn"
 fi
 snail_sh spacer 1

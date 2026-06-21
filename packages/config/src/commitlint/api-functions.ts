@@ -2,22 +2,12 @@ import type { UserConfig as CommitlintUserConfig } from '@commitlint/types'
 import { merge as deepMerge } from 'ts-deepmerge'
 import type { LiteralUnion } from 'type-fest'
 import { commitlintDefaultConfig } from './base.js'
-import {
-    COMMIT_TYPES,
-    type ConventionalCommitType,
-    filterCommitTypes,
-} from './types.js'
+import { COMMIT_TYPES, type ConventionalCommitType } from './types.js'
 import {
     workspaceScopes,
-    workspaceScopesCsv,
     type WorkspaceScopesOptions,
 } from './workspace.scopes.js'
-import {
-    type ConfigFunctionOptions,
-    type ConfigToolApi,
-    defineConfig,
-    type IdentityDefineConfig,
-} from '../core/index.js'
+import { type ConfigFunctionOptions, defineConfig } from '../core/index.js'
 
 export type CommitlintConfig = CommitlintUserConfig
 
@@ -36,7 +26,7 @@ export const defineCommitlintConfig = <const TConfig extends CommitlintConfig>(
     config: TConfig,
 ): TConfig => defineConfig(config)
 
-export const buildCommitlintConfigFunction = ({
+export const buildFunctionCommitlint = ({
     appendScopes,
     appendTypes = [],
     overrides = {},
@@ -59,22 +49,3 @@ export const buildCommitlintConfigFunction = ({
         overrides,
     )
 }
-
-export const Commitlint = {
-    commitTypes: COMMIT_TYPES,
-    config: buildCommitlintConfigFunction,
-    defineConfig: defineCommitlintConfig,
-    filterCommitTypes,
-    workspaceScopes,
-    workspaceScopesCsv,
-} satisfies ConfigToolApi<
-    CommitlintConfig,
-    CommitlintConfigFunctionOptions,
-    IdentityDefineConfig<CommitlintConfig>,
-    {
-        commitTypes: typeof COMMIT_TYPES
-        filterCommitTypes: typeof filterCommitTypes
-        workspaceScopes: typeof workspaceScopes
-        workspaceScopesCsv: typeof workspaceScopesCsv
-    }
->

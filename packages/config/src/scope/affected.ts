@@ -2,18 +2,17 @@
 
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
+import { splitNonEmptyLines, uniqueSorted } from './../utilities/array.js'
+import { runCommand } from './../utilities/command.js'
 import { runCliIfEntrypoint } from './../utilities/entrypoint.js'
+import { getRepoRoot } from './../workspace/git.js'
+import { normalizeRepoPath } from './../workspace/paths.js'
 import {
     formatScopes,
-    getRepoRoot,
     isRootPackageName,
-    normalizeRepoPath,
-    runCommand,
     type ScopeFormat,
     shortenScopeName,
-    splitLines,
-    uniqueSorted,
-} from './lib.js'
+} from './../workspace/scopes.js'
 
 type ParsedArgs = {
     changesetFiles: Array<string>
@@ -27,7 +26,7 @@ type ParsedArgs = {
 
 export function main(args: Array<string> = process.argv.slice(2)): void {
     const parsed = parseArgs(args)
-    const repoRoot = getRepoRoot()
+    const repoRoot = getRepoRoot({ fallbackToCwd: true })
 
     const scopes = [
         ...(parsed.includeNxScopes
@@ -85,7 +84,7 @@ function collectDirtyRepoScopes(
         },
     ).stdout
 
-    return splitLines(`${staged}\n${unstaged}\n${untracked}`).flatMap(
+    return splitNonEmptyLines(`${staged}\n${unstaged}\n${untracked}`).flatMap(
         (filePath) => collectRepoScopesForPath(repoRoot, filePath, keepPrefix),
     )
 }
@@ -109,7 +108,7 @@ function collectNxAffectedScopes(
 
     if (result.status !== 0) return []
 
-    return splitLines(result.stdout).map((scope) =>
+    return splitNonEmptyLines(result.stdout).map((scope) =>
         normalizeScopeName(scope, parsed.keepPrefix),
     )
 }

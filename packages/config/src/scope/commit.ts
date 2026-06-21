@@ -1,20 +1,21 @@
 #!/usr/bin/env node
 
 import path from 'node:path'
+import { splitNonEmptyLines, uniqueSorted } from './../utilities/array.js'
+import { runCommand } from './../utilities/command.js'
 import { runCliIfEntrypoint } from './../utilities/entrypoint.js'
+import { getRepoRoot } from './../workspace/git.js'
 import {
     findNearestPackageJson,
-    formatScopes,
-    getRepoRoot,
-    isRootPackageName,
-    normalizeRepoPath,
     readPackageName,
-    runCommand,
+} from './../workspace/packages.js'
+import { normalizeRepoPath } from './../workspace/paths.js'
+import {
+    formatScopes,
+    isRootPackageName,
     type ScopeFormat,
     shortenScopeName,
-    splitLines,
-    uniqueSorted,
-} from './lib.js'
+} from './../workspace/scopes.js'
 
 type ChangeMode = 'all' | 'staged'
 type OutputMode = 'commit' | 'message' | 'scope'
@@ -34,7 +35,7 @@ type ParsedArgs = {
 
 export function main(args: Array<string> = process.argv.slice(2)): void {
     const parsed = parseArgs(args)
-    const repoRoot = getRepoRoot()
+    const repoRoot = getRepoRoot({ fallbackToCwd: true })
     if (parsed.validateOnly) {
         const [type] = parsed.positionals
 
@@ -105,7 +106,7 @@ function collectChangedPaths(
     mode: ChangeMode,
 ): Array<string> {
     if (mode === 'staged') {
-        return splitLines(
+        return splitNonEmptyLines(
             runCommand('git', ['diff', '--cached', '--name-only'], {
                 cwd: repoRoot,
             }).stdout,
@@ -126,7 +127,7 @@ function collectChangedPaths(
         { cwd: repoRoot },
     ).stdout
 
-    return splitLines(`${staged}\n${unstaged}\n${untracked}`)
+    return splitNonEmptyLines(`${staged}\n${unstaged}\n${untracked}`)
 }
 
 function collectScopes(

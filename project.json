@@ -38,13 +38,13 @@
         "lint": {
             "cache": true,
             "dependsOn": ["build:ts"],
-            "command": "prettier --check '**/*' '!{packages,apps}/**'  --ignore-unknown --no-error-on-unmatched-pattern && eslint --config eslint.config.ts ./*.ts ./*.mts ./*.cts --no-error-on-unmatched-pattern",
+            "command": "prettier --check '**/*' '!{packages,apps}/**'  '!**/*.api.md'  --ignore-unknown --no-error-on-unmatched-pattern && eslint --config eslint.config.ts ./*.ts ./*.mts ./*.cts --no-error-on-unmatched-pattern",
             "options": { "cwd": "{projectRoot}" }
         },
         "fix": {
             "cache": true,
             "dependsOn": ["build:ts"],
-            "command": "pnpm exec prettier --write '**/*' '!{packages,apps}/**'  --ignore-unknown  --no-error-on-unmatched-pattern && pnpm exec eslint --config eslint.config.ts ./*.ts ./*.mts ./*.cts --fix --no-error-on-unmatched-pattern",
+            "command": "pnpm exec prettier --write '**/*' '!{packages,apps}/**' '!**/*.api.md' --ignore-unknown  --no-error-on-unmatched-pattern && pnpm exec eslint --config eslint.config.ts ./*.ts ./*.mts ./*.cts --fix --no-error-on-unmatched-pattern",
             "options": { "cwd": "{projectRoot}" }
         },
         "lint:md": {

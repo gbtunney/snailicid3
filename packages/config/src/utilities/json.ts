@@ -56,7 +56,7 @@ export const isPlainObject = <Type extends UnknownRecord = UnknownRecord>(
     return prototype === Object.prototype || prototype === null
 }
 
-export const safeDeserializeJSON = <Type extends JsonValue = JsonValue>(
+const safeDeserializeJSON = <Type extends JsonValue = JsonValue>(
     data: unknown,
 ): Type | undefined => {
     const logger = getTraceLogger('safeDeserializeJSON')
@@ -69,7 +69,7 @@ export const safeDeserializeJSON = <Type extends JsonValue = JsonValue>(
     }
 }
 
-export function serializeJSON<Type extends Jsonifiable = Jsonifiable>(
+function serializeJSON<Type extends Jsonifiable = Jsonifiable>(
     value: unknown,
 ): string {
     if (typeof value !== 'string') {
@@ -85,12 +85,7 @@ export function serializeJSON<Type extends Jsonifiable = Jsonifiable>(
     }
 }
 
-/**
- * PrettyPrint a JSON object.
- *
- * @category Json
- */
-export const prettyPrintJSON = <Type extends Jsonifiable>(
+const prettyPrintJSON = <Type extends Jsonifiable>(
     value: Type,
     indentSpaces = 4,
 ): string => {
@@ -101,9 +96,12 @@ export const prettyPrintJSON = <Type extends Jsonifiable>(
     )
 }
 
-export const importJSON = async (
-    filename: string,
-): Promise<JsonValue | undefined> => {
+/**
+ * TODO can we make a isjsonifiable function for stirng,null,etc and these should use the serialize function ? also
+ * paths should reso
+ */
+const importJSON = async (filename: string): Promise<JsonValue | undefined> => {
+    /** Testing lintstaged */
     const absolutePath = path.resolve(filename)
     const logger = getTraceLogger('importJSON')
 
@@ -147,8 +145,7 @@ export type JSONExportEntry<Type extends Jsonifiable = JsonValue> = {
     filename: string
 }
 
-/** Throws error if file save fails */
-export const exportJSONFile = (
+const exportJSONFile = (
     config: JSONExportConfig,
     outdir?: string,
     /** File overwrite mode if exists */
@@ -215,4 +212,39 @@ export const exportJSONFile = (
     if (!success) throw new Error(prettyPrintJSON(Object.values(result_status)))
 
     return success
+}
+
+/** Eslint-disable-next-line perfectionist/sort-objects */
+export type JsonUtilities = {
+    deserialize: <Type extends JsonValue = JsonValue>(
+        data: unknown,
+    ) => Type | undefined
+    exportFile: (
+        config: JSONExportConfig,
+        outdir?: string,
+        overwrite?: boolean,
+        logData?: boolean,
+    ) => boolean
+    importFile: (filename: string) => Promise<JsonValue | undefined>
+    prettyPrint: <Type extends Jsonifiable>(
+        value: Type,
+        indentSpaces?: number,
+    ) => string
+    serialize: <Type extends Jsonifiable = Jsonifiable>(
+        value: unknown,
+    ) => string
+}
+
+export const json: JsonUtilities = {
+    deserialize: safeDeserializeJSON,
+    /** Throws error if file save fails */
+    exportFile: exportJSONFile,
+    importFile: importJSON,
+    /**
+     * PrettyPrint a JSON object.
+     *
+     * @category Json
+     */
+    prettyPrint: prettyPrintJSON,
+    serialize: serializeJSON,
 }

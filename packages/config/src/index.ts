@@ -20,7 +20,10 @@ export type { WorkspaceScopesOptions } from './commitlint/workspace.scopes.js'
 export { defineConfig } from './core/index.js'
 export type {
     AnyDefineConfig,
+    BaseConfigFunctionOptions,
     ConfigBuilder,
+    ConfigFunctionOptions,
+    ConfigTool,
     ConfigToolApi,
     IdentityDefineConfig,
 } from './core/index.js'
@@ -35,6 +38,7 @@ export { EsLint } from './eslint/index.js'
 export type {
     EsLintConfig,
     EsLintConfigFunctionOptions,
+    EsLintTool,
     TsConfig,
 } from './eslint/index.js'
 
@@ -47,6 +51,7 @@ export { LintStaged } from './lint-staged/index.js'
 export type {
     LintStagedConfig,
     LintStagedConfigFunctionOptions,
+    LintStagedTool,
 } from './lint-staged/index.js'
 /**
  * A Node.js command line interface and style checker / lint tool for Markdown files.
@@ -68,6 +73,11 @@ export type {
     PrettierConfigFunctionOptions,
     PrettierOptions,
     PrettierOverrides,
+    PrettierPlugin,
+    PrettierPluginName,
+    PrettierPluginPackageName,
+    PrettierTool,
+    ResolvedPrettierPlugin,
 } from './prettier/index.js'
 /* SHARED CONFIGURATIONS */
 export {
@@ -85,21 +95,27 @@ export type { PrettierFileExtensions } from './shared.js'
 export { MARKDOWN_FILE_EXTENSIONS } from './shared.js'
 
 export type { MarkdownFileExtensions } from './shared.js'
+export type {
+    ConfigToolRegistry,
+    ConfigToolRegistryEntry,
+} from './tool-registry.js'
 /* *  UTILITIES *  */
 export { expandExtensions } from './utilities/extensions.js'
+export type {
+    AllowedExtensions,
+    FileExtensionHint,
+} from './utilities/extensions.js'
 export {
-    exportJSONFile,
     //globFileFilter,
-    importJSON,
     isPlainObject,
-    prettyPrintJSON,
-    safeDeserializeJSON,
-    serializeJSON,
+    json,
 } from './utilities/json.js'
 export type {
     Json,
     JSONExportConfig,
     JSONExportEntry,
+    JsonUtilities,
+    PlainObject,
 } from './utilities/json.js'
 export { getFilePath } from './utilities/path.js'
 export { merge } from 'ts-deepmerge'

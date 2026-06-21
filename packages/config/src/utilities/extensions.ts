@@ -17,7 +17,7 @@ const ensureTrailingDot = (value: string): string => {
     return `${value}.`
 }
 
-type FileExtensionHint = LiteralUnion<AllowedExtensions, string>
+export type FileExtensionHint = LiteralUnion<AllowedExtensions, string>
 /**
  * Expands a list of file extensions by appending them to a normalized base pattern.
  *
