@@ -30,7 +30,7 @@
         "changeset:create": "pnpm changeset:prepare && pnpm exec gbt-changeset",
         "changeset:prepare": "pnpm run test && pnpm docs:build && pnpm api:report",
         "release:archive": "pnpm -r exec mkdir -p ./releases &&  pnpm -r --access public pack --pack-destination='./releases'",
-        "registry:start": "pnpm exec verdaccio",
+        "registry:start": "pnpm  exec verdaccio",
         "\n========== INSPECT >> ==========": "",
         "inspect:nx": "pnpm nx:graph",
         "inspect:lint": "pnpm exec eslint-config-inspector --no-open",
