@@ -1,7 +1,3 @@
-import { typedoc } from '@snailicid3/build-config'
-import url from 'node:url'
+import { Typedoc } from '@snailicid3/config'
 
-const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
-const typeDocConfig = typedoc.configMarkdown(__dirname)
-
-export default typeDocConfig
+export default Typedoc.markdown.config({ meta: import.meta })
