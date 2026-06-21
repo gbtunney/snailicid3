@@ -13,3 +13,14 @@ export type {
 } from './api-functions.js'
 
 export type { PrettierOptions, PrettierOverrides } from './options.js'
+
+export {
+    definePrettierPlugins,
+    resolvePluginRegistry,
+    resolvePrettierPlugin,
+} from './plugins/plugin-registry.js'
+
+export type {
+    PrettierPluginPackageName,
+    ResolvedPrettierPlugin,
+} from './plugins/plugin-registry.js'

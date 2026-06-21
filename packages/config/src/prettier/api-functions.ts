@@ -5,11 +5,14 @@ import type {
     PrettierOverrides,
 } from './options.js'
 import {
-    type AnyPrettierPlugin,
+    getBuiltInPrettierPlugins,
     getPrettierPluginsBundled,
     getPrettierPluginsList,
-    type PrettierPluginName,
 } from './plugins.js'
+import type {
+    PrettierPluginPackageName,
+    ResolvedPrettierPlugin,
+} from './plugins/plugin-registry.js'
 import {
     type ConfigFunctionOptions,
     type ConfigToolApi,
@@ -30,7 +33,7 @@ export type PrettierConfigFunctionOptions = ConfigFunctionOptions<{
     plugins?: Array<PrettierPlugin>
 }>
 
-type PrettierPlugin = AnyPrettierPlugin | PrettierPluginName
+type PrettierPlugin = PrettierPluginPackageName | ResolvedPrettierPlugin
 
 export const definePrettierConfig = <const TConfig extends PrettierConfig>(
     config: TConfig,
@@ -61,6 +64,7 @@ export const Prettier = {
     options: { base: getDefaultOptions },
     overrides: { base: getDefaultOverrides },
     plugins: {
+        builtIn: getBuiltInPrettierPlugins,
         bundled: getPrettierPluginsBundled,
         list: getPrettierPluginsList,
     },
@@ -72,6 +76,7 @@ export const Prettier = {
         options: { base: typeof getDefaultOptions }
         overrides: { base: typeof getDefaultOverrides }
         plugins: {
+            builtIn: typeof getBuiltInPrettierPlugins
             bundled: typeof getPrettierPluginsBundled
             list: typeof getPrettierPluginsList
         }
