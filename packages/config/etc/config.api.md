@@ -703,6 +703,7 @@ export type TypedocConfigFunction<Type extends object = object> = (input?: Typed
 export type TypedocConfigFunctionOptions<Type extends object = object> = ConfigFunctionOptions & {
     cwd?: string;
     dirname?: string;
+    meta?: ImportMeta;
     overrides?: TypedocOptions<Type>;
 };
 
