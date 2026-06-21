@@ -77,7 +77,7 @@ snail_sh kv_pair "changed scopes" "${all_changed_scope:-root}"
 snail_sh kv_pair "affected scopes" "${affected_scope:-workspace}"
 snail_sh kv_pair "affected from main" "${affected_scope_base_main:-workspace}"
 
-snail_sh spacer 1
+snail_sh spacer 2
 if pnpm -r outdated; then
     snail_sh status_pair "dependencies" "current" "success"
 else
