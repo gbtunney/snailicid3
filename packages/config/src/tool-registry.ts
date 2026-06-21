@@ -24,8 +24,13 @@ import type {
     PrettierConfigFunctionOptions,
 } from './prettier/index.js'
 import { Prettier } from './prettier/index.js'
+import type {
+    TypedocConfig,
+    TypedocConfigFunctionOptions,
+} from './typedoc/index.js'
+import { Typedoc } from './typedoc/index.js'
 
-type AnyConfigToolApi = ConfigToolApi<object, object, AnyDefineConfig>
+type AnyConfigToolApi = ConfigToolApi<object, never, AnyDefineConfig>
 
 export const configTools = {
     commitlint: Commitlint,
@@ -33,6 +38,7 @@ export const configTools = {
     lintStaged: LintStaged,
     markdownlint: Markdownlint,
     prettier: Prettier,
+    typedoc: Typedoc,
 } satisfies Record<string, AnyConfigToolApi>
 
 export type ConfigToolRegistry = {
@@ -52,6 +58,10 @@ export type ConfigToolRegistry = {
     prettier: ConfigToolRegistryEntry<
         PrettierConfig,
         PrettierConfigFunctionOptions
+    >
+    typedoc: ConfigToolRegistryEntry<
+        TypedocConfig,
+        TypedocConfigFunctionOptions
     >
 }
 
