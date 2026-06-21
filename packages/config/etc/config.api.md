@@ -45,11 +45,11 @@ export type BaseConfigFunctionOptions = {
 };
 
 // @public (undocumented)
-export const COMMIT_TYPES: ("feat" | "fix" | "docs" | "style" | "refactor" | "perf" | "test" | "build" | "ci" | "chore" | "revert" | "changeset" | "release")[];
+export const COMMIT_TYPES: ("style" | "feat" | "fix" | "docs" | "refactor" | "perf" | "test" | "build" | "ci" | "chore" | "revert" | "changeset" | "release")[];
 
 // @public (undocumented)
 export const Commitlint: {
-    commitTypes: ("feat" | "fix" | "docs" | "style" | "refactor" | "perf" | "test" | "build" | "ci" | "chore" | "revert" | "changeset" | "release")[];
+    commitTypes: ("style" | "feat" | "fix" | "docs" | "refactor" | "perf" | "test" | "build" | "ci" | "chore" | "revert" | "changeset" | "release")[];
     config: (input?: CommitlintConfigFunctionOptions) => CommitlintConfig;
     defineConfig: <const TConfig extends CommitlintConfig>(config: TConfig) => TConfig;
     filterCommitTypes: (exclude: ReadonlyArray<ConventionalCommitType>) => Array<ConventionalCommitType>;
