@@ -442,6 +442,13 @@ export const Typedoc: {
     materialTheme: {
         config: TypedocConfigFunction<MaterialThemeOptions>;
     };
+    plugins: {
+        default: () => Array<TypedocPluginName>;
+        markdown: () => Array<TypedocPluginName>;
+        materialTheme: () => Array<TypedocPluginName>;
+        remark: () => Array<TypedocPluginName>;
+        vitepress: () => Array<TypedocPluginName>;
+    };
     vitepress: {
         config: TypedocConfigFunction<    {
         anchorPrefix?: string | undefined;
@@ -615,6 +622,13 @@ export const typedoc: {
     materialTheme: {
         config: TypedocConfigFunction<MaterialThemeOptions>;
     };
+    plugins: {
+        default: () => Array<TypedocPluginName>;
+        markdown: () => Array<TypedocPluginName>;
+        materialTheme: () => Array<TypedocPluginName>;
+        remark: () => Array<TypedocPluginName>;
+        vitepress: () => Array<TypedocPluginName>;
+    };
     vitepress: {
         config: TypedocConfigFunction<    {
         anchorPrefix?: string | undefined;
@@ -730,6 +744,21 @@ export type TypedocMaterialThemeConfigFunctionOptions = TypedocConfigFunctionOpt
 
 // @public (undocumented)
 export type TypedocOptions<Type extends object = object> = Partial<Type & TypeDocOptions>;
+
+// Warning: (ae-forgotten-export) The symbol "KeysOf" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "TYPEDOC_PLUGINS" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type TypedocPluginName = KeysOf<typeof TYPEDOC_PLUGINS>;
+
+// @public (undocumented)
+export type TypedocPluginPackageName = `typedoc-${string}-theme` | `typedoc-plugin-${string}`;
+
+// @public (undocumented)
+export type TypedocPluginRegistry = Partial<Record<TypedocPluginPackageName, TypedocPluginRegistryEntry>>;
+
+// @public (undocumented)
+export type TypedocPluginRegistryEntry = false | true;
 
 // @public (undocumented)
 export type TypedocTool = ConfigTool<TypedocConfig, TypedocConfigFunctionOptions, typeof Typedoc.defineConfig, Omit<typeof Typedoc, 'config' | 'defineConfig'>>;
