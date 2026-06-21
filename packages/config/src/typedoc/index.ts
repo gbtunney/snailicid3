@@ -29,7 +29,7 @@ export const typedoc: Typedoc = {
     materialTheme,
     //  plugin:{load} //todo: triggers error
 }
-export { docServer } from './docServer.js'
+//export { docServer } from './docServer.js'
 export {
     configMarkdown as typedocMarkdownConfig,
     configVitepress as typedocVitepressConfig,

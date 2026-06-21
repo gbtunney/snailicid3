@@ -8,6 +8,7 @@ import type {
 import type { BuildAdapter } from '../../build/ports.js'
 import { getPlanEntry } from '../../build/ports.js'
 
+export type ViteConfig = Array<UserConfig>[0]
 export type ViteConfigInput = Array<UserConfig>
 
 type ViteLibraryFormat = 'cjs' | 'es' | 'iife' | 'umd'

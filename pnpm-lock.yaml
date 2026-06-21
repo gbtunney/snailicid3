@@ -125,9 +125,6 @@ importers:
             publint:
                 specifier: ^0.3.21
                 version: 0.3.21
-            remark-toc:
-                specifier: ^9.0.0
-                version: 9.0.0
             rollup:
                 specifier: ^4.61.1
                 version: 4.62.2
@@ -149,24 +146,6 @@ importers:
             type-fest:
                 specifier: ^5.7.0
                 version: 5.7.0
-            typedoc:
-                specifier: ^0.28.19
-                version: 0.28.19(typescript@6.0.3)
-            typedoc-material-theme:
-                specifier: ^1.4.1
-                version: 1.4.1(typedoc@0.28.19(typescript@6.0.3))
-            typedoc-plugin-markdown:
-                specifier: ^4.12.0
-                version: 4.12.0(typedoc@0.28.19(typescript@6.0.3))
-            typedoc-plugin-remark:
-                specifier: ^2.0.1
-                version: 2.0.1(typedoc-plugin-markdown@4.12.0(typedoc@0.28.19(typescript@6.0.3)))
-            typedoc-plugin-zod:
-                specifier: ^1.4.3
-                version: 1.4.3(typedoc@0.28.19(typescript@6.0.3))
-            unified-prettier:
-                specifier: ^2.0.1
-                version: 2.0.1(prettier@3.8.4)
             unplugin-unused:
                 specifier: ^0.5.7
                 version: 0.5.7
@@ -413,6 +392,9 @@ importers:
             prettier-plugin-sh:
                 specifier: ^0.18.1
                 version: 0.18.1(prettier@3.8.4)
+            remark-toc:
+                specifier: ^9.0.0
+                version: 9.0.0
             ts-deepmerge:
                 specifier: ^8.0.0
                 version: 8.0.0
@@ -422,12 +404,24 @@ importers:
             typedoc:
                 specifier: ^0.28.19
                 version: 0.28.19(typescript@6.0.3)
+            typedoc-material-theme:
+                specifier: ^1.4.1
+                version: 1.4.1(typedoc@0.28.19(typescript@6.0.3))
             typedoc-plugin-markdown:
                 specifier: ^4.12.0
                 version: 4.12.0(typedoc@0.28.19(typescript@6.0.3))
+            typedoc-plugin-remark:
+                specifier: ^2.0.1
+                version: 2.0.1(typedoc-plugin-markdown@4.12.0(typedoc@0.28.19(typescript@6.0.3)))
+            typedoc-plugin-zod:
+                specifier: ^1.4.3
+                version: 1.4.3(typedoc@0.28.19(typescript@6.0.3))
             typescript-eslint:
                 specifier: ^8.61.1
                 version: 8.61.1(eslint@10.5.0(jiti@2.7.0))(typescript@6.0.3)
+            unified-prettier:
+                specifier: ^2.0.1
+                version: 2.0.1(prettier@3.8.4)
             yargs:
                 specifier: ^18.0.0
                 version: 18.0.0

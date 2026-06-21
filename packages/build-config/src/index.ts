@@ -1,5 +1,6 @@
 // ── Tsdown adapter — Rolldown-powered library bundling ───────────────────────
 export {
+    defineTsdownConfig,
     entryToTsdownConfig,
     toTsdownConfig,
     toTsdownConfigs,
@@ -8,6 +9,8 @@ export type { TsdownConfigInput } from './adapters/tsdown/index.js'
 
 // ── Vite adapter — Browser/universal library bundling ───────────────────────
 export {
+    defineViteConfig,
+    docServer,
     entryToViteConfig,
     toViteConfig,
     toViteConfigs,
@@ -43,10 +46,6 @@ export {
     // schemaBasePackage,
     // schemaRequiredScripts,
 } from './build/schemas/package.js'
-
-// ── Typedoc ───────────────────────────────────────────────────────────────────
-export { docServer, typedoc } from './typedoc/index.js'
-export type * from './typedoc/index.js'
 
 // ── Vitest ────────────────────────────────────────────────────────────────────
 export { vitest } from './vitest/index.js'
