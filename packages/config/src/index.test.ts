@@ -12,8 +12,14 @@ import {
     Prettier,
     PRETTIER_FILE_EXTENSIONS,
     TS_FILE_EXTENSIONS,
+    Typedoc,
+    typedoc,
 } from './index.js'
-import type { ConfigToolRegistry, MarkdownlintTool } from './index.js'
+import type {
+    ConfigToolRegistry,
+    MarkdownlintTool,
+    TypedocTool,
+} from './index.js'
 
 describe('file extension constants', () => {
     test('JS_FILE_EXTENSIONS contains js', () => {
@@ -62,6 +68,7 @@ describe('tool namespace API', () => {
         ['LintStaged', LintStaged],
         ['Markdownlint', Markdownlint],
         ['Prettier', Prettier],
+        ['Typedoc', Typedoc],
     ])('%s exposes config and defineConfig', (_name, tool) => {
         expect(typeof tool.config).toBe('function')
         expect(typeof tool.defineConfig).toBe('function')
@@ -78,6 +85,7 @@ describe('tool namespace API', () => {
         expect('buildFunctionLintStaged' in ConfigPackage).toBe(false)
         expect('buildFunctionMarkdownlint' in ConfigPackage).toBe(false)
         expect('buildFunctionPrettier' in ConfigPackage).toBe(false)
+        expect('buildFunctionTypedoc' in ConfigPackage).toBe(false)
     })
 
     test('registry type map exposes native config and function options', () => {
@@ -98,6 +106,20 @@ describe('tool namespace API', () => {
         const config: MarkdownlintTool['config'] = api.config(options)
 
         expect(config.config.MD002).toBe(false)
+    })
+
+    test('typedoc namespace follows the tool API shape', () => {
+        const options: ConfigToolRegistry['typedoc']['functionOptions'] = {
+            overrides: { excludeExternals: true },
+        }
+        const api: TypedocTool['api'] = Typedoc
+        const config = api.config(options)
+
+        expect(typedoc).toBe(Typedoc)
+        expect(config?.excludeExternals).toBe(true)
+        expect(typeof Typedoc.markdown.config).toBe('function')
+        expect(typeof Typedoc.materialTheme.config).toBe('function')
+        expect(typeof Typedoc.vitepress.config).toBe('function')
     })
 })
 

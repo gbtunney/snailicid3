@@ -99,6 +99,25 @@ export type {
     ConfigToolRegistry,
     ConfigToolRegistryEntry,
 } from './tool-registry.js'
+/**
+ * @namespace TypeDoc Configuration
+ * @see [TypeDoc - Documentation Generator for TypeScript Projects](https://typedoc.org/)
+ */
+export { Typedoc, typedoc } from './typedoc/index.js'
+export type {
+    MaterialThemeOptions,
+    RemarkPluginOptions,
+    TypedocConfig,
+    TypedocConfigFunction,
+    TypedocConfigFunctionOptions,
+    TypedocFileOptions,
+    TypedocMarkdownConfigFunctionOptions,
+    TypedocMarkdownOptions,
+    TypedocMarkdownPluginOptions,
+    TypedocMaterialThemeConfigFunctionOptions,
+    TypedocOptions,
+    TypedocTool,
+} from './typedoc/index.js'
 /* *  UTILITIES *  */
 export { expandExtensions } from './utilities/extensions.js'
 export type {

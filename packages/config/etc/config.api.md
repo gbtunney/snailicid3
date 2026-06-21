@@ -23,8 +23,10 @@ import { merge } from 'ts-deepmerge';
 import type { Options } from 'prettier-plugin-jsdoc';
 import { Options as Options_2 } from 'prettier';
 import type { Plugin } from 'prettier';
+import { PluginOptions } from 'typedoc-plugin-markdown';
 import { Spread } from 'type-fest';
 import { Config as TsConfig } from 'typescript-eslint';
+import { TypeDocOptions } from 'typedoc';
 import type { UnknownRecord } from 'type-fest';
 import type { UserConfig } from '@commitlint/types';
 
@@ -47,7 +49,7 @@ export const COMMIT_TYPES: ("style" | "feat" | "fix" | "docs" | "refactor" | "pe
 
 // @public (undocumented)
 export const Commitlint: {
-    commitTypes: ("feat" | "fix" | "docs" | "style" | "refactor" | "perf" | "test" | "build" | "ci" | "chore" | "revert" | "changeset" | "release")[];
+    commitTypes: ("style" | "feat" | "fix" | "docs" | "refactor" | "perf" | "test" | "build" | "ci" | "chore" | "revert" | "changeset" | "release")[];
     config: (input?: CommitlintConfigFunctionOptions) => CommitlintConfig;
     defineConfig: <const TConfig extends CommitlintConfig>(config: TConfig) => TConfig;
     filterCommitTypes: (exclude: ReadonlyArray<ConventionalCommitType>) => Array<ConventionalCommitType>;
@@ -98,6 +100,7 @@ export type ConfigToolRegistry = {
     lintStaged: ConfigToolRegistryEntry<LintStagedConfig, LintStagedConfigFunctionOptions>;
     markdownlint: ConfigToolRegistryEntry<MarkdownlintConfig, MarkdownlintConfigFunctionOptions>;
     prettier: ConfigToolRegistryEntry<PrettierConfig, PrettierConfigFunctionOptions>;
+    typedoc: ConfigToolRegistryEntry<TypedocConfig, TypedocConfigFunctionOptions>;
 };
 
 // @public (undocumented)
@@ -256,6 +259,11 @@ export type MarkdownlintRuleConfiguration = Record<string, boolean | Record<stri
 // @public (undocumented)
 export type MarkdownlintTool = ConfigTool<MarkdownlintConfig, MarkdownlintConfigFunctionOptions, typeof Markdownlint.defineConfig, Omit<typeof Markdownlint, 'config' | 'defineConfig'>>;
 
+// @public (undocumented)
+export type MaterialThemeOptions = {
+    themeColor?: string;
+};
+
 export { merge }
 
 // @public (undocumented)
@@ -321,6 +329,12 @@ export type PrettierPluginPackageName = `@prettier/${string}` | `prettier-plugin
 export type PrettierTool = ConfigTool<PrettierConfig, PrettierConfigFunctionOptions, typeof Prettier.defineConfig, Omit<typeof Prettier, 'config' | 'defineConfig'>>;
 
 // @public (undocumented)
+export type RemarkPluginOptions = {
+    remarkPlugins?: unknown;
+    remarkStringifyOptions?: unknown;
+};
+
+// @public (undocumented)
 export type ResolvedPrettierPlugin = Plugin & {
     readonly [RESOLVED_PRETTIER_PLUGIN]: true;
 };
@@ -332,6 +346,386 @@ export { TsConfig }
 
 // @public (undocumented)
 export type TSFileExtensions = ArrayValues<typeof TS_FILE_EXTENSIONS>;
+
+// @public (undocumented)
+export const Typedoc: {
+    config: TypedocConfigFunction;
+    defineConfig: <const TConfig extends TypedocConfig>(config: TConfig) => TConfig;
+    markdown: {
+        config: TypedocConfigFunction<    {
+        anchorPrefix?: string | undefined;
+        blockTagsPreserveOrder?: string[] | undefined;
+        classPropertiesFormat?: "list" | "table" | "htmlTable" | undefined;
+        customAnchorsFormat?: "curlyBrace" | "escapedCurlyBrace" | "squareBracket" | undefined;
+        entryFileName?: string | undefined;
+        entryModule?: string | undefined;
+        enumMembersFormat?: "list" | "table" | "htmlTable" | undefined;
+        excludeGroups?: boolean | undefined;
+        excludeScopesInPaths?: boolean | undefined;
+        expandObjects?: boolean | undefined;
+        expandParameters?: boolean | undefined;
+        fileExtension?: string | undefined;
+        flattenOutputFiles?: boolean | undefined;
+        formatWithPrettier?: boolean | undefined;
+        hideBreadcrumbs?: boolean | undefined;
+        hideGroupHeadings?: boolean | undefined;
+        hidePageHeader?: boolean | undefined;
+        hidePageTitle?: boolean | undefined;
+        indexFormat?: "list" | "table" | "htmlTable" | undefined;
+        interfacePropertiesFormat?: "list" | "table" | "htmlTable" | undefined;
+        membersWithOwnFile?: ("Enum" | "Variable" | "Function" | "Class" | "Interface" | "TypeAlias")[] | undefined;
+        mergeReadme?: boolean | undefined;
+        modulesFileName?: string | undefined;
+        navigationJson?: string | undefined;
+        navigationModel?: {
+        excludeGroups?: boolean;
+        excludeCategories?: boolean;
+        excludeFolders?: boolean;
+        } | undefined;
+        outputFileStrategy?: "members" | "modules" | undefined;
+        pageTitleTemplates?: {
+        index?: string | ((name: {
+        projectName: string;
+        version: string;
+        }) => string);
+        member?: string | ((name: {
+        name: string;
+        rawName: string;
+        kind: string;
+        isDeprecated: boolean;
+        group?: string;
+        codeKeyword?: string;
+        keyword?: string;
+        }) => string);
+        module?: string | ((name: {
+        name: string;
+        rawName: string;
+        kind: string;
+        isDeprecated: boolean;
+        }) => string);
+        } | undefined;
+        parametersFormat?: "list" | "table" | "htmlTable" | undefined;
+        preserveAnchorCasing?: boolean | undefined;
+        prettierConfigFile?: string | undefined;
+        propertiesFormat?: "list" | "table" | "htmlTable" | undefined;
+        propertyMembersFormat?: "list" | "table" | "htmlTable" | undefined;
+        publicPath?: string | undefined;
+        sanitizeComments?: boolean | undefined;
+        strikeDeprecatedPageTitles?: boolean | undefined;
+        tableColumnSettings?: {
+        hideDefaults?: boolean;
+        hideInherited?: boolean;
+        hideModifiers?: boolean;
+        hideOverrides?: boolean;
+        hideSources?: boolean;
+        hideValues?: boolean;
+        leftAlignHeaders?: boolean;
+        } | undefined;
+        textContentMappings?: Record<string, any> | undefined;
+        typeAliasPropertiesFormat?: "list" | "table" | "htmlTable" | undefined;
+        typeDeclarationFormat?: "list" | "table" | "htmlTable" | undefined;
+        typeDeclarationVisibility?: "compact" | "verbose" | undefined;
+        useCodeBlocks?: boolean | undefined;
+        useCustomAnchors?: boolean | undefined;
+        useHTMLAnchors?: boolean | undefined;
+        useHTMLEncodedBrackets?: boolean | undefined;
+        remarkPlugins?: unknown;
+        remarkStringifyOptions?: unknown;
+        }>;
+    };
+    materialTheme: {
+        config: TypedocConfigFunction<MaterialThemeOptions>;
+    };
+    vitepress: {
+        config: TypedocConfigFunction<    {
+        anchorPrefix?: string | undefined;
+        blockTagsPreserveOrder?: string[] | undefined;
+        classPropertiesFormat?: "list" | "table" | "htmlTable" | undefined;
+        customAnchorsFormat?: "curlyBrace" | "escapedCurlyBrace" | "squareBracket" | undefined;
+        entryFileName?: string | undefined;
+        entryModule?: string | undefined;
+        enumMembersFormat?: "list" | "table" | "htmlTable" | undefined;
+        excludeGroups?: boolean | undefined;
+        excludeScopesInPaths?: boolean | undefined;
+        expandObjects?: boolean | undefined;
+        expandParameters?: boolean | undefined;
+        fileExtension?: string | undefined;
+        flattenOutputFiles?: boolean | undefined;
+        formatWithPrettier?: boolean | undefined;
+        hideBreadcrumbs?: boolean | undefined;
+        hideGroupHeadings?: boolean | undefined;
+        hidePageHeader?: boolean | undefined;
+        hidePageTitle?: boolean | undefined;
+        indexFormat?: "list" | "table" | "htmlTable" | undefined;
+        interfacePropertiesFormat?: "list" | "table" | "htmlTable" | undefined;
+        membersWithOwnFile?: ("Enum" | "Variable" | "Function" | "Class" | "Interface" | "TypeAlias")[] | undefined;
+        mergeReadme?: boolean | undefined;
+        modulesFileName?: string | undefined;
+        navigationJson?: string | undefined;
+        navigationModel?: {
+        excludeGroups?: boolean;
+        excludeCategories?: boolean;
+        excludeFolders?: boolean;
+        } | undefined;
+        outputFileStrategy?: "members" | "modules" | undefined;
+        pageTitleTemplates?: {
+        index?: string | ((name: {
+        projectName: string;
+        version: string;
+        }) => string);
+        member?: string | ((name: {
+        name: string;
+        rawName: string;
+        kind: string;
+        isDeprecated: boolean;
+        group?: string;
+        codeKeyword?: string;
+        keyword?: string;
+        }) => string);
+        module?: string | ((name: {
+        name: string;
+        rawName: string;
+        kind: string;
+        isDeprecated: boolean;
+        }) => string);
+        } | undefined;
+        parametersFormat?: "list" | "table" | "htmlTable" | undefined;
+        preserveAnchorCasing?: boolean | undefined;
+        prettierConfigFile?: string | undefined;
+        propertiesFormat?: "list" | "table" | "htmlTable" | undefined;
+        propertyMembersFormat?: "list" | "table" | "htmlTable" | undefined;
+        publicPath?: string | undefined;
+        sanitizeComments?: boolean | undefined;
+        strikeDeprecatedPageTitles?: boolean | undefined;
+        tableColumnSettings?: {
+        hideDefaults?: boolean;
+        hideInherited?: boolean;
+        hideModifiers?: boolean;
+        hideOverrides?: boolean;
+        hideSources?: boolean;
+        hideValues?: boolean;
+        leftAlignHeaders?: boolean;
+        } | undefined;
+        textContentMappings?: Record<string, any> | undefined;
+        typeAliasPropertiesFormat?: "list" | "table" | "htmlTable" | undefined;
+        typeDeclarationFormat?: "list" | "table" | "htmlTable" | undefined;
+        typeDeclarationVisibility?: "compact" | "verbose" | undefined;
+        useCodeBlocks?: boolean | undefined;
+        useCustomAnchors?: boolean | undefined;
+        useHTMLAnchors?: boolean | undefined;
+        useHTMLEncodedBrackets?: boolean | undefined;
+        remarkPlugins?: unknown;
+        remarkStringifyOptions?: unknown;
+        }>;
+    };
+};
+
+// @public (undocumented)
+export const typedoc: {
+    config: TypedocConfigFunction;
+    defineConfig: <const TConfig extends TypedocConfig>(config: TConfig) => TConfig;
+    markdown: {
+        config: TypedocConfigFunction<    {
+        anchorPrefix?: string | undefined;
+        blockTagsPreserveOrder?: string[] | undefined;
+        classPropertiesFormat?: "list" | "table" | "htmlTable" | undefined;
+        customAnchorsFormat?: "curlyBrace" | "escapedCurlyBrace" | "squareBracket" | undefined;
+        entryFileName?: string | undefined;
+        entryModule?: string | undefined;
+        enumMembersFormat?: "list" | "table" | "htmlTable" | undefined;
+        excludeGroups?: boolean | undefined;
+        excludeScopesInPaths?: boolean | undefined;
+        expandObjects?: boolean | undefined;
+        expandParameters?: boolean | undefined;
+        fileExtension?: string | undefined;
+        flattenOutputFiles?: boolean | undefined;
+        formatWithPrettier?: boolean | undefined;
+        hideBreadcrumbs?: boolean | undefined;
+        hideGroupHeadings?: boolean | undefined;
+        hidePageHeader?: boolean | undefined;
+        hidePageTitle?: boolean | undefined;
+        indexFormat?: "list" | "table" | "htmlTable" | undefined;
+        interfacePropertiesFormat?: "list" | "table" | "htmlTable" | undefined;
+        membersWithOwnFile?: ("Enum" | "Variable" | "Function" | "Class" | "Interface" | "TypeAlias")[] | undefined;
+        mergeReadme?: boolean | undefined;
+        modulesFileName?: string | undefined;
+        navigationJson?: string | undefined;
+        navigationModel?: {
+        excludeGroups?: boolean;
+        excludeCategories?: boolean;
+        excludeFolders?: boolean;
+        } | undefined;
+        outputFileStrategy?: "members" | "modules" | undefined;
+        pageTitleTemplates?: {
+        index?: string | ((name: {
+        projectName: string;
+        version: string;
+        }) => string);
+        member?: string | ((name: {
+        name: string;
+        rawName: string;
+        kind: string;
+        isDeprecated: boolean;
+        group?: string;
+        codeKeyword?: string;
+        keyword?: string;
+        }) => string);
+        module?: string | ((name: {
+        name: string;
+        rawName: string;
+        kind: string;
+        isDeprecated: boolean;
+        }) => string);
+        } | undefined;
+        parametersFormat?: "list" | "table" | "htmlTable" | undefined;
+        preserveAnchorCasing?: boolean | undefined;
+        prettierConfigFile?: string | undefined;
+        propertiesFormat?: "list" | "table" | "htmlTable" | undefined;
+        propertyMembersFormat?: "list" | "table" | "htmlTable" | undefined;
+        publicPath?: string | undefined;
+        sanitizeComments?: boolean | undefined;
+        strikeDeprecatedPageTitles?: boolean | undefined;
+        tableColumnSettings?: {
+        hideDefaults?: boolean;
+        hideInherited?: boolean;
+        hideModifiers?: boolean;
+        hideOverrides?: boolean;
+        hideSources?: boolean;
+        hideValues?: boolean;
+        leftAlignHeaders?: boolean;
+        } | undefined;
+        textContentMappings?: Record<string, any> | undefined;
+        typeAliasPropertiesFormat?: "list" | "table" | "htmlTable" | undefined;
+        typeDeclarationFormat?: "list" | "table" | "htmlTable" | undefined;
+        typeDeclarationVisibility?: "compact" | "verbose" | undefined;
+        useCodeBlocks?: boolean | undefined;
+        useCustomAnchors?: boolean | undefined;
+        useHTMLAnchors?: boolean | undefined;
+        useHTMLEncodedBrackets?: boolean | undefined;
+        remarkPlugins?: unknown;
+        remarkStringifyOptions?: unknown;
+        }>;
+    };
+    materialTheme: {
+        config: TypedocConfigFunction<MaterialThemeOptions>;
+    };
+    vitepress: {
+        config: TypedocConfigFunction<    {
+        anchorPrefix?: string | undefined;
+        blockTagsPreserveOrder?: string[] | undefined;
+        classPropertiesFormat?: "list" | "table" | "htmlTable" | undefined;
+        customAnchorsFormat?: "curlyBrace" | "escapedCurlyBrace" | "squareBracket" | undefined;
+        entryFileName?: string | undefined;
+        entryModule?: string | undefined;
+        enumMembersFormat?: "list" | "table" | "htmlTable" | undefined;
+        excludeGroups?: boolean | undefined;
+        excludeScopesInPaths?: boolean | undefined;
+        expandObjects?: boolean | undefined;
+        expandParameters?: boolean | undefined;
+        fileExtension?: string | undefined;
+        flattenOutputFiles?: boolean | undefined;
+        formatWithPrettier?: boolean | undefined;
+        hideBreadcrumbs?: boolean | undefined;
+        hideGroupHeadings?: boolean | undefined;
+        hidePageHeader?: boolean | undefined;
+        hidePageTitle?: boolean | undefined;
+        indexFormat?: "list" | "table" | "htmlTable" | undefined;
+        interfacePropertiesFormat?: "list" | "table" | "htmlTable" | undefined;
+        membersWithOwnFile?: ("Enum" | "Variable" | "Function" | "Class" | "Interface" | "TypeAlias")[] | undefined;
+        mergeReadme?: boolean | undefined;
+        modulesFileName?: string | undefined;
+        navigationJson?: string | undefined;
+        navigationModel?: {
+        excludeGroups?: boolean;
+        excludeCategories?: boolean;
+        excludeFolders?: boolean;
+        } | undefined;
+        outputFileStrategy?: "members" | "modules" | undefined;
+        pageTitleTemplates?: {
+        index?: string | ((name: {
+        projectName: string;
+        version: string;
+        }) => string);
+        member?: string | ((name: {
+        name: string;
+        rawName: string;
+        kind: string;
+        isDeprecated: boolean;
+        group?: string;
+        codeKeyword?: string;
+        keyword?: string;
+        }) => string);
+        module?: string | ((name: {
+        name: string;
+        rawName: string;
+        kind: string;
+        isDeprecated: boolean;
+        }) => string);
+        } | undefined;
+        parametersFormat?: "list" | "table" | "htmlTable" | undefined;
+        preserveAnchorCasing?: boolean | undefined;
+        prettierConfigFile?: string | undefined;
+        propertiesFormat?: "list" | "table" | "htmlTable" | undefined;
+        propertyMembersFormat?: "list" | "table" | "htmlTable" | undefined;
+        publicPath?: string | undefined;
+        sanitizeComments?: boolean | undefined;
+        strikeDeprecatedPageTitles?: boolean | undefined;
+        tableColumnSettings?: {
+        hideDefaults?: boolean;
+        hideInherited?: boolean;
+        hideModifiers?: boolean;
+        hideOverrides?: boolean;
+        hideSources?: boolean;
+        hideValues?: boolean;
+        leftAlignHeaders?: boolean;
+        } | undefined;
+        textContentMappings?: Record<string, any> | undefined;
+        typeAliasPropertiesFormat?: "list" | "table" | "htmlTable" | undefined;
+        typeDeclarationFormat?: "list" | "table" | "htmlTable" | undefined;
+        typeDeclarationVisibility?: "compact" | "verbose" | undefined;
+        useCodeBlocks?: boolean | undefined;
+        useCustomAnchors?: boolean | undefined;
+        useHTMLAnchors?: boolean | undefined;
+        useHTMLEncodedBrackets?: boolean | undefined;
+        remarkPlugins?: unknown;
+        remarkStringifyOptions?: unknown;
+        }>;
+    };
+};
+
+// @public (undocumented)
+export type TypedocConfig = TypedocOptions;
+
+// @public (undocumented)
+export type TypedocConfigFunction<Type extends object = object> = (input?: TypedocConfigFunctionOptions<Type>) => TypedocOptions<Type>;
+
+// @public (undocumented)
+export type TypedocConfigFunctionOptions<Type extends object = object> = ConfigFunctionOptions & {
+    cwd?: string;
+    dirname?: string;
+    overrides?: TypedocOptions<Type>;
+};
+
+// @public (undocumented)
+export type TypedocFileOptions = Pick<TypeDocOptions, 'entryPoints' | 'exclude' | 'gitRevision' | 'out' | 'readme' | 'tsconfig'>;
+
+// @public (undocumented)
+export type TypedocMarkdownConfigFunctionOptions = TypedocConfigFunctionOptions<TypedocMarkdownPluginOptions>;
+
+// @public (undocumented)
+export type TypedocMarkdownOptions = TypedocOptions<Merge<PluginOptions, RemarkPluginOptions>>;
+
+// @public (undocumented)
+export type TypedocMarkdownPluginOptions = Merge<PluginOptions, RemarkPluginOptions>;
+
+// @public (undocumented)
+export type TypedocMaterialThemeConfigFunctionOptions = TypedocConfigFunctionOptions<MaterialThemeOptions>;
+
+// @public (undocumented)
+export type TypedocOptions<Type extends object = object> = Partial<Type & TypeDocOptions>;
+
+// @public (undocumented)
+export type TypedocTool = ConfigTool<TypedocConfig, TypedocConfigFunctionOptions, typeof Typedoc.defineConfig, Omit<typeof Typedoc, 'config' | 'defineConfig'>>;
 
 // @public (undocumented)
 export const workspaceScopes: (options?: WorkspaceScopesOptions) => Array<string>;

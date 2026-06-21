@@ -5,6 +5,7 @@ import { type PluginOptions as MarkdownPluginOptions } from 'typedoc-plugin-mark
 
 import {
     fileSharedOptions,
+    resolveTypedocConfigInput,
     type TypedocConfigFunction,
     type TypedocOptions,
 } from './shared.js'
@@ -98,44 +99,36 @@ const enableRemarkPlugins = (
 }
 
 /** Typedoc-plugin-markdown is required */
-export const configMarkdown: TypedocConfigFunction<
+export const buildFunctionTypedocMarkdown: TypedocConfigFunction<
     Merge<MarkdownPluginOptions, RemarkPluginOptions>
-> = (__dirname, _options) => {
-    const _fileOptions = fileSharedOptions(__dirname)
-    const options_to_merge: TypedocMarkdownOptions =
-        _options !== undefined ? _options : {}
+> = (input = {}) => {
+    const { dirname, overrides } = resolveTypedocConfigInput(input)
+    const _fileOptions = fileSharedOptions(dirname)
 
-    if (_fileOptions !== undefined) {
-        const options: TypedocMarkdownOptions = deepmerge(
-            {
-                ..._fileOptions,
-                ...markdownBase(),
-            },
-            enableRemarkPlugins(true, true),
-        )
-        return deepmerge(options, options_to_merge)
-    }
-    return undefined
+    const options: TypedocMarkdownOptions = deepmerge(
+        {
+            ..._fileOptions,
+            ...markdownBase(),
+        },
+        enableRemarkPlugins(true, true),
+    )
+    return deepmerge(options, overrides)
 }
 
-export const configVitepress: TypedocConfigFunction<
+export const buildFunctionTypedocVitepress: TypedocConfigFunction<
     Merge<MarkdownPluginOptions, RemarkPluginOptions>
-> = (__dirname, _options) => {
-    const _fileOptions = fileSharedOptions(__dirname)
-    const options_to_merge: TypedocMarkdownOptions =
-        _options !== undefined ? _options : {}
-    if (_fileOptions !== undefined) {
-        const options: TypedocMarkdownOptions = deepmerge(
-            {
-                ..._fileOptions,
-                ...markdownBase(),
-                ...enableRemarkPlugins(false, false),
-            },
-            { plugin: ['typedoc-vitepress-theme'] },
-        )
-        return deepmerge(options, options_to_merge)
-    }
+> = (input = {}) => {
+    const { dirname, overrides } = resolveTypedocConfigInput(input)
+    const _fileOptions = fileSharedOptions(dirname)
 
-    return undefined
+    const options: TypedocMarkdownOptions = deepmerge(
+        {
+            ..._fileOptions,
+            ...markdownBase(),
+            ...enableRemarkPlugins(false, false),
+        },
+        { plugin: ['typedoc-vitepress-theme'] },
+    )
+    return deepmerge(options, overrides)
 }
-export default configMarkdown
+export default buildFunctionTypedocMarkdown
