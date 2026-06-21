@@ -76,6 +76,8 @@ export type {
     PrettierPlugin,
     PrettierPluginName,
     PrettierPluginPackageName,
+    PrettierPluginRegistry,
+    PrettierPluginRegistryEntry,
     PrettierTool,
     ResolvedPrettierPlugin,
 } from './prettier/index.js'

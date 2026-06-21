@@ -6,15 +6,15 @@ export type PrettierPluginPackageName =
     | `@prettier/${string}`
     | `prettier-plugin-${string}`
 
-export type ResolvedPrettierPlugin = PrettierPlugin & {
-    readonly [RESOLVED_PRETTIER_PLUGIN]: true
-}
-
-type PrettierPluginRegistry = Partial<
+export type PrettierPluginRegistry = Partial<
     Record<PrettierPluginPackageName, PrettierPluginRegistryEntry>
 >
 
-type PrettierPluginRegistryEntry = false | ResolvedPrettierPlugin | true
+export type PrettierPluginRegistryEntry = false | ResolvedPrettierPlugin | true
+
+export type ResolvedPrettierPlugin = PrettierPlugin & {
+    readonly [RESOLVED_PRETTIER_PLUGIN]: true
+}
 
 type StrictPrettierPluginRegistry<
     TPlugins extends Record<string, PrettierPluginRegistryEntry>,
@@ -32,13 +32,13 @@ export const resolvePrettierPlugin = (
     return plugin as ResolvedPrettierPlugin
 }
 
-export const definePrettierPlugins = <
+export const definePrettierPluginRegistry = <
     const TPlugins extends Record<string, PrettierPluginRegistryEntry>,
 >(
     plugins: StrictPrettierPluginRegistry<TPlugins>,
 ): TPlugins => plugins
 
-export const resolvePluginRegistry = (
+export const resolvePrettierPluginRegistry = (
     plugins: PrettierPluginRegistry,
 ): Array<PrettierPluginPackageName | ResolvedPrettierPlugin> => {
     return Object.entries(plugins).flatMap(

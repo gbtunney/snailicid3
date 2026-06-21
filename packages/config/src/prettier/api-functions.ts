@@ -4,17 +4,20 @@ import type {
     PrettierOptions,
     PrettierOverrides,
 } from './options.js'
-import { getPrettierPluginsBundled, getPrettierPluginsList } from './plugins.js'
+import {
+    getDefaultPrettierPluginNames,
+    getDefaultPrettierPlugins,
+} from './plugins/index.js'
 import type {
     PrettierPluginPackageName,
     ResolvedPrettierPlugin,
-} from './plugins/plugin-registry.js'
+} from './plugins/registry.js'
 import { type ConfigFunctionOptions, defineConfig } from '../core/index.js'
 
 export const BASE_IGNORES = ['**/*.api.md', 'tmp', 'temp'] as const
 
 export type PrettierConfigFunctionOptions = ConfigFunctionOptions<{
-    /** Bundle plugin objects directly (default) vs. plugin package-name strings only. */
+    /** Use `useResolvedPlugins` for clearer option naming. */
     isBundled?: boolean
     /** Shallow-merged on top of `Prettier.options.base()` (caller keys win). */
     options?: PrettierOptions
@@ -22,6 +25,8 @@ export type PrettierConfigFunctionOptions = ConfigFunctionOptions<{
     overrides?: PrettierOverrides
     /** Appended after the default plugin array. */
     plugins?: Array<PrettierPlugin>
+    /** Use resolved plugin objects directly (default) vs. plugin package-name strings only. */
+    useResolvedPlugins?: boolean
 }>
 
 export type PrettierPlugin = PrettierPluginPackageName | ResolvedPrettierPlugin
@@ -30,16 +35,21 @@ export const definePrettierConfig = <const TConfig extends PrettierConfig>(
     config: TConfig,
 ): TConfig => defineConfig(config)
 
-export const buildFunctionPrettier = ({
-    isBundled = true,
-    options,
-    overrides = [],
-    plugins = [],
-}: PrettierConfigFunctionOptions = {}): PrettierConfig => {
+export const buildFunctionPrettier = (
+    input: PrettierConfigFunctionOptions = {},
+): PrettierConfig => {
+    const {
+        isBundled = true,
+        options,
+        overrides = [],
+        plugins = [],
+        useResolvedPlugins,
+    } = input
     const defaultOptions = getDefaultOptions()
-    const defaultPlugins = isBundled
-        ? getPrettierPluginsBundled()
-        : getPrettierPluginsList()
+    const shouldUseResolvedPlugins = useResolvedPlugins ?? isBundled
+    const defaultPlugins = shouldUseResolvedPlugins
+        ? getDefaultPrettierPlugins()
+        : getDefaultPrettierPluginNames()
 
     return {
         ...defaultOptions,

@@ -5,11 +5,11 @@ import * as unResolvedJsdocPlugin from 'prettier-plugin-jsdoc'
 import * as shPlugin from 'prettier-plugin-sh'
 import type { UnknownRecord } from 'type-fest'
 import {
-    definePrettierPlugins,
+    definePrettierPluginRegistry,
     type ResolvedPrettierPlugin,
-    resolvePluginRegistry,
     resolvePrettierPlugin,
-} from './plugin-registry.js'
+    resolvePrettierPluginRegistry,
+} from './registry.js'
 
 type UnresolvedPrettierPlugin<Type extends PrettierPlugin = PrettierPlugin> =
     | Type
@@ -26,7 +26,7 @@ export const keysOf = <ObjectType extends UnknownRecord>(
     obj: ObjectType,
 ): Array<KeysOf<ObjectType>> => Object.keys(obj) as Array<KeysOf<ObjectType>>
 
-export const PRETTIER_PLUGINS = definePrettierPlugins({
+export const PRETTIER_PLUGINS = definePrettierPluginRegistry({
     '@prettier/plugin-php': resolvePrettierPlugin(phpPlugin),
     '@prettier/plugin-xml': resolvePrettierPlugin(xmlPlugin),
     'prettier-plugin-jsdoc': resolvePrettierPlugin(jsDocPlugin),
@@ -39,15 +39,15 @@ export type PrettierPluginName =
     | 'prettier-plugin-jsdoc'
     | 'prettier-plugin-sh'
 
-export const getBuiltInPrettierPlugins = (): Array<
+export const getDefaultPrettierPlugins = (): Array<
     PrettierPluginName | ResolvedPrettierPlugin
 > => {
-    return resolvePluginRegistry(PRETTIER_PLUGINS) as Array<
+    return resolvePrettierPluginRegistry(PRETTIER_PLUGINS) as Array<
         PrettierPluginName | ResolvedPrettierPlugin
     >
 }
 
-export const getPrettierPluginsList = (): Array<PrettierPluginName> => {
+export const getDefaultPrettierPluginNames = (): Array<PrettierPluginName> => {
     const plugins = PRETTIER_PLUGINS as Record<
         PrettierPluginName,
         boolean | ResolvedPrettierPlugin
@@ -56,7 +56,5 @@ export const getPrettierPluginsList = (): Array<PrettierPluginName> => {
     return keysOf(plugins).filter((pluginName) => plugins[pluginName] !== false)
 }
 
-export const getPrettierPluginsBundled = getBuiltInPrettierPlugins
-
 export const DEFAULT_PRETTIER_PLUGIN_LIST: Array<PrettierPluginName> =
-    getPrettierPluginsList()
+    getDefaultPrettierPluginNames()
