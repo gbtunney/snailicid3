@@ -158,44 +158,44 @@ describe('scaffoldPackage', () => {
     })
 })
 describe('index.ts exports', () => {
-    test('exports Commitlint configuration', () => {
+    test('exports Commitlint configuration', async () => {
         const { Commitlint } = await import('@snailicid3/config')
         expect(Commitlint).toBeDefined()
     })
 
-    test('exports workspaceScopes and workspaceScopesCsv', () => {
+    test('exports workspaceScopes and workspaceScopesCsv', async () => {
         const { workspaceScopes, workspaceScopesCsv } =
             await import('@snailicid3/config')
         expect(workspaceScopes).toBeDefined()
         expect(workspaceScopesCsv).toBeDefined()
     })
 
-    test('exports defineConfig', () => {
+    test('exports defineConfig', async () => {
         const { defineConfig } = await import('@snailicid3/config')
         expect(defineConfig).toBeDefined()
     })
 
-    test('exports EsLint configuration', () => {
+    test('exports EsLint configuration', async () => {
         const { EsLint } = await import('@snailicid3/config')
         expect(EsLint).toBeDefined()
     })
 
-    test('exports LintStaged configuration', () => {
+    test('exports LintStaged configuration', async () => {
         const { LintStaged } = await import('@snailicid3/config')
         expect(LintStaged).toBeDefined()
     })
 
-    test('exports Markdownlint configuration', () => {
+    test('exports Markdownlint configuration', async () => {
         const { Markdownlint } = await import('@snailicid3/config')
         expect(Markdownlint).toBeDefined()
     })
 
-    test('exports Prettier configuration', () => {
+    test('exports Prettier configuration', async () => {
         const { Prettier } = await import('@snailicid3/config')
         expect(Prettier).toBeDefined()
     })
 
-    test('exports shared file extensions', () => {
+    test('exports shared file extensions', async () => {
         const {
             JS_FILE_EXTENSIONS,
             JSLIKE_FILE_EXTENSIONS,
@@ -210,26 +210,16 @@ describe('index.ts exports', () => {
         expect(MARKDOWN_FILE_EXTENSIONS).toBeDefined()
     })
 
-    test('exports utilities', () => {
-        const {
-            expandExtensions,
-            exportJSONFile,
-            getFilePath,
-            importJSON,
-            isPlainObject,
-            merge,
-            prettyPrintJSON,
-            safeDeserializeJSON,
-            serializeJSON,
-        } = await import('@snailicid3/config')
+    test('exports utilities', async () => {
+        const { expandExtensions, getFilePath, isPlainObject, json, merge } =
+            await import('@snailicid3/config')
         expect(expandExtensions).toBeDefined()
-        expect(exportJSONFile).toBeDefined()
-        expect(importJSON).toBeDefined()
+        expect(json.exportFile).toBeDefined()
+        expect(json.importFile).toBeDefined()
         expect(isPlainObject).toBeDefined()
-        expect(prettyPrintJSON).toBeDefined()
-        expect(safeDeserializeJSON).toBeDefined()
-        expect(serializeJSON).toBeDefined()
+        expect(json.prettyPrint).toBeDefined()
+        expect(json.deserialize).toBeDefined()
+        expect(json.serialize).toBeDefined()
         expect(getFilePath).toBeDefined()
-        expect(merge).toBeDefined()
     })
 })
