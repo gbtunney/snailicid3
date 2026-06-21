@@ -1,7 +1,6 @@
 export { getScaledWidth, SHARED_FORMATTING_RULES } from '../shared.js'
 
 import {
-    
     buildFunctionPrettier,
     definePrettierConfig,
     type PrettierConfig,
@@ -58,7 +57,7 @@ export type {
     PrettierPlugin,
 } from './api-functions.js'
 
-export {BASE_IGNORES} from './api-functions.js'
+export { BASE_IGNORES } from './api-functions.js'
 
 export type { PrettierOptions, PrettierOverrides } from './options.js'
 export type { PrettierPluginName } from './plugins.js'

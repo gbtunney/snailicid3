@@ -2,10 +2,7 @@ import type { UserConfig as CommitlintUserConfig } from '@commitlint/types'
 import { merge as deepMerge } from 'ts-deepmerge'
 import type { LiteralUnion } from 'type-fest'
 import { commitlintDefaultConfig } from './base.js'
-import {
-    COMMIT_TYPES,
-    type ConventionalCommitType,
-} from './types.js'
+import { COMMIT_TYPES, type ConventionalCommitType } from './types.js'
 import {
     workspaceScopes,
     type WorkspaceScopesOptions,

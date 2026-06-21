@@ -1,5 +1,4 @@
 import {
-    
     buildFunctionMarkdownlint,
     defineMarkdownlintConfig,
     type MarkdownlintConfig,
@@ -45,7 +44,7 @@ export type {
     MarkdownlintConfigFunctionOptions,
 } from './api-functions.js'
 
-export {BASE_IGNORES} from './api-functions.js'
+export { BASE_IGNORES } from './api-functions.js'
 
 export type {
     MarkdownlintConfiguration,

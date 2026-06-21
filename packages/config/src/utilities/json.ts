@@ -97,9 +97,11 @@ const prettyPrintJSON = <Type extends Jsonifiable>(
 }
 
 /**
- *TODO can we make a isjsonifiable function for stirng,null,etc and these should use the serialize function ? also paths should reso
+ * TODO can we make a isjsonifiable function for stirng,null,etc and these should use the serialize function ? also
+ * paths should reso
  */
 const importJSON = async (filename: string): Promise<JsonValue | undefined> => {
+    /** Testing lintstaged */
     const absolutePath = path.resolve(filename)
     const logger = getTraceLogger('importJSON')
 

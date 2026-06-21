@@ -4,10 +4,7 @@ import type {
     PrettierOptions,
     PrettierOverrides,
 } from './options.js'
-import {
-    getPrettierPluginsBundled,
-    getPrettierPluginsList,
-} from './plugins.js'
+import { getPrettierPluginsBundled, getPrettierPluginsList } from './plugins.js'
 import type {
     PrettierPluginPackageName,
     ResolvedPrettierPlugin,
