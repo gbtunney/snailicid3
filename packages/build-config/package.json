@@ -1,6 +1,6 @@
 {
     "name": "@snailicid3/build-config",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "private": false,
     "description": "Shared tsdown, vite, vitest and typedoc build tool configs",
     "scripts": {
