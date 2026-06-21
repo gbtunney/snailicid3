@@ -28,7 +28,7 @@
         "api:check": "pnpm exec nx run-many --target=api:check",
         "\n========== PUBLISH >> ==========": "",
         "changeset:create": "pnpm changeset:prepare && pnpm exec gbt-changeset",
-        "changeset:prepare": "pnpm run fix && pnpm run test && pnpm docs:build && pnpm api:report",
+        "changeset:prepare": "pnpm run test && pnpm docs:build && pnpm api:report",
         "release:archive": "pnpm -r exec mkdir -p ./releases &&  pnpm -r --access public pack --pack-destination='./releases'",
         "registry:start": "pnpm exec verdaccio",
         "\n========== INSPECT >> ==========": "",
@@ -75,7 +75,7 @@
         "prettier": "^3.8.4",
         "tsx": "^4.22.4",
         "typescript": "^6.0.2",
-        "verdaccio": "^6.7.3"
+        "verdaccio": "^6.7.4"
     },
     "nx": {
         "includedScripts": []

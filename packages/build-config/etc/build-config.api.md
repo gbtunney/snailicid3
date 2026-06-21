@@ -5,11 +5,10 @@
 ```ts
 
 import type { build } from 'tsdown';
+import { defineConfig as defineTsdownConfig } from 'tsdown';
+import { defineConfig as defineViteConfig } from 'vite';
 import { LiteralUnion } from 'type-fest';
-import { PluginOptions as MarkdownPluginOptions } from 'typedoc-plugin-markdown';
-import type { Merge } from 'type-fest';
 import { merge } from 'ts-deepmerge';
-import { TypeDocOptions } from 'typedoc';
 import { UserConfig } from 'vite';
 import { ViteUserConfig } from 'vitest/config';
 import z from 'zod';
@@ -57,6 +56,10 @@ export type DefineBuildPlanInput = {
     root?: z.input<typeof schemaBuildPlanRoot>;
 };
 
+export { defineTsdownConfig }
+
+export { defineViteConfig }
+
 // @public (undocumented)
 export function deriveBuildPlanEntry(options: {
     entry: BuildPlanEntryInput;
@@ -89,13 +92,6 @@ export function hasPlanEntry(plan: ResolvedBuildPlan, entryKey: string): boolean
 
 // @public (undocumented)
 export function isRootEntryKey(key: string): boolean;
-
-export { MarkdownPluginOptions }
-
-// @public (undocumented)
-export type MaterialThemeOptions = {
-    themeColor?: string;
-};
 
 export { merge }
 
@@ -208,41 +204,6 @@ export function toViteConfigs(plan: ResolvedBuildPlan): ViteConfigInput;
 
 // @public (undocumented)
 export type TsdownConfigInput = Array<TsdownBuildConfig>;
-
-// @public (undocumented)
-export type Typedoc = {
-    config: TypedocConfigFunction;
-    configMarkdown: TypedocConfigFunction<MarkdownPluginOptions>;
-    configMaterialTheme: TypedocConfigFunction<MaterialThemeOptions>;
-    configVitepressTheme: TypedocConfigFunction<MarkdownPluginOptions>;
-    materialTheme: TypedocConfigFunction<MaterialThemeOptions>;
-};
-
-// @public (undocumented)
-export const typedoc: Typedoc;
-
-// @public (undocumented)
-export type TypedocConfig = Partial<TypeDocOptions>;
-
-// @public (undocumented)
-export type TypedocConfigFunction<Type extends object = object> = (__dirname: string, _options?: TypedocOptions<Type>) => TypedocOptions<Type> | undefined;
-
-// Warning: (ae-forgotten-export) The symbol "RemarkPluginOptions" needs to be exported by the entry point index.d.ts
-//
-// @public
-export const typedocMarkdownConfig: TypedocConfigFunction<Merge<MarkdownPluginOptions, RemarkPluginOptions>>;
-
-// @public (undocumented)
-export const typedocMaterialTheme: TypedocConfigFunction<MaterialThemeOptions>;
-
-// @public (undocumented)
-export type TypedocOptions<Type extends object = object> = Partial<Type & TypeDocOptions>;
-
-// @public (undocumented)
-export const typedocStandardConfig: TypedocConfigFunction;
-
-// @public (undocumented)
-export const typedocVitepressConfig: TypedocConfigFunction<Merge<MarkdownPluginOptions, RemarkPluginOptions>>;
 
 // @public (undocumented)
 export const viteAdapter: BuildAdapter;
