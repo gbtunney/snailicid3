@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest'
 import { type CommandResult } from './../utilities/command.js'
 import { runCommand } from './../utilities/command.js'
 import { getRepoRoot } from './../workspace/git.js'
+import { Commitlint } from './index.js'
 
 const repoRoot = getRepoRoot()
 
@@ -31,4 +32,48 @@ describe('commitlint CLI integration', () => {
         )
         expect(result.status).not.toBe(0)
     }, 15000)
+})
+
+describe('Commitlint export', () => {
+    test('is a non-null object', () => {
+        expect(Commitlint).toBeDefined()
+        expect(typeof Commitlint).toBe('object')
+    })
+
+    test('has a config function', () => {
+        expect(typeof Commitlint.config).toBe('function')
+    })
+
+    test('has workspace scope helpers', () => {
+        expect(typeof Commitlint.workspaceScopes).toBe('function')
+        expect(typeof Commitlint.workspaceScopesCsv).toBe('function')
+    })
+
+    test('config returns an object with extends', () => {
+        const config = Commitlint.config()
+        expect(config).toHaveProperty('extends')
+    })
+})
+
+describe('Commitlint config merge behavior', () => {
+    test('appendTypes appends to commitTypes for the type-enum rule', () => {
+        const config = Commitlint.config({ appendTypes: ['custom-type'] })
+        const typeEnumRule = config.rules?.['type-enum'] as
+            | [number, string, Array<string>]
+            | undefined
+        expect(typeEnumRule?.[2]).toContain('custom-type')
+        expect(typeEnumRule?.[2]).toEqual(
+            expect.arrayContaining([...Commitlint.commitTypes]),
+        )
+    })
+
+    test('scopeOptions.mergeScopes appends to the scope-enum rule', () => {
+        const config = Commitlint.config({
+            scopeOptions: { mergeScopes: ['extra-scope'] },
+        })
+        const scopeEnumRule = config.rules?.['scope-enum'] as
+            | [number, string, Array<string>]
+            | undefined
+        expect(scopeEnumRule?.[2]).toContain('extra-scope')
+    })
 })
