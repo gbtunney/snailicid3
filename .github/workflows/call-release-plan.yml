@@ -484,21 +484,26 @@ jobs:
                 fi
 
                 for tag_name in $publish_candidates; do
-                  # Changesets creates the tag locally during publish.
-                  # Push only the exact tag we expect, not every local tag.
-                  if git ls-remote --exit-code --tags origin "refs/tags/$tag_name" >/dev/null 2>&1; then
+                  # Changesets creates tags locally during publish but may also push them.
+                  # If the tag is already on origin, skip. If it exists locally but not on
+                  # origin, push it with explicit src:dst. If it is absent locally (Changesets
+                  # pushed it already or tag creation failed), warn and continue so the
+                  # GitHub Release step still runs.
+                  if git ls-remote --exit-code --tags origin "refs/tags/${tag_name}" >/dev/null 2>&1; then
                     echo "Tag already exists on origin: $tag_name"
+                  elif git rev-parse --verify "refs/tags/${tag_name}" >/dev/null 2>&1; then
+                    git push origin "refs/tags/${tag_name}:refs/tags/${tag_name}"
                   else
-                    git push origin "refs/tags/$tag_name"
+                    echo "::warning::Local tag not found for ${tag_name}; Changesets may have pushed it already."
                   fi
 
-                  if gh release view "$tag_name" >/dev/null 2>&1; then
+                  if gh release view "${tag_name}" >/dev/null 2>&1; then
                     echo "GitHub Release already exists for $tag_name."
                     continue
                   fi
 
                   echo "Creating GitHub Release for $tag_name."
-                  gh release create "$tag_name" --title "$tag_name" --generate-notes
+                  gh release create "${tag_name}" --title "${tag_name}" --generate-notes
                 done
 
                 {
