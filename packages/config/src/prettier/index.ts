@@ -2,9 +2,12 @@ export { getScaledWidth, SHARED_FORMATTING_RULES } from '../shared.js'
 
 import {
     buildFunctionPrettier,
+    buildPrettierJsonConfig,
     definePrettierConfig,
     type PrettierConfig,
     type PrettierConfigFunctionOptions,
+    type PrettierJsonConfig,
+    type PrettierJsonConfigFunctionOptions,
 } from './api-functions.js'
 import { getDefaultOptions, getDefaultOverrides } from './options.js'
 import {
@@ -20,6 +23,7 @@ import {
 
 export const Prettier = defineConfigTool({
     config: buildFunctionPrettier,
+    configFile: buildPrettierJsonConfig,
     defineConfig: definePrettierConfig,
     options: { base: getDefaultOptions },
     overrides: { base: getDefaultOverrides },
@@ -32,6 +36,7 @@ export const Prettier = defineConfigTool({
     PrettierConfigFunctionOptions,
     IdentityDefineConfig<PrettierConfig>,
     {
+        configFile: (input?: PrettierJsonConfigFunctionOptions) => PrettierJsonConfig
         options: { base: typeof getDefaultOptions }
         overrides: { base: typeof getDefaultOverrides }
         plugins: {
@@ -51,12 +56,23 @@ export type PrettierTool = ConfigTool<
 export type {
     PrettierConfig,
     PrettierConfigFunctionOptions,
+    PrettierJsonConfig,
+    PrettierJsonConfigFunctionOptions,
     PrettierPlugin,
 } from './api-functions.js'
 
 export { BASE_IGNORES } from './api-functions.js'
 
-export type { PrettierOptions, PrettierOverrides } from './options.js'
+export type {
+    PrettierConfigBase,
+    PrettierOptions,
+    PrettierOverride,
+    PrettierOverrideFilePattern,
+    PrettierOverrideFiles,
+    PrettierOverrides,
+    ReservedPrettierOptionKey,
+    StripIndexSignature,
+} from './options.js'
 export type { PrettierPluginName } from './plugins/index.js'
 
 export {
