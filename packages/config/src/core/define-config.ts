@@ -1,14 +1,24 @@
 import { type Spread } from 'type-fest'
+import { type PathRoot } from '../utilities/path.js'
 import { type PlainObject } from './../utilities/types.js'
 /**
  * Permissive base constraint for any `defineConfig`-style helper, including variadic tool signatures (e.g.
  * ESLint/Vite).
  */
 export type AnyDefineConfig = (...args: ReadonlyArray<any>) => unknown
-export type BaseConfigFunctionOptions = {
-    /** Reserved for future workspace-discovery cwd support. Defaults to `process.cwd()`. */
-    cwd?: string
-}
+
+export type ConfigCwd = PathRoot
+
+export type BaseConfigFunctionOptions<CwdRequired extends boolean = false> =
+    CwdRequired extends true
+        ? {
+              /** Root directory used for repo-relative path resolution. */
+              cwd: ConfigCwd
+          }
+        : {
+              /** Root directory used for repo-relative path resolution. Defaults to `process.cwd()`. */
+              cwd?: ConfigCwd
+          }
 /** The `config` builder function shape shared by every tool namespace. */
 export type ConfigBuilder<TConfig, TInput extends object = object> = (
     input?: TInput,
@@ -16,7 +26,8 @@ export type ConfigBuilder<TConfig, TInput extends object = object> = (
 
 export type ConfigFunctionOptions<
     ConfigOptions extends PlainObject = PlainObject,
-> = Spread<BaseConfigFunctionOptions, ConfigOptions>
+    CwdRequired extends boolean = false,
+> = Spread<BaseConfigFunctionOptions<CwdRequired>, ConfigOptions>
 
 export type ConfigTool<
     TConfig extends object,
