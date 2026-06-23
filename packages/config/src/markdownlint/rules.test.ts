@@ -6,6 +6,8 @@ import {
 } from './rules.js'
 import { Markdownlint } from './index.js'
 
+const cwd = import.meta
+
 describe('markdownlint rule configuration', () => {
     test('merges overrides with base config', () => {
         const overrides: MarkdownlintRuleConfiguration = {
@@ -81,6 +83,7 @@ function extractMd013Options(
 describe('markdownlint MD013 option keys', () => {
     test('allows known keys for MD013', () => {
         const cfg = Markdownlint.config({
+            cwd,
             rules: KNOWN_MD013_RULES,
         })
         const opts = extractMd013Options(cfg)
