@@ -43,7 +43,10 @@ export const resolveCwd = (cwd: PathRoot | undefined): string =>
 export const getFullPath = (
     value: string,
     root: PathRoot | undefined,
-): string => normalizePath(nodePath.join(resolveCwd(root), value))
+): string =>
+    nodePath.isAbsolute(value)
+        ? normalizePath(value)
+        : normalizePath(nodePath.join(resolveCwd(root), value))
 
 export const doesFileExist = (filePath: string): boolean =>
     fs.existsSync(filePath)
