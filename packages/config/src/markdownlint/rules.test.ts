@@ -31,7 +31,7 @@ describe('markdownlint rule configuration', () => {
     })
 })
 
-const ALLOWED_MD013_KEYS = [
+const ALLOWED_MD013_KEYS = new Set<string>([
     'line_length',
     'line-length',
     'code_block_line_length',
@@ -40,7 +40,7 @@ const ALLOWED_MD013_KEYS = [
     'headings',
     'strict',
     'tables',
-]
+])
 
 function extractMd013Options(
     cfg: unknown,
@@ -64,7 +64,12 @@ describe('markdownlint MD013 option keys', () => {
 
     test('detects misspelled / unknown keys (e.g. "line-ength")', () => {
         const cfg = Markdownlint.config({
-            rules: { MD013: { 'line-ength': 60 } },
+            rules: {
+                MD013: {
+                    // @ts-expect-error intentionally exercises runtime detection for unknown keys
+                    'line-ength': 60,
+                },
+            },
         })
         const opts = extractMd013Options(cfg)
         expect(opts).toBeDefined()
