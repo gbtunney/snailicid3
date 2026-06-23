@@ -1,7 +1,3 @@
 import { EsLint } from '@snailicid3/config'
-import { fileURLToPath } from 'node:url'
-
-const cwd = fileURLToPath(new URL('.', import.meta.url))
-const CONFIG = EsLint.config({ cwd })
-
+const CONFIG = EsLint.config({ cwd: import.meta })
 export default EsLint.defineConfig(CONFIG)
