@@ -1,15 +1,14 @@
 import { ApiExtractor } from './api-extractor/index.js'
 import { Markdownlint } from './markdownlint/index.js'
-import { getDefaultPrettierPluginNames } from './prettier/plugins/index.js'
 import { json } from './utilities/json.js'
-import { Prettier, PrettierTool } from './index.js'
+import { Prettier } from './index.js'
 /* TODO: outputs a json dump of markdownlint and prettier. this is TEMPORARY till the configs are correct. ideally this should be gotten rid of */
 
 const API_EXTRACTOR_CONFIG = json.object(ApiExtractor.config()) ?? {}
 
 const MARKDOWN_LINT_CONFIG = json.object(Markdownlint.config()) ?? {}
 
-const PRETTIER_CONFIG = json.object(Prettier.config()) ?? {}
+const PRETTIER_CONFIG = json.object(Prettier.configFile()) ?? {}
 
 /** As const */
 const JSON_EXPORTS = [
