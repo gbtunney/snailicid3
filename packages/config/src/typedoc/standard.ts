@@ -4,27 +4,36 @@ import {
     getTypedocMaterialThemePluginNames,
 } from './plugins/index.js'
 import { fileSharedOptions, resolveTypedocConfigInput } from './shared.js'
-import type { TypedocConfigFunction, TypedocOptions } from './shared.js'
+import type {
+    TypedocConfigFunction,
+    TypedocConfigFunctionOptions,
+    TypedocOptions,
+} from './shared.js'
+import { defineConfigBuilder } from '../core/index.js'
 
 export type MaterialThemeOptions = {
     themeColor?: string
 }
 export type TypedocConfig = TypedocOptions
 
-export const buildFunctionTypedoc: TypedocConfigFunction = (input = {}) => {
-    const { dirname, overrides } = resolveTypedocConfigInput(input)
-    const fileOptions = fileSharedOptions(dirname)
-    const options: TypedocOptions = {
-        ...fileOptions,
-        excludeExternals: false,
-        plugin: getDefaultTypedocPluginNames(),
-    }
-    return deepmerge(options, overrides)
-}
+export const buildFunctionTypedoc: TypedocConfigFunction =
+    defineConfigBuilder<TypedocConfig, TypedocConfigFunctionOptions>((input) => {
+        const { dirname, overrides } = resolveTypedocConfigInput(input)
+        const fileOptions = fileSharedOptions(dirname)
+        const options: TypedocOptions = {
+            ...fileOptions,
+            excludeExternals: false,
+            plugin: getDefaultTypedocPluginNames(),
+        }
+        return deepmerge(options, overrides)
+    })
 
 export const buildFunctionTypedocMaterialTheme: TypedocConfigFunction<
     MaterialThemeOptions
-> = (input = {}) => {
+> = defineConfigBuilder<
+    TypedocOptions<MaterialThemeOptions>,
+    TypedocConfigFunctionOptions<MaterialThemeOptions>
+>((input) => {
     const { overrides } = resolveTypedocConfigInput(input)
     const standardConfig = buildFunctionTypedoc(input)
     const options: TypedocOptions<MaterialThemeOptions> = {
@@ -33,6 +42,6 @@ export const buildFunctionTypedocMaterialTheme: TypedocConfigFunction<
         themeColor: '#cb9820',
     }
     return deepmerge(options, overrides)
-}
+})
 
 export default buildFunctionTypedoc
