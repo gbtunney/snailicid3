@@ -9,12 +9,19 @@ import {
     Markdownlint,
     type MarkdownlintTool,
     Prettier,
+    resolveCwd,
     typedoc,
     Typedoc,
     type TypedocTool,
 } from './index.js'
 
 const cwd = import.meta
+const dataImportMeta = {
+    url: 'data:text/javascript,export default undefined',
+} as ImportMeta
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+    typeof value === 'object' && value !== null && !Array.isArray(value)
 
 describe('@snailicid3/config public API', () => {
     test('exports the lowercase typedoc backward-compatible alias', () => {
@@ -99,5 +106,42 @@ describe('@snailicid3/config public API', () => {
         expect(typedoc).toBe(Typedoc)
         expect(config?.excludeExternals).toBe(true)
         expect(typeof Typedoc.markdown.config).toBe('function')
+    })
+
+    test('resolves non-file import meta urls to process cwd', () => {
+        expect(resolveCwd(dataImportMeta)).toBe(process.cwd())
+    })
+
+    test('all public config builders accept non-file import meta cwd', () => {
+        expect(() => ApiExtractor.config({ cwd: dataImportMeta })).not.toThrow()
+        expect(() => Commitlint.config({ cwd: dataImportMeta })).not.toThrow()
+        expect(() => EsLint.config({ cwd: dataImportMeta })).not.toThrow()
+        expect(() => LintStaged.config({ cwd: dataImportMeta })).not.toThrow()
+        expect(() => Markdownlint.config({ cwd: dataImportMeta })).not.toThrow()
+        expect(() => Prettier.config({ cwd: dataImportMeta })).not.toThrow()
+        expect(() => Prettier.configFile({ cwd: dataImportMeta })).not.toThrow()
+        expect(() => Typedoc.config({ cwd: dataImportMeta })).not.toThrow()
+        expect(() => Typedoc.markdown.config({ cwd: dataImportMeta })).not.toThrow()
+        expect(() =>
+            Typedoc.materialTheme.config({ cwd: dataImportMeta }),
+        ).not.toThrow()
+        expect(() => Typedoc.vitepress.config({ cwd: dataImportMeta })).not.toThrow()
+    })
+
+    test('eslint tsconfigRootDir is normalized before parser options receive it', () => {
+        const eslintConfig = EsLint.config({ cwd: dataImportMeta })
+        const parserOptionsEntry = eslintConfig.find(
+            (entry) => entry.name === 'Base: globals and projectService',
+        )
+        const languageOptions = parserOptionsEntry?.languageOptions
+        const parserOptions = isRecord(languageOptions)
+            ? languageOptions.parserOptions
+            : undefined
+        const tsconfigRootDir = isRecord(parserOptions)
+            ? parserOptions.tsconfigRootDir
+            : undefined
+
+        expect(typeof tsconfigRootDir).toBe('string')
+        expect(tsconfigRootDir).toBe(process.cwd())
     })
 })
