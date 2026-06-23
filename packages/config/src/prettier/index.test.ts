@@ -1,5 +1,8 @@
 import { describe, expect, test } from 'vitest'
 import { Prettier } from './index.js'
+
+const cwd = import.meta
+
 describe('Prettier export', () => {
     test('has a config function', () => {
         expect(typeof Prettier.config).toBe('function')
@@ -15,7 +18,7 @@ describe('Prettier export', () => {
 
 describe('Prettier config merge behavior', () => {
     test('options shallow-merge over the defaults', () => {
-        const config = Prettier.config({ options: { tabWidth: 2 } })
+        const config = Prettier.config({ cwd, options: { tabWidth: 2 } })
         expect(config.tabWidth).toBe(2)
         expect(config.singleQuote).toBe(Prettier.options.base().singleQuote)
     })
@@ -23,6 +26,7 @@ describe('Prettier config merge behavior', () => {
     test('overrides append after the default overrides', () => {
         const baseOverridesLength = Prettier.overrides.base().length
         const config = Prettier.config({
+            cwd,
             overrides: [{ files: '*.foo', options: { parser: 'babel' } }],
         })
         expect(config.overrides).toHaveLength(baseOverridesLength + 1)
