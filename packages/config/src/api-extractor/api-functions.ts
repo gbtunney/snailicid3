@@ -6,7 +6,6 @@ import {
     defineConfigBuilder,
 } from '../core/index.js'
 import { deepMerge } from '../utilities/json.js'
-import type { PlainObject } from '../utilities/types.js'
 
 export type ApiExtractorConfig = IConfigFile
 
@@ -28,7 +27,7 @@ export const buildFunctionApiExtractor = defineConfigBuilder<
     const config: ApiExtractorConfig = getBaseConfig()
     const finalConfig = deepMerge(
         'replace',
-        config as unknown as PlainObject,
+        config,
         overrides,
     ) as unknown as ApiExtractorConfig
 

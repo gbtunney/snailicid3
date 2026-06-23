@@ -20,16 +20,9 @@ import {
 
 export const BASE_IGNORES = ['**/*.api.md', 'tmp', 'temp'] as const
 
-export type PrettierPlugin = PrettierPluginPackageName | ResolvedPrettierPlugin
-
 /** Runtime Prettier config. Runtime config may use resolved plugin objects. */
 export type PrettierConfig = PrettierConfigBase & {
     plugins: Array<PrettierPlugin>
-}
-
-/** `.prettierrc.json` config. JSON config must use plugin package names. */
-export type PrettierJsonConfig = PrettierConfigBase & {
-    plugins: Array<PrettierPluginPackageName>
 }
 
 export type PrettierConfigFunctionOptions = ConfigFunctionOptions<{
@@ -45,6 +38,11 @@ export type PrettierConfigFunctionOptions = ConfigFunctionOptions<{
     useResolvedPlugins?: boolean
 }>
 
+/** `.prettierrc.json` config. JSON config must use plugin package names. */
+export type PrettierJsonConfig = PrettierConfigBase & {
+    plugins: Array<PrettierPluginPackageName>
+}
+
 export type PrettierJsonConfigFunctionOptions = ConfigFunctionOptions<{
     /** Shallow-merged on top of `Prettier.options.base()`; caller keys win. */
     options?: PrettierOptions
@@ -54,6 +52,8 @@ export type PrettierJsonConfigFunctionOptions = ConfigFunctionOptions<{
     plugins?: Array<PrettierPluginPackageName>
 }>
 
+export type PrettierPlugin = PrettierPluginPackageName | ResolvedPrettierPlugin
+
 export const definePrettierConfig = <const TConfig extends PrettierConfig>(
     config: TConfig,
 ): TConfig => defineConfig(config)
@@ -61,19 +61,27 @@ export const definePrettierConfig = <const TConfig extends PrettierConfig>(
 export const buildFunctionPrettier = defineConfigBuilder<
     PrettierConfig,
     PrettierConfigFunctionOptions
->(({ isBundled = true, options, overrides = [], plugins = [], useResolvedPlugins }) => {
-    const shouldUseResolvedPlugins = useResolvedPlugins ?? isBundled
-    const defaultPlugins = shouldUseResolvedPlugins
-        ? getDefaultPrettierPlugins()
-        : getDefaultPrettierPluginNames()
+>(
+    ({
+        isBundled = true,
+        options,
+        overrides = [],
+        plugins = [],
+        useResolvedPlugins,
+    }) => {
+        const shouldUseResolvedPlugins = useResolvedPlugins ?? isBundled
+        const defaultPlugins = shouldUseResolvedPlugins
+            ? getDefaultPrettierPlugins()
+            : getDefaultPrettierPluginNames()
 
-    return {
-        ...getDefaultOptions(),
-        ...options,
-        overrides: [...getDefaultOverrides(), ...overrides],
-        plugins: [...defaultPlugins, ...plugins],
-    }
-})
+        return {
+            ...getDefaultOptions(),
+            ...options,
+            overrides: [...getDefaultOverrides(), ...overrides],
+            plugins: [...defaultPlugins, ...plugins],
+        }
+    },
+)
 
 /**
  * Builds the JSON-file-safe Prettier config shape used by `.prettierrc.json` artifacts.

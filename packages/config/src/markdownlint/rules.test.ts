@@ -34,12 +34,12 @@ describe('markdownlint rule configuration', () => {
 })
 
 const ALLOWED_MD013_KEYS = new Set<string>([
-    'line_length',
-    'line-length',
     'code_block_line_length',
     'code_blocks',
     'heading_line_length',
     'headings',
+    'line-length',
+    'line_length',
     'strict',
     'tables',
 ])

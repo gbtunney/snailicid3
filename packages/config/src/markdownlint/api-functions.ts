@@ -45,8 +45,15 @@ export const defineMarkdownlintConfig = <
 export const buildFunctionMarkdownlint = defineConfigBuilder<
     MarkdownlintConfig,
     MarkdownlintConfigFunctionOptions
->(({ ignores = [], includes = ['**/*.md'], rules = {}, useBaseConfig = true }) => ({
-    config: getMergedRuleConfiguration(rules, useBaseConfig),
-    globs: includes,
-    ignores: [...BASE_IGNORES, ...ignores],
-}))
+>(
+    ({
+        ignores = [],
+        includes = ['**/*.md'],
+        rules = {},
+        useBaseConfig = true,
+    }) => ({
+        config: getMergedRuleConfiguration(rules, useBaseConfig),
+        globs: includes,
+        ignores: [...BASE_IGNORES, ...ignores],
+    }),
+)

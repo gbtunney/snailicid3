@@ -16,32 +16,33 @@ export type MaterialThemeOptions = {
 }
 export type TypedocConfig = TypedocOptions
 
-export const buildFunctionTypedoc: TypedocConfigFunction =
-    defineConfigBuilder<TypedocConfig, TypedocConfigFunctionOptions>((input) => {
-        const { dirname, overrides } = resolveTypedocConfigInput(input)
-        const fileOptions = fileSharedOptions(dirname)
-        const options: TypedocOptions = {
-            ...fileOptions,
-            excludeExternals: false,
-            plugin: getDefaultTypedocPluginNames(),
-        }
-        return deepmerge(options, overrides)
-    })
-
-export const buildFunctionTypedocMaterialTheme: TypedocConfigFunction<
-    MaterialThemeOptions
-> = defineConfigBuilder<
-    TypedocOptions<MaterialThemeOptions>,
-    TypedocConfigFunctionOptions<MaterialThemeOptions>
+export const buildFunctionTypedoc: TypedocConfigFunction = defineConfigBuilder<
+    TypedocConfig,
+    TypedocConfigFunctionOptions
 >((input) => {
-    const { overrides } = resolveTypedocConfigInput(input)
-    const standardConfig = buildFunctionTypedoc(input)
-    const options: TypedocOptions<MaterialThemeOptions> = {
-        ...standardConfig,
-        plugin: getTypedocMaterialThemePluginNames(),
-        themeColor: '#cb9820',
+    const { dirname, overrides } = resolveTypedocConfigInput(input)
+    const fileOptions = fileSharedOptions(dirname)
+    const options: TypedocOptions = {
+        ...fileOptions,
+        excludeExternals: false,
+        plugin: getDefaultTypedocPluginNames(),
     }
     return deepmerge(options, overrides)
 })
+
+export const buildFunctionTypedocMaterialTheme: TypedocConfigFunction<MaterialThemeOptions> =
+    defineConfigBuilder<
+        TypedocOptions<MaterialThemeOptions>,
+        TypedocConfigFunctionOptions<MaterialThemeOptions>
+    >((input) => {
+        const { overrides } = resolveTypedocConfigInput(input)
+        const standardConfig = buildFunctionTypedoc(input)
+        const options: TypedocOptions<MaterialThemeOptions> = {
+            ...standardConfig,
+            plugin: getTypedocMaterialThemePluginNames(),
+            themeColor: '#cb9820',
+        }
+        return deepmerge(options, overrides)
+    })
 
 export default buildFunctionTypedoc

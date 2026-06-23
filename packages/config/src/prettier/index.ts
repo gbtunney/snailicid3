@@ -36,7 +36,9 @@ export const Prettier = defineConfigTool({
     PrettierConfigFunctionOptions,
     IdentityDefineConfig<PrettierConfig>,
     {
-        configFile: (input: PrettierJsonConfigFunctionOptions) => PrettierJsonConfig
+        configFile: (
+            input: PrettierJsonConfigFunctionOptions,
+        ) => PrettierJsonConfig
         options: { base: typeof getDefaultOptions }
         overrides: { base: typeof getDefaultOverrides }
         plugins: {

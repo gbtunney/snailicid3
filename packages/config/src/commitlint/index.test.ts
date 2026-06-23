@@ -71,7 +71,7 @@ describe('Commitlint export', () => {
 
 describe('Commitlint config merge behavior', () => {
     test('appendTypes appends to commitTypes for the type-enum rule', () => {
-        const config = Commitlint.config({ cwd, appendTypes: ['custom-type'] })
+        const config = Commitlint.config({ appendTypes: ['custom-type'], cwd })
         const typeEnumRule = config.rules?.['type-enum'] as
             | [number, string, Array<string>]
             | undefined

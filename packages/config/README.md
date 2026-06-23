@@ -46,8 +46,8 @@ conventions, TypeScript base configs, and utility shell scripts.
   rules_
 - [**commitlint**](https://commitlint.js.org/) • _Conventional commit configuration_
 - [**api-extractor**](https://api-extractor.com/) • _API report and declaration rollup config_
-- [**typedoc**](https://typedoc.org/) • _TypeDoc config builders for standard, markdown,
-  VitePress, and material-theme docs_
+- [**typedoc**](https://typedoc.org/) • _TypeDoc config builders for standard, markdown, VitePress,
+  and material-theme docs_
 - [**typescript**](https://www.typescriptlang.org/) • _Base tsconfig presets: `base`, `library`,
   `typecheck`, `docs`_
 
@@ -283,7 +283,8 @@ Does not emit js files, checks all files in package including .test.ts files.
 
 #### Library
 
-Creates a folder of declarations and js files in `<configDir>/types`, suitable for a library package.
+Creates a folder of declarations and js files in `<configDir>/types`, suitable for a library
+package.
 
 ```json5
 /* @file tsconfig.build.json */

@@ -1,6 +1,4 @@
-import {
-    type MarkdownlintRuleConfiguration,
-} from './schema.js'
+import { type MarkdownlintRuleConfiguration } from './schema.js'
 import { getScaledWidth, SHARED_FORMATTING_RULES } from '../prettier/index.js'
 /** As MarkdownlintRuleConfiguration; */
 export const getBaseConfig = (): MarkdownlintRuleConfiguration => {

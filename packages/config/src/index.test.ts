@@ -1,17 +1,17 @@
 import { describe, expect, test } from 'vitest'
 import * as ConfigPackage from './index.js'
 import {
-    typedoc,
     ApiExtractor,
     Commitlint,
-    ConfigToolRegistry,
+    type ConfigToolRegistry,
     EsLint,
     LintStaged,
     Markdownlint,
-    MarkdownlintTool,
+    type MarkdownlintTool,
     Prettier,
+    typedoc,
     Typedoc,
-    TypedocTool,
+    type TypedocTool,
 } from './index.js'
 
 const cwd = import.meta

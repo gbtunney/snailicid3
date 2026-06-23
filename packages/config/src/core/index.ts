@@ -13,4 +13,8 @@ export type {
     ResolvedConfigFunctionOptions,
 } from './define-config.js'
 
-export { defineConfig, defineConfigBuilder, defineConfigTool } from './define-config.js'
+export {
+    defineConfig,
+    defineConfigBuilder,
+    defineConfigTool,
+} from './define-config.js'

@@ -1,5 +1,3 @@
-import fs from 'node:fs'
-import path from 'node:path'
 import { merge as deep_merge } from 'ts-deepmerge'
 import type {
     JsonArray,
@@ -8,9 +6,9 @@ import type {
     JsonValue,
     Tagged,
 } from 'type-fest'
+import fs from 'node:fs'
+import path from 'node:path'
 
-export type MergeArrayModes = 'append' | 'replace'
-export type PlainObject = object
 export type JSONSerializeOptions = {
     indentSpaces?: number
     pretty?: boolean
@@ -20,6 +18,8 @@ export type JSONStringOf<Type extends JsonValue = JsonValue> = Tagged<
     'JSON_STRING',
     Type
 >
+export type MergeArrayModes = 'append' | 'replace'
+export type PlainObject = object
 
 type PlainRecord = Record<string, unknown>
 

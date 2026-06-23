@@ -110,7 +110,9 @@ export const buildFunctionTypedocMarkdown: TypedocConfigFunction<
     Merge<MarkdownPluginOptions, RemarkPluginOptions>
 > = defineConfigBuilder<
     TypedocMarkdownOptions,
-    TypedocConfigFunctionOptions<Merge<MarkdownPluginOptions, RemarkPluginOptions>>
+    TypedocConfigFunctionOptions<
+        Merge<MarkdownPluginOptions, RemarkPluginOptions>
+    >
 >((input) => {
     const { dirname, overrides } = resolveTypedocConfigInput(input)
     const fileOptions = fileSharedOptions(dirname)
@@ -129,7 +131,9 @@ export const buildFunctionTypedocVitepress: TypedocConfigFunction<
     Merge<MarkdownPluginOptions, RemarkPluginOptions>
 > = defineConfigBuilder<
     TypedocMarkdownOptions,
-    TypedocConfigFunctionOptions<Merge<MarkdownPluginOptions, RemarkPluginOptions>>
+    TypedocConfigFunctionOptions<
+        Merge<MarkdownPluginOptions, RemarkPluginOptions>
+    >
 >((input) => {
     const { dirname, overrides } = resolveTypedocConfigInput(input)
     const fileOptions = fileSharedOptions(dirname)
