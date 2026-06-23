@@ -230,6 +230,13 @@ export type JSONExportEntry<Type = unknown> = {
     filename: string
 }
 
+type JSONExportStatus = Record<string, string | true>
+
+const getJSONExportFileName = (filename: string): string =>
+    filename.endsWith('.json') || filename.endsWith('json')
+        ? filename
+        : `${filename}.json`
+
 const exportJSONFile = (
     config: JSONExportConfig,
     outdir?: string,
@@ -237,81 +244,59 @@ const exportJSONFile = (
     overwrite: boolean = true,
     logData: boolean = false,
 ): boolean => {
-    const result_status = config.reduce<Record<string, string | true>>(
-        (acc, entry: JSONExportEntry) => {
-            let success: string | true = true
-            const file_name =
-                entry.filename.endsWith('.json') ||
-                entry.filename.endsWith('json')
-                    ? entry.filename
-                    : `${entry.filename}.json`
-            const file_path = outdir
-                ? path.resolve(outdir, file_name)
-                : path.resolve(file_name)
-            const parsedData = deserializeJSON(entry.data)
-            const logObject =
-                logData && parsedData !== undefined
-                    ? `\n${stringifyJSONValue(parsedData)}`
-                    : ''
+    const result_status: JSONExportStatus = {}
 
-            const writeFile = (filePath: string = file_path): string | true => {
-                if (parsedData === undefined) {
-                    return `FILE WRITE ERROR: ${file_path}, data is not JSON serializable`
-                }
+    for (const entry of config) {
+        const file_name = getJSONExportFileName(entry.filename)
+        const file_path = outdir
+            ? path.resolve(outdir, file_name)
+            : path.resolve(file_name)
+        const parsedData = deserializeJSON(entry.data)
+        const logObject =
+            logData && parsedData !== undefined
+                ? `\n${stringifyJSONValue(parsedData)}`
+                : ''
 
-                fs.mkdirSync(path.dirname(filePath), { recursive: true })
-                fs.writeFileSync(
-                    filePath,
-                    stringifyJSONValue(parsedData, { pretty: true }),
-                )
-                return true
+        const writeFile = (filePath: string = file_path): string | true => {
+            if (parsedData === undefined) {
+                return `FILE WRITE ERROR: ${file_path}, data is not JSON serializable`
             }
 
-            try {
-                if (overwrite) {
-                    success = writeFile()
+            fs.mkdirSync(path.dirname(filePath), { recursive: true })
+            fs.writeFileSync(
+                filePath,
+                stringifyJSONValue(parsedData, { pretty: true }),
+            )
+            return true
+        }
 
-                    if (success === true) {
-                        console.log(
-                            `Writing file to (${fs.existsSync(file_path) ? 'existing' : 'empty'}) path: ${file_path}`,
-                            logObject,
-                        )
-                    } else {
-                        console.error(success, logObject)
-                    }
-                } else if (!overwrite && !fs.existsSync(file_path)) {
-                    success = writeFile()
+        let success: string | true
 
-                    if (success === true) {
-                        console.log(
-                            `Writing file to (empty) path: ${file_path}`,
-                            logObject,
-                        )
-                    } else {
-                        console.error(success, logObject)
-                    }
-                } else if (!overwrite && fs.existsSync(file_path)) {
-                    const errorMessage = `FILE WRITE ERROR: ${file_path}, file already exists`
-                    console.error(errorMessage, logObject)
-                    success = errorMessage
+        try {
+            const fileExists = fs.existsSync(file_path)
+
+            if (!overwrite && fileExists) {
+                success = `FILE WRITE ERROR: ${file_path}, file already exists`
+                console.error(success, logObject)
+            } else {
+                success = writeFile()
+
+                if (success === true) {
+                    console.log(
+                        `Writing file to (${fileExists ? 'existing' : 'empty'}) path: ${file_path}`,
+                        logObject,
+                    )
                 } else {
-                    const errorMessage = `UNKNOWN ERROR: write to ${fs.existsSync(file_path) ? 'EXISTING' : 'EMPTY'} path ${file_path} failed`
-                    console.error(errorMessage, logObject)
-                    success = errorMessage
+                    console.error(success, logObject)
                 }
-            } catch (error: unknown) {
-                const errorMessage = `FILE WRITE ERROR: ${file_path}, ${formatUnknownError(error)}`
-                console.error(errorMessage, logObject)
-                success = errorMessage
             }
+        } catch (error: unknown) {
+            success = `FILE WRITE ERROR: ${file_path}, ${formatUnknownError(error)}`
+            console.error(success, logObject)
+        }
 
-            return {
-                ...acc,
-                [file_path]: success,
-            }
-        },
-        {},
-    )
+        result_status[file_path] = success
+    }
 
     if (logData) {
         console.log(
@@ -320,10 +305,14 @@ const exportJSONFile = (
         )
     }
 
-    const success = Array.from(Object.entries(result_status)).reduce<boolean>(
-        (status, [, value]) => (!status ? false : value === true),
-        true,
-    )
+    let success = true
+    for (const status of Object.values(result_status)) {
+        if (status !== true) {
+            success = false
+            break
+        }
+    }
+
     if (!success) throw new Error(prettyPrintJSON(Object.values(result_status)))
 
     return success
