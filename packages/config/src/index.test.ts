@@ -1,12 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import * as ConfigPackage from './index.js'
 import {
-    apiExtractor,
-    commitlint,
-    eslint,
-    lintStaged,
-    markdownlint,
-    prettier,
     typedoc,
     ApiExtractor,
     Commitlint,
@@ -21,13 +15,7 @@ import {
 } from './index.js'
 
 describe('@snailicid3/config public API', () => {
-    test('exports lowercase backward-compatible tool aliases', () => {
-        expect(apiExtractor).toBe(ApiExtractor)
-        expect(commitlint).toBe(Commitlint)
-        expect(eslint).toBe(EsLint)
-        expect(lintStaged).toBe(LintStaged)
-        expect(markdownlint).toBe(Markdownlint)
-        expect(prettier).toBe(Prettier)
+    test('exports the lowercase typedoc backward-compatible alias', () => {
         expect(typedoc).toBe(Typedoc)
     })
 
@@ -50,11 +38,14 @@ describe('@snailicid3/config public API', () => {
     })
 
     test('tool extras remain available on namespaces', () => {
-        expect(typeof Commitlint.scopes.csv).toBe('function')
-        expect(Array.isArray(Commitlint.types.list)).toBe(true)
+        expect(typeof Commitlint.workspaceScopes).toBe('function')
+        expect(typeof Commitlint.workspaceScopesCsv).toBe('function')
+        expect(Array.isArray(Commitlint.commitTypes)).toBe(true)
+        expect(typeof Prettier.configFile).toBe('function')
         expect(typeof Prettier.options.base).toBe('function')
         expect(typeof Prettier.overrides.base).toBe('function')
         expect(typeof Prettier.plugins.default).toBe('function')
+        expect(typeof Prettier.plugins.packageNames).toBe('function')
         expect(typeof Typedoc.markdown.config).toBe('function')
     })
 
