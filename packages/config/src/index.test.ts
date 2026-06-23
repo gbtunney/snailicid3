@@ -14,6 +14,8 @@ import {
     TypedocTool,
 } from './index.js'
 
+const cwd = import.meta
+
 describe('@snailicid3/config public API', () => {
     test('exports the lowercase typedoc backward-compatible alias', () => {
         expect(typedoc).toBe(Typedoc)
@@ -66,6 +68,7 @@ describe('@snailicid3/config public API', () => {
 
     test('registry type map exposes native config and function options', () => {
         const options: ConfigToolRegistry['markdownlint']['functionOptions'] = {
+            cwd,
             rules: { MD001: false },
         }
         const config: ConfigToolRegistry['markdownlint']['config'] =
@@ -76,6 +79,7 @@ describe('@snailicid3/config public API', () => {
 
     test('tool type aliases expose config, options, and api slots', () => {
         const options: MarkdownlintTool['options'] = {
+            cwd,
             rules: { MD003: false },
         }
         const api: MarkdownlintTool['api'] = Markdownlint
@@ -86,6 +90,7 @@ describe('@snailicid3/config public API', () => {
 
     test('typedoc namespace follows the tool API shape', () => {
         const options: ConfigToolRegistry['typedoc']['functionOptions'] = {
+            cwd,
             overrides: { excludeExternals: true },
         }
         const api: TypedocTool['api'] = Typedoc
