@@ -1,3 +1,4 @@
+import { type IConfigFile } from '@microsoft/api-extractor'
 import { parse as parseJsonc } from 'jsonc-parser'
 import type { JsonObject } from 'type-fest'
 import fs from 'node:fs'
@@ -10,10 +11,10 @@ import { isPlainObject } from '../utilities/json.js'
  *
  * @throws {TypeError} If the parsed config is not a JSON object.
  */
-export function getBaseConfig(): JsonObject {
+export function getBaseConfig(): IConfigFile {
     const url = new URL('./base.json', import.meta.url)
     const text = fs.readFileSync(url, 'utf8')
-    const parsed = parseJsonc(text) as unknown
+    const parsed: IConfigFile = parseJsonc(text) as IConfigFile
 
     if (!isPlainObject<JsonObject>(parsed)) {
         throw new TypeError(
