@@ -29,6 +29,7 @@
         "scope-commit": "./bin/scope/commit.sh",
         "scope-affected": "./bin/scope/affected.sh",
         "gbt-changeset": "./bin/changeset-branch.sh",
+        "gbt-exec": "./bin/make-executable.sh",
         "gbt-setup": "./bin/completions/install-pnpm.sh",
         "gbt-uninstall": "./bin/uninstall.sh"
     },
@@ -148,6 +149,7 @@
         "json-schema-to-typescript": "^15.0.4",
         "jsonc-parser": "^3.3.1",
         "lint-staged": "^17.0.7",
+        "markdownlint": "^0.41.0",
         "markdownlint-cli2": "^0.22.1",
         "micromatch": "^4.0.8",
         "prettier": "^3.8.4",

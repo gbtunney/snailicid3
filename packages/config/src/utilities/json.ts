@@ -9,11 +9,9 @@ import type {
 } from 'type-fest'
 import fs from 'node:fs'
 import path from 'node:path'
+import type { PlainObject } from './types.js'
 export type MergeArrayModes = 'append' | 'replace'
-export type PlainObject = {
-    [x: string]: unknown
-    [y: number]: never
-}
+
 export const deepMerge = <Type extends Array<PlainObject>>(
     array_mode: MergeArrayModes = 'append',
     ...value: Array<PlainObject>

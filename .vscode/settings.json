@@ -79,7 +79,8 @@
         { "rule": "import/no-extraneous-dependencies", "severity": "off" },
         { "rule": "@typescript-eslint/no-unused-vars", "severity": "off" },
         { "rule": "import-x/prefer-default-export", "severity": "off" },
-        { "rule": "import/prefer-default-export", "severity": "off" }
+        { "rule": "import/prefer-default-export", "severity": "off" },
+        { "rule": "capitalized-comments", "severity": "off" }
     ],
     "nxConsole.generateAiAgentRules": true
 }

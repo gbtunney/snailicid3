@@ -131,7 +131,7 @@ export type {
     FileExtensionHint,
 } from './utilities/extensions.js'
 export {
-    //globFileFilter,
+    //GlobFileFilter,
     isPlainObject,
     json,
 } from './utilities/json.js'
@@ -140,7 +140,7 @@ export type {
     JSONExportConfig,
     JSONExportEntry,
     JsonUtilities,
-    PlainObject,
 } from './utilities/json.js'
 export { getFilePath } from './utilities/path.js'
+export type { PlainObject } from './utilities/types.js'
 export { merge } from 'ts-deepmerge'

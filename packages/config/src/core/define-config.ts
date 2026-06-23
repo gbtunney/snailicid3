@@ -1,5 +1,5 @@
 import { type Spread } from 'type-fest'
-import { type PlainObject } from './../utilities/json.js'
+import { type PlainObject } from './../utilities/types.js'
 /**
  * Permissive base constraint for any `defineConfig`-style helper, including variadic tool signatures (e.g.
  * ESLint/Vite).

@@ -1,10 +1,11 @@
-import type { MarkdownlintRuleConfiguration } from './schema.js'
+import {
+    type MarkdownlintRuleConfiguration,
+} from './schema.js'
 import { getScaledWidth, SHARED_FORMATTING_RULES } from '../prettier/index.js'
-
 /** As MarkdownlintRuleConfiguration; */
 export const getBaseConfig = (): MarkdownlintRuleConfiguration => {
     const baseConfig: MarkdownlintRuleConfiguration = {
-        // assigned at end default: useDefault,
+        // Assigned at end default: useDefault,
         //extends: false,
         default: true,
         // MD001 heading-increment
