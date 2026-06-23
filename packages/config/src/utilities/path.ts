@@ -1,53 +1,76 @@
 import fs from 'node:fs'
-import path from 'node:path'
+import nodePath from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-///todo is there a better way of naming this?
-/** Like the __dir */
-export const getDirname = (meta: ImportMeta, filePath: string): string => {
-    const directoryPath = path.dirname(fileURLToPath(meta.url))
+export type PathRoot = ImportMeta | string
 
-    if (!fs.existsSync(path.resolve(directoryPath))) {
-        throw new Error(
-            `Directory does not exist: ${path.resolve(directoryPath)}`,
-        )
+const isImportMeta = (value: unknown): value is ImportMeta =>
+    typeof value === 'object' &&
+    value !== null &&
+    'url' in value &&
+    typeof value.url === 'string'
+
+const assertDirectoryExists = (directoryPath: string): void => {
+    if (!fs.existsSync(directoryPath)) {
+        throw new Error(`Directory does not exist: ${directoryPath}`)
     }
+}
 
-    return path.resolve(directoryPath)
+/** Resolve an `ImportMeta` or string root to an absolute directory path. */
+export const getDirname = (root: PathRoot, _filePath?: string): string => {
+    const directoryPath = isImportMeta(root)
+        ? nodePath.dirname(fileURLToPath(root.url))
+        : nodePath.resolve(root)
+
+    const resolvedDirectoryPath = nodePath.resolve(directoryPath)
+    assertDirectoryExists(resolvedDirectoryPath)
+
+    return resolvedDirectoryPath
 }
 
 export const getFilename = (fullPath: string): string =>
-    path.basename(fullPath, path.extname(fullPath))
-export const getExt = (fullPath: string): string =>
-    path.extname(fullPath).replace('.', '')
+    nodePath.basename(fullPath, nodePath.extname(fullPath))
 
-export const getFullPath = (
-    _value: string,
-    _root: string | undefined,
-): string => {
-    return _root !== undefined ? `${_root}/${_value}` : _value
-}
+export const getExt = (fullPath: string): string =>
+    nodePath.extname(fullPath).replace('.', '')
 
 export const normalizePath = (value: string): string =>
-    path.normalize(path.resolve(value))
+    nodePath.normalize(nodePath.resolve(value))
 
-export const doesFileExist = (path: string): boolean => fs.existsSync(path)
+export const resolveCwd = (cwd: PathRoot | undefined): string =>
+    cwd === undefined ? process.cwd() : getDirname(cwd)
+
+export const getFullPath = (
+    value: string,
+    root: PathRoot | undefined,
+): string => normalizePath(nodePath.join(resolveCwd(root), value))
+
+export const doesFileExist = (filePath: string): boolean =>
+    fs.existsSync(filePath)
 
 export const getFilePath = (
-    rootormeta: ImportMeta | string | undefined,
+    rootormeta: PathRoot | undefined,
     filePath: string,
-): string => {
-    if (rootormeta === undefined) {
-        return normalizePath(filePath)
-    }
-    const dirname =
-        typeof rootormeta === 'string'
-            ? path.resolve(rootormeta)
-            : getDirname(rootormeta, filePath)
+): string => getFullPath(filePath, rootormeta)
 
-    if (!fs.existsSync(path.resolve(dirname))) {
-        throw new Error(`Directory does not exist: ${path.resolve(dirname)}`)
-    }
+export type PathUtilities = {
+    dirname: typeof getDirname
+    exists: typeof doesFileExist
+    extension: typeof getExt
+    file: typeof getFilePath
+    filename: typeof getFilename
+    full: typeof getFullPath
+    normalize: typeof normalizePath
+    resolveCwd: typeof resolveCwd
+}
 
-    return normalizePath(`${dirname}/${filePath}`)
+export const paths: PathUtilities = {
+    dirname: getDirname,
+    exists: doesFileExist,
+    extension: getExt,
+    file: getFilePath,
+    filename: getFilename,
+    full: getFullPath,
+    normalize: normalizePath,
+    resolveCwd,
 }
