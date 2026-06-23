@@ -9,12 +9,13 @@ import { Commitlint, type CommitlintConfig } from '@snailicid3/config'
  * @example
  *     ;```ts
  *     Commitlint.config({
+ *         cwd: import.meta,
  *         scopeOptions: { mergeScopes: ['stupid'] },
  *         appendTypes: ['derp'],
  *     })
  *     ```
  */
 const configuration: CommitlintConfig = Commitlint.defineConfig(
-    Commitlint.config(),
+    Commitlint.config({ cwd: import.meta }),
 )
 export default configuration
