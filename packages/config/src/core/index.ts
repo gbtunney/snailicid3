@@ -2,6 +2,7 @@ export type {
     AnyDefineConfig,
     BaseConfigFunctionOptions,
     ConfigBuilder,
+    ConfigCwd,
     ConfigFunctionOptions,
     ConfigTool,
     ConfigToolApi,
