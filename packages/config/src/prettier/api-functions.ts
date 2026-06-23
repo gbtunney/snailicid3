@@ -12,7 +12,11 @@ import type {
     PrettierPluginPackageName,
     ResolvedPrettierPlugin,
 } from './plugins/registry.js'
-import { type ConfigFunctionOptions, defineConfig } from '../core/index.js'
+import {
+    type ConfigFunctionOptions,
+    defineConfig,
+    defineConfigBuilder,
+} from '../core/index.js'
 
 export const BASE_IGNORES = ['**/*.api.md', 'tmp', 'temp'] as const
 
@@ -54,16 +58,10 @@ export const definePrettierConfig = <const TConfig extends PrettierConfig>(
     config: TConfig,
 ): TConfig => defineConfig(config)
 
-export const buildFunctionPrettier = (
-    input: PrettierConfigFunctionOptions = {},
-): PrettierConfig => {
-    const {
-        isBundled = true,
-        options,
-        overrides = [],
-        plugins = [],
-        useResolvedPlugins,
-    } = input
+export const buildFunctionPrettier = defineConfigBuilder<
+    PrettierConfig,
+    PrettierConfigFunctionOptions
+>(({ isBundled = true, options, overrides = [], plugins = [], useResolvedPlugins }) => {
     const shouldUseResolvedPlugins = useResolvedPlugins ?? isBundled
     const defaultPlugins = shouldUseResolvedPlugins
         ? getDefaultPrettierPlugins()
@@ -75,22 +73,21 @@ export const buildFunctionPrettier = (
         overrides: [...getDefaultOverrides(), ...overrides],
         plugins: [...defaultPlugins, ...plugins],
     }
-}
+})
 
 /**
  * Builds the JSON-file-safe Prettier config shape used by `.prettierrc.json` artifacts.
  *
  * Runtime Prettier config may contain resolved plugin objects. JSON config files must keep plugin package names.
  */
-export const buildPrettierJsonConfig = (
-    input: PrettierJsonConfigFunctionOptions = {},
-): PrettierJsonConfig => {
-    const { options, overrides = [], plugins = [] } = input
-
+export const buildPrettierJsonConfig = defineConfigBuilder<
+    PrettierJsonConfig,
+    PrettierJsonConfigFunctionOptions
+>(({ options, overrides = [], plugins = [] }) => {
     return {
         ...getDefaultOptions(),
         ...options,
         overrides: [...getDefaultOverrides(), ...overrides],
         plugins: [...getDefaultPrettierPluginNames(), ...plugins],
     }
-}
+})
