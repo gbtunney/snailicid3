@@ -30,6 +30,7 @@ export type {
     AnyDefineConfig,
     BaseConfigFunctionOptions,
     ConfigBuilder,
+    ConfigCwd,
     ConfigFunctionOptions,
     ConfigTool,
     ConfigToolApi,
@@ -77,8 +78,14 @@ export type * from './markdownlint/index.js'
 export { Prettier } from './prettier/index.js'
 export type {
     PrettierConfig,
+    PrettierConfigBase,
     PrettierConfigFunctionOptions,
+    PrettierJsonConfig,
+    PrettierJsonConfigFunctionOptions,
     PrettierOptions,
+    PrettierOverride,
+    PrettierOverrideFilePattern,
+    PrettierOverrideFiles,
     PrettierOverrides,
     PrettierPlugin,
     PrettierPluginName,
@@ -86,7 +93,9 @@ export type {
     PrettierPluginRegistry,
     PrettierPluginRegistryEntry,
     PrettierTool,
+    ReservedPrettierOptionKey,
     ResolvedPrettierPlugin,
+    StripIndexSignature,
 } from './prettier/index.js'
 /* SHARED CONFIGURATIONS */
 export {
@@ -150,7 +159,18 @@ export type {
     JSONExportEntry,
     JsonUtilities,
 } from './utilities/json.js'
-export { getFilePath } from './utilities/path.js'
+export {
+    doesFileExist,
+    getDirname,
+    getExt,
+    getFilename,
+    getFilePath,
+    getFullPath,
+    normalizePath,
+    paths,
+    resolveCwd,
+} from './utilities/path.js'
+export type { PathRoot, PathUtilities } from './utilities/path.js'
 export type { PlainObject } from './utilities/types.js'
 
 export { merge } from 'ts-deepmerge'
