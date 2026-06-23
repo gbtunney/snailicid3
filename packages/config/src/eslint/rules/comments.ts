@@ -13,6 +13,15 @@ export const commentsRules = (): Array<Config> =>
         {
             name: 'Comments: JSDoc ERROR',
             rules: {
+                'capitalized-comments': [
+                    'error',
+                    'always',
+                    {
+                        ignoreConsecutiveComments: true,
+                        ignoreInlineComments: true,
+                        ignorePattern: '^eslint(-|$)',
+                    },
+                ],
                 'jsdoc/check-alignment': 'error',
                 'jsdoc/check-indentation': [
                     'error',
@@ -61,7 +70,7 @@ export const commentsRules = (): Array<Config> =>
                 'jsdoc/no-undefined-types': 'error',
                 'jsdoc/require-jsdoc': 'off',
                 'jsdoc/require-param': 'off',
-                /* keep to warn for now til i see how typedoc handles param types */
+                /* Keep to warn for now til i see how typedoc handles param types */
                 'jsdoc/require-param-type': 'warn',
                 'jsdoc/require-property-description': 'off',
                 'jsdoc/require-returns': 'off',

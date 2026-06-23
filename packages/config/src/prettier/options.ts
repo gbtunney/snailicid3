@@ -24,9 +24,10 @@ export const getDefaultOptions = (): PrettierOptions => {
     return {
         bracketSameLine: true,
 
+        jsdocCapitalizeDescription: false,
         /** JS Doc */
         jsdocPrintWidth: getScaledWidth('comments'),
-        //packageIgnoreSort: ["scripts"],
+        //PackageIgnoreSort: ["scripts"],
         //SHARED_FORMATTING_RULES.tabWidth,
         /**
          * TODO reenabled or remove packageSortOrder: [ "name", "version", "private", "description", "scripts", "main",
