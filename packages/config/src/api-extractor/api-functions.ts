@@ -1,6 +1,10 @@
 import { type IConfigFile } from '@microsoft/api-extractor'
 import { getBaseConfig } from './base.js'
-import { type ConfigFunctionOptions, defineConfig } from '../core/index.js'
+import {
+    type ConfigFunctionOptions,
+    defineConfig,
+    defineConfigBuilder,
+} from '../core/index.js'
 import { deepMerge } from '../utilities/json.js'
 import type { PlainObject } from '../utilities/types.js'
 
@@ -17,10 +21,10 @@ export const defineApiExtractorConfig = <
     config: TConfig,
 ): TConfig => defineConfig(config)
 
-export const buildFunctionApiExtractor = (
-    options: ApiExtractorConfigFunctionOptions = {},
-): ApiExtractorConfig => {
-    const { cwd: _cwd, overrides = {} } = options
+export const buildFunctionApiExtractor = defineConfigBuilder<
+    ApiExtractorConfig,
+    ApiExtractorConfigFunctionOptions
+>(({ overrides = {} }) => {
     const config: ApiExtractorConfig = getBaseConfig()
     const finalConfig = deepMerge(
         'replace',
@@ -29,4 +33,4 @@ export const buildFunctionApiExtractor = (
     ) as unknown as ApiExtractorConfig
 
     return defineApiExtractorConfig(finalConfig)
-}
+})
