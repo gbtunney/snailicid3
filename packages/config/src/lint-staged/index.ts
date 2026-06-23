@@ -6,7 +6,6 @@ import {
     type LintStagedConfigFunctionOptions,
 } from './api-functions.js'
 import { extensionsToGlob, quoteArg, toFileArgs } from './helpers.js'
-buildFunctionLintStaged()
 import {
     type ConfigTool,
     type ConfigToolApi,
@@ -44,6 +43,3 @@ export type {
     LintStagedConfig,
     LintStagedConfigFunctionOptions,
 } from './api-functions.js'
-
-const testy: LintStagedConfigFunctionOptions = {}
-buildFunctionLintStaged(testy)
