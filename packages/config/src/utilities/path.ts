@@ -16,10 +16,18 @@ const assertDirectoryExists = (directoryPath: string): void => {
     }
 }
 
+const getImportMetaDirname = (meta: ImportMeta): string => {
+    const url = new URL(meta.url)
+
+    return url.protocol === 'file:'
+        ? nodePath.dirname(fileURLToPath(url))
+        : process.cwd()
+}
+
 /** Resolve an `ImportMeta` or string root to an absolute directory path. */
 export const getDirname = (root: PathRoot, _filePath?: string): string => {
     const directoryPath = isImportMeta(root)
-        ? nodePath.dirname(fileURLToPath(root.url))
+        ? getImportMetaDirname(root)
         : nodePath.resolve(root)
 
     const resolvedDirectoryPath = nodePath.resolve(directoryPath)
