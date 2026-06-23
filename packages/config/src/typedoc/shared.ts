@@ -13,10 +13,8 @@ export type TypedocConfigFunction<Type extends object = object> = (
 ) => TypedocOptions<Type>
 export type TypedocConfigFunctionOptions<Type extends object = object> =
     ConfigFunctionOptions<{
-        /** Directory containing the package being documented. Defaults to `meta`, then `cwd`, then `process.cwd()`. */
+        /** Directory containing the package being documented. Defaults to `cwd`, then `process.cwd()`. */
         dirname?: PathRoot
-        /** Module metadata for resolving the package directory from a config file. */
-        meta?: ImportMeta
         /** Merged on top of the generated TypeDoc config. */
         overrides?: TypedocOptions<Type>
     }>
@@ -32,13 +30,12 @@ export type TypedocOptions<Type extends object = object> = Partial<
 export const resolveTypedocConfigInput = <Type extends object = object>({
     cwd,
     dirname,
-    meta,
     overrides = {},
 }: TypedocConfigFunctionOptions<Type> = {}): {
     dirname: string
     overrides: TypedocOptions<Type>
 } => ({
-    dirname: resolveCwd(dirname ?? meta ?? cwd),
+    dirname: resolveCwd(dirname ?? cwd),
     overrides,
 })
 
