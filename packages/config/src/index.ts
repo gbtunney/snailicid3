@@ -6,8 +6,12 @@
  */
 
 /** API EXTRACTOR */
-//todo: use api shape even tho we dont really neeed?
-export * as apiExtractor from './api-extractor/index.js'
+export { ApiExtractor } from './api-extractor/index.js'
+export type {
+    ApiExtractorConfig,
+    ApiExtractorConfigFunctionOptions,
+    ApiExtractorTool,
+} from './api-extractor/index.js'
 export { Commitlint } from './commitlint/index.js'
 export type * from './commitlint/index.js'
 export {

@@ -1,12 +1,12 @@
 import type { JsonObject } from 'type-fest'
-import { apiExtractor } from './api-extractor/index.js'
+import { ApiExtractor } from './api-extractor/index.js'
 import { Markdownlint } from './markdownlint/index.js'
 import { getDefaultPrettierPluginNames } from './prettier/plugins/index.js'
 import { isPlainObject, json } from './utilities/json.js'
 import { Prettier } from './index.js'
 /* TODO: outputs a json dump of markdownlint and prettier. this is TEMPORARY till the configs are correct. ideally this should be gotten rid of */
 
-const _apiExtractorConfig = apiExtractor.config()
+const _apiExtractorConfig = ApiExtractor.config()
 const API_EXTRACTOR_CONFIG = isPlainObject<JsonObject>(_apiExtractorConfig)
     ? _apiExtractorConfig
     : {}
