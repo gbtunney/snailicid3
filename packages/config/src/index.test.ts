@@ -17,6 +17,7 @@ import {
     MarkdownlintTool,
     Prettier,
     Typedoc,
+    TypedocTool,
 } from './index.js'
 
 describe('@snailicid3/config public API', () => {
