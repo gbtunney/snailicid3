@@ -41,6 +41,15 @@ describe('json utilities', () => {
         expect(pretty).toContain('\n')
     })
 
+    it('does not double-serialize existing JSON object strings', () => {
+        const once = json.serialize(markdownlintLikeConfig)
+        const twice = json.serialize(once)
+
+        expect(twice).toBe(once)
+        expect(twice).not.toContain('\\"')
+        expect(json.object(twice)).toEqual(markdownlintLikeConfig)
+    })
+
     it('rejects non-object values from the object helper', () => {
         expect(json.object('[1, 2, 3]')).toBeUndefined()
         expect(json.object('not-json')).toBeUndefined()
