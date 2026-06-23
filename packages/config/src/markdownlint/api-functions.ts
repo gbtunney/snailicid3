@@ -28,7 +28,7 @@ export type MarkdownlintConfig = MarkdownlintConfiguration
 export type MarkdownlintConfigFunctionOptions = ConfigFunctionOptions<{
     /** Appended to `BASE_IGNORES`. */
     ignores?: Array<string>
-    /** Replaces the default `['**/*.md']` glob list if provided. */
+    /** Replaces the default markdown glob list if provided. */
     includes?: Array<string>
     /** Merged onto `Markdownlint.rules.base()` when `useBaseConfig` is true. */
     rules?: MarkdownlintRuleConfiguration
