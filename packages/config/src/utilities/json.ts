@@ -1,7 +1,13 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { merge as deep_merge } from 'ts-deepmerge'
-import type { JsonArray, JsonObject, JsonPrimitive, JsonValue } from 'type-fest'
+import type {
+    JsonArray,
+    JsonObject,
+    JsonPrimitive,
+    JsonValue,
+    Tagged,
+} from 'type-fest'
 
 export type MergeArrayModes = 'append' | 'replace'
 export type PlainObject = object
@@ -9,6 +15,11 @@ export type JSONSerializeOptions = {
     indentSpaces?: number
     pretty?: boolean
 }
+export type JSONStringOf<Type extends JsonValue = JsonValue> = Tagged<
+    string,
+    'JSON_STRING',
+    Type
+>
 
 type PlainRecord = Record<string, unknown>
 
@@ -53,10 +64,14 @@ const getTraceLogger = (scope: string): TraceLogger => {
     }
 }
 
+const formatUnknownError = (error: unknown): string =>
+    error instanceof Error ? error.message : String(error)
+
 export namespace Json {
     export type Array = JsonArray
     export type Object = JsonObject
     export type Primitive = JsonPrimitive
+    export type StringOf<Type extends JsonValue = JsonValue> = JSONStringOf<Type>
     export type Value = JsonValue
 }
 
@@ -106,6 +121,9 @@ export const isJsonArray = (value: unknown): value is JsonArray =>
 export const isJsonObject = (value: unknown): value is JsonObject =>
     isPlainObject(value) && isJsonValue(value)
 
+const toJSONString = <Type extends JsonValue>(value: string): JSONStringOf<Type> =>
+    value as JSONStringOf<Type>
+
 const parseJSONString = (data: string): JsonValue | undefined => {
     try {
         const parsed: unknown = JSON.parse(data)
@@ -117,7 +135,7 @@ const parseJSONString = (data: string): JsonValue | undefined => {
 
 const deserializeJSON = (data: unknown): JsonValue | undefined => {
     if (typeof data === 'string') {
-        return parseJSONString(data)
+        return parseJSONString(data) ?? data
     }
 
     try {
@@ -143,16 +161,18 @@ const getJSONIndentSpaces = ({
     pretty = false,
 }: JSONSerializeOptions = {}): number => (pretty ? indentSpaces : 0)
 
-const stringifyJSONValue = (
-    value: JsonValue,
+const stringifyJSONValue = <Type extends JsonValue>(
+    value: Type,
     options: JSONSerializeOptions = {},
-): string =>
-    JSON.stringify(value, undefined, getJSONIndentSpaces(options)) ?? 'null'
+): JSONStringOf<Type> =>
+    toJSONString<Type>(
+        JSON.stringify(value, undefined, getJSONIndentSpaces(options)) ?? 'null',
+    )
 
 function serializeJSON(
     value: unknown,
     options: JSONSerializeOptions = {},
-): string {
+): JSONStringOf {
     const parsed = deserializeJSON(value)
 
     return parsed === undefined
@@ -163,7 +183,7 @@ function serializeJSON(
 const prettyPrintJSON = (
     value: unknown,
     indentSpaces = DEFAULT_JSON_INDENT_SPACES,
-): string => serializeJSON(value, { indentSpaces, pretty: true })
+): JSONStringOf => serializeJSON(value, { indentSpaces, pretty: true })
 
 /**
  * TODO can we make a isjsonifiable function for stirng,null,etc and these should use the serialize function ? also
@@ -193,6 +213,13 @@ const importJSON = async (filename: string): Promise<JsonValue | undefined> => {
     }
 }
 
+const importJSONObject = async (
+    filename: string,
+): Promise<JsonObject | undefined> => {
+    const parsed = await importJSON(filename)
+    return isJsonObject(parsed) ? parsed : undefined
+}
+
 export type JSONExportConfig = Array<JSONExportEntry>
 
 export type JSONExportEntry<Type = unknown> = {
@@ -218,34 +245,63 @@ const exportJSONFile = (
             const file_path = outdir
                 ? path.resolve(outdir, file_name)
                 : path.resolve(file_name)
+            const parsedData = deserializeJSON(entry.data)
+            const logObject =
+                logData && parsedData !== undefined
+                    ? `\n${stringifyJSONValue(parsedData)}`
+                    : ''
 
-            const writeFile = (filePath: string = file_path): void => {
+            const writeFile = (filePath: string = file_path): string | true => {
+                if (parsedData === undefined) {
+                    return `FILE WRITE ERROR: ${file_path}, data is not JSON serializable`
+                }
+
                 fs.mkdirSync(path.dirname(filePath), { recursive: true })
-                fs.writeFileSync(filePath, prettyPrintJSON(entry.data))
+                fs.writeFileSync(
+                    filePath,
+                    stringifyJSONValue(parsedData, { pretty: true }),
+                )
+                return true
             }
-            const logObject = logData ? `\n${serializeJSON(entry.data)}` : ''
 
-            if (overwrite) {
-                writeFile()
-                console.log(
-                    `Writing file to (${fs.existsSync(file_path) ? 'existing' : 'empty'}) path: ${file_path}`,
-                    logObject,
-                )
-            } else if (!overwrite && !fs.existsSync(file_path)) {
-                writeFile()
-                console.log(
-                    `Writing file to (empty) path: ${file_path}`,
-                    logObject,
-                )
-            } else if (!overwrite && fs.existsSync(file_path)) {
-                const errorMessage = `FILE WRITE ERROR: ${file_path}, file already exists`
-                console.error(errorMessage, logObject)
-                success = errorMessage
-            } else {
-                const errorMessage = `UNKNOWN ERROR: write to ${fs.existsSync(file_path) ? 'EXISTING' : 'EMPTY'} path ${file_path} failed`
+            try {
+                if (overwrite) {
+                    success = writeFile()
+
+                    if (success === true) {
+                        console.log(
+                            `Writing file to (${fs.existsSync(file_path) ? 'existing' : 'empty'}) path: ${file_path}`,
+                            logObject,
+                        )
+                    } else {
+                        console.error(success, logObject)
+                    }
+                } else if (!overwrite && !fs.existsSync(file_path)) {
+                    success = writeFile()
+
+                    if (success === true) {
+                        console.log(
+                            `Writing file to (empty) path: ${file_path}`,
+                            logObject,
+                        )
+                    } else {
+                        console.error(success, logObject)
+                    }
+                } else if (!overwrite && fs.existsSync(file_path)) {
+                    const errorMessage = `FILE WRITE ERROR: ${file_path}, file already exists`
+                    console.error(errorMessage, logObject)
+                    success = errorMessage
+                } else {
+                    const errorMessage = `UNKNOWN ERROR: write to ${fs.existsSync(file_path) ? 'EXISTING' : 'EMPTY'} path ${file_path} failed`
+                    console.error(errorMessage, logObject)
+                    success = errorMessage
+                }
+            } catch (error: unknown) {
+                const errorMessage = `FILE WRITE ERROR: ${file_path}, ${formatUnknownError(error)}`
                 console.error(errorMessage, logObject)
                 success = errorMessage
             }
+
             return {
                 ...acc,
                 [file_path]: success,
@@ -280,11 +336,15 @@ export type JsonUtilities = {
         logData?: boolean,
     ) => boolean
     importFile: (filename: string) => Promise<JsonValue | undefined>
+    importObject: (filename: string) => Promise<JsonObject | undefined>
     isObject: (value: unknown) => value is JsonObject
     isValue: (value: unknown) => value is JsonValue
     object: (data: unknown) => JsonObject | undefined
-    prettyPrint: (value: unknown, indentSpaces?: number) => string
-    serialize: (value: unknown, options?: JSONSerializeOptions) => string
+    prettyPrint: (value: unknown, indentSpaces?: number) => JSONStringOf
+    serialize: (
+        value: unknown,
+        options?: JSONSerializeOptions,
+    ) => JSONStringOf
 }
 
 export const json: JsonUtilities = {
@@ -292,6 +352,7 @@ export const json: JsonUtilities = {
     deserializeObject: deserializeJSONObject,
     exportFile: exportJSONFile,
     importFile: importJSON,
+    importObject: importJSONObject,
     isObject: isJsonObject,
     isValue: isJsonValue,
     object: deserializeJSONObject,
