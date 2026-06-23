@@ -31,6 +31,22 @@ export type PrettierConfigFunctionOptions = ConfigFunctionOptions<{
 
 export type PrettierPlugin = PrettierPluginPackageName | ResolvedPrettierPlugin
 
+export type PrettierJsonConfig = Omit<
+    PrettierOptions,
+    'overrides' | 'plugins'
+> & {
+    overrides: PrettierOverrides
+    plugins: Array<PrettierPluginPackageName>
+}
+
+export type PrettierJsonConfigFunctionOptions = Omit<
+    PrettierConfigFunctionOptions,
+    'isBundled' | 'plugins' | 'useResolvedPlugins'
+> & {
+    /** Appended after the default package-name plugin list. */
+    plugins?: Array<PrettierPluginPackageName>
+}
+
 export const definePrettierConfig = <const TConfig extends PrettierConfig>(
     config: TConfig,
 ): TConfig => defineConfig(config)
@@ -56,6 +72,24 @@ export const buildFunctionPrettier = (
         ...options,
         overrides: [...getDefaultOverrides(), ...overrides],
         plugins: [...defaultPlugins, ...plugins],
+    }
+}
+
+/**
+ * Builds the JSON-file-safe Prettier config shape used by `.prettierrc.json` artifacts.
+ *
+ * Runtime Prettier config may contain resolved plugin objects. JSON config files must keep plugin package names.
+ */
+export const buildPrettierJsonConfig = (
+    input: PrettierJsonConfigFunctionOptions = {},
+): PrettierJsonConfig => {
+    const { options, overrides = [], plugins = [] } = input
+
+    return {
+        ...getDefaultOptions(),
+        ...options,
+        overrides: [...getDefaultOverrides(), ...overrides],
+        plugins: [...getDefaultPrettierPluginNames(), ...plugins],
     }
 }
 
