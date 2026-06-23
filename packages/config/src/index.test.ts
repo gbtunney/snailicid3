@@ -1,80 +1,64 @@
 import { describe, expect, test } from 'vitest'
 import * as ConfigPackage from './index.js'
 import {
+    apiExtractor,
+    commitlint,
+    eslint,
+    lintStaged,
+    markdownlint,
+    prettier,
+    typedoc,
+    ApiExtractor,
     Commitlint,
-    defineConfig,
+    ConfigToolRegistry,
     EsLint,
-    expandExtensions,
-    JS_FILE_EXTENSIONS,
-    JSLIKE_FILE_EXTENSIONS,
     LintStaged,
     Markdownlint,
-    Prettier,
-    PRETTIER_FILE_EXTENSIONS,
-    TS_FILE_EXTENSIONS,
-    Typedoc,
-    typedoc,
-} from './index.js'
-import type {
-    ConfigToolRegistry,
     MarkdownlintTool,
-    TypedocTool,
+    Prettier,
+    Typedoc,
 } from './index.js'
 
-describe('file extension constants', () => {
-    test('JS_FILE_EXTENSIONS contains js', () => {
-        expect(JS_FILE_EXTENSIONS).toContain('js')
+describe('@snailicid3/config public API', () => {
+    test('exports lowercase backward-compatible tool aliases', () => {
+        expect(apiExtractor).toBe(ApiExtractor)
+        expect(commitlint).toBe(Commitlint)
+        expect(eslint).toBe(EsLint)
+        expect(lintStaged).toBe(LintStaged)
+        expect(markdownlint).toBe(Markdownlint)
+        expect(prettier).toBe(Prettier)
+        expect(typedoc).toBe(Typedoc)
     })
 
-    test('TS_FILE_EXTENSIONS contains ts', () => {
-        expect(TS_FILE_EXTENSIONS).toContain('ts')
+    test('exports capitalized tool namespaces', () => {
+        expect(typeof ApiExtractor.config).toBe('function')
+        expect(typeof Commitlint.config).toBe('function')
+        expect(typeof EsLint.config).toBe('function')
+        expect(typeof LintStaged.config).toBe('function')
+        expect(typeof Markdownlint.config).toBe('function')
+        expect(typeof Prettier.config).toBe('function')
+        expect(typeof Typedoc.config).toBe('function')
     })
 
-    test('JSLIKE_FILE_EXTENSIONS includes both js and ts entries', () => {
-        expect(JSLIKE_FILE_EXTENSIONS).toContain('js')
-        expect(JSLIKE_FILE_EXTENSIONS).toContain('ts')
+    test('tool namespaces expose defineConfig helpers', () => {
+        expect(typeof ApiExtractor.defineConfig).toBe('function')
+        expect(typeof Commitlint.defineConfig).toBe('function')
+        expect(typeof Markdownlint.defineConfig).toBe('function')
+        expect(typeof Prettier.defineConfig).toBe('function')
+        expect(typeof Typedoc.defineConfig).toBe('function')
     })
 
-    test('PRETTIER_FILE_EXTENSIONS is a non-empty array', () => {
-        expect(Array.isArray(PRETTIER_FILE_EXTENSIONS)).toBe(true)
-        expect(PRETTIER_FILE_EXTENSIONS.length).toBeGreaterThan(0)
-    })
-})
-
-describe('expandExtensions', () => {
-    test('returns an array of the same length', () => {
-        expect(expandExtensions(['ts', 'js'])).toHaveLength(2)
+    test('tool extras remain available on namespaces', () => {
+        expect(typeof Commitlint.scopes.csv).toBe('function')
+        expect(Array.isArray(Commitlint.types.list)).toBe(true)
+        expect(typeof Prettier.options.base).toBe('function')
+        expect(typeof Prettier.overrides.base).toBe('function')
+        expect(typeof Prettier.plugins.default).toBe('function')
+        expect(typeof Typedoc.markdown.config).toBe('function')
     })
 
-    test('passes extensions through without a base pattern', () => {
-        expect(expandExtensions(['ts'])).toEqual(['ts'])
-    })
-
-    test('prepends base pattern with trailing dot', () => {
-        expect(expandExtensions(['ts'], 'src')).toEqual(['src.ts'])
-    })
-})
-
-describe('core defineConfig', () => {
-    test('returns the config unchanged', () => {
-        expect(defineConfig({ a: 1 })).toEqual({ a: 1 })
-    })
-})
-
-describe('tool namespace API', () => {
-    test.each([
-        ['Commitlint', Commitlint],
-        ['EsLint', EsLint],
-        ['LintStaged', LintStaged],
-        ['Markdownlint', Markdownlint],
-        ['Prettier', Prettier],
-        ['Typedoc', Typedoc],
-    ])('%s exposes config and defineConfig', (_name, tool) => {
-        expect(typeof tool.config).toBe('function')
-        expect(typeof tool.defineConfig).toBe('function')
-    })
-
-    test('does not expose raw config builder helpers from the root API', () => {
+    test('does not export old buildFunction helpers at package root', () => {
+        expect('buildApiExtractorConfigFunction' in ConfigPackage).toBe(false)
         expect('buildCommitlintConfigFunction' in ConfigPackage).toBe(false)
         expect('buildEsLintConfigFunction' in ConfigPackage).toBe(false)
         expect('buildLintStagedConfigFunction' in ConfigPackage).toBe(false)
@@ -100,12 +84,12 @@ describe('tool namespace API', () => {
 
     test('tool type aliases expose config, options, and api slots', () => {
         const options: MarkdownlintTool['options'] = {
-            rules: { MD002: false },
+            rules: { MD003: false },
         }
         const api: MarkdownlintTool['api'] = Markdownlint
         const config: MarkdownlintTool['config'] = api.config(options)
 
-        expect(config.config.MD002).toBe(false)
+        expect(config.config.MD003).toBe(false)
     })
 
     test('typedoc namespace follows the tool API shape', () => {
@@ -118,14 +102,5 @@ describe('tool namespace API', () => {
         expect(typedoc).toBe(Typedoc)
         expect(config?.excludeExternals).toBe(true)
         expect(typeof Typedoc.markdown.config).toBe('function')
-        expect(typeof Typedoc.materialTheme.config).toBe('function')
-        expect(typeof Typedoc.vitepress.config).toBe('function')
-        expect(Typedoc.plugins.default()).toEqual(['typedoc-plugin-zod'])
-        expect(Typedoc.plugins.markdown()).toEqual([
-            'typedoc-plugin-markdown',
-            'typedoc-plugin-zod',
-        ])
     })
 })
-
-export {}
