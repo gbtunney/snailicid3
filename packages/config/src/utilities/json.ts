@@ -4,13 +4,15 @@ import { merge as deep_merge } from 'ts-deepmerge'
 import type { JsonArray, JsonObject, JsonPrimitive, JsonValue } from 'type-fest'
 
 export type MergeArrayModes = 'append' | 'replace'
-export type PlainObject = Record<string, unknown>
+export type PlainObject = object
 export type JSONSerializeOptions = {
     indentSpaces?: number
     pretty?: boolean
 }
 
-export const isPlainObject = <Type extends PlainObject = PlainObject>(
+type PlainRecord = Record<string, unknown>
+
+export const isPlainObject = <Type extends PlainObject = PlainRecord>(
     value: unknown,
 ): value is Type => {
     if (value === null || typeof value !== 'object') {
@@ -25,10 +27,11 @@ export const deepMerge = (
     array_mode: MergeArrayModes = 'append',
     ...value: Array<PlainObject>
 ): PlainObject => {
+    const mergeableValues = value.filter(isPlainObject<PlainRecord>)
     const result =
         array_mode === 'append'
-            ? deep_merge.withOptions({ mergeArrays: true }, ...value)
-            : deep_merge.withOptions({ mergeArrays: false }, ...value)
+            ? deep_merge.withOptions({ mergeArrays: true }, ...mergeableValues)
+            : deep_merge.withOptions({ mergeArrays: false }, ...mergeableValues)
 
     return isPlainObject(result) ? result : {}
 }
