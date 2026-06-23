@@ -1,5 +1,8 @@
 import { type TypeDocOptions } from 'typedoc'
-import type { ConfigFunctionOptions } from '../core/index.js'
+import type {
+    ConfigFunctionOptions,
+    ResolvedConfigFunctionOptions,
+} from '../core/index.js'
 import {
     doesFileExist,
     getFilePath,
@@ -9,11 +12,11 @@ import {
 } from '../utilities/path.js'
 
 export type TypedocConfigFunction<Type extends object = object> = (
-    input?: TypedocConfigFunctionOptions<Type>,
+    input: TypedocConfigFunctionOptions<Type>,
 ) => TypedocOptions<Type>
 export type TypedocConfigFunctionOptions<Type extends object = object> =
     ConfigFunctionOptions<{
-        /** Directory containing the package being documented. Defaults to `cwd`, then `process.cwd()`. */
+        /** Directory containing the package being documented. Defaults to `cwd`. */
         dirname?: PathRoot
         /** Merged on top of the generated TypeDoc config. */
         overrides?: TypedocOptions<Type>
@@ -31,11 +34,11 @@ export const resolveTypedocConfigInput = <Type extends object = object>({
     cwd,
     dirname,
     overrides = {},
-}: TypedocConfigFunctionOptions<Type> = {}): {
+}: ResolvedConfigFunctionOptions<TypedocConfigFunctionOptions<Type>>): {
     dirname: string
     overrides: TypedocOptions<Type>
 } => ({
-    dirname: resolveCwd(dirname ?? cwd),
+    dirname: dirname === undefined ? cwd : resolveCwd(dirname),
     overrides,
 })
 
