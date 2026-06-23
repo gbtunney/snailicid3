@@ -7,7 +7,11 @@ import {
     workspaceScopes,
     type WorkspaceScopesOptions,
 } from './workspace.scopes.js'
-import { type ConfigFunctionOptions, defineConfig } from '../core/index.js'
+import {
+    type ConfigFunctionOptions,
+    defineConfig,
+    defineConfigBuilder,
+} from '../core/index.js'
 
 export type CommitlintConfig = CommitlintUserConfig
 
@@ -26,12 +30,10 @@ export const defineCommitlintConfig = <const TConfig extends CommitlintConfig>(
     config: TConfig,
 ): TConfig => defineConfig(config)
 
-export const buildFunctionCommitlint = ({
-    appendScopes,
-    appendTypes = [],
-    overrides = {},
-    scopeOptions,
-}: CommitlintConfigFunctionOptions = {}): CommitlintConfig => {
+export const buildFunctionCommitlint = defineConfigBuilder<
+    CommitlintConfig,
+    CommitlintConfigFunctionOptions
+>(({ appendScopes, appendTypes = [], overrides = {}, scopeOptions }) => {
     const scopes = workspaceScopes(appendScopes ?? scopeOptions)
     const typeEnum = [...new Set([...COMMIT_TYPES, ...appendTypes])]
 
@@ -48,4 +50,4 @@ export const buildFunctionCommitlint = ({
         enumRules,
         overrides,
     )
-}
+})
