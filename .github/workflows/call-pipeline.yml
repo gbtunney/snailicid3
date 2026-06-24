@@ -100,9 +100,9 @@ on:
                 type: boolean
 
             disable_nx_cloud:
-                description: Optional override for vars.DISABLE_NX_CLOUD ('true'|'false'). If set, this input takes precedence; if empty, the workflow falls back to vars.DISABLE_NX_CLOUD.
+                description: Disable Nx Cloud policy ( true |false | vars ) for this run. (true) means its disabled
                 required: false
-                default: ''
+                default: 'vars'
                 type: string
 
             # Nx affected options
@@ -186,6 +186,10 @@ jobs:
 
                   input_value="${{ inputs.disable_nx_cloud }}"
                   variable_value="${{ vars.DISABLE_NX_CLOUD || '' }}"
+
+                  if [ "$input_value" = "vars" ]; then
+                    input_value=""
+                  fi
 
                   if [ -n "$input_value" ]; then
                     policy_source="input:disable_nx_cloud"

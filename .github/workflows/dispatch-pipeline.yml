@@ -40,6 +40,16 @@ on:
                 required: true
                 default: false
                 type: boolean
+            disable_nx_cloud:
+                description: Disable Nx Cloud policy for this run. (true) means its disabled
+                required: true
+                default: vars
+                type: choice
+                options:
+                    - vars
+                    - 'true'
+                    - 'false'
+
             run_build:
                 description: Run pnpm build
                 required: true
@@ -112,6 +122,7 @@ jobs:
         with:
             mode: ${{ inputs.mode }}
             check_mode: ${{ inputs.check_mode }}
+            disable_nx_cloud: ${{ inputs.disable_nx_cloud }}
             api_report_mode: ${{ inputs.api_report_mode }}
             require_lockfile: ${{ inputs.require_lockfile }}
             require_clean_repo: ${{ inputs.require_clean_repo }}

@@ -246,6 +246,9 @@ jobs:
         needs: [detect, plan, guard_real_release]
         if: ${{ always() && needs.detect.outputs.should_version == 'true' && (inputs.dry_run == true || needs.guard_real_release.result == 'success') }}
         runs-on: ubuntu-latest
+        env:
+            HUSKY: 0
+            NX_NO_CLOUD: ${{ (vars.DISABLE_NX_CLOUD || 'true') == 'true' && 'true' || 'false' }}
 
         steps:
             - name: Checkout release source
@@ -429,6 +432,7 @@ jobs:
             pnpm_cache: ${{ inputs.pnpm_cache }}
             upload_workspace_artifact: ${{ inputs.upload_workspace_artifact }}
             artifact_name_prefix: release-candidate
+            disable_nx_cloud: 'vars'
 
     pending_release_publish_plan:
         name: pending release publish plan
