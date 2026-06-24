@@ -3,7 +3,10 @@ import {
     defineConfig as eslintDefineConfig,
 } from '@eslint/config-helpers'
 import { buildDefaultEslintConfig } from './base.js'
-import { type ConfigFunctionOptions } from '../core/index.js'
+import {
+    type ConfigFunctionOptions,
+    defineConfigBuilder,
+} from '../core/index.js'
 
 export type EsLintConfig = Array<Config>
 
@@ -16,13 +19,15 @@ export type EsLintConfigFunctionOptions = ConfigFunctionOptions<{
 
 export const defineEsLintConfig = eslintDefineConfig
 
-export const buildFunctionEsLint = ({
-    cwd = process.cwd(),
-    ignores = [],
-    overrides = [],
-}: EsLintConfigFunctionOptions = {}): EsLintConfig => {
+export const buildFunctionEsLint = defineConfigBuilder<
+    EsLintConfig,
+    EsLintConfigFunctionOptions
+>(({ cwd, ignores = [], overrides = [] }) => {
     return defineEsLintConfig(
-        ...buildDefaultEslintConfig({ cwd, globalIgnores: ignores }),
+        ...buildDefaultEslintConfig({
+            cwd,
+            globalIgnores: ignores,
+        }),
         ...overrides,
     )
-}
+})

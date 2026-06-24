@@ -10,9 +10,9 @@ describe('@snailicid3/color — isHexColor', () => {
     })
 
     test('rejects invalid hex strings', () => {
-        expect(isHexColor('FF0000')).toBe(false) // missing #
+        expect(isHexColor('FF0000')).toBe(false) // Missing #
         expect(isHexColor('#FFF')).toBe(false) // 3-digit
-        expect(isHexColor('#GGGGGG')).toBe(false) // invalid chars
+        expect(isHexColor('#GGGGGG')).toBe(false) // Invalid chars
         expect(isHexColor('')).toBe(false)
     })
 })

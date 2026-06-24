@@ -12,8 +12,10 @@ import {
     fileSharedOptions,
     resolveTypedocConfigInput,
     type TypedocConfigFunction,
+    type TypedocConfigFunctionOptions,
     type TypedocOptions,
 } from './shared.js'
+import { defineConfigBuilder } from '../core/index.js'
 export type RemarkPluginOptions = {
     /** An array of remark plugin names. */
 
@@ -106,34 +108,44 @@ const enableRemarkPlugins = (
 /** Typedoc-plugin-markdown is required */
 export const buildFunctionTypedocMarkdown: TypedocConfigFunction<
     Merge<MarkdownPluginOptions, RemarkPluginOptions>
-> = (input = {}) => {
+> = defineConfigBuilder<
+    TypedocMarkdownOptions,
+    TypedocConfigFunctionOptions<
+        Merge<MarkdownPluginOptions, RemarkPluginOptions>
+    >
+>((input) => {
     const { dirname, overrides } = resolveTypedocConfigInput(input)
-    const _fileOptions = fileSharedOptions(dirname)
+    const fileOptions = fileSharedOptions(dirname)
 
     const options: TypedocMarkdownOptions = deepmerge(
         {
-            ..._fileOptions,
+            ...fileOptions,
             ...markdownBase(),
         },
         enableRemarkPlugins(true, true),
     )
     return deepmerge(options, overrides)
-}
+})
 
 export const buildFunctionTypedocVitepress: TypedocConfigFunction<
     Merge<MarkdownPluginOptions, RemarkPluginOptions>
-> = (input = {}) => {
+> = defineConfigBuilder<
+    TypedocMarkdownOptions,
+    TypedocConfigFunctionOptions<
+        Merge<MarkdownPluginOptions, RemarkPluginOptions>
+    >
+>((input) => {
     const { dirname, overrides } = resolveTypedocConfigInput(input)
-    const _fileOptions = fileSharedOptions(dirname)
+    const fileOptions = fileSharedOptions(dirname)
 
     const options: TypedocMarkdownOptions = deepmerge(
         {
-            ..._fileOptions,
+            ...fileOptions,
             ...markdownBase(),
             ...enableRemarkPlugins(false, false),
         },
         { plugin: getTypedocVitepressPluginNames() },
     )
     return deepmerge(options, overrides)
-}
+})
 export default buildFunctionTypedocMarkdown

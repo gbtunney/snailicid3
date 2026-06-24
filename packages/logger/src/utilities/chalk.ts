@@ -8,7 +8,7 @@ import chalk, {
     modifierNames,
 } from 'chalk'
 import {
-    //type ColorJS,
+    //Type ColorJS,
     //  type HexColor,
     parseColorJS,
     parseColorToHexStrict,
@@ -88,7 +88,7 @@ export function toBackground(
     color: ChalkColorPreset,
     removeBright = false,
 ): ChalkColorPreset {
-    // normalize to foreground base first
+    // Normalize to foreground base first
     const _color: string = addBg(
         lowerCaseFirstLetter(isBackground(color) ? stripBg(color) : color),
     )

@@ -4,7 +4,7 @@ export const formatCurrency = (
     minimumFractionDigits: number = 2,
     currency: string = 'USD',
 ): string => {
-    // if (!isInteger(value)) return value
+    // If (!isInteger(value)) return value
     return new Intl.NumberFormat('en-US', {
         currency,
         minimumFractionDigits,

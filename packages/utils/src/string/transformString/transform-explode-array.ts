@@ -21,7 +21,7 @@ export const transformExplodeArray = function ({
     trim?: (TrimCharacters & { pattern: Array<string> | string }) | undefined
 }): Array<string> | string {
     if (isEmpty(value)) return []
-    //if it is an array already,delimiter is disregarded & array is just cleaned & prefixed.
+    //If it is an array already,delimiter is disregarded & array is just cleaned & prefixed.
     //the only case for delimiter being undefined is if value as an array
     let result: Array<string> = isArray<Array<string>>(value)
         ? value

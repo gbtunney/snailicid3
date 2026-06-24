@@ -1,33 +1,21 @@
-import type { JsonObject } from 'type-fest'
-import { apiExtractor } from './api-extractor/index.js'
+import { ApiExtractor } from './api-extractor/index.js'
 import { Markdownlint } from './markdownlint/index.js'
-import { getDefaultPrettierPluginNames } from './prettier/plugins/index.js'
-import { isPlainObject, json } from './utilities/json.js'
+import { json } from './utilities/json.js'
 import { Prettier } from './index.js'
 /* TODO: outputs a json dump of markdownlint and prettier. this is TEMPORARY till the configs are correct. ideally this should be gotten rid of */
 
-const _apiExtractorConfig = apiExtractor.config()
-const API_EXTRACTOR_CONFIG = isPlainObject<JsonObject>(_apiExtractorConfig)
-    ? _apiExtractorConfig
-    : {}
+const cwd = process.cwd()
 
-const MARKDOWN_LINT_CONFIG = isPlainObject<JsonObject>(Markdownlint.config())
-    ? Markdownlint.config()
-    : {}
+const API_EXTRACTOR_CONFIG = json.object(ApiExtractor.config({ cwd })) ?? {}
 
-const _prettierMergedConfig = {
-    ...Prettier.config(),
-    // Build artifact must keep plugin package names, not resolved plugin objects.
-    plugins: getDefaultPrettierPluginNames(),
-}
-const _prettierConfig = isPlainObject<JsonObject>(_prettierMergedConfig)
-    ? _prettierMergedConfig
-    : {}
+const MARKDOWN_LINT_CONFIG = json.object(Markdownlint.config({ cwd })) ?? {}
+
+const PRETTIER_CONFIG = json.object(Prettier.configFile({ cwd })) ?? {}
 
 /** As const */
 const JSON_EXPORTS = [
     {
-        data: _prettierConfig,
+        data: PRETTIER_CONFIG,
         filename: 'dist/.prettierrc.json',
     },
     {

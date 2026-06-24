@@ -45,6 +45,9 @@ conventions, TypeScript base configs, and utility shell scripts.
 - [**markdownlint-cli2**](https://github.com/DavidAnson/markdownlint-cli2) • _Markdown linting
   rules_
 - [**commitlint**](https://commitlint.js.org/) • _Conventional commit configuration_
+- [**api-extractor**](https://api-extractor.com/) • _API report and declaration rollup config_
+- [**typedoc**](https://typedoc.org/) • _TypeDoc config builders for standard, markdown, VitePress,
+  and material-theme docs_
 - [**typescript**](https://www.typescriptlang.org/) • _Base tsconfig presets: `base`, `library`,
   `typecheck`, `docs`_
 
@@ -63,51 +66,50 @@ $ npm install @snailicid3/config --save-dev
 
 ## Examples
 
+All TypeScript config builders require `cwd`. Pass `import.meta` from the config file when the
+configuration should resolve paths relative to that file.
+
 ### ESLint
 
-#### Example: Basic Config
+#### Basic Config
 
 ```ts
 /* @file eslint.config.ts */
 import { EsLint } from '@snailicid3/config'
-import url from 'node:url'
 
-const cwd = url.fileURLToPath(new URL('.', import.meta.url))
-const CONFIG = EsLint.config({ cwd })
+const config = EsLint.config({ cwd: import.meta })
 
-export default EsLint.defineConfig(CONFIG)
+export default EsLint.defineConfig(config)
 ```
 
-#### Example: Overriding Config
+#### Overriding Config
 
-This overrides eslint config to ignore everything in package docs foldders
+This example appends an extra ignore pattern.
 
 ```ts
+/* @file eslint.config.ts */
 import { EsLint } from '@snailicid3/config'
-import url from 'node:url'
 
-const cwd = url.fileURLToPath(new URL('.', import.meta.url))
-const CONFIG = EsLint.config({
-  cwd,
+const config = EsLint.config({
+  cwd: import.meta,
   ignores: ['packages/**/docs/**/*'],
 })
-export default EsLint.defineConfig(CONFIG)
+
+export default EsLint.defineConfig(config)
 ```
 
-#### Example: Overriding Rules
+#### Overriding Rules
 
-This overrides eslint config to add or change default rules. This example shows how to add camelcase
-naming convention to specific files.
+This example appends a custom flat-config entry.
 
 ```ts
-import { EsLint, EslintConfig, expandExtensions, TS_FILE_EXTENSIONS } from '@snailicid3/config'
-import url from 'node:url'
+/* @file eslint.config.ts */
+import { EsLint, type EsLintConfig, expandExtensions, TS_FILE_EXTENSIONS } from '@snailicid3/config'
 
-const cwd = url.fileURLToPath(new URL('.', import.meta.url))
-const override_example: EslintConfig = {
+const overrideExample: EsLintConfig[number] = {
   /** Expands a list of file extensions by appending them to a normalized base pattern. */
   files: expandExtensions(TS_FILE_EXTENSIONS, '**/src/**/*'),
-  name: 'Naming: allow ids for paramaters',
+  name: 'Naming: allow ids for parameters',
   rules: {
     '@typescript-eslint/naming-convention': [
       'error',
@@ -123,23 +125,23 @@ const override_example: EslintConfig = {
   },
 }
 
-const CONFIG = EsLint.config({ cwd, overrides: [override_example] })
-export default EsLint.defineConfig(CONFIG)
+const config = EsLint.config({ cwd: import.meta, overrides: [overrideExample] })
+
+export default EsLint.defineConfig(config)
 ```
 
 ### Prettier
 
-#### Example: Standard Config
-
-Does not emit js files, checks all files in package including .test.ts files
+#### Standard Config
 
 ```ts
-/** @file Prettier.config.ts */
+/* @file prettier.config.ts */
 import { Prettier } from '@snailicid3/config'
-export default Prettier.defineConfig(Prettier.config())
+
+export default Prettier.defineConfig(Prettier.config({ cwd: import.meta }))
 ```
 
-#### Example: Overriding Config
+#### Overriding Config
 
 ```ts
 /* @file prettier.config.ts */
@@ -147,6 +149,7 @@ import { Prettier } from '@snailicid3/config'
 
 export default Prettier.defineConfig(
   Prettier.config({
+    cwd: import.meta,
     options: {
       endOfLine: 'lf',
       printWidth: 100,
@@ -167,11 +170,96 @@ export default Prettier.defineConfig(
 )
 ```
 
+#### JSON File Config
+
+Use `configFile` when generating a `.prettierrc.json` artifact. It keeps plugins as package-name
+strings instead of resolved plugin objects.
+
+```ts
+import { Prettier } from '@snailicid3/config'
+
+const prettierrc = Prettier.configFile({ cwd: import.meta })
+```
+
+### Markdownlint
+
+```ts
+/* @file .markdownlint-cli2.mts */
+import { Markdownlint } from '@snailicid3/config'
+
+export default Markdownlint.defineConfig(Markdownlint.config({ cwd: import.meta }))
+```
+
+### Lint-Staged
+
+```ts
+/* @file .lintstagedrc.mts */
+import { LintStaged } from '@snailicid3/config'
+
+export default LintStaged.defineConfig(LintStaged.config({ cwd: import.meta }))
+```
+
+### Commitlint
+
+```ts
+/* @file commitlint.config.ts */
+import { Commitlint } from '@snailicid3/config'
+
+export default Commitlint.defineConfig(
+  Commitlint.config({
+    cwd: import.meta,
+    scopeOptions: { mergeScopes: ['my-package'] },
+  }),
+)
+```
+
+### TypeDoc
+
+```ts
+/* @file typedoc.config.ts */
+import { Typedoc } from '@snailicid3/config'
+
+export default Typedoc.materialTheme.config({ cwd: import.meta })
+```
+
+```ts
+/* @file typedoc.config.ts */
+import { Typedoc } from '@snailicid3/config'
+
+export default Typedoc.markdown.config({ cwd: import.meta })
+```
+
+```ts
+/* @file typedoc.config.ts */
+import { Typedoc } from '@snailicid3/config'
+
+export default Typedoc.vitepress.config({ cwd: import.meta })
+```
+
+### Api-Extractor
+
+Generate or copy the package base config to `dist/.api-extractor-base.json`, then extend it from the
+package API Extractor config.
+
+```json5
+{
+  extends: './dist/.api-extractor-base.json',
+}
+```
+
+The TypeScript builder has the same required `cwd` contract.
+
+```ts
+import { ApiExtractor } from '@snailicid3/config'
+
+const config = ApiExtractor.config({ cwd: import.meta })
+```
+
 ### TypeScript
 
-#### Example: Type Check
+#### Type Check
 
-Does not emit js files, checks all files in package including .test.ts files
+Does not emit js files, checks all files in package including .test.ts files.
 
 ```json5
 // @file tsconfig.json
@@ -193,13 +281,10 @@ Does not emit js files, checks all files in package including .test.ts files
 }
 ```
 
-```json5
-{}
-```
+#### Library
 
-#### Example: Library
-
-Creates a folder of declarations & js files in `<configDir>/types`, suitable for a library package.
+Creates a folder of declarations and js files in `<configDir>/types`, suitable for a library
+package.
 
 ```json5
 /* @file tsconfig.build.json */
@@ -210,8 +295,8 @@ Creates a folder of declarations & js files in `<configDir>/types`, suitable for
 }
 ```
 
-Change outDir to `<configDir>/dist` if not using a bundler this example overrides the
-compilerOptions to create dist folder of js files.
+Change `outDir` to `<configDir>/dist` if not using a bundler. This example overrides the
+compilerOptions to create a dist folder of js files.
 
 ```json5
 /* @file tsconfig.build.json */
@@ -223,17 +308,6 @@ compilerOptions to create dist folder of js files.
     outDir: './dist',
   },
 }
-```
-
-### Commitlint
-
-```ts
-/* @file commitlint.config.ts */
-import { Commitlint } from '@snailicid3/config'
-
-export default Commitlint.defineConfig(
-  Commitlint.config({ scopeOptions: { mergeScopes: ['my-package'] } }),
-)
 ```
 
 ## Shell Completions

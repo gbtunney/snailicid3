@@ -26,7 +26,7 @@ export type InitSuccessCallback<
     AppOptionsSchema extends ZodObjectSchema = z.ZodObject,
 > = (
     args: z.infer<AppOptionsSchema>,
-    config: AppConfig, // or: z.infer<typeof appConfigSchema>
+    config: AppConfig, // Or: z.infer<typeof appConfigSchema>
     help: string | undefined,
 ) => Promise<void> | void
 
@@ -65,7 +65,7 @@ export const initApp = async <AppOptionsSchema extends ZodObjectSchema>(
 
         const wrapped_app_options = wrapSchema<AppOptionsSchema>(optionsSchema)
 
-        /* * populate description and header * */
+        /* * Populate description and header * */
         const desc: string = app_config.description
             ? app_config.description
             : wrapped_app_options.description
@@ -97,12 +97,12 @@ export const initApp = async <AppOptionsSchema extends ZodObjectSchema>(
         // Build configured yargs first
         const yargsInstance = getArgsInstance(_yargs).boolean('interactive')
 
-        // short-circuit for help/version so yargs handles printing and exit code
+        // Short-circuit for help/version so yargs handles printing and exit code
 
         const hasVersion = _yargs.includes('-v') || _yargs.includes('--version')
         const hasHelp = _yargs.includes('-h') || _yargs.includes('--help')
 
-        // if (app_config.clear) clear()
+        // If (app_config.clear) clear()
         /* * Print the header if print ==true  * */
         console.log(header)
         if (hasVersion) {
@@ -117,7 +117,7 @@ export const initApp = async <AppOptionsSchema extends ZodObjectSchema>(
 
         const argSuccess = optionsSchema.safeParse(raw_arguments)
 
-        /* i dont know what anything does after this */
+        /* I dont know what anything does after this */
 
         if (argSuccess.success) {
             const resolvedArgs: z.output<AppOptionsSchema> = argSuccess.data

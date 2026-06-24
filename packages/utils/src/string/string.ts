@@ -31,7 +31,7 @@ export const truncate = (
     value = trim(value)
     if (value.length <= maxChars) return value
     value = value.substring(0, maxChars - append.length)
-    //crop at last space or remove trailing whitespace
+    //Crop at last space or remove trailing whitespace
     value = onlyFullWords
         ? value.substring(0, value.lastIndexOf(' '))
         : trim(value)

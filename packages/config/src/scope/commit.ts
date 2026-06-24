@@ -384,7 +384,7 @@ function validateCommitMessage(repoRoot: string, message: string): void {
 export default main
 
 /*
-console.log({
+Console.log({
     argv: process.argv,
     isEntrypoint: isCallerEntrypoint(import.meta, { log: true }),
 })

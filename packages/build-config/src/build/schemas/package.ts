@@ -26,7 +26,7 @@ export const schemaBasePackage = z.looseObject({
     }),
     description: z.string(),
     license: z.enum(LICENSES).default('MIT'),
-    //  main: z.string(),
+    //  Main: z.string(),
     name: z.string().regex(PACKAGE_NAME_REGEX),
     private: z.boolean(),
     repository: z.union([
@@ -53,7 +53,7 @@ export function parsePackage(pkg: unknown): z.output<typeof schemaBasePackage> {
     return schemaBasePackage.parse(pkg)
 }
 
-//stripped down to just the required meta ffieldd.
+//Stripped down to just the required meta ffieldd.
 export const schemaPackageMetaBanner = z.object({
     ...schemaBasePackage.pick({
         author: true,

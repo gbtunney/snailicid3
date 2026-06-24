@@ -1,80 +1,65 @@
 import { describe, expect, test } from 'vitest'
 import * as ConfigPackage from './index.js'
 import {
+    ApiExtractor,
     Commitlint,
-    defineConfig,
+    type ConfigToolRegistry,
     EsLint,
-    expandExtensions,
-    JS_FILE_EXTENSIONS,
-    JSLIKE_FILE_EXTENSIONS,
     LintStaged,
     Markdownlint,
+    type MarkdownlintTool,
     Prettier,
-    PRETTIER_FILE_EXTENSIONS,
-    TS_FILE_EXTENSIONS,
-    Typedoc,
+    resolveCwd,
     typedoc,
-} from './index.js'
-import type {
-    ConfigToolRegistry,
-    MarkdownlintTool,
-    TypedocTool,
+    Typedoc,
+    type TypedocTool,
 } from './index.js'
 
-describe('file extension constants', () => {
-    test('JS_FILE_EXTENSIONS contains js', () => {
-        expect(JS_FILE_EXTENSIONS).toContain('js')
+const cwd = import.meta
+const dataImportMeta = {
+    url: 'data:text/javascript,export default undefined',
+} as ImportMeta
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+    typeof value === 'object' && value !== null && !Array.isArray(value)
+
+describe('@snailicid3/config public API', () => {
+    test('exports the lowercase typedoc backward-compatible alias', () => {
+        expect(typedoc).toBe(Typedoc)
     })
 
-    test('TS_FILE_EXTENSIONS contains ts', () => {
-        expect(TS_FILE_EXTENSIONS).toContain('ts')
+    test('exports capitalized tool namespaces', () => {
+        expect(typeof ApiExtractor.config).toBe('function')
+        expect(typeof Commitlint.config).toBe('function')
+        expect(typeof EsLint.config).toBe('function')
+        expect(typeof LintStaged.config).toBe('function')
+        expect(typeof Markdownlint.config).toBe('function')
+        expect(typeof Prettier.config).toBe('function')
+        expect(typeof Typedoc.config).toBe('function')
     })
 
-    test('JSLIKE_FILE_EXTENSIONS includes both js and ts entries', () => {
-        expect(JSLIKE_FILE_EXTENSIONS).toContain('js')
-        expect(JSLIKE_FILE_EXTENSIONS).toContain('ts')
+    test('tool namespaces expose defineConfig helpers', () => {
+        expect(typeof ApiExtractor.defineConfig).toBe('function')
+        expect(typeof Commitlint.defineConfig).toBe('function')
+        expect(typeof Markdownlint.defineConfig).toBe('function')
+        expect(typeof Prettier.defineConfig).toBe('function')
+        expect(typeof Typedoc.defineConfig).toBe('function')
     })
 
-    test('PRETTIER_FILE_EXTENSIONS is a non-empty array', () => {
-        expect(Array.isArray(PRETTIER_FILE_EXTENSIONS)).toBe(true)
-        expect(PRETTIER_FILE_EXTENSIONS.length).toBeGreaterThan(0)
-    })
-})
-
-describe('expandExtensions', () => {
-    test('returns an array of the same length', () => {
-        expect(expandExtensions(['ts', 'js'])).toHaveLength(2)
-    })
-
-    test('passes extensions through without a base pattern', () => {
-        expect(expandExtensions(['ts'])).toEqual(['ts'])
+    test('tool extras remain available on namespaces', () => {
+        expect(typeof Commitlint.workspaceScopes).toBe('function')
+        expect(typeof Commitlint.workspaceScopesCsv).toBe('function')
+        expect(Array.isArray(Commitlint.commitTypes)).toBe(true)
+        expect(typeof Prettier.configFile).toBe('function')
+        expect(typeof Prettier.options.base).toBe('function')
+        expect(typeof Prettier.overrides.base).toBe('function')
+        expect(typeof Prettier.plugins.default).toBe('function')
+        expect(typeof Prettier.plugins.packageNames).toBe('function')
+        expect(typeof Typedoc.markdown.config).toBe('function')
     })
 
-    test('prepends base pattern with trailing dot', () => {
-        expect(expandExtensions(['ts'], 'src')).toEqual(['src.ts'])
-    })
-})
-
-describe('core defineConfig', () => {
-    test('returns the config unchanged', () => {
-        expect(defineConfig({ a: 1 })).toEqual({ a: 1 })
-    })
-})
-
-describe('tool namespace API', () => {
-    test.each([
-        ['Commitlint', Commitlint],
-        ['EsLint', EsLint],
-        ['LintStaged', LintStaged],
-        ['Markdownlint', Markdownlint],
-        ['Prettier', Prettier],
-        ['Typedoc', Typedoc],
-    ])('%s exposes config and defineConfig', (_name, tool) => {
-        expect(typeof tool.config).toBe('function')
-        expect(typeof tool.defineConfig).toBe('function')
-    })
-
-    test('does not expose raw config builder helpers from the root API', () => {
+    test('does not export old buildFunction helpers at package root', () => {
+        expect('buildApiExtractorConfigFunction' in ConfigPackage).toBe(false)
         expect('buildCommitlintConfigFunction' in ConfigPackage).toBe(false)
         expect('buildEsLintConfigFunction' in ConfigPackage).toBe(false)
         expect('buildLintStagedConfigFunction' in ConfigPackage).toBe(false)
@@ -90,6 +75,7 @@ describe('tool namespace API', () => {
 
     test('registry type map exposes native config and function options', () => {
         const options: ConfigToolRegistry['markdownlint']['functionOptions'] = {
+            cwd,
             rules: { MD001: false },
         }
         const config: ConfigToolRegistry['markdownlint']['config'] =
@@ -100,16 +86,18 @@ describe('tool namespace API', () => {
 
     test('tool type aliases expose config, options, and api slots', () => {
         const options: MarkdownlintTool['options'] = {
-            rules: { MD002: false },
+            cwd,
+            rules: { MD003: false },
         }
         const api: MarkdownlintTool['api'] = Markdownlint
         const config: MarkdownlintTool['config'] = api.config(options)
 
-        expect(config.config.MD002).toBe(false)
+        expect(config.config.MD003).toBe(false)
     })
 
     test('typedoc namespace follows the tool API shape', () => {
         const options: ConfigToolRegistry['typedoc']['functionOptions'] = {
+            cwd,
             overrides: { excludeExternals: true },
         }
         const api: TypedocTool['api'] = Typedoc
@@ -118,14 +106,46 @@ describe('tool namespace API', () => {
         expect(typedoc).toBe(Typedoc)
         expect(config?.excludeExternals).toBe(true)
         expect(typeof Typedoc.markdown.config).toBe('function')
-        expect(typeof Typedoc.materialTheme.config).toBe('function')
-        expect(typeof Typedoc.vitepress.config).toBe('function')
-        expect(Typedoc.plugins.default()).toEqual(['typedoc-plugin-zod'])
-        expect(Typedoc.plugins.markdown()).toEqual([
-            'typedoc-plugin-markdown',
-            'typedoc-plugin-zod',
-        ])
+    })
+
+    test('resolves non-file import meta urls to process cwd', () => {
+        expect(resolveCwd(dataImportMeta)).toBe(process.cwd())
+    })
+
+    test('all public config builders accept non-file import meta cwd', () => {
+        expect(() => ApiExtractor.config({ cwd: dataImportMeta })).not.toThrow()
+        expect(() => Commitlint.config({ cwd: dataImportMeta })).not.toThrow()
+        expect(() => EsLint.config({ cwd: dataImportMeta })).not.toThrow()
+        expect(() => LintStaged.config({ cwd: dataImportMeta })).not.toThrow()
+        expect(() => Markdownlint.config({ cwd: dataImportMeta })).not.toThrow()
+        expect(() => Prettier.config({ cwd: dataImportMeta })).not.toThrow()
+        expect(() => Prettier.configFile({ cwd: dataImportMeta })).not.toThrow()
+        expect(() => Typedoc.config({ cwd: dataImportMeta })).not.toThrow()
+        expect(() =>
+            Typedoc.markdown.config({ cwd: dataImportMeta }),
+        ).not.toThrow()
+        expect(() =>
+            Typedoc.materialTheme.config({ cwd: dataImportMeta }),
+        ).not.toThrow()
+        expect(() =>
+            Typedoc.vitepress.config({ cwd: dataImportMeta }),
+        ).not.toThrow()
+    })
+
+    test('eslint tsconfigRootDir is normalized before parser options receive it', () => {
+        const eslintConfig = EsLint.config({ cwd: dataImportMeta })
+        const parserOptionsEntry = eslintConfig.find(
+            (entry) => entry.name === 'Base: globals and projectService',
+        )
+        const languageOptions = parserOptionsEntry?.languageOptions
+        const parserOptions = isRecord(languageOptions)
+            ? languageOptions.parserOptions
+            : undefined
+        const tsconfigRootDir = isRecord(parserOptions)
+            ? parserOptions.tsconfigRootDir
+            : undefined
+
+        expect(typeof tsconfigRootDir).toBe('string')
+        expect(tsconfigRootDir).toBe(process.cwd())
     })
 })
-
-export {}

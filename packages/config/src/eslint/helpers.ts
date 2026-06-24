@@ -39,10 +39,10 @@ export const withSeverity = <Type extends Record<string, RuleOptions>>(
     return Object.fromEntries(
         Object.entries(rules).map(([name, value]) => {
             if (Array.isArray(value)) {
-                // already has options → replace first element
+                // Already has options → replace first element
                 return [name, [severity, ...value.slice(1)]]
             }
-            // no options → just set severity
+            // No options → just set severity
             return [name, severity]
         }),
     ) as Record<keyof Type, RuleConfig>

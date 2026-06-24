@@ -25,7 +25,7 @@
 | --------------------------------- | ---------------------- |
 | [`playground`](./apps/playground) | Development playground |
 
-## Setup
+## Setup Test
 
 ```sh
 pnpm install

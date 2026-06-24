@@ -19,4 +19,4 @@ export type NilOrEmpty = EmptyArray | EmptyObject | EmptyString | Nullish
 /** @group Empty Types */
 export type Nullish = null | undefined
 
-export type { EmptyObject } from 'type-fest' //nullish but with empty string
+export type { EmptyObject } from 'type-fest' //Nullish but with empty string

@@ -11,7 +11,7 @@ import {
     type InitSuccessCallback,
 } from './index.js'
 
-//todo: fix log levels
+//Todo: fix log levels
 const LOGGER = logger.get({
     colors: {},
     level: 'debug',
@@ -75,7 +75,7 @@ const initFunc: InitSuccessCallback<typeof my_merged_schema> = async (
     if (!args.interactive) {
         logger.get().info('Non-interactive mode: skipping prompts')
     } else {
-        //this is for example
+        //This is for example
         const options: yargsInteractive.Option = {
             errorlist: {
                 choices: Object.keys(args), //['HELP', 'SHOW ERROR','DONE'],
@@ -93,13 +93,13 @@ const initFunc: InitSuccessCallback<typeof my_merged_schema> = async (
     }
 
     logger.get().info(JSON.stringify(args))
-    //return void
+    //Return void
     return
 }
 /** Example app configuration options */
 const exampleAppConfigOptions: AppConfigIn = {
     description: 'This is an example to demonstrate use',
-    //code editor error
+    //Code editor error
     examples: [
         ['$0 --config "~/config.json"', 'Use custom config'],
         ['$0 --safe', 'Start in safe mode'],
@@ -115,7 +115,7 @@ const initialize = async (): Promise<'ERROR' | 'SUCCESS'> => {
         exampleAppConfigOptions,
         initFunc,
     )
-    //console.log('YARGS INSTANCE: ', instance_yargs)
+    //Console.log('YARGS INSTANCE: ', instance_yargs)
     if (instance_yargs === undefined) {
         process.exit(1)
         return 'ERROR'

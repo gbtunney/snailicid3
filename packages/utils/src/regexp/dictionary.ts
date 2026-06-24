@@ -58,9 +58,9 @@ export const NEW_LINE_CHARS = [
     '\u2028',
     /* * Unicode:paragraph separator * */
     '\u2029',
-    /* * line feed * */
+    /* * Line feed * */
     '\n',
-    /* * carriage return * */
+    /* * Carriage return * */
     '\r',
 ]
 
@@ -414,4 +414,4 @@ export const phoneNumber =
  * @see {@link https://regex101.com/r/VFnoSZ/2 | regexp101 examples}
  */
 export const zipCode = /^\d{5,6}(?:[\s-]\d{4})?$/gm
-//const streetAddress = /[a-zA-Z\d\s\-\,\#\.\+]+/g
+//Const streetAddress = /[a-zA-Z\d\s\-\,\#\.\+]+/g

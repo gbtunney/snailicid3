@@ -1,6 +1,6 @@
 import { getDefaultOptions, getDefaultOverrides } from './options.js'
 import type {
-    PrettierConfig,
+    PrettierConfigBase,
     PrettierOptions,
     PrettierOverrides,
 } from './options.js'
@@ -12,21 +12,44 @@ import type {
     PrettierPluginPackageName,
     ResolvedPrettierPlugin,
 } from './plugins/registry.js'
-import { type ConfigFunctionOptions, defineConfig } from '../core/index.js'
+import {
+    type ConfigFunctionOptions,
+    defineConfig,
+    defineConfigBuilder,
+} from '../core/index.js'
 
 export const BASE_IGNORES = ['**/*.api.md', 'tmp', 'temp'] as const
 
+/** Runtime Prettier config. Runtime config may use resolved plugin objects. */
+export type PrettierConfig = PrettierConfigBase & {
+    plugins: Array<PrettierPlugin>
+}
+
 export type PrettierConfigFunctionOptions = ConfigFunctionOptions<{
-    /** Use `useResolvedPlugins` for clearer option naming. */
+    /** Backcompat alias for `useResolvedPlugins`; defaults to true. */
     isBundled?: boolean
-    /** Shallow-merged on top of `Prettier.options.base()` (caller keys win). */
+    /** Shallow-merged on top of `Prettier.options.base()`; caller keys win. */
     options?: PrettierOptions
     /** Appended after `Prettier.overrides.base()`. */
     overrides?: PrettierOverrides
     /** Appended after the default plugin array. */
     plugins?: Array<PrettierPlugin>
-    /** Use resolved plugin objects directly (default) vs. plugin package-name strings only. */
+    /** Use resolved plugin objects directly vs. plugin package-name strings only. */
     useResolvedPlugins?: boolean
+}>
+
+/** `.prettierrc.json` config. JSON config must use plugin package names. */
+export type PrettierJsonConfig = PrettierConfigBase & {
+    plugins: Array<PrettierPluginPackageName>
+}
+
+export type PrettierJsonConfigFunctionOptions = ConfigFunctionOptions<{
+    /** Shallow-merged on top of `Prettier.options.base()`; caller keys win. */
+    options?: PrettierOptions
+    /** Appended after `Prettier.overrides.base()`. */
+    overrides?: PrettierOverrides
+    /** Appended after the default package-name plugin array. */
+    plugins?: Array<PrettierPluginPackageName>
 }>
 
 export type PrettierPlugin = PrettierPluginPackageName | ResolvedPrettierPlugin
@@ -35,28 +58,44 @@ export const definePrettierConfig = <const TConfig extends PrettierConfig>(
     config: TConfig,
 ): TConfig => defineConfig(config)
 
-export const buildFunctionPrettier = (
-    input: PrettierConfigFunctionOptions = {},
-): PrettierConfig => {
-    const {
+export const buildFunctionPrettier = defineConfigBuilder<
+    PrettierConfig,
+    PrettierConfigFunctionOptions
+>(
+    ({
         isBundled = true,
         options,
         overrides = [],
         plugins = [],
         useResolvedPlugins,
-    } = input
-    const defaultOptions = getDefaultOptions()
-    const shouldUseResolvedPlugins = useResolvedPlugins ?? isBundled
-    const defaultPlugins = shouldUseResolvedPlugins
-        ? getDefaultPrettierPlugins()
-        : getDefaultPrettierPluginNames()
+    }) => {
+        const shouldUseResolvedPlugins = useResolvedPlugins ?? isBundled
+        const defaultPlugins = shouldUseResolvedPlugins
+            ? getDefaultPrettierPlugins()
+            : getDefaultPrettierPluginNames()
 
+        return {
+            ...getDefaultOptions(),
+            ...options,
+            overrides: [...getDefaultOverrides(), ...overrides],
+            plugins: [...defaultPlugins, ...plugins],
+        }
+    },
+)
+
+/**
+ * Builds the JSON-file-safe Prettier config shape used by `.prettierrc.json` artifacts.
+ *
+ * Runtime Prettier config may contain resolved plugin objects. JSON config files must keep plugin package names.
+ */
+export const buildPrettierJsonConfig = defineConfigBuilder<
+    PrettierJsonConfig,
+    PrettierJsonConfigFunctionOptions
+>(({ options, overrides = [], plugins = [] }) => {
     return {
-        ...defaultOptions,
+        ...getDefaultOptions(),
         ...options,
         overrides: [...getDefaultOverrides(), ...overrides],
-        plugins: [...defaultPlugins, ...plugins],
+        plugins: [...getDefaultPrettierPluginNames(), ...plugins],
     }
-}
-
-export { type PrettierConfig } from './options.js'
+})

@@ -27,7 +27,7 @@ export const toStringNumeric = <Type extends string>(
     if (strictChars) {
         const trimmed = value.trim()
         if (!isStringNumeric(trimmed)) return undefined
-        return parseMaster(trimmed) // parseMaster validates then strips underscores internally
+        return parseMaster(trimmed) // ParseMaster validates then strips underscores internally
     }
     if (isStringNumeric(value, false)) {
         const stripped = removeAllNewlines(value).replace(

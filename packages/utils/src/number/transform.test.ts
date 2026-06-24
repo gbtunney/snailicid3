@@ -11,7 +11,7 @@ describe('Numeric Transform,', () => {
 
         const _testBigInt2 = toNumeric('10101000000n')
         expect(typeof _testBigInt).toEqual('bigint')
-        expect(isNumeric(1000000n)).toEqual(true) // was isNumeric(BigInt(1000000n))
+        expect(isNumeric(1000000n)).toEqual(true) // Was isNumeric(BigInt(1000000n))
         /** Was toNumeric(BigInt(1000000n)) */
         const __result = toNumeric(1000000n)
         expect(typeof __result).toEqual('bigint')

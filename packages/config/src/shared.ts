@@ -51,7 +51,7 @@ export const SHARED_FORMATTING_RULES: Merge<
 > = {
     markdownTabWidth: 2,
     maxEmptyLines: 1,
-    tabWidth: 4, //todo: use in "no-multiple-empty-lines" //MD012/no-multiple-blanks
+    tabWidth: 4, //Todo: use in "no-multiple-empty-lines" //MD012/no-multiple-blanks
 } as const
 
 export const getScaledWidth = (

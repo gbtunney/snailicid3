@@ -13,6 +13,7 @@ import { testingRules } from './rules/testing.js'
 import { typescriptRules } from './rules/typescript.js'
 import { JS_FILE_EXTENSIONS, TS_FILE_EXTENSIONS } from '../shared.js'
 import { expandExtensions } from '../utilities/extensions.js'
+import { type PathRoot, resolveCwd } from '../utilities/path.js'
 
 export const BASE_FILES: Array<string> = [
     ...expandExtensions(TS_FILE_EXTENSIONS, '*.'),
@@ -38,19 +39,20 @@ export const BASE_IGNORES: Array<string> = [
 /**
  * Builds the recommended flat ESLint config array.
  *
- * - `cwd`: used as `tsconfigRootDir`. Defaults to `process.cwd()`.
+ * - `cwd`: used as `tsconfigRootDir`.
  * - `ignores`: appended to `BASE_IGNORES`.
- * - `global_files`: override the global files
+ * - `global_files`: override the global files.
  */
 export const buildDefaultEslintConfig = ({
     cwd,
     globalFiles = BASE_FILES,
     globalIgnores = [],
 }: {
-    cwd: string
+    cwd: PathRoot
     globalFiles?: Array<string>
     globalIgnores?: Array<string>
 }): Array<Config> => {
+    const tsconfigRootDir = resolveCwd(cwd)
     const EslintConfig: Array<Config> = [
         {
             ignores: [...BASE_IGNORES, ...globalIgnores],
@@ -66,7 +68,7 @@ export const buildDefaultEslintConfig = ({
                     globals: { ...globals.browser, ...globals.node },
                     parserOptions: {
                         projectService: true,
-                        tsconfigRootDir: cwd,
+                        tsconfigRootDir,
                     },
                 },
                 name: 'Base: globals and projectService',

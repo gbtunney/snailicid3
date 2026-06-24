@@ -7,13 +7,13 @@ import { isNumeric } from './validators.js'
 describe('Parse Module', () => {
     test('isParsableToNumeric', () => {
         expect(isParsableToNumeric('\n\r-100000.0')).toEqual(true)
-        //demo the difference between these
+        //Demo the difference between these
         const test_value = ' 100000.02px'
         expect(isNumeric(test_value)).toEqual(false)
         ////todo: fix isParsableToNumeric numeric if it starts with leter
         expect(isParsableToNumeric(test_value)).toEqual(true)
         expect(_parse.parseToFloat(test_value)).toBe(100000.02)
-        //jest ignores zeros anyway
+        //Jest ignores zeros anyway
         expect(_parse.parseStringToInteger(test_value)).toEqual(100000)
 
         const test_value_2 = ' 100000.0222px'
@@ -34,7 +34,7 @@ describe('Parse Module', () => {
     })
 })
 
-/*const invalidTestValues = [
+/*Const invalidTestValues = [
             "",
             "abc",
             "10%",

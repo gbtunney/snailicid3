@@ -38,7 +38,7 @@ export const normalizeLineBreaks = (value: string, lineEnd = '\n'): string =>
  * @category Remove Characters
  */
 export const replaceAccents = (value: string): string => {
-    // verifies if the String has accents and replace them
+    // Verifies if the String has accents and replace them
     if (value.search(/[\xC0-\xFF]/g) == -1) return value
     return value
         .replace(/[\xC0-\xC5]/g, 'A')

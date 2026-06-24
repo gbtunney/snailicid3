@@ -26,7 +26,7 @@ describe('validators', () => {
             10,
             1.0,
             3.4028236692093846e38,
-            // from legacy
+            // From legacy
             3444.4,
             -3444,
             BigInt('0o377777777777777777'),
@@ -54,7 +54,7 @@ describe('validators', () => {
             expect(isStringNumeric(s)).toBe(true)
             expect(isPossibleNumeric(s)).toBe(true)
             expect(isNumeric(s)).toBe(false)
-            // use loose parsing to handle surrounding spaces consistently
+            // Use loose parsing to handle surrounding spaces consistently
             expect(toStringNumeric(s, false)).not.toBeUndefined()
         })
     })
@@ -88,8 +88,8 @@ describe('validators', () => {
             '1.0e+0',
             '3.4028236692093846346e+38',
             '8e5',
-            '7.123e+0_1', // underscore in exponent (now valid)
-            '7_123.456e-1_2', // underscores integer, fraction, exponent
+            '7.123e+0_1', // Underscore in exponent (now valid)
+            '7_123.456e-1_2', // Underscores integer, fraction, exponent
         ]
         sci.forEach((s) => {
             expect(isValidScientificNumber(s)).toBe(true)
@@ -117,14 +117,14 @@ describe('validators', () => {
             expect(isStringNumeric(s)).toBe(true)
             expect(isPossibleNumeric(s)).toBe(true)
             expect(toStringNumeric(s)).not.toBeUndefined()
-            // expect(isNumeric(s)).toBe(true)
+            // Expect(isNumeric(s)).toBe(true)
         })
     })
 
     test('invalid numeric strings', () => {
         // Keep only unambiguous invalids per current dictionary regex
         const invalid: Array<string> = [
-            // malformed scientific
+            // Malformed scientific
             'e10',
             '1e',
             '1e+',
@@ -134,17 +134,17 @@ describe('validators', () => {
             '1e10px',
             '+e10',
             '-e10',
-            // malformed decimals/ints
+            // Malformed decimals/ints
             '2_',
             '2._2',
             '00.',
             '7.123e+0__1',
-            '7.123e+0__9', // double underscore in exponent
-            '_7.1e2', // leading underscore
-            '7_.1e2', // underscore before decimal point
-            '7._1e2', // underscore immediately after dot
-            '7.1e_2', // underscore starts exponent
-            '7.1e2_', // trailing underscore exponent
+            '7.123e+0__9', // Double underscore in exponent
+            '_7.1e2', // Leading underscore
+            '7_.1e2', // Underscore before decimal point
+            '7._1e2', // Underscore immediately after dot
+            '7.1e_2', // Underscore starts exponent
+            '7.1e2_', // Trailing underscore exponent
         ]
 
         invalid.forEach((s) => {
@@ -159,9 +159,9 @@ describe('validators', () => {
         expect(isPossibleNumeric('222')).toBe(true)
         expect(isPossibleNumeric(' 222  ')).toBe(true)
 
-        // strict (default) rejects trailing units
+        // Strict (default) rejects trailing units
         expect(isPossibleNumeric('222px')).toBe(false)
-        // loose allows after stripping
+        // Loose allows after stripping
         expect(isPossibleNumeric('222px', false)).toBe(true)
 
         const mixed = ' 200px'

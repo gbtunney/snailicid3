@@ -1,10 +1,10 @@
-//import { zod } from '@snailicid3/g-library/node'
+//Import { zod } from '@snailicid3/g-library/node'
 import { z } from 'zod'
 
 const testPipe = z.string().pipe(z.transform((val) => val.length))
 
 const splitArray = z.transform<z.ZodString, number>((val) => 0)
-//z.boo/lean().meta()
+//Z.boo/lean().meta()
 export const commonFlagsSchema = z.object({
     debug: z
         .boolean()
@@ -15,7 +15,7 @@ export const commonFlagsSchema = z.object({
         .string()
         .default('dire')
         .meta({ alias: ['o', 'out'], description: '<dir> Output directory' }),
-    // outDir: z.fsPath().meta({ description: '<dir> Output directory' , alias: 'o'}),
+    // OutDir: z.fsPath().meta({ description: '<dir> Output directory' , alias: 'o'}),
     /*
    rootDir: z
    .string()

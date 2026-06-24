@@ -72,7 +72,7 @@ export const getYargAppOptionObject = <
                 LOGGER().warn(fmt`\nNO Description META FOR ${_key}`)
             }
 
-            //wrapString(getEnumValuesString(innerSchema))
+            //WrapString(getEnumValuesString(innerSchema))
             const resultYargsConfig: SingleYarg = {
                 alias: optionMeta?.alias,
                 array: outerSchema.type === 'array',
@@ -128,7 +128,7 @@ export const convertZodToYargsType = (
 
         return getEnumType(_enumValues) as YargsType
     }
-    //this returns the default type
+    //This returns the default type
     return isZodYargsFriendly(type) ? (_inner as YargsType) : defaultType
 }
 

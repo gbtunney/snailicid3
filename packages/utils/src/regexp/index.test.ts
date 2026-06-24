@@ -59,7 +59,7 @@ describe('Regexp', () => {
         const badString = '^+0x|^-0x|^0x'
         const goodString = '^+0x|^-0x|^0x'
         const testcasenew = escapeStringRegexp('^+0x|^-0x|^0x')
-        //todo: REJOIN THIS !!!
+        //Todo: REJOIN THIS !!!
         //   const list = joinRegexList(['0x' ,'^rx'])
 
         expect(isValidRegExp(new RegExp(escapeStringRegexp(goodString)))).toBe(

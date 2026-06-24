@@ -4,6 +4,7 @@ import { runCommand } from './../utilities/command.js'
 import { getRepoRoot } from './../workspace/git.js'
 import { Commitlint } from './index.js'
 
+const cwd = import.meta
 const repoRoot = getRepoRoot()
 const COMMITLINT_CLI_TIMEOUT = 45_000
 
@@ -63,14 +64,14 @@ describe('Commitlint export', () => {
     })
 
     test('config returns an object with extends', () => {
-        const config = Commitlint.config()
+        const config = Commitlint.config({ cwd })
         expect(config).toHaveProperty('extends')
     })
 })
 
 describe('Commitlint config merge behavior', () => {
     test('appendTypes appends to commitTypes for the type-enum rule', () => {
-        const config = Commitlint.config({ appendTypes: ['custom-type'] })
+        const config = Commitlint.config({ appendTypes: ['custom-type'], cwd })
         const typeEnumRule = config.rules?.['type-enum'] as
             | [number, string, Array<string>]
             | undefined
@@ -82,6 +83,7 @@ describe('Commitlint config merge behavior', () => {
 
     test('scopeOptions.mergeScopes appends to the scope-enum rule', () => {
         const config = Commitlint.config({
+            cwd,
             scopeOptions: { mergeScopes: ['extra-scope'] },
         })
         const scopeEnumRule = config.rules?.['scope-enum'] as

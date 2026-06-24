@@ -185,5 +185,5 @@ export const jsonLooseCodec = <
         JsonCodec,
         schema,
     ])
-    return _result //z.union([JsonCodec, schema]) //.transform(val => val);
+    return _result //Z.union([JsonCodec, schema]) //.transform(val => val);
 }

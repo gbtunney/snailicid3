@@ -103,6 +103,7 @@ resolve_style() {
 
     style_key="$(printf '%s' "$style" | tr '[:upper:]_' '[:lower:]-')"
 
+    # todo neeeds alias for grey ramp vars
     case "$style_key" in
         '') printf '%s' "$RESET" ;;
         reset) printf '%s' "$RESET" ;;

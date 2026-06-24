@@ -2,12 +2,10 @@ import { filterFileArrByGlob } from './../shared.js'
 import {
     buildFunctionLintStaged,
     defineLintStagedConfig,
-    extensionsToGlob,
     type LintStagedConfig,
     type LintStagedConfigFunctionOptions,
-    quoteArg,
-    toFileArgs,
 } from './api-functions.js'
+import { extensionsToGlob, quoteArg, toFileArgs } from './helpers.js'
 import {
     type ConfigTool,
     type ConfigToolApi,

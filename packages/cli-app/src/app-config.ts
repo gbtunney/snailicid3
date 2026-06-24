@@ -22,7 +22,7 @@ export type AppConfigIn<
 > = z.input<
     z.ZodType<
         AppConfig,
-        //  z.ZodTypeDef,
+        //  Z.ZodTypeDef,
         Merge<
             z.input<AppConfigSchema>,
             {
@@ -56,7 +56,7 @@ export const appConfigSchema = z.object({
         .array(z.tuple([z.string(), z.string()]))
         .default([])
         .meta({ description: 'Examples for app cli help' }),
-    //todo: allow figlet options?
+    //Todo: allow figlet options?
     /** Use figlet to make large ascii title */
     figlet: z
         .boolean()
@@ -76,7 +76,7 @@ export const appConfigSchema = z.object({
         .record(z.string(), z.string())
         .default(default_aliases)
         .transform((value) => {
-            // defaults first, user overrides win
+            // Defaults first, user overrides win
             return { ...default_aliases, ...value }
         }),
 
@@ -139,7 +139,7 @@ export const resolveAppConfigSchema = <
     AppOptionsSchema extends ZodObjectSchema,
 >(
     value: AppConfigIn<AppOptionsSchema>,
-    schema: AppConfigSchema, //note : the default parameter errors like: schema:  AppConfigSchema=appConfigSchema
+    schema: AppConfigSchema, //Note : the default parameter errors like: schema:  AppConfigSchema=appConfigSchema
 ): undefined | z.infer<AppConfigSchema> => {
     if (tgZodSchema(schema, value)) {
         return schema.parse(value)

@@ -5,7 +5,7 @@ import { wrapAnyZodSchema } from './helpers.js'
 
 const metaSchema = z.object({
     alias: zodHelpers.ensureArray(z.string()).default([]),
-    deprecated: z.boolean().default(false), // z.array(z.string() ).default([]),
+    deprecated: z.boolean().default(false), // Z.array(z.string() ).default([]),
     description: z.string().default('i am'),
     hidden: z.boolean().default(false),
     id: z.string().optional(),
@@ -42,7 +42,7 @@ export const updateMetaForSchema = <Schema extends z.ZodType>(
     _data: Partial<MetaInput>,
 ): CLIAppMeta | undefined => {
     const optionMeta = getMetaForSchema(_schema)
-    //return parseMeta<MetaSchema>(optionMeta,metaSchema)
+    //Return parseMeta<MetaSchema>(optionMeta,metaSchema)
     z.globalRegistry.add(_schema, { ...optionMeta, _data })
     /* Get Updated */
     return getMetaForSchema(_schema)
@@ -55,6 +55,6 @@ export type AppConfigMeta = {
 
 export const initAppRegistry = (): void => {
     const _schema = wrapAnyZodSchema<z.ZodObject>(appConfigSchema)
-    //const myRegistry = z.registry<AppConfigMeta,z.ZodString >
+    //Const myRegistry = z.registry<AppConfigMeta,z.ZodString >
     const myRegistry = z.registry<AppConfigMeta, typeof appConfigSchema>()
 }
