@@ -1,4 +1,5 @@
-import { describe, expect, test } from 'vitest'
+import type * as SnailConfig from '@snailicid3/config'
+import { beforeAll, describe, expect, test } from 'vitest'
 import { mkdtempSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -14,6 +15,12 @@ const testInput = scaffoldInputSchema.parse({
     description: 'A test package',
     name: 'my-pkg',
 })
+
+let configModule: typeof SnailConfig
+
+beforeAll(async () => {
+    configModule = await import('@snailicid3/config')
+}, 15_000)
 
 describe('scaffoldInputSchema', () => {
     test('accepts valid lowercase hyphenated name', () => {
@@ -158,68 +165,51 @@ describe('scaffoldPackage', () => {
     })
 })
 describe('index.ts exports', () => {
-    test('exports Commitlint configuration', async () => {
-        const { Commitlint } = await import('@snailicid3/config')
-        expect(Commitlint).toBeDefined()
+    test('exports Commitlint configuration', () => {
+        expect(configModule.Commitlint).toBeDefined()
     })
 
-    test('exports workspaceScopes and workspaceScopesCsv', async () => {
-        const { workspaceScopes, workspaceScopesCsv } =
-            await import('@snailicid3/config')
-        expect(workspaceScopes).toBeDefined()
-        expect(workspaceScopesCsv).toBeDefined()
+    test('exports workspaceScopes and workspaceScopesCsv', () => {
+        expect(configModule.workspaceScopes).toBeDefined()
+        expect(configModule.workspaceScopesCsv).toBeDefined()
     })
 
-    test('exports defineConfig', async () => {
-        const { defineConfig } = await import('@snailicid3/config')
-        expect(defineConfig).toBeDefined()
+    test('exports defineConfig', () => {
+        expect(configModule.defineConfig).toBeDefined()
     })
 
-    test('exports EsLint configuration', async () => {
-        const { EsLint } = await import('@snailicid3/config')
-        expect(EsLint).toBeDefined()
+    test('exports EsLint configuration', () => {
+        expect(configModule.EsLint).toBeDefined()
     })
 
-    test('exports LintStaged configuration', async () => {
-        const { LintStaged } = await import('@snailicid3/config')
-        expect(LintStaged).toBeDefined()
+    test('exports LintStaged configuration', () => {
+        expect(configModule.LintStaged).toBeDefined()
     })
 
-    test('exports Markdownlint configuration', async () => {
-        const { Markdownlint } = await import('@snailicid3/config')
-        expect(Markdownlint).toBeDefined()
+    test('exports Markdownlint configuration', () => {
+        expect(configModule.Markdownlint).toBeDefined()
     })
 
-    test('exports Prettier configuration', async () => {
-        const { Prettier } = await import('@snailicid3/config')
-        expect(Prettier).toBeDefined()
+    test('exports Prettier configuration', () => {
+        expect(configModule.Prettier).toBeDefined()
     })
 
-    test('exports shared file extensions', async () => {
-        const {
-            JS_FILE_EXTENSIONS,
-            JSLIKE_FILE_EXTENSIONS,
-            MARKDOWN_FILE_EXTENSIONS,
-            PRETTIER_FILE_EXTENSIONS,
-            TS_FILE_EXTENSIONS,
-        } = await import('@snailicid3/config')
-        expect(JS_FILE_EXTENSIONS).toBeDefined()
-        expect(JSLIKE_FILE_EXTENSIONS).toBeDefined()
-        expect(TS_FILE_EXTENSIONS).toBeDefined()
-        expect(PRETTIER_FILE_EXTENSIONS).toBeDefined()
-        expect(MARKDOWN_FILE_EXTENSIONS).toBeDefined()
+    test('exports shared file extensions', () => {
+        expect(configModule.JS_FILE_EXTENSIONS).toBeDefined()
+        expect(configModule.JSLIKE_FILE_EXTENSIONS).toBeDefined()
+        expect(configModule.TS_FILE_EXTENSIONS).toBeDefined()
+        expect(configModule.PRETTIER_FILE_EXTENSIONS).toBeDefined()
+        expect(configModule.MARKDOWN_FILE_EXTENSIONS).toBeDefined()
     })
 
-    test('exports utilities', async () => {
-        const { expandExtensions, getFilePath, isPlainObject, json, merge } =
-            await import('@snailicid3/config')
-        expect(expandExtensions).toBeDefined()
-        expect(json.exportFile).toBeDefined()
-        expect(json.importFile).toBeDefined()
-        expect(isPlainObject).toBeDefined()
-        expect(json.prettyPrint).toBeDefined()
-        expect(json.deserialize).toBeDefined()
-        expect(json.serialize).toBeDefined()
-        expect(getFilePath).toBeDefined()
+    test('exports utilities', () => {
+        expect(configModule.expandExtensions).toBeDefined()
+        expect(configModule.json.exportFile).toBeDefined()
+        expect(configModule.json.importFile).toBeDefined()
+        expect(configModule.isPlainObject).toBeDefined()
+        expect(configModule.json.prettyPrint).toBeDefined()
+        expect(configModule.json.deserialize).toBeDefined()
+        expect(configModule.json.serialize).toBeDefined()
+        expect(configModule.getFilePath).toBeDefined()
     })
 })

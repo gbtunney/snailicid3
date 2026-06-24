@@ -100,9 +100,8 @@ type HasOmittedJsonObjectValue<Type> = [
 
 type IsNever<Type> = [Type] extends [never] ? true : false
 
-type IsTuple<Type extends ReadonlyArray<unknown>> = number extends Type['length']
-    ? false
-    : true
+type IsTuple<Type extends ReadonlyArray<unknown>> =
+    number extends Type['length'] ? false : true
 
 /** Function values are omitted from JSON object properties and become null in JSON arrays. */
 type JsonFunction = (...parameters: Array<never>) => unknown

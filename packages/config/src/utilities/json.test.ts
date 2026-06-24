@@ -62,9 +62,12 @@ describe('json utilities', () => {
         const compact = jsonValue.normalize(markdownlintLikeConfig)
         const pretty = jsonValue.serializePretty(compact)
 
+        expect(pretty).toBeDefined()
         expect(pretty).toContain('\n')
         expect(pretty).not.toContain('\\"')
-        expect(jsonValue.serialize(pretty)).toEqual(markdownlintLikeConfig)
+        expect(
+            pretty === undefined ? undefined : jsonValue.parseObject(pretty),
+        ).toEqual(markdownlintLikeConfig)
     })
     it('exports and imports JSON objects through validated boundaries', async () => {
         const temporaryDirectory = makeTemporaryDirectory()
@@ -118,19 +121,18 @@ describe('json utilities', () => {
     })
 
     it('rejects non-object values from the object helper', () => {
-        expect(jsonValue.parse('[1, 2, 3]')).toBeUndefined()
-        expect(jsonValue.parse('not-json')).toBeUndefined()
-        expect(jsonValue.serialize(null)).toBeUndefined()
+        expect(jsonValue.normalizeObject('[1, 2, 3]')).toBeUndefined()
+        expect(jsonValue.normalizeObject('not-json')).toBeUndefined()
+        expect(jsonValue.normalizeObject(null)).toBeUndefined()
     })
 
     it('exposes strict JSON value and object guards', () => {
         expect(isJsonValue({ a: ['b', 1, null, true] })).toBe(true)
         expect(isJsonValue(Number.NaN)).toBe(false)
 
-        //TODO fix this so it wont acept array in object
-        expect(jsonValue.guard.array({ a: 1 })).toBe(true)
-        //Shouldntthis take aparam???
-        expect(jsonValue.guard.valueOf([])).toBe(false)
+        expect(jsonValue.guard.object({ a: 1 })).toBe(true)
+        expect(jsonValue.guard.array({ a: 1 })).toBe(false)
+        expect(jsonValue.guard.valueOf([])).toBe(true)
     })
 })
 
