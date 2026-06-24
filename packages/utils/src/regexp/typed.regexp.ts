@@ -20,8 +20,8 @@ export type TypedRegexpMatch<Pattern extends string> = {
 /** Remove whitespace + comments from annotated regex */
 export function cleanAnnotatedRegex(input: string): string {
     return input
-        .replace(/#.*$/gm, '') // remove trailing comments
-        .replace(/\s+/g, '') // collapse whitespace/newlines
+        .replace(/#.*$/gm, '') // Remove trailing comments
+        .replace(/\s+/g, '') // Collapse whitespace/newlines
 }
 
 /** Treat a multi-line annotated regex as if it were the cleaned literal. Use only with Typed Regexp. */

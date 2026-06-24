@@ -114,7 +114,7 @@ export function toHex(color: ColorJS, includeAlpha = false): string {
     const green = toByte(greenFloat)
     const red = toByte(redFloat)
 
-    // alpha is a number in ColorJS; TS already thinks it's not nullish here
+    // Alpha is a number in ColorJS; TS already thinks it's not nullish here
     const alpha = toByte(srgb.alpha)
 
     let hex = `#${toHex2(red)}${toHex2(green)}${toHex2(blue)}`
@@ -124,7 +124,7 @@ export function toHex(color: ColorJS, includeAlpha = false): string {
 /** Parse to branded #RRGGBB; returns undefined instead of throwing on failure */
 export function tryParseColorToHex(input: string): undefined {
     try {
-        // return parseColorToHexStrict(input)
+        // Return parseColorToHexStrict(input)
     } catch {
         return undefined
     }

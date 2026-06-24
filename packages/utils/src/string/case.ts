@@ -33,12 +33,12 @@ export const capitalizeWords = (value: string): string =>
 export const camelCase = (value: string): string => {
     value = replaceAll(/[_-]/g, ' ', pipe(replaceAccents, removeNonWord)(value))
     if (/[a-z]/.test(value) && /^|\s[A-Z]+\s|$/.test(value)) {
-        // we convert any word that isn't all caps into lowercase
+        // We convert any word that isn't all caps into lowercase
         // value = value.replace(/\s(\w+)/g, function(word, m) {
         //   return /^[A-Z]+$/.test(m) ? word : lowerCase(word);
         //  });
     } else if (/\s/.test(value)) {
-        // if it doesn't contain an acronym and it has spaces we should
+        // If it doesn't contain an acronym and it has spaces we should
         // convert every word to lowercase
         value = toLower(value)
     }

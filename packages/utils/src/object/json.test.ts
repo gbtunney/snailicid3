@@ -34,7 +34,7 @@ describe('JSON serialize', () => {
                 age: string
                 name: string
             }>()
-            /* expectTypeOf(result).toMatchObjectType<{
+            /* ExpectTypeOf(result).toMatchObjectType<{
                 name: string
                 age: number
             }>()*/
@@ -60,7 +60,7 @@ describe('JSON serialize', () => {
         const _errorResult = jsonParser().deserialize(errorResult)
         console.log('_errorResult', _errorResult)
         if (errorResult !== 'ERROR') {
-            //  const errorResultLat4est = demoDeserializeJSON(errorResult)
+            //  Const errorResultLat4est = demoDeserializeJSON(errorResult)
         }
     })
 })

@@ -28,11 +28,11 @@ const isMatchStringRegExp = (value: string, exp: RegExp): value is string =>
 const testme = (value: unknown): boolean =>
     typeof value === 'string' && value.length > 5
 
-// boolean predicate example
+// Boolean predicate example
 const isTestObj = factoryValidator(testme, 'matchRegExp')
 void isTestObj
 
-// type-guard example (explicit type for isolatedModules friendliness)
+// Type-guard example (explicit type for isolatedModules friendliness)
 const isMatchRegExpObj: ValidatorReturn<
     typeof isMatchStringRegExp,
     'matchRegExp'

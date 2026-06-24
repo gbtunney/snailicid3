@@ -11,14 +11,14 @@ const browserEngineSchema = z.enum(BROWSER_ENGINES)
 const runtimeEngineSchema = z.enum(RUNTIME_ENGINES)
 
 /*
-export const engineNameSchema = z.union([
+Export const engineNameSchema = z.union([
   browserEngineSchema,
   runtimeEngineSchema,
 ])
 */
 const engineTargetSchema = z.templateLiteral([
     z.union([browserEngineSchema, runtimeEngineSchema]),
-    // z.number().int().positive(),
+    // Z.number().int().positive(),
     z.string().regex(SEMVER_REGEX),
 ])
 

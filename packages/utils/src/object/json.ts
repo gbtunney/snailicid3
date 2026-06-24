@@ -51,5 +51,5 @@ export const safeDeserializeJson = (data: string): Json.Value | undefined => {
     }
     return undefined
 }
-//todo: finish these functions
+//Todo: finish these functions
 export type JsonOf<Type> = Tagged<string, 'JSON', Type>

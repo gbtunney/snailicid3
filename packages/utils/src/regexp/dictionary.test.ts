@@ -21,7 +21,7 @@ describe('regexp/dictionary', () => {
             '1.0e+0',
             '3.4028236692093846346e+38',
             '8e5',
-            // underscores allowed
+            // Underscores allowed
             '1_000',
             '1_000.0_0',
             '.1_0',
@@ -43,7 +43,7 @@ describe('regexp/dictionary', () => {
             '1e--10',
             '+e10',
             '-e10',
-            // bad underscores
+            // Bad underscores
             '1__0',
             '1._0',
             '1_.0',
@@ -53,7 +53,7 @@ describe('regexp/dictionary', () => {
             '1_',
             '._1',
             '2._2',
-            '00.', // trailing dot without fraction
+            '00.', // Trailing dot without fraction
         ])('invalid: %s', (str) => {
             expect(scientificNumber.test(str)).toBe(false)
         })
@@ -73,11 +73,11 @@ describe('regexp/dictionary', () => {
         })
 
         test.each([
-            '0x', // no digits
-            '0xG', // non-hex
-            '0x_FF', // leading underscore
-            '0xFF_', // trailing underscore
-            '0xA__B', // double underscore
+            '0x', // No digits
+            '0xG', // Non-hex
+            '0x_FF', // Leading underscore
+            '0xFF_', // Trailing underscore
+            '0xA__B', // Double underscore
         ])('invalid: %s', (str) => {
             expect(hexNumber.test(str)).toBe(false)
         })
@@ -92,11 +92,11 @@ describe('regexp/dictionary', () => {
         )
 
         test.each([
-            '0b', // no digits
-            '0b2', // non-binary
-            '0b_10', // leading underscore
-            '0b10_', // trailing underscore
-            '0b1__0', // double underscore
+            '0b', // No digits
+            '0b2', // Non-binary
+            '0b_10', // Leading underscore
+            '0b10_', // Trailing underscore
+            '0b1__0', // Double underscore
         ])('invalid: %s', (str) => {
             expect(binaryNumber.test(str)).toBe(false)
         })
@@ -117,14 +117,14 @@ describe('regexp/dictionary', () => {
         })
 
         test.each([
-            '10', // missing n
-            '10_n', // underscore before n
-            '10n_', // trailing underscore
-            '+0xn', // missing digits
-            '0x_n', // underscore right after base
-            '0bn', // missing digits
-            '0b_n', // underscore right after base
-            '1__0n', // double underscore
+            '10', // Missing n
+            '10_n', // Underscore before n
+            '10n_', // Trailing underscore
+            '+0xn', // Missing digits
+            '0x_n', // Underscore right after base
+            '0bn', // Missing digits
+            '0b_n', // Underscore right after base
+            '1__0n', // Double underscore
         ])('invalid: %s', (str) => {
             expect(bigintNumber.test(str)).toBe(false)
         })

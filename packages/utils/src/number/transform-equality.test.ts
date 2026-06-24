@@ -4,17 +4,17 @@ import { isPossibleNumeric, isStringNumeric } from './validators.js'
 
 describe('toNumeric equality (string vs literal)', () => {
     test.each([
-        // plain decimals
+        // Plain decimals
         ['0', 0],
         ['5', 5],
         ['144', 144],
         ['3.1415', 3.1415],
         ['100000.0', 100000.0],
         ['  222  ', 222],
-        // signed decimals
+        // Signed decimals
         ['+10', 10],
         ['-10', -10],
-        // scientific
+        // Scientific
         ['1e3', 1000],
         ['1e+3', 1000],
         ['1e-3', 0.001],
@@ -23,7 +23,7 @@ describe('toNumeric equality (string vs literal)', () => {
         ['6.02e23', 6.02e23],
         ['1.0e+0', 1],
         ['8e5', 800000],
-        // hex/binary
+        // Hex/binary
         ['0xff', 255],
         ['0xFF', 255],
         ['-0xAbc', -0xabc],
@@ -51,7 +51,7 @@ describe('toNumeric equality (string vs literal)', () => {
     })
 
     test.each([
-        // clearly invalid shapes should not parse
+        // Clearly invalid shapes should not parse
         'e10',
         '1e',
         '1e+',

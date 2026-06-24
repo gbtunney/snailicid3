@@ -1,11 +1,11 @@
-// typed-regexp.test.ts
+// Typed-regexp.test.ts
 import { describe, expect, it } from 'vitest'
 
 import {
     asAnnotatedPattern,
     cleanAnnotatedRegex,
     typedRegexp,
-} from './typed.regexp.js' // adjust filename
+} from './typed.regexp.js' // Adjust filename
 
 // ------------------------------------------------------------------------------------
 // 1. cleanRegex() behavior
@@ -64,7 +64,7 @@ describe('typedRegexp – type inference', () => {
         const result = regex.execTyped('aaabbb')
         if (result === null) throw new Error('unexpected null')
 
-        // should be string
+        // Should be string
         const alphaGroup: string = result.groups.alpha
         const betaGroup: string = result.groups.beta
 
@@ -90,7 +90,7 @@ describe('typedRegexp – type inference', () => {
         const matchResult = regex.execTyped('foo')
         if (matchResult === null) throw new Error('unexpected')
 
-        // should have no keys at all
+        // Should have no keys at all
         expect(Object.keys(matchResult.groups)).toHaveLength(0)
 
         // @ts-expect-error - there are no group keys

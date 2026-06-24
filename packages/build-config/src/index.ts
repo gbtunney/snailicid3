@@ -43,7 +43,7 @@ export {
 } from './build/schemas/index.js'
 export {
     parsePackage,
-    // schemaBasePackage,
+    // SchemaBasePackage,
     // schemaRequiredScripts,
 } from './build/schemas/package.js'
 

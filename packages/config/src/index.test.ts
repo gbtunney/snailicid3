@@ -121,11 +121,15 @@ describe('@snailicid3/config public API', () => {
         expect(() => Prettier.config({ cwd: dataImportMeta })).not.toThrow()
         expect(() => Prettier.configFile({ cwd: dataImportMeta })).not.toThrow()
         expect(() => Typedoc.config({ cwd: dataImportMeta })).not.toThrow()
-        expect(() => Typedoc.markdown.config({ cwd: dataImportMeta })).not.toThrow()
+        expect(() =>
+            Typedoc.markdown.config({ cwd: dataImportMeta }),
+        ).not.toThrow()
         expect(() =>
             Typedoc.materialTheme.config({ cwd: dataImportMeta }),
         ).not.toThrow()
-        expect(() => Typedoc.vitepress.config({ cwd: dataImportMeta })).not.toThrow()
+        expect(() =>
+            Typedoc.vitepress.config({ cwd: dataImportMeta }),
+        ).not.toThrow()
     })
 
     test('eslint tsconfigRootDir is normalized before parser options receive it', () => {

@@ -40,7 +40,7 @@ export const getFilePathArr = (
     }
     const _value =
         getDirectoryFiles && isDirectory(value)
-            ? //make a glob.
+            ? //Make a glob.
               path.resolve(`${value}/*`)
             : value
     const _result = globSync(_value)
@@ -66,7 +66,7 @@ export const isFileArray = (
         const newglob: string | undefined = isGlob(_path)
             ? _path
             : allowDirectory && isDirectory(_path)
-              ? //make a glob.
+              ? //Make a glob.
                 path.resolve(`${_path}/*`)
               : undefined
         if (newglob === undefined) return false

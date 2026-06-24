@@ -122,6 +122,6 @@ describe('jsonStringified<T>()', () => {
         const ex2str = JSON.stringify(ex2)
         const _encoded = testCodec.decode(ex2str)
         const mystr: z.input<typeof testCodec> = { a: 'ss', b: 'sdsd' }
-        //console.log("THE PARSABLE VALUE IS ", testCodec.encode(mystr)  )
+        //Console.log("THE PARSABLE VALUE IS ", testCodec.encode(mystr)  )
     })
 })

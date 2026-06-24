@@ -4,7 +4,7 @@ import path from 'node:path'
 
 export type ImageMimeType = 'bmp' | 'gif' | 'jpeg' | 'png' | 'svg'
 
-//todo: finish this type
+//Todo: finish this type
 type Base64 = Tagged<string, 'base64'>
 
 export const getImageExtensionLiteral = (value: string): ImageMimeType => {

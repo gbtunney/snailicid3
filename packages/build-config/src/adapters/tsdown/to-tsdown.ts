@@ -33,7 +33,7 @@ export function entryToTsdownConfig(
         entryOutputFormats: entry.output_formats,
         runtime: entry.runtime,
     })
-    // noExternal: [/.*/],
+    // NoExternal: [/.*/],
     const hasDts = entry.output_formats.includes('ts')
 
     const externals =
@@ -66,7 +66,7 @@ export function entryToTsdownConfig(
               publint: true,
               report: true,
               unused: {
-                  level: 'warning', //this should be setup on publish or ci to do it for real
+                  level: 'warning', //This should be setup on publish or ci to do it for real
               },
           }
         : {}
@@ -81,7 +81,7 @@ export function entryToTsdownConfig(
         tsdownFormats: formats,
         unbundle: !entry.bundle,
     })
-    //const bundle = entry.bundle
+    //Const bundle = entry.bundle
     const config: TsdownBuildConfig = {
         ...(entry.bannerContent ? { banner: entry.bannerContent } : {}),
         ...(hasGlobal ? { globalName: entry.moduleName } : {}),

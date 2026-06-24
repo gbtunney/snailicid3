@@ -30,10 +30,10 @@ describe('Numeric Module', () => {
             expect(isPossibleNumeric(value)).toEqual(true)
         })
 
-        //isValidScientificNumber()
+        //IsValidScientificNumber()
         expect(isPossibleNumeric<string>('\n\r-100000.0', false)).toEqual(true)
         expect(isNumeric<bigint>(BigInt('0o377777777777777777'))).toEqual(true)
-        //ramda tests
+        //Ramda tests
         expect(isInteger(1.0)).toEqual(true)
         expect(isInteger(1)).toEqual(true)
         expect(isBigInt(100)).toEqual(false)

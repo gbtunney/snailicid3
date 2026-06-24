@@ -32,7 +32,7 @@ describe('Zod helpers', () => {
             endResult,
         )
 
-        //inputs
+        //Inputs
         const inputInA: z.input<typeof getArrStringSchemaTest> = ['33']
         const inputInB: z.input<typeof getArrStringSchemaTest> = '33'
 
@@ -41,19 +41,19 @@ describe('Zod helpers', () => {
 
         const getArrNumberSchemaTest = ensureArray(z.number())
 
-        //inputs
+        //Inputs
         const _inputInA: z.input<typeof getArrNumberSchemaTest> = [33]
         const _inputInB: z.input<typeof getArrNumberSchemaTest> = 33
-        //outputs
+        //Outputs
         const _inputOutA: z.output<typeof getArrNumberSchemaTest> = [33]
 
-        //inputs
+        //Inputs
         const __inputInA: z.input<typeof getArrRecursiveSchemaTest> = [
             '33',
             'gillian',
         ]
         const __inputInB: z.input<typeof getArrRecursiveSchemaTest> = '33'
-        //outputs
+        //Outputs
         const __inputOutA: z.output<typeof getArrRecursiveSchemaTest> = [['33']]
         const __inputOutB: z.output<typeof getArrRecursiveSchemaTest> = [
             ['33'],
@@ -109,7 +109,7 @@ describe('Zod helpers', () => {
             getREGEXPSchemaTest.parse(['^0x', 'FFFF00']).test('34760x'),
         ).toBe(false)
 
-        //this is because the ^ is escaped to a literal  rather than the regexp to come first !!
+        //This is because the ^ is escaped to a literal  rather than the regexp to come first !!
         expect(
             getREGEXPSchemaTest.parse(['^+0x', 'FFFF00']).test('^+0x234760x'),
         ).toBe(true)

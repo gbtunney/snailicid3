@@ -34,7 +34,7 @@ export const exportJSONFile = (
         if (overwrite === 'ON') {
             writeFile() ///write the file return success.
         } else if (!fs.existsSync(file_path)) {
-            //is set to warn or error, but no file exists.
+            //Is set to warn or error, but no file exists.
             writeFile() ///write the file return success.
         } else if (overwrite === 'WARN' || fs.existsSync(file_path)) {
             console.warn('FILE PATH ALREADY EXCISTS::: ', file_path, entry)

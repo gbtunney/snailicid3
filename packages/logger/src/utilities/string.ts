@@ -5,7 +5,7 @@ export const modifyCaseIndexedLetter = (
     index: number = 0,
 ): string => {
     if (str.length >= 0 && str.length >= index + 1 && str[index]) {
-        // const indexedElement =
+        // Const indexedElement =
         const str_transformed: string =
             _case === 'upper'
                 ? str[index].toUpperCase()

@@ -5,7 +5,7 @@ import * as zod from './zod.node.js'
 describe('zod custom schemas', () => {
     test('TODO: reenable', () => {
         expect(true).toBe(true)
-        //todo: reenable
+        //Todo: reenable
         expect(
             zod
                 .fsPathTypeExists('any', './')
@@ -25,11 +25,11 @@ describe('zod custom schemas', () => {
                 .success,
         ).toBe(true)
 
-        //test path resolution TODO: reenable someday
+        //Test path resolution TODO: reenable someday
         const _resolvedSchema = zod
             .fsPathTypeExists()
             .safeParse('./sample_image/..//sample_image/testimage.jpeg')
-        //expect(_resolvedSchema.data).toEqual('/Users/gilliantunney/snailicide-monorepo/packages/g-library/sample_image/testimage.jpeg')
+        //Expect(_resolvedSchema.data).toEqual('/Users/gilliantunney/snailicide-monorepo/packages/g-library/sample_image/testimage.jpeg')
         //const _resolvedDir = zod.fsPathTypeExists('directory').safeParse('./sample_image/..//sample_image/')
         //expect(_resolvedSchema.data).toEqual('/Users/gilliantunney/snailicide-monorepo/packages/g-library/sample_image/testimage.jpeg')
 

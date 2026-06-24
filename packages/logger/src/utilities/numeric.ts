@@ -4,7 +4,7 @@ import { fmt } from './../pretty.print.js'
 // ==============================
 //export type Range = { min: number; max: number };
 export type Range = [number, number]
-//export const rangePercent: Range = { min: 0, max: 1 };
+//Export const rangePercent: Range = { min: 0, max: 1 };
 //export const rangeFloat100: Range = { min: 0, max: 100 };
 //export const rangeDegrees: Range = { min: 0, max: 360 };
 export const RANGE_PERCENT: Range = [0, 100]
@@ -35,7 +35,7 @@ export const roundToDecimals = (
     decimals: number,
     func: (value: number) => number = Math.round,
 ): number => {
-    if (!Number.isFinite(value)) return value // avoid NaN/Infinity issues
+    if (!Number.isFinite(value)) return value // Avoid NaN/Infinity issues
     if (decimals <= 0) return func(value)
     const factor = 10 ** decimals
     return Math.round(value * factor) / factor

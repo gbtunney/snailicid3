@@ -42,7 +42,7 @@ export const getColor = (
 }
 
 const rotateHueFunction = (hue: number, incrementValue: number): number => {
-    //todo: chheck to see if inc is an integer.
+    //Todo: chheck to see if inc is an integer.
     return (hue + incrementValue) % 360
 }
 /** RA.rangeStep(5, 0, 20); // => [0, 5, 10, 15] */
@@ -94,7 +94,7 @@ export const analogous = (
     )
 }
 
-/*export const getChromaColor = (
+/*Export const getChromaColor = (
     color: Chromable,
     format?: chroma.ColorFormat,
 ): ChromaColorPalatte | undefined => {

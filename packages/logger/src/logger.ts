@@ -161,7 +161,7 @@ export const createLogger = (opts?: LoggerOpts): Logger => {
 
     const prefix = (level: LogLevelName): string => {
         const bg_color = getColorChalkInstance(colors[level], 'bg')
-        //assertChalkColor( color)
+        //AssertChalkColor( color)
         return [
             bg_color.bold(` ===> ${chalk.bold(level.toUpperCase())} `),
             chalk.italic(showTime ? dayjs().format(timeFormat) : ''),
@@ -181,7 +181,7 @@ export const createLogger = (opts?: LoggerOpts): Logger => {
             const [fmt, css, reset] = colorizeBrowser(head, 'red')
             out(fmt, css, reset, ...args)
         } else {
-            //chalk.bgRed('THIS IS A COLOR ', color)
+            //Chalk.bgRed('THIS IS A COLOR ', color)
             out(
                 wrapColorChalkInstanceText(head, color, 'fg'),
                 formatArgs('', ...args),
