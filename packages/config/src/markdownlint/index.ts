@@ -13,6 +13,7 @@ import {
     type IdentityDefineConfig,
 } from '../core/index.js'
 
+///todo: can we give the same object treatment to markdownlint  config keys and rules top level
 export const Markdownlint = defineConfigTool({
     config: buildFunctionMarkdownlint,
     defineConfig: defineMarkdownlintConfig,
