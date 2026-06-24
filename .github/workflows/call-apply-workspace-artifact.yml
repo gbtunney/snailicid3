@@ -292,5 +292,5 @@ jobs:
                     echo "- push_branch: \`${{ inputs.push_branch }}\`"
                     echo "- is_dirty: \`${{ steps.dirty.outputs.is_dirty }}\`"
                     echo "- scoped_commit_message: \`${{ inputs.scoped_commit_message }}\`"
-                    echo "- post_overlay_command: \`${{ inputs.post_overlay_command }}\`"
+                    echo "- post_overlay_command: \`${{ inputs.post_overlay_command != '' && 'provided' || 'none' }}\`"
                   } >> "$GITHUB_STEP_SUMMARY"
