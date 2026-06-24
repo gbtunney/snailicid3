@@ -318,7 +318,7 @@ const exportJSONFile = (
     return success
 }
 
-export type JsonUtilities = {
+export const json: {
     deserialize: (data: unknown) => JsonValue | undefined
     deserializeObject: (data: unknown) => JsonObject | undefined
     exportFile: (
@@ -334,9 +334,7 @@ export type JsonUtilities = {
     object: (data: unknown) => JsonObject | undefined
     prettyPrint: (value: unknown, indentSpaces?: number) => JSONStringOf
     serialize: (value: unknown, options?: JSONSerializeOptions) => JSONStringOf
-}
-
-export const json: JsonUtilities = {
+} = {
     deserialize: deserializeJSON,
     deserializeObject: deserializeJSONObject,
     exportFile: exportJSONFile,
@@ -348,3 +346,4 @@ export const json: JsonUtilities = {
     prettyPrint: prettyPrintJSON,
     serialize: serializeJSON,
 }
+export type { Jsonifiable } from 'type-fest'

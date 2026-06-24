@@ -64,7 +64,7 @@ export const getFilePath = (
     filePath: string,
 ): string => getFullPath(filePath, rootormeta)
 
-export type PathUtilities = {
+export const paths: {
     dirname: typeof getDirname
     exists: typeof doesFileExist
     extension: typeof getExt
@@ -73,9 +73,7 @@ export type PathUtilities = {
     full: typeof getFullPath
     normalize: typeof normalizePath
     resolveCwd: typeof resolveCwd
-}
-
-export const paths: PathUtilities = {
+} = {
     dirname: getDirname,
     exists: doesFileExist,
     extension: getExt,

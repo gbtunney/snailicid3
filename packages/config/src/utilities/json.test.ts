@@ -56,6 +56,14 @@ describe('json utilities', () => {
         expect(json.object(twice)).toEqual(markdownlintLikeConfig)
     })
 
+    it('pretty prints existing JSON object strings without double-serializing', () => {
+        const compact = json.serialize(markdownlintLikeConfig)
+        const pretty = json.prettyPrint(compact)
+
+        expect(pretty).toContain('\n')
+        expect(pretty).not.toContain('\\"')
+        expect(json.object(pretty)).toEqual(markdownlintLikeConfig)
+    })
     it('exports and imports JSON objects through validated boundaries', async () => {
         const temporaryDirectory = makeTemporaryDirectory()
         const filename = path.join(temporaryDirectory, 'markdownlint.json')
