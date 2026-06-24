@@ -28,3 +28,15 @@ export type ReplaceAll<
 > = Value extends `${infer Head}${Search}${infer Tail}`
     ? `${Head}${Replacement}${ReplaceAll<Tail, Search, Replacement>}`
     : Value
+
+export type {
+    IterableElement,
+    LiteralUnion,
+    OmitDeep,
+    OmitIndexSignature,
+    Simplify,
+    UnknownArray,
+    UnknownRecord,
+    Writable,
+    WritableDeep,
+} from 'type-fest'

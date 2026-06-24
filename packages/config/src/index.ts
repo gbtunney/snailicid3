@@ -161,7 +161,7 @@ export type {
     Json,
     JSONExportConfig,
     JSONExportEntry,
-    JsonUtilities,
+    Jsonifiable,
 } from './utilities/json.js'
 export {
     doesFileExist,
@@ -174,7 +174,18 @@ export {
     paths,
     resolveCwd,
 } from './utilities/path.js'
-export type { PathRoot, PathUtilities } from './utilities/path.js'
-export type { PlainObject } from './utilities/types.js'
+export type { PathRoot } from './utilities/path.js'
+export type {
+    IterableElement,
+    LiteralUnion,
+    OmitDeep,
+    OmitIndexSignature,
+    PlainObject,
+    Simplify,
+    UnknownArray,
+    UnknownRecord,
+    Writable,
+    WritableDeep,
+} from './utilities/types.js'
 
 export { merge } from 'ts-deepmerge'
