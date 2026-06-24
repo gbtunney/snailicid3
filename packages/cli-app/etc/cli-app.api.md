@@ -85,7 +85,7 @@ export const initApp: <AppOptionsSchema extends ZodObjectSchema>(optionsSchema: 
 export const initializeApp: <AppOptionsSchema extends ZodObjectSchema>(optionsSchema: AppOptionsSchema, config: AppConfigIn, initFunction: InitSuccessCallback<AppOptionsSchema>, skip_interactive?: boolean, _yargs?: Array<string>) => Promise<Argv | undefined>;
 
 // @public
-export type InitSuccessCallback<AppOptionsSchema extends ZodObjectSchema = z.ZodObject> = (args: z.infer<AppOptionsSchema>, config: AppConfig, // or: z.infer<typeof appConfigSchema>
+export type InitSuccessCallback<AppOptionsSchema extends ZodObjectSchema = z.ZodObject> = (args: z.infer<AppOptionsSchema>, config: AppConfig, // Or: z.infer<typeof appConfigSchema>
 help: string | undefined) => Promise<void> | void;
 
 // Warning: (ae-forgotten-export) The symbol "packageSchema" needs to be exported by the entry point index.d.ts
