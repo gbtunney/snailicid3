@@ -9,15 +9,22 @@ import type {
 import fs from 'node:fs'
 import path from 'node:path'
 
+/** Options used when converting JSON-compatible values to strings. */
 export type JSONSerializeOptions = {
+    /** Number of spaces to use when `pretty` is enabled. */
     indentSpaces?: number
+    /** When true, format the JSON string with indentation. */
     pretty?: boolean
 }
+
+/** Branded JSON string produced by the JSON utility helpers. */
 export type JSONStringOf<Type extends JsonValue = JsonValue> = Tagged<
     string,
     'JSON_STRING',
     Type
 >
+
+/** How object merging should treat array properties. */
 export type MergeArrayModes = 'append' | 'replace'
 export type PlainObject = object
 
@@ -67,12 +74,18 @@ const getTraceLogger = (scope: string): TraceLogger => {
 const formatUnknownError = (error: unknown): string =>
     error instanceof Error ? error.message : String(error)
 
+/** Type aliases for JSON-compatible values. */
 export namespace Json {
+    /** JSON-compatible array value. */
     export type Array = JsonArray
+    /** JSON-compatible object value. Arrays are not objects here. */
     export type Object = JsonObject
+    /** JSON-compatible primitive value: string, number, boolean, or null. */
     export type Primitive = JsonPrimitive
+    /** Branded JSON string produced by `json.serialize()` or `json.prettyPrint()`. */
     export type StringOf<Type extends JsonValue = JsonValue> =
         JSONStringOf<Type>
+    /** Any JSON-compatible value: object, array, string, number, boolean, or null. */
     export type Value = JsonValue
 }
 
@@ -223,10 +236,14 @@ const importJSONObject = async (
     return isJsonObject(parsed) ? parsed : undefined
 }
 
+/** List of JSON files to write with `json.exportFile()`. */
 export type JSONExportConfig = Array<JSONExportEntry>
 
+/** One JSON file output entry for `json.exportFile()`. */
 export type JSONExportEntry<Type = unknown> = {
+    /** JSON-serializable data to write. */
     data: Type
+    /** Output filename. `.json` is appended when omitted. */
     filename: string
 }
 
@@ -319,20 +336,76 @@ const exportJSONFile = (
 }
 
 export type JsonUtilities = {
+    /**
+     * Convert unknown in-memory data into a JSON-compatible value.
+     *
+     * Use this when the input is already in memory. Strings are parsed as JSON
+     * when possible; non-JSON strings remain strings. Arrays are allowed.
+     * For reading from disk, use `json.importFile()` instead.
+     */
     deserialize: (data: unknown) => JsonValue | undefined
+
+    /**
+     * Convert unknown in-memory data into a JSON object only.
+     *
+     * This rejects arrays and primitives. It is the verbose alias of
+     * `json.object()`.
+     */
     deserializeObject: (data: unknown) => JsonObject | undefined
+
+    /**
+     * Write one or more JSON files to disk.
+     *
+     * Use this for generated JSON artifacts. Each entry filename receives a
+     * `.json` suffix when one is not already present.
+     */
     exportFile: (
         config: JSONExportConfig,
         outdir?: string,
         overwrite?: boolean,
         logData?: boolean,
     ) => boolean
+
+    /**
+     * Read and parse a JSON file from disk.
+     *
+     * Use this when any JSON value is acceptable: object, array, string,
+     * number, boolean, or null. For in-memory data, use `json.deserialize()`.
+     */
     importFile: (filename: string) => Promise<JsonValue | undefined>
+
+    /**
+     * Read and parse a JSON file from disk, requiring an object result.
+     *
+     * Use this for package/config JSON files where arrays and primitives should
+     * be rejected.
+     */
     importObject: (filename: string) => Promise<JsonObject | undefined>
+
+    /** Check whether a value is a JSON object. Arrays are rejected. */
     isObject: (value: unknown) => value is JsonObject
+
+    /** Check whether a value is any JSON-compatible value. Arrays are allowed. */
     isValue: (value: unknown) => value is JsonValue
+
+    /**
+     * Convert unknown in-memory data into a JSON object only.
+     *
+     * Short alias for `json.deserializeObject()`. This parses JSON strings and
+     * accepts plain objects, but rejects arrays and primitives. For file IO, use
+     * `json.importObject()`.
+     */
     object: (data: unknown) => JsonObject | undefined
+
+    /** Serialize data as formatted JSON using the provided indentation width. */
     prettyPrint: (value: unknown, indentSpaces?: number) => JSONStringOf
+
+    /**
+     * Serialize unknown in-memory data to a branded JSON string.
+     *
+     * Use this when you need JSON text output. Pass `{ pretty: true }` or use
+     * `json.prettyPrint()` for indented output.
+     */
     serialize: (value: unknown, options?: JSONSerializeOptions) => JSONStringOf
 }
 
