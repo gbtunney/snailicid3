@@ -69,7 +69,7 @@ jobs:
     pipeline_workspace_update:
         name: Run selected pipeline routines
         needs: guard
-        uses: ./.github/workflows/call-pipeline.yml
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@main
         with:
             mode: report
             check_mode: ${{ inputs.run_fix && 'fix' || 'skip' }}
@@ -86,7 +86,7 @@ jobs:
         name: Apply artifact and commit
         needs: pipeline_workspace_update
         if: ${{ needs.pipeline_workspace_update.result == 'success' && needs.pipeline_workspace_update.outputs.artifact_uploaded == 'true' }}
-        uses: ./.github/workflows/call-apply-workspace-artifact.yml
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-apply-workspace-artifact.yml@main
         secrets: inherit
         with:
             ref: ${{ github.ref_name }}
