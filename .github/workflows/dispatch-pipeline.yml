@@ -118,7 +118,7 @@ permissions:
 
 jobs:
     pipeline:
-        uses: ./.github/workflows/call-pipeline.yml
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@main
         with:
             mode: ${{ inputs.mode }}
             check_mode: ${{ inputs.check_mode }}
@@ -144,7 +144,7 @@ jobs:
         needs: pipeline
         if: ${{ always() }}
         steps:
-            - name: 🧾 Output Summary
+            - name: 🧧 Output Summary
               shell: bash
               run: |
                   {
