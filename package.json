@@ -26,6 +26,7 @@
         "\n========== API REPORT >> ==========": "",
         "api:report": "pnpm exec nx run-many --target=api:report",
         "api:check": "pnpm exec nx run-many --target=api:check",
+        "workspace:report": "pnpm --workspace-concurrency=1 --filter './{packages,apps,api}/**' exec sh -c 'snail-sh spacer 1; snail-sh kabob \"🐌 $PNPM_PACKAGE_NAME\" \"100%\" magenta; snail-sh spacer 1; knip --directory \"$PWD\" || true';snail-sh spacer 2;",
         "\n========== PUBLISH >> ==========": "",
         "changeset:create": "pnpm changeset:prepare && pnpm exec gbt-changeset && pnpm api:report",
         "changeset:prepare": "pnpm run test && pnpm docs:build",
