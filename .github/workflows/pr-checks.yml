@@ -1,27 +1,3 @@
-# Runs on every pull_request to main and on workflow_dispatch.
-#
-# This workflow uses the same state detector as the release workflow:
-#
-#   .github/workflows/call-detect-release-state.yml
-#
-# The detector classifies the checked-out ref into one of three PR-check phases:
-#
-#   pending_changeset
-#     A changeset file exists. This is source-work PR state.
-#     Run the heavier validation set because docs/API surfaces may need updates.
-#
-#   pending_release
-#     No changesets remain, but at least one public package version is not on npm.
-#     This is version-bump/release PR state.
-#     Run the heavier validation set before allowing merge/publish.
-#
-#   main
-#     No changesets and no publish candidates.
-#     This is a normal PR state.
-#     Run the normal required build/test pipeline.
-#
-# The three pipeline jobs are intentionally explicit instead of one combined block
-# with many ternary-style inputs. This makes the Actions UI show which phase ran.
 name: PR Checks
 
 on:
@@ -56,14 +32,13 @@ jobs:
               shell: bash
               run: |
                   set -euo pipefail
-
                   echo "Checked out merge ref: refs/pull/${{ github.event.pull_request.number }}/merge"
                   git status --short
                   git rev-parse --verify HEAD
 
     detect:
         name: detect release state
-        uses: ./.github/workflows/call-detect-release-state.yml
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-detect-release-state.yml@main
         with:
             ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
@@ -71,7 +46,7 @@ jobs:
         name: pending changeset
         needs: detect
         if: ${{ needs.detect.outputs.should_version == 'true' }}
-        uses: ./.github/workflows/call-pipeline.yml
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@main
         with:
             checkout_ref: ${{ github.event_name == 'pull_request' && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.ref }}
             mode: abort_on_error
@@ -88,7 +63,7 @@ jobs:
         name: pending release
         needs: detect
         if: ${{ needs.detect.outputs.should_publish == 'true' }}
-        uses: ./.github/workflows/call-pipeline.yml
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@main
         with:
             checkout_ref: ${{ github.event_name == 'pull_request' && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.ref }}
             mode: abort_on_error
@@ -105,7 +80,7 @@ jobs:
         name: main
         needs: detect
         if: ${{ needs.detect.outputs.should_skip == 'true' }}
-        uses: ./.github/workflows/call-pipeline.yml
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@main
         with:
             checkout_ref: ${{ github.event_name == 'pull_request' && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.ref }}
             mode: abort_on_error
