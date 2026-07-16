@@ -1,3 +1,7 @@
+# ─────────────────────────────────────────────────────────────
+# SYNCED from gbtunney/snailicid3-actions/templates/workflows — do not edit
+# here. Change the template and re-run bin/sync-callers.sh.
+# ─────────────────────────────────────────────────────────────
 name: Dispatch Release State
 
 on:
