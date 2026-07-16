@@ -1,9 +1,4 @@
 # Runs only after merge to `main`.
-#
-# This workflow is intentionally a thin wrapper around call-release-plan.yml.
-# Release branching, version PR management, and publish decisions are all
-# centralized in the reusable workflow so manual dispatch and push-triggered
-# releases share one implementation.
 name: Push Release
 
 on:
@@ -29,7 +24,7 @@ env:
 jobs:
     release_plan:
         name: release plan
-        uses: ./.github/workflows/call-release-plan.yml
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-release-plan.yml@main
         secrets: inherit
         with:
             ref: ''
