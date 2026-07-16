@@ -16,6 +16,14 @@ export const importRules = (): Array<Config> =>
         perfectionistConfigs['recommended-natural'],
         {
             name: 'Imports: default rules',
+            settings: {
+                /**
+                 * Unlike eslint-plugin-import, import-x has no default here, so export-map rules (namespace, named,
+                 * default, export) parse the full source of every resolvable dependency and can exhaust the heap on
+                 * large packages such as three.js.
+                 */
+                'import-x/ignore': ['node_modules'],
+            },
             rules: {
                 '@typescript-eslint/consistent-type-imports': [
                     'error',
