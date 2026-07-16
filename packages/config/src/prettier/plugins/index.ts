@@ -12,8 +12,7 @@ import {
 } from './registry.js'
 
 type UnresolvedPrettierPlugin<Type extends PrettierPlugin = PrettierPlugin> =
-    | Type
-    | { default: Type }
+    Type | { default: Type }
 
 const jsDocPlugin: UnresolvedPrettierPlugin = {
     ...unResolvedJsdocPlugin,

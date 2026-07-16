@@ -175,8 +175,7 @@ describe('vite adapter', () => {
             entries: [{ key: '*', runtime: 'browser' }],
         })
         const config = viteAdapter.createConfig?.(plan) as
-            | ReturnType<typeof toViteConfigs>
-            | undefined
+            ReturnType<typeof toViteConfigs> | undefined
 
         expect(viteAdapter.name).toBe('vite')
         expect(config).toHaveLength(1)

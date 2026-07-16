@@ -37,8 +37,7 @@ export type PrettierOverrideFilePattern = LiteralUnion<
 >
 
 export type PrettierOverrideFiles =
-    | Array<PrettierOverrideFilePattern>
-    | PrettierOverrideFilePattern
+    Array<PrettierOverrideFilePattern> | PrettierOverrideFilePattern
 
 export type PrettierOverrides = Array<PrettierOverride>
 
@@ -48,22 +47,19 @@ export type PrettierOverrides = Array<PrettierOverride>
  * Top-level Prettier options are flat. Override `options` are nested under each override item.
  */
 export type ReservedPrettierOptionKey =
-    | 'exclude'
-    | 'excludeFiles'
-    | 'files'
-    | 'options'
-    | 'overrides'
-    | 'plugins'
+    'exclude' | 'excludeFiles' | 'files' | 'options' | 'overrides' | 'plugins'
 
 /** Removes loose index signatures so editor hints show known option keys instead of accepting every random string key. */
 export type StripIndexSignature<Type> = {
-    [Key in keyof Type as string extends Key
-        ? never
-        : number extends Key
-          ? never
-          : symbol extends Key
+    [
+        Key in keyof Type as string extends Key
             ? never
-            : Key]: Type[Key]
+            : number extends Key
+              ? never
+              : symbol extends Key
+                ? never
+                : Key
+    ]: Type[Key]
 }
 
 type RawPrettierOverride = StripIndexSignature<

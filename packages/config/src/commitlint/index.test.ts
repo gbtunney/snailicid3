@@ -73,8 +73,7 @@ describe('Commitlint config merge behavior', () => {
     test('appendTypes appends to commitTypes for the type-enum rule', () => {
         const config = Commitlint.config({ appendTypes: ['custom-type'], cwd })
         const typeEnumRule = config.rules?.['type-enum'] as
-            | [number, string, Array<string>]
-            | undefined
+            [number, string, Array<string>] | undefined
         expect(typeEnumRule?.[2]).toContain('custom-type')
         expect(typeEnumRule?.[2]).toEqual(
             expect.arrayContaining([...Commitlint.commitTypes]),
@@ -87,8 +86,7 @@ describe('Commitlint config merge behavior', () => {
             scopeOptions: { mergeScopes: ['extra-scope'] },
         })
         const scopeEnumRule = config.rules?.['scope-enum'] as
-            | [number, string, Array<string>]
-            | undefined
+            [number, string, Array<string>] | undefined
         expect(scopeEnumRule?.[2]).toContain('extra-scope')
     })
 })
