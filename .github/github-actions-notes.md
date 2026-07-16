@@ -142,8 +142,8 @@ Do not make report or autofix jobs required.
 ### Notes on the extracted actions repository
 
 - Composite actions inside the reusable workflows are referenced fully qualified
-  (`gbtunney/snailicid3-actions/.github/actions/<name>@main`) — local `./` paths resolve against
-  the caller's checkout and break cross-repo consumers.
+  (`gbtunney/snailicid3-actions/.github/actions/<name>@main`) — local `./` paths resolve against the
+  caller's checkout and break cross-repo consumers.
 - Version-PR titles reuse the scope-commit-derived release message; the changeset slug appears only
   in the `release/<slug>` branch name.
 - The actions repository self-tests on every PR via its fixture workspace (`test-actions.yml`).
