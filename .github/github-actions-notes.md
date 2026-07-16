@@ -134,10 +134,16 @@ Do not make report or autofix jobs required.
    `primary_changeset_slug`).
 4. Keep `call-pipeline.yml` generic, with optional `disable_nx_cloud` input override and fallback to
    `vars.DISABLE_NX_CLOUD`.
-5. Keep local actions/workflows in this repository for now; extraction into a dedicated actions
-   repository is intentionally deferred.
+5. Shared `call-*` workflows, composite actions, and scripts live in
+   [gbtunney/snailicid3-actions](https://github.com/gbtunney/snailicid3-actions) and are referenced
+   `@main`. This repository keeps only the thin caller workflows (`dispatch-*`, `pr-checks`,
+   `push-*`).
 
-### Deferred work
+### Notes on the extracted actions repository
 
-- Externalize shared actions/workflows into a dedicated repository later, after current release-flow
-  stabilization.
+- Composite actions inside the reusable workflows are referenced fully qualified
+  (`gbtunney/snailicid3-actions/.github/actions/<name>@main`) — local `./` paths resolve against
+  the caller's checkout and break cross-repo consumers.
+- Version-PR titles reuse the scope-commit-derived release message; the changeset slug appears only
+  in the `release/<slug>` branch name.
+- The actions repository self-tests on every PR via its fixture workspace (`test-actions.yml`).
