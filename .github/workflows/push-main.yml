@@ -1,3 +1,7 @@
+# ─────────────────────────────────────────────────────────────
+# SYNCED from gbtunney/snailicid3-actions/templates/workflows — do not edit
+# here. Change the template and re-run bin/sync-callers.sh.
+# ─────────────────────────────────────────────────────────────
 # Runs on every push to `main`. This answers: "is main busted after merge?"
 name: Push Main
 on:
@@ -19,7 +23,9 @@ jobs:
     required:
         name: required
         uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@main
+        secrets: inherit
         with:
+            run_chromatic: false
             mode: abort_on_error
             check_mode: check
             require_lockfile: true
