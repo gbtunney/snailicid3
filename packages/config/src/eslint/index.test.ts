@@ -38,4 +38,14 @@ describe('EsLint config merge behavior', () => {
         })
         expect(config.at(-1)?.name).toBe('Custom override')
     })
+
+    test('base import rules ignore node_modules for import-x', () => {
+        const config = EsLint.config({ cwd })
+        const importsEntry = config.find(
+            (entry) => entry.name === 'Imports: default rules',
+        )
+        expect(importsEntry?.settings?.['import-x/ignore']).toEqual([
+            'node_modules',
+        ])
+    })
 })

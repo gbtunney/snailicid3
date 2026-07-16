@@ -59,6 +59,12 @@ export const importRules = (): Array<Config> =>
                 ],
                 'unused-imports/no-unused-imports': 'error',
             },
+            settings: {
+                /* Import-x otherwise tries to parse node_modules sources for export maps and can crash;
+                 * its resolver (eslint-import-resolver-node, an optional peer) ships as a real dependency
+                 * of this package. */
+                'import-x/ignore': ['node_modules'],
+            },
         },
         {
             files: [
