@@ -10,8 +10,6 @@
         "\n========== DEVELOPMENT >> ==========": "",
         "dev": "vite",
         "dev:vite": "vite",
-        "\n========== BUILD >> ==========": "",
-        "build:vite": "vite build",
         "\n========== TEST >> ==========": "",
         "test:watch": "vitest watch"
     },
@@ -23,10 +21,10 @@
     "devDependencies": {
         "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
-        "@types/node": "^26.0.0",
+        "@types/node": "^26.1.1",
         "@types/react": "^19.2.17",
         "@types/react-dom": "^19.2.3",
-        "typescript": "^6.0.2",
+        "typescript": "^6.0.3",
         "vitest": "^4.1.9"
     },
     "buildConfig": {
@@ -45,10 +43,10 @@
     },
     "nx": {
         "targets": {
-            "dev": {},
+            "bk:dev": {},
             "dev:ts": {},
             "dev:rollup": {},
-            "dev:vite": {},
+            "bk:dev:vite": {},
             "build:ts": {},
             "check:ts": {},
             "build:rollup": {},

@@ -144,7 +144,7 @@
         "eslint-plugin-react-hooks": "7.1.1",
         "eslint-plugin-react-refresh": "^0.5.3",
         "eslint-plugin-storybook": "^10.4.5",
-        "eslint-plugin-unicorn": "^68.0.0",
+        "eslint-plugin-unicorn": "^72.0.0",
         "eslint-plugin-unused-imports": "^4.4.1",
         "globals": "^17.6.0",
         "json-schema": "^0.4.0",
@@ -152,11 +152,11 @@
         "jsonc-parser": "^3.3.1",
         "lint-staged": "^17.0.7",
         "markdownlint": "^0.41.0",
-        "markdownlint-cli2": "^0.22.1",
-        "micromatch": "^4.0.10",
+        "markdownlint-cli2": "^0.23.1",
+        "micromatch": "^4.0.8",
         "prettier": "^3.8.4",
         "prettier-plugin-jsdoc": "^1.8.1",
-        "prettier-plugin-sh": "^0.18.1",
+        "prettier-plugin-sh": "^0.19.0",
         "remark-toc": "^9.0.0",
         "ts-deepmerge": "^8.0.0",
         "type-fest": "^5.7.0",
@@ -173,8 +173,8 @@
     },
     "devDependencies": {
         "@microsoft/api-extractor": "^7.58.8",
-        "@types/node": "26.0.0",
-        "typescript": "^6.0.3",
+        "@types/node": "26.1.1",
+        "typescript": "6.0.3",
         "vitest": "^4.1.9"
     }
 }
