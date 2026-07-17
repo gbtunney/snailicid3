@@ -1,5 +1,15 @@
 # @snailicid3/config
 
+## 0.1.4
+
+### Patch Changes
+
+- 8107df8: - Fix eslint-plugin-import-x crash: ship `eslint-import-resolver-node` (import-x's
+  optional peer) as a real dependency and set `import-x/ignore: ['node_modules']` in the base import
+  rules, so consumers no longer need the settings override or a manual resolver install.
+  - Add a reusable `tsconfig.react` preset to `@snailicid3/config` for React packages with sensible
+    JSX, DOM, and declaration emit defaults.
+
 ## 0.1.3
 
 ### Patch Changes
