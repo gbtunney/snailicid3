@@ -1,0 +1,11 @@
+{
+    "extends": "./tsconfig.library.json",
+    "compilerOptions": {
+        "jsxFactory": null,
+        "jsxFragmentFactory": null,
+        "jsx": "react-jsx",
+        "lib": ["ES2022", "DOM", "DOM.Iterable"],
+        "allowImportingTsExtensions": true,
+        "emitDeclarationOnly": true
+    }
+}
