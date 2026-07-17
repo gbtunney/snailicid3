@@ -148,13 +148,13 @@ dist
 *.d.cts.map
 *.map
 
-# Un-ignore the @snailicid3/types source package
-!packages/types/
 # Un-ignore src/types/ subdirectories (source code, not declarations)
-!packages/*/src/types/
+!./src/types/
 
 #Husky
 .husky/_
+
+docs
 
 # Scratch Files
 scratch
