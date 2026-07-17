@@ -4,7 +4,7 @@ default: check type: choice options: - fix - check - skip run_install: < this sh
 ??> description: Run install diagnostics required: true default: true type: boolean
 require_lockfile: description: Treat frozen lockfile install as required required: true default:
 false type: boolean require_clean_repo: description: Fail if repository becomes dirty  
- required: true default: false type: boolean run_build: description: Run pnpm build required: true
+required: true default: false type: boolean run_build: description: Run pnpm build required: true
 default: false type: boolean run_test: description: Run pnpm test required: true default: false
 type: boolean run_docs_build: description: Run docs build routine required: true default: false
 type: boolean nx_cache_reset: description: Run nx cache reset before routines required: true

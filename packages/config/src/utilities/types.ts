@@ -4,17 +4,19 @@ export type OmitKeyDelimiterAliases<
     AliasDelimiter extends string,
     CanonicalDelimiter extends string,
 > = Simplify<{
-    [Key in keyof TObject as Key extends string
-        ? Key extends `${string}${AliasDelimiter}${string}`
-            ? ReplaceAll<
-                  Key,
-                  AliasDelimiter,
-                  CanonicalDelimiter
-              > extends keyof TObject
-                ? never
+    [
+        Key in keyof TObject as Key extends string
+            ? Key extends `${string}${AliasDelimiter}${string}`
+                ? ReplaceAll<
+                      Key,
+                      AliasDelimiter,
+                      CanonicalDelimiter
+                  > extends keyof TObject
+                    ? never
+                    : Key
                 : Key
             : Key
-        : Key]: TObject[Key]
+    ]: TObject[Key]
 }>
 export type PlainObject = {
     [x: string]: unknown

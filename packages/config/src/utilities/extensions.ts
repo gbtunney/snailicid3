@@ -6,9 +6,7 @@ import type {
 } from '../shared.js'
 
 export type AllowedExtensions =
-    | JSLikeFileExtensions
-    | MarkdownFileExtensions
-    | PrettierFileExtensions
+    JSLikeFileExtensions | MarkdownFileExtensions | PrettierFileExtensions
 
 const ensureTrailingDot = (value: string): string => {
     if (value.length === 0 || value.endsWith('.')) {

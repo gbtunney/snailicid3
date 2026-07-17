@@ -36,8 +36,7 @@ export const fsPathExists = (
     allowedType:
         | 'any'
         | (
-              | Array<Exclude<FileType, undefined>>
-              | Exclude<FileType, undefined>
+              Array<Exclude<FileType, undefined>> | Exclude<FileType, undefined>
           ) = 'any',
 ): ReturnType<typeof fsPathTypeExists> => {
     if (!exists) {
@@ -51,8 +50,7 @@ export const fsPathTypeExists = (
         | 'any'
         | 'none'
         | (
-              | Array<Exclude<FileType, undefined>>
-              | Exclude<FileType, undefined>
+              Array<Exclude<FileType, undefined>> | Exclude<FileType, undefined>
           ) = 'any',
     root?: string,
 ): z.ZodType<string, string> => {

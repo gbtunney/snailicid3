@@ -50,11 +50,13 @@ export const ensureArray = <Type extends z.ZodType>(
 ): z.ZodType<Array<z.output<Type>>, Array<z.input<Type>> | z.input<Type>> => {
     const union = z
         .union([z.array(schema), schema])
-        .transform<
-            Array<z.output<Type>>
-        >((value: Array<z.output<Type>> | z.output<Type>): Array<z.output<Type>> => {
-            return R_ensureArray(value) ///Array.isArray(value) ? value : [value]
-        })
+        .transform<Array<z.output<Type>>>(
+            (
+                value: Array<z.output<Type>> | z.output<Type>,
+            ): Array<z.output<Type>> => {
+                return R_ensureArray(value) ///Array.isArray(value) ? value : [value]
+            },
+        )
     return union
 }
 

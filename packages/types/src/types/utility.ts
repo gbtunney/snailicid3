@@ -110,9 +110,9 @@ export type PlainObject = {
 
 /** Prefix all string keys of an object type. */
 export type PrefixProperties<Type extends object, Prefix extends string> = {
-    [Key in keyof Type as `${Prefix}${Key extends string
-        ? Key
-        : never}`]: Type[Key]
+    [
+        Key in keyof Type as `${Prefix}${Key extends string ? Key : never}`
+    ]: Type[Key]
 }
 
 /** Rest parameters (everything after the first) of a function. */
@@ -121,9 +121,9 @@ export type RestArgsOf<FunctionType extends (...args: Array<any>) => any> =
 
 /** Suffix all string keys of an object type. */
 export type SuffixProperties<Type extends object, Suffix extends string> = {
-    [Key in keyof Type as `${Key extends string
-        ? Key
-        : never}${Suffix}`]: Type[Key]
+    [
+        Key in keyof Type as `${Key extends string ? Key : never}${Suffix}`
+    ]: Type[Key]
 }
 
 /** All but the first element type of a tuple. */

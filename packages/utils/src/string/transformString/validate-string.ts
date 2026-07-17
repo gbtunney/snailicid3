@@ -13,12 +13,7 @@ export type IValidateObj = {
 export type ValidateFunc = (value: string, pattern: string) => boolean
 
 export type ValidateOperation =
-    | 'contains'
-    | 'endsWith'
-    | 'eq'
-    | 'includes'
-    | 'startsWith'
-    | ValidateFunc
+    'contains' | 'endsWith' | 'eq' | 'includes' | 'startsWith' | ValidateFunc
 
 /**
  * Checks if the string starts with the given pattern

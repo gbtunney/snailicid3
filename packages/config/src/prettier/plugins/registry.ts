@@ -3,8 +3,7 @@ import type { Plugin as PrettierPlugin } from 'prettier'
 declare const RESOLVED_PRETTIER_PLUGIN: unique symbol
 
 export type PrettierPluginPackageName =
-    | `@prettier/${string}`
-    | `prettier-plugin-${string}`
+    `@prettier/${string}` | `prettier-plugin-${string}`
 
 export type PrettierPluginRegistry = Partial<
     Record<PrettierPluginPackageName, PrettierPluginRegistryEntry>
@@ -21,8 +20,7 @@ type StrictPrettierPluginRegistry<
 > = Record<Exclude<keyof TPlugins, PrettierPluginPackageName>, never> & TPlugins
 
 type UnresolvedPrettierPlugin<TPlugin extends PrettierPlugin = PrettierPlugin> =
-    | TPlugin
-    | { default: TPlugin }
+    TPlugin | { default: TPlugin }
 
 export const resolvePrettierPlugin = (
     moduleValue: UnresolvedPrettierPlugin,

@@ -1,6 +1,5 @@
 export type TypedocPluginPackageName =
-    | `typedoc-${string}-theme`
-    | `typedoc-plugin-${string}`
+    `typedoc-${string}-theme` | `typedoc-plugin-${string}`
 
 export type TypedocPluginRegistry = Partial<
     Record<TypedocPluginPackageName, TypedocPluginRegistryEntry>
