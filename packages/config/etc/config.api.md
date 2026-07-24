@@ -79,11 +79,11 @@ export type BaseConfigFunctionOptions = {
 };
 
 // @public (undocumented)
-export const COMMIT_TYPES: ("style" | "feat" | "fix" | "docs" | "refactor" | "perf" | "test" | "build" | "ci" | "chore" | "revert" | "changeset" | "release")[];
+export const COMMIT_TYPES: ("style" | "build" | "fix" | "test" | "feat" | "docs" | "refactor" | "perf" | "ci" | "chore" | "revert" | "changeset" | "release")[];
 
 // @public (undocumented)
 export const Commitlint: {
-    commitTypes: ("style" | "feat" | "fix" | "docs" | "refactor" | "perf" | "test" | "build" | "ci" | "chore" | "revert" | "changeset" | "release")[];
+    commitTypes: ("style" | "build" | "fix" | "test" | "feat" | "docs" | "refactor" | "perf" | "ci" | "chore" | "revert" | "changeset" | "release")[];
     config: ConfigBuilder<UserConfig, {
     cwd: ConfigCwd;
     overrides?: CommitlintConfig | undefined;
@@ -170,7 +170,7 @@ export const defineNxConfig: <const TConfig extends NxPreset>(config: TConfig) =
 // @public
 export const defineNxTargets: <const TTargets extends NxTargets>(targets: TTargets) => TTargets;
 
-// @public (undocumented)
+// @public
 export const doesFileExist: (filePath: string) => boolean;
 
 // @public (undocumented)
@@ -209,16 +209,16 @@ export const filterCommitTypes: (exclude: ReadonlyArray<ConventionalCommitType>)
 // @public
 export const getDirname: (root: PathRoot, _filePath?: string) => string;
 
-// @public (undocumented)
+// @public
 export const getExt: (fullPath: string) => string;
 
-// @public (undocumented)
+// @public
 export const getFilename: (fullPath: string) => string;
 
-// @public (undocumented)
+// @public
 export const getFilePath: (rootormeta: PathRoot | undefined, filePath: string) => string;
 
-// @public (undocumented)
+// @public
 export const getFullPath: (value: string, root: PathRoot | undefined) => string;
 
 // @public
@@ -227,7 +227,7 @@ export type IdentityDefineConfig<TConfig> = <const TValue extends TConfig>(confi
 // Warning: (ae-forgotten-export) The symbol "PlainObject_2" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "PlainRecord" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export const isPlainObject: <Type extends PlainObject_2 = PlainRecord>(value: unknown) => value is Type;
 
 export { IterableElement }
@@ -360,7 +360,7 @@ export type MaterialThemeOptions = {
 
 export { merge }
 
-// @public (undocumented)
+// @public
 export const normalizePath: (value: string) => string;
 
 // @public (undocumented)
@@ -530,7 +530,7 @@ export type RemarkPluginOptions = {
 // @public
 export type ReservedPrettierOptionKey = 'exclude' | 'excludeFiles' | 'files' | 'options' | 'overrides' | 'plugins';
 
-// @public (undocumented)
+// @public
 export const resolveCwd: (cwd: PathRoot | undefined) => string;
 
 // @public (undocumented)
@@ -1000,7 +1000,7 @@ export { WritableDeep }
 // Warnings were encountered during analysis:
 //
 // src/api-extractor/index.ts:22:1 - (ae-forgotten-export) The symbol "getBaseConfig" needs to be exported by the entry point index.d.ts
-// src/utilities/json.ts:404:5 - (ae-forgotten-export) The symbol "JSONSerializeOptions" needs to be exported by the entry point index.d.ts
+// src/utilities/json.ts:420:5 - (ae-forgotten-export) The symbol "JSONSerializeOptions" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

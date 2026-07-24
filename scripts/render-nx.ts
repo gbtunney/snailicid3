@@ -10,6 +10,7 @@
  */
 
 import { json, Nx } from '@snailicid3/config'
+import { format, resolveConfig } from 'prettier'
 import { readFileSync, writeFileSync } from 'node:fs'
 
 const NX_JSON_PATH = 'nx.json'
@@ -27,7 +28,16 @@ const nxJson = {
     'nxCloudId': '69ef26f2453df8557a7462c5',
 }
 
-const rendered = `${json.prettyPrint(nxJson)}\n`
+/**
+ * Format with the repo's own prettier config so the generated file matches what `pnpm fix` / `root:lint` would produce.
+ * Without this, prettier and this renderer disagree on array wrapping and each would report the other's output as wrong
+ * — running `pnpm fix` would then break `nx:render:check`.
+ */
+const prettierOptions = await resolveConfig(NX_JSON_PATH)
+const rendered = await format(json.serialize(nxJson), {
+    ...prettierOptions,
+    parser: 'json',
+})
 
 /** TODO: can any of the configs file write functions be used here? also this NEEDS SNAIL-SH!!!!!!!!!!! */
 if (process.argv.includes('--check')) {
