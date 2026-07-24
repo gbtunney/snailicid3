@@ -32,7 +32,12 @@
             "build:ts": {},
             "check:ts": {},
             "build:tsdown": {},
-            "build": {},
+            "build": {
+                "dependsOn": [
+                    "build:ts",
+                    "build:tsdown"
+                ]
+            },
             "test": {},
             "test:watch": {},
             "lint": {},

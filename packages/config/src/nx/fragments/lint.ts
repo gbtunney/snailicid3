@@ -7,15 +7,15 @@ export default defineNxConfig({
             cache: false,
             command:
                 "pnpm exec prettier --write . '!**/*.api.md' --ignore-unknown && pnpm exec eslint . --fix",
-            dependsOn: ['^build:ts'],
+            dependsOn: ['^build'],
             options: { cwd: '{projectRoot}' },
         },
         lint: {
             cache: true,
             command:
                 "pnpm exec prettier --check . '!**/*.api.md' --ignore-unknown && eslint .",
-            // (fix) dropped `build`; upstream types for type-aware rules
-            dependsOn: ['^build:ts'],
+            // (fix) dropped local `build`; upstream types for type-aware rules
+            dependsOn: ['^build'],
             options: { cwd: '{projectRoot}' },
         },
     },

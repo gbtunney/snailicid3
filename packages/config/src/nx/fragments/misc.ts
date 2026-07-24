@@ -5,15 +5,15 @@ export default defineNxConfig({
         'api:check': {
             cache: true,
             command: 'api-extractor run',
-            dependsOn: ['build:ts', '^build:ts'],
+            dependsOn: ['build:ts', '^build'],
             inputs: ['production', '^production'],
             options: { cwd: '{projectRoot}' },
         },
         'api:report': {
             cache: true,
             command: 'api-extractor run --local',
-            // (fix) build:ts (types) rather than agnostic `build`
-            dependsOn: ['build:ts', '^build:ts'],
+            // Local build:ts for own types; upstream full build for their .d.cts
+            dependsOn: ['build:ts', '^build'],
             inputs: ['production', '^production'],
             options: { cwd: '{projectRoot}' },
             outputs: ['{projectRoot}/etc/*.api.md'],
@@ -46,7 +46,7 @@ export default defineNxConfig({
         'docs:build:ts': {
             cache: true,
             command: 'tsc --build tsconfig.docs.json',
-            dependsOn: ['build:ts', '^build:ts', '^docs:build:ts'],
+            dependsOn: ['build:ts', '^build', '^docs:build:ts'],
             inputs: ['production', '^production'],
             options: { cwd: '{projectRoot}' },
         },

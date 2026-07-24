@@ -2,64 +2,18 @@
     "$schema": "./node_modules/nx/schemas/project-schema.json",
     "projectType": "application",
     "targets": {
-        "build": {
-            "dependsOn": ["build:ts"]
-        },
-
-        "build:ts": {
-            "cache": true,
+        "root:build": {},
+        "root:build:ts": {
             "dependsOn": [
                 { "projects": ["@snailicid3/config"], "target": "build" },
                 { "projects": ["@snailicid3/build-config"], "target": "build" }
-            ],
-            "inputs": [
-                "{projectRoot}/*.ts",
-                "{projectRoot}/*.mts",
-                "{projectRoot}/*.cts",
-                "{projectRoot}/tsconfig.json"
-            ],
-            "outputs": [
-                "{projectRoot}/*.js",
-                "{projectRoot}/*.mjs",
-                "{projectRoot}/*.cjs"
-            ],
-            "command": "tsc --build tsconfig.json",
-            "options": { "cwd": "{projectRoot}" }
+            ]
         },
-        "clean:ts": {
-            "cache": false,
-            "command": "tsc --build --clean tsconfig.json",
-            "options": { "cwd": "{projectRoot}" }
-        },
-        "clean": {
-            "cache": false,
-            "dependsOn": ["clean:ts"]
-        },
-        "lint": {
-            "cache": true,
-            "dependsOn": ["build:ts"],
-            "command": "prettier --check '**/*' '!{packages,apps}/**'  '!**/*.api.md'  --ignore-unknown --no-error-on-unmatched-pattern && eslint --config eslint.config.ts ./*.ts ./*.mts ./*.cts --no-error-on-unmatched-pattern",
-            "options": { "cwd": "{projectRoot}" }
-        },
-        "fix": {
-            "cache": true,
-            "dependsOn": ["build:ts"],
-            "command": "pnpm exec prettier --write '**/*' '!{packages,apps}/**' '!**/*.api.md' --ignore-unknown  --no-error-on-unmatched-pattern && pnpm exec eslint --config eslint.config.ts ./*.ts ./*.mts ./*.cts --fix --no-error-on-unmatched-pattern",
-            "options": { "cwd": "{projectRoot}" }
-        },
-        "lint:md": {
-            "cache": true,
-            "dependsOn": ["build:ts"],
-            "inputs": ["{projectRoot}/**/*.md"],
-            "command": "pnpm exec markdownlint-cli2",
-            "options": { "cwd": "{workspaceRoot}" }
-        },
-        "fix:md": {
-            "cache": true,
-            "dependsOn": ["build:ts"],
-            "inputs": ["{projectRoot}/**/*.md"],
-            "command": "pnpm exec prettier './**/*.md' '!**/*.api.md' --write &&  pnpm exec markdownlint-cli2 --fix",
-            "options": { "cwd": "{projectRoot}" }
-        }
+        "root:clean": {},
+        "root:clean:ts": {},
+        "root:lint": {},
+        "root:fix": {},
+        "lint:md": {},
+        "fix:md": {}
     }
 }

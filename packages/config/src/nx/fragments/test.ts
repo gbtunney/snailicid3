@@ -5,8 +5,8 @@ export default defineNxConfig({
         'check:ts': {
             cache: true,
             command: 'tsc --build tsconfig.json',
-            // (fix) was [build:ts, ^build]
-            dependsOn: ['^build:ts'],
+            // (fix) dropped local build:ts; upstream types still required
+            dependsOn: ['^build'],
             // (fix) ^default -> ^production
             inputs: ['default', '^production'],
             options: { cwd: '{projectRoot}' },

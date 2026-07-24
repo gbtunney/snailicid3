@@ -31,8 +31,10 @@ describe('Nx preset merge behavior (spec invariants)', () => {
         )
     })
 
-    test('build:ts only depends on upstream types and caches types only', () => {
-        expect(targetDefaults?.['build:ts']?.dependsOn).toEqual(['^build:ts'])
+    test('build:ts waits on the full upstream build and caches types only', () => {
+        // Bundled packages emit their .d.cts from the bundler, so upstream
+        // declarations only exist after `build`, not after `build:ts`.
+        expect(targetDefaults?.['build:ts']?.dependsOn).toEqual(['^build'])
         expect(targetDefaults?.['build:ts']?.outputs).toEqual([
             '{projectRoot}/types',
         ])

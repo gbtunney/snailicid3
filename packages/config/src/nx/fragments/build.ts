@@ -19,8 +19,9 @@ export default defineNxConfig({
         'build:ts': {
             cache: true,
             command: 'tsc --build tsconfig.build.json',
-            // (fix) was ^build; only upstream types needed
-            dependsOn: ['^build:ts'],
+            // Upstream `build` (not `build:ts`): bundled packages emit their .d.cts
+            // from the bundler, so upstream types only exist after a full build.
+            dependsOn: ['^build'],
             inputs: ['production', '^production'],
             options: { cwd: '{projectRoot}' },
             // (fix) tsc outDir is ./types; dist owned by bundler
@@ -29,8 +30,7 @@ export default defineNxConfig({
         'build:tsdown': {
             cache: true,
             command: 'tsdown',
-            // (fix) was ^build
-            dependsOn: ['^build:ts'],
+            dependsOn: ['^build'],
             inputs: ['production', '^production'],
             options: { cwd: '{projectRoot}' },
             outputs: ['{projectRoot}/dist'],
@@ -38,8 +38,7 @@ export default defineNxConfig({
         'build:vite': {
             cache: true,
             command: 'vite build',
-            // (fix) ^build -> ^build:ts
-            dependsOn: ['build:ts', '^build:ts'],
+            dependsOn: ['build:ts', '^build'],
             inputs: ['production', '^production'],
             options: { cwd: '{projectRoot}' },
             outputs: ['{projectRoot}/dist'],
