@@ -22,6 +22,7 @@ import type { KeyAsString } from 'type-fest';
 import { LiteralUnion } from 'type-fest';
 import type { Merge } from 'type-fest';
 import { merge } from 'ts-deepmerge';
+import type { NxJsonConfiguration } from 'nx/src/config/nx-json.js';
 import { OmitDeep } from 'type-fest';
 import { OmitIndexSignature } from 'type-fest';
 import type { Options } from 'prettier-plugin-jsdoc';
@@ -31,6 +32,7 @@ import { PluginOptions } from 'typedoc-plugin-markdown';
 import { Simplify } from 'type-fest';
 import { Spread } from 'type-fest';
 import type { Tagged } from 'type-fest';
+import type { TargetConfiguration } from 'nx/src/config/workspace-json-project-json.js';
 import { Config as TsConfig } from 'typescript-eslint';
 import { TypeDocOptions } from 'typedoc';
 import { UnknownArray } from 'type-fest';
@@ -161,6 +163,12 @@ export const defineConfig: <const TConfig>(config: TConfig) => TConfig;
 
 // @public (undocumented)
 export const defineConfigBuilder: <TConfig, const TInput extends BaseConfigFunctionOptions>(builder: ConfigBuilderImplementation<TConfig, TInput>) => ConfigBuilder<TConfig, TInput>;
+
+// @public
+export const defineNxConfig: <const TConfig extends NxPreset>(config: TConfig) => TConfig;
+
+// @public
+export const defineNxTargets: <const TTargets extends NxTargets>(targets: TTargets) => TTargets;
 
 // @public (undocumented)
 export const doesFileExist: (filePath: string) => boolean;
@@ -355,6 +363,31 @@ export { merge }
 // @public (undocumented)
 export const normalizePath: (value: string) => string;
 
+// @public (undocumented)
+export const Nx: {
+    config: ConfigBuilder<NxPreset, BaseConfigFunctionOptions>;
+    defineConfig: <const TConfig extends NxPreset>(config: TConfig) => TConfig;
+    presets: {
+        base: () => NxPreset;
+        merge: (...presets: Array<Partial<NxPreset>>) => NxPreset;
+    };
+};
+
+// @public
+export type NxPreset = {
+    namedInputs?: NxJsonConfiguration['namedInputs'];
+    targetDefaults?: NxTargets;
+};
+
+// @public
+export type NxPresetFunctionOptions = BaseConfigFunctionOptions;
+
+// @public
+export type NxTargets = Record<string, TargetConfiguration>;
+
+// @public (undocumented)
+export type NxTool = ConfigTool<NxPreset, NxPresetFunctionOptions, typeof Nx.defineConfig, Omit<typeof Nx, 'config' | 'defineConfig'>>;
+
 export { OmitDeep }
 
 export { OmitIndexSignature }
@@ -379,6 +412,9 @@ export type PlainObject = {
     [x: string]: unknown;
     [y: number]: never;
 };
+
+// @public
+export const prefixTargets: (prefix: string, targets: NxTargets) => NxTargets;
 
 // @public (undocumented)
 export const Prettier: {
@@ -512,6 +548,9 @@ export type ResolvedConfigFunctionOptions<TInput extends BaseConfigFunctionOptio
 export type ResolvedPrettierPlugin = Plugin & {
     readonly [RESOLVED_PRETTIER_PLUGIN]: true;
 };
+
+// @public
+export const selectTargets: (targets: NxTargets, keys: Array<string>) => NxTargets;
 
 export { Simplify }
 

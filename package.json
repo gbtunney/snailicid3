@@ -48,6 +48,8 @@
         "nx:graph": "pnpm nx graph",
         "nx:affected": "nx affected --target=build",
         "nx:reset": "pnpm exec nx reset",
+        "nx:render": "pnpm exec tsx scripts/render-nx.ts",
+        "nx:render:check": "pnpm exec tsx scripts/render-nx.ts --check",
         "\n========== CHECK >> ==========": "",
         "check": "pnpm exec nx run-many -t lint",
         "check:md": "pnpm exec nx run $npm_package_name:lint:md",
