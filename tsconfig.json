@@ -13,6 +13,6 @@
         ".lintstagedrc.mts"
     ],
 
-    "include": ["./*.ts", "./*.mts", "./*.cts"],
+    "include": ["./*.ts", "./scripts/*.ts", "./*.mts", "./*.cts"],
     "exclude": ["node_modules", "scratch"]
 }

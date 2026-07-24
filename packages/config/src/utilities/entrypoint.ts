@@ -25,10 +25,6 @@ import { fileURLToPath } from 'node:url'
  * ```
  */
 
-export type EntrypointOptions = {
-    log?: boolean
-}
-
 export type ImportMetaWithUrl = Pick<ImportMeta, 'url'>
 
 type AsyncFunction<Args extends ReadonlyArray<unknown>, Result> = (
@@ -39,6 +35,7 @@ type SyncFunction<Args extends ReadonlyArray<unknown>, Result> = (
     ...args: Args
 ) => Result
 
+/** Resolve a path through symlinks when it exists and lexically otherwise. */
 const toRealPath = (filePath: string): string => {
     try {
         return realpathSync(path.resolve(filePath))
@@ -47,9 +44,10 @@ const toRealPath = (filePath: string): string => {
     }
 }
 
+/** Check whether a caller module resolves to the executable path in process.argv. */
 export function isCallerEntrypoint(
     callerMeta: ImportMetaWithUrl,
-    options: EntrypointOptions = {},
+    options: { log?: boolean } = {},
 ): boolean {
     const { log: logEnabled = false } = options
 
@@ -78,6 +76,7 @@ export function isCallerEntrypoint(
     return isEntrypoint
 }
 
+/** Run a synchronous CLI entrypoint with consistent error reporting and exit behavior. */
 export function runCliIfEntrypoint<Args extends ReadonlyArray<unknown>>(
     callerMeta: ImportMetaWithUrl,
     mainFn: SyncFunction<Args, void>,
@@ -101,6 +100,7 @@ export function runCliIfEntrypoint<Args extends ReadonlyArray<unknown>>(
     )
 }
 
+/** Run an asynchronous CLI entrypoint with consistent error reporting and exit behavior. */
 export async function runCliIfEntrypointAsync<
     Args extends ReadonlyArray<unknown>,
 >(
@@ -126,6 +126,7 @@ export async function runCliIfEntrypointAsync<
     )
 }
 
+/** Invoke a synchronous function only when its module is the process entrypoint. */
 export function runIfEntrypoint<Args extends ReadonlyArray<unknown>, Result>(
     callerMeta: ImportMetaWithUrl,
     mainFn: SyncFunction<Args, Result>,
@@ -136,6 +137,7 @@ export function runIfEntrypoint<Args extends ReadonlyArray<unknown>, Result>(
     return mainFn(...args)
 }
 
+/** Invoke an asynchronous function only when its module is the process entrypoint. */
 export async function runIfEntrypointAsync<
     Args extends ReadonlyArray<unknown>,
     Result,

@@ -1,5 +1,6 @@
 export type ScopeFormat = 'csv' | 'list'
 
+/** Format scope names for a comma-delimited CLI value or a newline-delimited list. */
 export function formatScopes(
     scopes: ReadonlyArray<string>,
     format: ScopeFormat,
@@ -13,11 +14,12 @@ export function formatScopes(
     return values.join(',')
 }
 
+/** Check whether a package name identifies an unscoped or scoped workspace root. */
 export function isRootPackageName(packageName: string): boolean {
     return packageName === 'root' || /^@[^/]+\/root$/.test(packageName)
 }
 
-/** Todo: should this be called normalize scope name and trim all the strings. ?? */
+/** Remove an npm organization prefix from a scope unless the prefix should be retained. */
 export function shortenScopeName(
     scopeName: string,
     keepPrefix = false,
