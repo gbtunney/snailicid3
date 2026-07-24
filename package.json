@@ -43,7 +43,7 @@
         "reset": "pnpm run uninstall && pnpm start",
         "prepare": "husky",
         "lint:staged": "pnpm exec lint-staged --relative",
-        "postinstall": "pnpm exec ./bin/esbuild-patch.sh && pnpm build:self && echo '\n=== >> Success:: Install complete.'",
+        "postinstall": "pnpm exec gbt-patch && pnpm build:self && echo '\n=== >> Success:: Install complete.'",
         "\n========== NX >> ==========": "",
         "nx:graph": "pnpm nx graph",
         "nx:affected": "nx affected --target=build",

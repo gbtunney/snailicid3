@@ -30,6 +30,7 @@ export type PlainObject = object
 
 type PlainRecord = Record<string, unknown>
 
+/** Check whether a value is an object with Object.prototype or a null prototype. */
 export const isPlainObject = <Type extends PlainObject = PlainRecord>(
     value: unknown,
 ): value is Type => {
@@ -41,6 +42,7 @@ export const isPlainObject = <Type extends PlainObject = PlainRecord>(
     return prototype === Object.prototype || prototype === null
 }
 
+/** Deeply merge plain objects, either appending or replacing array properties. */
 export const deepMerge = (
     array_mode: MergeArrayModes = 'append',
     ...value: Array<PlainObject>
@@ -60,6 +62,7 @@ type TraceLogger = {
 
 const DEFAULT_JSON_INDENT_SPACES = 4
 
+/** Create an error logger labeled for a JSON utility operation. */
 const getTraceLogger = (scope: string): TraceLogger => {
     const label = `[@snailicid3/config:${scope}]`
 
@@ -71,6 +74,7 @@ const getTraceLogger = (scope: string): TraceLogger => {
     }
 }
 
+/** Convert an unknown thrown value into a readable message. */
 const formatUnknownError = (error: unknown): string =>
     error instanceof Error ? error.message : String(error)
 
@@ -89,12 +93,14 @@ export namespace Json {
     export type Value = JsonValue
 }
 
+/** Check whether a value is a finite JSON primitive. */
 export const isJsonPrimitive = (value: unknown): value is JsonPrimitive =>
     value === null ||
     typeof value === 'string' ||
     typeof value === 'boolean' ||
     (typeof value === 'number' && Number.isFinite(value))
 
+/** Recursively validate JSON values while detecting circular objects and arrays. */
 const isJsonValueInternal = (
     value: unknown,
     seen: WeakSet<object>,
@@ -126,19 +132,24 @@ const isJsonValueInternal = (
     return false
 }
 
+/** Check whether an unknown value is valid, non-circular JSON data. */
 export const isJsonValue = (value: unknown): value is JsonValue =>
     isJsonValueInternal(value, new WeakSet<object>())
 
+/** Check whether a value is a valid JSON array. */
 export const isJsonArray = (value: unknown): value is JsonArray =>
     Array.isArray(value) && isJsonValue(value)
 
+/** Check whether a value is a valid JSON object rather than an array. */
 export const isJsonObject = (value: unknown): value is JsonObject =>
     isPlainObject(value) && isJsonValue(value)
 
+/** Brand output that has already passed through JSON.stringify. */
 const toJSONString = <Type extends JsonValue>(
     value: string,
 ): JSONStringOf<Type> => value as JSONStringOf<Type>
 
+/** Parse a string only when its result is valid JSON data. */
 const parseJSONString = (data: string): JsonValue | undefined => {
     try {
         const parsed: unknown = JSON.parse(data)
@@ -148,6 +159,7 @@ const parseJSONString = (data: string): JsonValue | undefined => {
     }
 }
 
+/** Normalize unknown in-memory data through a JSON serialization boundary. */
 const deserializeJSON = (data: unknown): JsonValue | undefined => {
     if (typeof data === 'string') {
         return parseJSONString(data) ?? data
@@ -166,11 +178,13 @@ const deserializeJSON = (data: unknown): JsonValue | undefined => {
     }
 }
 
+/** Normalize unknown data only when its result is a JSON object. */
 const deserializeJSONObject = (data: unknown): JsonObject | undefined => {
     const parsed = deserializeJSON(data)
     return isJsonObject(parsed) ? parsed : undefined
 }
 
+/** Resolve JSON indentation to zero for compact output or the configured width for pretty output. */
 const getJSONIndentSpaces = ({
     indentSpaces = DEFAULT_JSON_INDENT_SPACES,
     pretty = false,
@@ -185,6 +199,7 @@ const stringifyJSONValue = <Type extends JsonValue>(
             'null',
     )
 
+/** Serialize unknown input to branded JSON, falling back to its string representation. */
 function serializeJSON(
     value: unknown,
     options: JSONSerializeOptions = {},
@@ -196,15 +211,13 @@ function serializeJSON(
         : stringifyJSONValue(parsed, options)
 }
 
+/** Serialize unknown input as indented branded JSON. */
 const prettyPrintJSON = (
     value: unknown,
     indentSpaces = DEFAULT_JSON_INDENT_SPACES,
 ): JSONStringOf => serializeJSON(value, { indentSpaces, pretty: true })
 
-/**
- * TODO can we make a isjsonifiable function for stirng,null,etc and these should use the serialize function ? also
- * paths should reso
- */
+/** Read and validate any JSON value from a file. */
 const importJSON = async (filename: string): Promise<JsonValue | undefined> => {
     const absolutePath = path.resolve(filename)
     const logger = getTraceLogger('importJSON')
@@ -229,6 +242,7 @@ const importJSON = async (filename: string): Promise<JsonValue | undefined> => {
     }
 }
 
+/** Read a JSON file only when it contains an object. */
 const importJSONObject = async (
     filename: string,
 ): Promise<JsonObject | undefined> => {
@@ -249,11 +263,13 @@ export type JSONExportEntry<Type = unknown> = {
 
 type JSONExportStatus = Record<string, string | true>
 
+/** Add a JSON extension when a requested output filename omits one. */
 const getJSONExportFileName = (filename: string): string =>
     filename.endsWith('.json') || filename.endsWith('json')
         ? filename
         : `${filename}.json`
 
+/** Write configured JSON values to disk and report whether every write succeeded. */
 const exportJSONFile = (
     config: JSONExportConfig,
     outdir?: string,

@@ -12,6 +12,7 @@ export type WorkspacePackage = {
 export const validPackageName =
     /^(@[\da-z~-][\d._a-z~-]*\/)?[\da-z~-][\d._a-z~-]*$/
 
+/** Find the closest package manifest at or above an input path without leaving the repository. */
 export function findNearestPackageJson(
     repoRoot: string,
     inputPath: string,
@@ -36,12 +37,14 @@ export function findNearestPackageJson(
     return null
 }
 
+/** Ask pnpm for the workspace node_modules directory, returning undefined when pnpm fails. */
 export function getWorkspaceNodeModulesRoot(): string | undefined {
     const output = runCommand('pnpm', ['root', '-w'])
 
     return output.success ? output.stdout.trim() : undefined
 }
 
+/** Read pnpm's recursive workspace package listing and optionally filter it. */
 export function getWorkspacePackagesList(
     filter?: (pkg: WorkspacePackage) => boolean,
 ): Array<WorkspacePackage> {
@@ -57,12 +60,14 @@ export function getWorkspacePackagesList(
     return filter ? packages.filter(filter) : packages
 }
 
+/** Index workspace packages by package name in a Map. */
 export function getWorkspacePackagesLookup(
     ...args: Parameters<typeof getWorkspacePackagesList>
 ): Map<string, WorkspacePackage> {
     return new Map(Object.entries(getWorkspacePackagesObject(...args)))
 }
 
+/** Index workspace packages by name, optionally mapping each package to another value. */
 export function getWorkspacePackagesObject(
     filter?: (pkg: WorkspacePackage) => boolean,
 ): Record<string, WorkspacePackage>
@@ -90,6 +95,7 @@ export function getWorkspacePackagesObject<Result>(
     )
 }
 
+/** Read a trimmed package name from a manifest, returning null for missing or invalid data. */
 export function readPackageName(packageJsonPath: string): null | string {
     if (!existsSync(packageJsonPath)) return null
 
@@ -105,6 +111,7 @@ export function readPackageName(packageJsonPath: string): null | string {
     }
 }
 
+/** Convert either supported workspace package collection into an array. */
 export function workspacePackagesToArray(
     input:
         | ReadonlyMap<string, WorkspacePackage>
@@ -117,6 +124,7 @@ export function workspacePackagesToArray(
     return Object.values(input)
 }
 
+/** Check whether unknown pnpm output has the fields required for a workspace package. */
 function isWorkspacePackage(value: unknown): value is WorkspacePackage {
     if (!value || typeof value !== 'object') return false
 
@@ -131,6 +139,7 @@ function isWorkspacePackage(value: unknown): value is WorkspacePackage {
     )
 }
 
+/** Safely determine whether a path exists and is a directory. */
 function pathExistsAsDirectory(filePath: string): boolean {
     try {
         return existsSync(filePath) && statSync(filePath).isDirectory()

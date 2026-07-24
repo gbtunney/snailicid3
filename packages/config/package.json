@@ -31,7 +31,8 @@
         "gbt-changeset": "./bin/changeset-branch.sh",
         "gbt-exec": "./bin/make-executable.sh",
         "gbt-setup": "./bin/completions/install-pnpm.sh",
-        "gbt-uninstall": "./bin/uninstall.sh"
+        "gbt-uninstall": "./bin/uninstall.sh",
+        "gbt-patch": "./bin/esbuild-patch/patch.sh"
     },
     "buildConfig": {
         "runtime": "node",
