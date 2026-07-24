@@ -11,7 +11,7 @@ PNPM_STORE_DIR="$CONSUMER_DIR/node_modules/.pnpm"
 
 header "🐌 ESBUILD CATALINA PATCH" "80%" "reverse-magenta" "~"
 
- discover_esbuild_target() {
+discover_esbuild_target() {
     local candidate
 
     for candidate in "$PNPM_STORE_DIR"/@esbuild+darwin-x64@*/node_modules/@esbuild/darwin-x64/bin/esbuild; do
