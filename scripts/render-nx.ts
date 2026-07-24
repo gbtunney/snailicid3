@@ -1,4 +1,3 @@
-import { json, Nx } from '@snailicid3/config'
 /**
  * Renders snailicid3's own self-contained `nx.json` from the shared Nx preset.
  *
@@ -9,6 +8,8 @@ import { json, Nx } from '@snailicid3/config'
  *
  * Usage: tsx scripts/render-nx.ts # write nx.json tsx scripts/render-nx.ts --check # fail if committed nx.json is stale
  */
+
+import { json, Nx } from '@snailicid3/config'
 import { readFileSync, writeFileSync } from 'node:fs'
 
 const NX_JSON_PATH = 'nx.json'
