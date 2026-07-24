@@ -9,7 +9,9 @@ PATCH_BINARY="$SCRIPT_DIR/esbuild-darwin-x64"
 CONSUMER_DIR="${GBT_PATCH_CWD:-$PWD}"
 PNPM_STORE_DIR="$CONSUMER_DIR/node_modules/.pnpm"
 
-header "🐌 ESBUILD CATALINA PATCH" "80%" "reverse-magenta" "~"
+rule " " 50% 1 #todo this is temporary dont know why spacer wouldnt work
+kabob "🐌 ESBUILD CATALINA PATCH" "100%" "cyan"
+rule " " 50% 1
 
 discover_esbuild_target() {
     local candidate
@@ -48,7 +50,10 @@ install -m 755 "$PATCH_BINARY" "$ESBUILD_TARGET"
 
 if cmp -s "$PATCH_BINARY" "$ESBUILD_TARGET"; then
     status_pair "Catalina patch" "✓ installed" "success"
+    rule " " 50% 1 #todo this is temporary dont know why spacer wouldnt work
+
 else
     status_pair "Catalina patch" "✗ verification failed" "critical"
+    rule " " 50% 1 #todo
     exit 1
 fi
