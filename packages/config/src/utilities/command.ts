@@ -13,6 +13,7 @@ type RunCommandOptions = {
     stdio?: 'inherit' | 'pipe'
 }
 
+/** Run a command synchronously without a shell and return normalized output and status. */
 export function runCommand(
     command: string,
     args: ReadonlyArray<string> = [],
@@ -38,6 +39,7 @@ export function runCommand(
     }
 }
 
+/** Run a command synchronously and return trimmed stdout, throwing on failure. */
 export function runCommandOrThrow(
     command: string,
     args: ReadonlyArray<string> = [],

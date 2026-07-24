@@ -3,10 +3,6 @@ import { splitNonEmptyLines } from './../utilities/array.js'
 import { runCommand } from './../utilities/command.js'
 import { getWorkspacePackagesList, type WorkspacePackage } from './packages.js'
 
-export type GetRepoRootOptions = {
-    fallbackToCwd?: boolean
-}
-
 export type GitChangedFilesOptions = {
     base?: string
     head?: string
@@ -15,6 +11,7 @@ export type GitChangedFilesOptions = {
     includeUntracked?: boolean
 }
 
+/** Return workspace packages containing files selected by the requested Git changes. */
 export function getChangedWorkspacePackagesFromGit(
     options: GitChangedFilesOptions = {},
 ): Array<WorkspacePackage> {
@@ -49,6 +46,7 @@ export function getChangedWorkspacePackagesFromGit(
     return [...hits.values()]
 }
 
+/** List repository-relative files changed in the requested Git worktree areas or revision range. */
 export function getGitChangedFiles(
     options: GitChangedFilesOptions = {},
 ): Array<string> {
@@ -91,7 +89,8 @@ export function getGitChangedFiles(
     return [...files]
 }
 
-export function getRepoRoot(options: GetRepoRootOptions = {}): string {
+/** Resolve the current Git root, optionally falling back to the process working directory. */
+export function getRepoRoot(options: { fallbackToCwd?: boolean } = {}): string {
     const { fallbackToCwd = false } = options
 
     const output = runCommand('git', ['rev-parse', '--show-toplevel'])
@@ -115,6 +114,7 @@ export function getRepoRoot(options: GetRepoRootOptions = {}): string {
     )
 }
 
+/** Test whether a path is the supplied directory or one of its descendants. */
 function isInsideDir(absChildPath: string, absParentDir: string): boolean {
     const relativePath = path.relative(absParentDir, absChildPath)
 

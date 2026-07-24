@@ -8,22 +8,28 @@
  *
  * Usage: tsx scripts/render-nx.ts # write nx.json tsx scripts/render-nx.ts --check # fail if committed nx.json is stale
  */
+
+import { json, Nx } from '@snailicid3/config'
 import { readFileSync, writeFileSync } from 'node:fs'
-import { Nx, json } from '@snailicid3/config'
 
 const NX_JSON_PATH = 'nx.json'
 
+/**
+ * TODO: can we prompt to update maybe after postinstal if stale? it needs to reinstall after updated tho, can that be
+ * suppressed somehow i guess it doesnt need to be ?
+ */
 const nxJson = {
     '$schema': './node_modules/nx/schemas/nx-schema.json',
     '//': 'GENERATED — edit packages/config/src/nx/fragments/*, not this file. Run: pnpm nx:render',
     ...Nx.config({ cwd: process.cwd() }),
-    // snailicid3-only top-level keys (external repos supply their own).
-    'nxCloudId': '69ef26f2453df8557a7462c5',
     'analytics': true,
+    // Snailicid3-only top-level keys (external repos supply their own).
+    'nxCloudId': '69ef26f2453df8557a7462c5',
 }
 
 const rendered = `${json.prettyPrint(nxJson)}\n`
 
+/** TODO: can any of the configs file write functions be used here? also this NEEDS SNAIL-SH!!!!!!!!!!! */
 if (process.argv.includes('--check')) {
     const current = readFileSync(NX_JSON_PATH, 'utf8')
     if (current !== rendered) {

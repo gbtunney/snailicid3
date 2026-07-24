@@ -160,25 +160,30 @@ type NonOmittedJsonObjectValue<Type> = Exclude<Type, JsonOmittedObjectValue>
 
 const DEFAULT_INDENT_SPACES = 4
 
+/** Apply the generic serialized-JSON brand after JSON.stringify validates the string. */
 const brandSerializedJsonString = <Type extends JsonValue>(
     value: string,
 ): SerializedJsonString<Type> => value as SerializedJsonString<Type>
 
+/** Apply the compact serialized-JSON brand to validated output. */
 const brandCompactSerializedJsonString = <Type extends JsonValue>(
     value: string,
 ): CompactSerializedJsonString<Type> =>
     value as CompactSerializedJsonString<Type>
 
+/** Apply the pretty serialized-JSON brand to validated output. */
 const brandPrettySerializedJsonString = <Type extends JsonValue>(
     value: string,
 ): PrettySerializedJsonString<Type> => value as PrettySerializedJsonString<Type>
 
+/** Translate stringify options into JSON.stringify's indentation argument. */
 const getJsonIndent = ({
     indentSpaces = DEFAULT_INDENT_SPACES,
     pretty = false,
 }: JsonStringifyOptions = {}): number | undefined =>
     pretty ? indentSpaces : undefined
 
+/** Check for an object whose prototype is Object.prototype or null. */
 const isPlainObject = (value: unknown): value is Record<string, unknown> => {
     if (value === null || typeof value !== 'object') {
         return false
@@ -189,6 +194,7 @@ const isPlainObject = (value: unknown): value is Record<string, unknown> => {
     return prototype === Object.prototype || prototype === null
 }
 
+/** Recursively validate JSON data while rejecting circular references. */
 const isJsonValueInternal = (
     value: unknown,
     seen: WeakSet<object>,
@@ -270,12 +276,15 @@ export const parseAs = <Type extends JsonValue>(
     return guard(parsed) ? parsed : undefined
 }
 
+/** Parse JSON text only when it contains an array. */
 export const parseArray = (text: string): JsonArray | undefined =>
     parseAs(text, JsonGuards.array)
 
+/** Parse JSON text only when it contains an object. */
 export const parseObject = (text: string): JsonObject | undefined =>
     parseAs(text, JsonGuards.object)
 
+/** Parse JSON text only when it contains a primitive. */
 export const parsePrimitive = (text: string): JsonPrimitive | undefined =>
     parseAs(text, JsonGuards.primitive)
 
@@ -349,16 +358,19 @@ export const normalizeAs = <Type extends JsonValue>(
     return guard(normalized) ? normalized : undefined
 }
 
+/** Normalize unknown input only when the result is a JSON array. */
 export const normalizeArray = (
     input: unknown,
     options: JsonNormalizeOptions = {},
 ): JsonArray | undefined => normalizeAs(input, JsonGuards.array, options)
 
+/** Normalize unknown input only when the result is a JSON object. */
 export const normalizeObject = (
     input: unknown,
     options: JsonNormalizeOptions = {},
 ): JsonObject | undefined => normalizeAs(input, JsonGuards.object, options)
 
+/** Normalize unknown input only when the result is a JSON primitive. */
 export const normalizePrimitive = (
     input: unknown,
     options: JsonNormalizeOptions = {},
@@ -375,6 +387,7 @@ export const serialize = (
     return normalized === undefined ? undefined : stringify(normalized, options)
 }
 
+/** Normalize unknown input and serialize it without indentation. */
 export const serializeCompact = (
     input: unknown,
     options: JsonNormalizeOptions = {},
@@ -384,6 +397,7 @@ export const serializeCompact = (
     return normalized === undefined ? undefined : compact(normalized)
 }
 
+/** Normalize unknown input and serialize it with pretty indentation. */
 export const serializePretty = (
     input: unknown,
     options: JsonNormalizeOptions & { indentSpaces?: number } = {},
