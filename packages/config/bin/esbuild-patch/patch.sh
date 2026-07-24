@@ -9,7 +9,9 @@ PATCH_BINARY="$SCRIPT_DIR/esbuild-darwin-x64"
 CONSUMER_DIR="${GBT_PATCH_CWD:-$PWD}"
 PNPM_STORE_DIR="$CONSUMER_DIR/node_modules/.pnpm"
 
-discover_esbuild_target() {
+header "🐌 ESBUILD CATALINA PATCH" "80%" "reverse-magenta" "~"
+
+ discover_esbuild_target() {
     local candidate
 
     for candidate in "$PNPM_STORE_DIR"/@esbuild+darwin-x64@*/node_modules/@esbuild/darwin-x64/bin/esbuild; do
@@ -23,31 +25,30 @@ discover_esbuild_target() {
 }
 
 if [[ "$(uname -s)" != "Darwin" || "$(uname -m)" != "x86_64" ]]; then
-    info "Catalina esbuild patch is only needed on Darwin x64; nothing to do."
+    status_pair "platform" "not Darwin x64; skipped" "info"
     exit 0
 fi
 
 [[ -f "$PATCH_BINARY" ]] || {
-    critical "Catalina-compatible esbuild binary is missing."
+    status_pair "patch binary" "missing" "critical"
     kv_pair "expected" "$PATCH_BINARY"
     exit 1
 }
 
 ESBUILD_TARGET="$(discover_esbuild_target || true)"
 [[ -n "$ESBUILD_TARGET" ]] || {
-    warn "No installed @esbuild/darwin-x64 executable was found; nothing to patch."
+    status_pair "installed esbuild" "not found; skipped" "warning"
     kv_pair "searched" "$PNPM_STORE_DIR"
     exit 0
 }
 
-header "🐌 ESBUILD CATALINA PATCH" "80%" "reverse-magenta" "~"
 kv_pair "source" "$PATCH_BINARY"
 kv_pair "target" "$ESBUILD_TARGET"
 install -m 755 "$PATCH_BINARY" "$ESBUILD_TARGET"
 
 if cmp -s "$PATCH_BINARY" "$ESBUILD_TARGET"; then
-    success "Catalina-compatible esbuild installed successfully."
+    status_pair "Catalina patch" "✓ installed" "success"
 else
-    critical "The copied esbuild executable does not match the patch binary."
+    status_pair "Catalina patch" "✗ verification failed" "critical"
     exit 1
 fi
