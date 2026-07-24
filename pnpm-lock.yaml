@@ -377,6 +377,9 @@ importers:
             jsonc-parser:
                 specifier: ^3.3.1
                 version: 3.3.1
+            knip:
+                specifier: ^6.18.0
+                version: 6.27.0(@types/node@26.1.1)(typescript@6.0.3)
             lint-staged:
                 specifier: ^17.0.7
                 version: 17.0.8

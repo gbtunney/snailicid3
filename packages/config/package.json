@@ -32,7 +32,9 @@
         "gbt-exec": "./bin/make-executable.sh",
         "gbt-setup": "./bin/completions/install-pnpm.sh",
         "gbt-uninstall": "./bin/uninstall.sh",
-        "gbt-patch": "./bin/esbuild-patch/patch.sh"
+        "gbt-patch": "./bin/esbuild-patch/patch.sh",
+        "inspect-dependencies": "./bin/inspect-dependencies.sh",
+        "inspect-deps": "./bin/inspect-dependencies.sh"
     },
     "buildConfig": {
         "runtime": "node",
@@ -154,6 +156,7 @@
         "json-schema": "^0.4.0",
         "json-schema-to-typescript": "^15.0.4",
         "jsonc-parser": "^3.3.1",
+        "knip": "^6.18.0",
         "lint-staged": "^17.0.7",
         "markdownlint": "^0.41.0",
         "markdownlint-cli2": "^0.23.1",
