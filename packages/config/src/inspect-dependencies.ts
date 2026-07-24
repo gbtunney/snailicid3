@@ -29,19 +29,17 @@ export function main(args: Array<string> = process.argv.slice(2)): void {
     let failed = false
 
     for (const pkg of packages) {
-        printHeader(pkg.name)
+        printHeader(pkg.name, repoRoot)
         const result = runCommand(
             'knip',
             ['--directory', path.resolve(repoRoot, pkg.path), ...forwardedArgs],
-            { cwd: repoRoot },
+            { cwd: repoRoot, stdio: 'inherit' },
         )
 
-        process.stdout.write(result.stdout)
-        process.stderr.write(result.stderr)
         failed ||= !result.success
     }
 
-    process.stdout.write('\n\n')
+    process.stdout.write('\n')
     if (failed) process.exitCode = 1
 }
 
@@ -115,15 +113,17 @@ function isIgnored(
     )
 }
 
-/** Print a full-width snail-sh-style heading before a package report. */
-function printHeader(packageName: string): void {
-    const label = `🐌 ${packageName}`
-    const width = Math.max(process.stdout.columns ?? 80, label.length + 4)
-    const side = '-'.repeat(
-        Math.max(1, Math.floor((width - label.length - 2) / 2)),
+/** Print a full-width snail-sh heading before a package report. */
+function printHeader(packageName: string, repoRoot: string): void {
+    const result = runCommand(
+        'snail-sh',
+        ['header', `🐌 ${packageName}`, '100%', 'magenta', '-'],
+        { cwd: repoRoot, stdio: 'inherit' },
     )
 
-    process.stdout.write(`\n${side} ${label} ${side}\n\n`)
+    if (!result.success) {
+        process.stdout.write(`\n🐌 ${packageName}\n\n`)
+    }
 }
 
 runCliIfEntrypoint(import.meta, main, process.argv.slice(2))
