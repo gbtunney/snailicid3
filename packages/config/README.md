@@ -50,6 +50,8 @@ conventions, TypeScript base configs, and utility shell scripts.
   and material-theme docs_
 - [**typescript**](https://www.typescriptlang.org/) • _Base tsconfig presets: `base`, `library`,
   `typecheck`, `docs`_
+- [**nx**](https://nx.dev/) • _Shared pipeline preset: `namedInputs` + `targetDefaults` consumed via
+  `nx.json > extends`_
 
 ## Installation
 
@@ -188,6 +190,55 @@ const prettierrc = Prettier.configFile({ cwd: import.meta })
 import { Markdownlint } from '@snailicid3/config'
 
 export default Markdownlint.defineConfig(Markdownlint.config({ cwd: import.meta }))
+```
+
+### Nx
+
+The shared pipeline ships as a generated `dist/nx-preset.json`, consumed through Nx's `extends`:
+
+```jsonc
+/* @file nx.json */
+{
+  "extends": "@snailicid3/config/nx-preset.json",
+  "nxCloudId": "…",
+  "analytics": true,
+}
+```
+
+Nx merges a preset with a **top-level shallow spread**, so a consumer `nx.json` must not redefine
+`namedInputs` or `targetDefaults` — either would replace the preset's wholesale. Per-package
+variance belongs in `package.json > nx.targets`.
+
+`build` is deliberately bundler-agnostic (`dependsOn: ["build:ts"]`), so each package opts into its
+own bundler, otherwise it compiles types but never emits `dist`:
+
+```jsonc
+/* @file packages/<name>/package.json */
+"nx": { "targets": { "build": { "dependsOn": ["build:ts", "build:tsdown"] } } }
+```
+
+Workspace-root targets are namespaced `root:*` to avoid colliding with package targets. Enable them
+from the root `package.json` — no `project.json` required:
+
+```jsonc
+/* @file package.json */
+"nx": {
+    "targets": {
+        "root:build": {}, "root:build:ts": {},
+        "root:clean": {}, "root:clean:ts": {},
+        "root:lint": {}, "root:fix": {},
+        "lint:md": {}, "fix:md": {}
+    }
+}
+```
+
+The preset is also available programmatically, which is how this repo renders its own committed
+`nx.json` rather than extending an artifact produced by building itself:
+
+```ts
+import { Nx } from '@snailicid3/config'
+
+const preset = Nx.config({ cwd: process.cwd() }) // { namedInputs, targetDefaults }
 ```
 
 ### Lint-Staged
