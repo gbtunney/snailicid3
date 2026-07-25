@@ -1,14 +1,20 @@
 {
-    "extends": "./tsconfig.json",
+    "extends": "@snailicid3/config/tsconfig.library",
     "compilerOptions": {
-        "noEmit": true
+        "jsxFactory": null,
+        "jsxFragmentFactory": null,
+        "jsx": "react-jsx",
+        "lib": ["ES2022", "DOM", "DOM.Iterable"],
+        "types": ["node", "vite/client"],
+        "allowImportingTsExtensions": true,
+        "emitDeclarationOnly": true
+        // "noEmit": true
     },
-    "exclude": ["./dist", "./node_modules", "./*.bk.ts"],
+    "exclude": ["./dist", "./node_modules", "./**/*.bk.ts"],
     "include": [
-        "./*.ts",
-        "./*.mts",
-        "./*.cts",
         "./src/**/*.ts",
+        "./src/**/*.mts",
+        "./src/**/*.cts",
         "./src/**/*.tsx"
     ]
 }

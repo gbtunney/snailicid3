@@ -33,7 +33,7 @@
         "registry:start": "pnpm exec verdaccio",
         "\n========== INSPECT >> ==========": "",
         "inspect:nx": "pnpm nx:graph",
-        "inspect:dependencies": "pnpm exec inspect-deps",
+        "inspect:dependencies": "pnpm run build:self  && pnpm exec inspect-deps",
         "inspect:lint": "pnpm exec eslint-config-inspector --no-open",
         "inspect:vitest": "pnpm exec vitest --ui",
         "inspect:deps": "pnpm inspect:dependencies",

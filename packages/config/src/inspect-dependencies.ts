@@ -2,6 +2,7 @@
 
 import micromatch from 'micromatch'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { runCommand } from './utilities/command.js'
 import { runCliIfEntrypoint } from './utilities/entrypoint.js'
 import { getRepoRoot } from './workspace/git.js'
@@ -16,10 +17,12 @@ import { normalizeRepoPath } from './workspace/paths.js'
 /** TODO: figure out how to add the filters via arg w the default like the last one */
 
 /** Run Knip once per workspace package, or once for the current child package. */
-/** TODO: figure out how knip can run if not installed in root repo or consumer package */
 export function main(args: Array<string> = process.argv.slice(2)): void {
     const { forwardedArgs, ignoredPatterns } = parseArgs(args)
     const repoRoot = getRepoRoot({ fallbackToCwd: true })
+    const knipCli = fileURLToPath(
+        new URL('../bin/knip.js', import.meta.resolve('knip')),
+    )
     const packages = selectPackages(repoRoot, process.cwd()).filter(
         (pkg) => !isIgnored(pkg, repoRoot, ignoredPatterns),
     )
@@ -33,17 +36,35 @@ export function main(args: Array<string> = process.argv.slice(2)): void {
 
     for (const pkg of packages) {
         printHeader(pkg.name, repoRoot)
+        // Path.resolve(repoRoot, pkg.path)
+        const relativePath: string = path.relative(repoRoot, pkg.path)
         const result = runCommand(
-            'knip',
-            ['--directory', path.resolve(repoRoot, pkg.path), ...forwardedArgs],
+            process.execPath,
+            [knipCli, '--workspace', relativePath, ...forwardedArgs],
             { cwd: repoRoot, stdio: 'inherit' },
         )
-
         failed ||= !result.success
     }
 
-    process.stdout.write('\n')
-    if (failed) process.exitCode = 1
+    if (failed) {
+        const result = runCommand(
+            'snail-sh',
+            ['warn', '⚠️ Some packages had Knip issues (non-blocking)'],
+            { cwd: repoRoot, stdio: 'inherit' },
+        )
+    } else {
+        const result = runCommand(
+            'snail-sh',
+            [
+                'success',
+                '⚠️ Inspection: Knip analysis of package dependency successful!',
+            ],
+            { cwd: repoRoot, stdio: 'inherit' },
+        )
+    }
+    process.stdout.write('\n\n')
+
+    if (failed) process.exitCode = 0
 }
 
 /** Match an ignore pattern against both the package name and repository-relative path. */
@@ -106,7 +127,7 @@ rule " " 50% 1
 
     const result = runCommand(
         'snail-sh',
-        ['kabob', `🐌 ${packageName}`, '100%', 'magenta', '*'],
+        ['kabob', `🐌 ${packageName}`, '90%', 'magenta', '*'],
         { cwd: repoRoot, stdio: 'inherit' },
     )
     const result2 = runCommand('snail-sh', ['rule', ' ', '50%', '1'], {

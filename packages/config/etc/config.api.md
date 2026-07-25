@@ -316,8 +316,8 @@ export const Markdownlint: {
     config: ConfigBuilder<MarkdownlintConfiguration, {
     cwd: ConfigCwd;
     includes?: Array<string> | undefined;
-    rules?: MarkdownlintRuleConfiguration | undefined;
     ignores?: Array<string> | undefined;
+    rules?: MarkdownlintRuleConfiguration | undefined;
     useBaseConfig?: boolean | undefined;
     }>;
     defineConfig: <const TConfig extends MarkdownlintConfig>(config: TConfig) => TConfig;
