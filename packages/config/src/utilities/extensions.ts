@@ -8,6 +8,7 @@ import type {
 export type AllowedExtensions =
     JSLikeFileExtensions | MarkdownFileExtensions | PrettierFileExtensions
 
+/** Append a dot to a non-empty prefix unless it already has one. */
 const ensureTrailingDot = (value: string): string => {
     if (value.length === 0 || value.endsWith('.')) {
         return value

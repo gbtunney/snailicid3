@@ -1,6 +1,6 @@
 {
     "name": "@snailicid3/config",
-    "version": "0.1.4",
+    "version": "0.2.0",
     "private": false,
     "description": "Shared linting, formatting, and TypeScript config utilities for the snailicid3 monorepo",
     "keywords": [
@@ -31,7 +31,10 @@
         "gbt-changeset": "./bin/changeset-branch.sh",
         "gbt-exec": "./bin/make-executable.sh",
         "gbt-setup": "./bin/completions/install-pnpm.sh",
-        "gbt-uninstall": "./bin/uninstall.sh"
+        "gbt-uninstall": "./bin/uninstall.sh",
+        "gbt-patch": "./bin/esbuild-patch/patch.sh",
+        "inspect-dependencies": "./bin/inspect-dependencies.sh",
+        "inspect-deps": "./bin/inspect-dependencies.sh"
     },
     "buildConfig": {
         "runtime": "node",
@@ -42,7 +45,14 @@
         "targets": {
             "dev": {},
             "dev:ts": {},
-            "build:ts": {},
+            "build:ts": {
+                "outputs": [
+                    "{projectRoot}/dist/**/*.js",
+                    "{projectRoot}/dist/**/*.js.map",
+                    "{projectRoot}/dist/*/**/*.json",
+                    "{projectRoot}/types"
+                ]
+            },
             "check:ts": {},
             "build:exporter": {
                 "cache": true,
@@ -53,12 +63,14 @@
                     "{projectRoot}/src/build-exporter.ts",
                     "{projectRoot}/src/api-extractor/**/*",
                     "{projectRoot}/src/prettier/**/*",
-                    "{projectRoot}/src/markdownlint/**/*"
+                    "{projectRoot}/src/markdownlint/**/*",
+                    "{projectRoot}/src/nx/**/*"
                 ],
                 "outputs": [
                     "{projectRoot}/dist/.prettierrc.json",
                     "{projectRoot}/dist/.markdownlint.json",
-                    "{projectRoot}/dist/.api-extractor-base.json"
+                    "{projectRoot}/dist/.api-extractor-base.json",
+                    "{projectRoot}/dist/nx-preset.json"
                 ]
             },
             "api:report": {},
@@ -91,6 +103,7 @@
         },
         "./prettier": "./dist/.prettierrc.json",
         "./markdownlint": "./dist/.markdownlint.json",
+        "./nx-preset.json": "./dist/nx-preset.json",
         "./tsconfig/base": "./typescript-config/tsconfig.base.json",
         "./api-extractor/base.json": "./dist/.api-extractor-base.json",
         "./tsconfig/library": "./typescript-config/tsconfig.library.json",
@@ -150,6 +163,7 @@
         "json-schema": "^0.4.0",
         "json-schema-to-typescript": "^15.0.4",
         "jsonc-parser": "^3.3.1",
+        "knip": "^6.18.0",
         "lint-staged": "^17.0.7",
         "markdownlint": "^0.41.0",
         "markdownlint-cli2": "^0.23.1",
@@ -174,6 +188,7 @@
     "devDependencies": {
         "@microsoft/api-extractor": "^7.58.8",
         "@types/node": "26.1.1",
+        "nx": "^23.0.0",
         "typescript": "6.0.3",
         "vitest": "^4.1.9"
     }

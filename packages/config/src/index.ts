@@ -76,6 +76,27 @@ export { Markdownlint } from './markdownlint/index.js'
 export type * from './markdownlint/index.js'
 
 /**
+ * @namespace Nx Pipeline Preset
+ * @see [Nx - Smart Monorepos](https://nx.dev/)
+ *
+ * Shared `namedInputs` + `targetDefaults` shipped as a single `dist/nx-preset.json` artifact consumed via
+ * `nx.json > extends`.
+ */
+export { Nx } from './nx/index.js'
+export type {
+    NxPreset,
+    NxPresetFunctionOptions,
+    NxTargets,
+    NxTool,
+} from './nx/index.js'
+export {
+    defineNxConfig,
+    defineNxTargets,
+    prefixTargets,
+    selectTargets,
+} from './nx/index.js'
+
+/**
  * @namespace Prettier Configuration
  * @see [Prettier - Opinionated Code Formatter](https://prettier.io/)
  */

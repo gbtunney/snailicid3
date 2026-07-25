@@ -1,5 +1,6 @@
 import { ApiExtractor } from './api-extractor/index.js'
 import { Markdownlint } from './markdownlint/index.js'
+import { Nx } from './nx/index.js'
 import { json } from './utilities/json.js'
 import { Prettier } from './index.js'
 /* TODO: outputs a json dump of markdownlint and prettier. this is TEMPORARY till the configs are correct. ideally this should be gotten rid of */
@@ -12,8 +13,14 @@ const MARKDOWN_LINT_CONFIG = json.object(Markdownlint.config({ cwd })) ?? {}
 
 const PRETTIER_CONFIG = json.object(Prettier.configFile({ cwd })) ?? {}
 
+const NX_PRESET_CONFIG = json.object(Nx.config({ cwd })) ?? {}
+
 /** As const */
 const JSON_EXPORTS = [
+    {
+        data: NX_PRESET_CONFIG,
+        filename: 'dist/nx-preset.json',
+    },
     {
         data: PRETTIER_CONFIG,
         filename: 'dist/.prettierrc.json',

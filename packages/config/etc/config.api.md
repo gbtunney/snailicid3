@@ -22,6 +22,7 @@ import type { KeyAsString } from 'type-fest';
 import { LiteralUnion } from 'type-fest';
 import type { Merge } from 'type-fest';
 import { merge } from 'ts-deepmerge';
+import type { NxJsonConfiguration } from 'nx/src/config/nx-json.js';
 import { OmitDeep } from 'type-fest';
 import { OmitIndexSignature } from 'type-fest';
 import type { Options } from 'prettier-plugin-jsdoc';
@@ -31,6 +32,7 @@ import { PluginOptions } from 'typedoc-plugin-markdown';
 import { Simplify } from 'type-fest';
 import { Spread } from 'type-fest';
 import type { Tagged } from 'type-fest';
+import type { TargetConfiguration } from 'nx/src/config/workspace-json-project-json.js';
 import { Config as TsConfig } from 'typescript-eslint';
 import { TypeDocOptions } from 'typedoc';
 import { UnknownArray } from 'type-fest';
@@ -77,11 +79,11 @@ export type BaseConfigFunctionOptions = {
 };
 
 // @public (undocumented)
-export const COMMIT_TYPES: ("style" | "feat" | "fix" | "docs" | "refactor" | "perf" | "test" | "build" | "ci" | "chore" | "revert" | "changeset" | "release")[];
+export const COMMIT_TYPES: ("style" | "build" | "fix" | "test" | "feat" | "docs" | "refactor" | "perf" | "ci" | "chore" | "revert" | "changeset" | "release")[];
 
 // @public (undocumented)
 export const Commitlint: {
-    commitTypes: ("style" | "feat" | "fix" | "docs" | "refactor" | "perf" | "test" | "build" | "ci" | "chore" | "revert" | "changeset" | "release")[];
+    commitTypes: ("style" | "build" | "fix" | "test" | "feat" | "docs" | "refactor" | "perf" | "ci" | "chore" | "revert" | "changeset" | "release")[];
     config: ConfigBuilder<UserConfig, {
     cwd: ConfigCwd;
     overrides?: CommitlintConfig | undefined;
@@ -162,7 +164,13 @@ export const defineConfig: <const TConfig>(config: TConfig) => TConfig;
 // @public (undocumented)
 export const defineConfigBuilder: <TConfig, const TInput extends BaseConfigFunctionOptions>(builder: ConfigBuilderImplementation<TConfig, TInput>) => ConfigBuilder<TConfig, TInput>;
 
-// @public (undocumented)
+// @public
+export const defineNxConfig: <const TConfig extends NxPreset>(config: TConfig) => TConfig;
+
+// @public
+export const defineNxTargets: <const TTargets extends NxTargets>(targets: TTargets) => TTargets;
+
+// @public
 export const doesFileExist: (filePath: string) => boolean;
 
 // @public (undocumented)
@@ -201,16 +209,16 @@ export const filterCommitTypes: (exclude: ReadonlyArray<ConventionalCommitType>)
 // @public
 export const getDirname: (root: PathRoot, _filePath?: string) => string;
 
-// @public (undocumented)
+// @public
 export const getExt: (fullPath: string) => string;
 
-// @public (undocumented)
+// @public
 export const getFilename: (fullPath: string) => string;
 
-// @public (undocumented)
+// @public
 export const getFilePath: (rootormeta: PathRoot | undefined, filePath: string) => string;
 
-// @public (undocumented)
+// @public
 export const getFullPath: (value: string, root: PathRoot | undefined) => string;
 
 // @public
@@ -219,7 +227,7 @@ export type IdentityDefineConfig<TConfig> = <const TValue extends TConfig>(confi
 // Warning: (ae-forgotten-export) The symbol "PlainObject_2" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "PlainRecord" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export const isPlainObject: <Type extends PlainObject_2 = PlainRecord>(value: unknown) => value is Type;
 
 export { IterableElement }
@@ -352,8 +360,33 @@ export type MaterialThemeOptions = {
 
 export { merge }
 
-// @public (undocumented)
+// @public
 export const normalizePath: (value: string) => string;
+
+// @public (undocumented)
+export const Nx: {
+    config: ConfigBuilder<NxPreset, BaseConfigFunctionOptions>;
+    defineConfig: <const TConfig extends NxPreset>(config: TConfig) => TConfig;
+    presets: {
+        base: () => NxPreset;
+        merge: (...presets: Array<Partial<NxPreset>>) => NxPreset;
+    };
+};
+
+// @public
+export type NxPreset = {
+    namedInputs?: NxJsonConfiguration['namedInputs'];
+    targetDefaults?: NxTargets;
+};
+
+// @public
+export type NxPresetFunctionOptions = BaseConfigFunctionOptions;
+
+// @public
+export type NxTargets = Record<string, TargetConfiguration>;
+
+// @public (undocumented)
+export type NxTool = ConfigTool<NxPreset, NxPresetFunctionOptions, typeof Nx.defineConfig, Omit<typeof Nx, 'config' | 'defineConfig'>>;
 
 export { OmitDeep }
 
@@ -379,6 +412,9 @@ export type PlainObject = {
     [x: string]: unknown;
     [y: number]: never;
 };
+
+// @public
+export const prefixTargets: (prefix: string, targets: NxTargets) => NxTargets;
 
 // @public (undocumented)
 export const Prettier: {
@@ -494,7 +530,7 @@ export type RemarkPluginOptions = {
 // @public
 export type ReservedPrettierOptionKey = 'exclude' | 'excludeFiles' | 'files' | 'options' | 'overrides' | 'plugins';
 
-// @public (undocumented)
+// @public
 export const resolveCwd: (cwd: PathRoot | undefined) => string;
 
 // @public (undocumented)
@@ -512,6 +548,9 @@ export type ResolvedConfigFunctionOptions<TInput extends BaseConfigFunctionOptio
 export type ResolvedPrettierPlugin = Plugin & {
     readonly [RESOLVED_PRETTIER_PLUGIN]: true;
 };
+
+// @public
+export const selectTargets: (targets: NxTargets, keys: Array<string>) => NxTargets;
 
 export { Simplify }
 
@@ -961,7 +1000,7 @@ export { WritableDeep }
 // Warnings were encountered during analysis:
 //
 // src/api-extractor/index.ts:22:1 - (ae-forgotten-export) The symbol "getBaseConfig" needs to be exported by the entry point index.d.ts
-// src/utilities/json.ts:404:5 - (ae-forgotten-export) The symbol "JSONSerializeOptions" needs to be exported by the entry point index.d.ts
+// src/utilities/json.ts:420:5 - (ae-forgotten-export) The symbol "JSONSerializeOptions" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

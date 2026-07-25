@@ -18,7 +18,12 @@
         "targets": {
             "dev": {},
             "dev:ts": {},
-            "build:ts": {},
+            "build:ts": {
+                "outputs": [
+                    "{projectRoot}/dist",
+                    "{projectRoot}/types"
+                ]
+            },
             "check:ts": {},
             "build": {
                 "dependsOn": [

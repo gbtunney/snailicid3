@@ -1,6 +1,6 @@
 import path from 'node:path'
 
-/** Todo : this should use a normalize function in utilities ? */
+/** Convert an absolute or explicitly relative path to a clean repository-relative path. */
 export function normalizeRepoPath(repoRoot: string, inputPath: string): string {
     const cleanPath = inputPath.replace(/^\.\//, '')
 
