@@ -47,7 +47,9 @@
             "dev:ts": {},
             "build:ts": {
                 "outputs": [
-                    "{projectRoot}/dist",
+                    "{projectRoot}/dist/**/*.js",
+                    "{projectRoot}/dist/**/*.js.map",
+                    "{projectRoot}/dist/*/**/*.json",
                     "{projectRoot}/types"
                 ]
             },
