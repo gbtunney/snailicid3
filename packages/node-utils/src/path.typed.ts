@@ -33,7 +33,7 @@ const createPathTypeResult = <Type extends FilePathType>(
     return {
         path: value as TypedPath<Type>,
         type,
-    } as Extract<PathTypeResult, { type: Type }>
+    } as unknown as Extract<PathTypeResult, { type: Type }>
 }
 
 /**
@@ -89,7 +89,11 @@ export const getPathOfType = <Type extends FilePathType>(
 ): TypedPath<Type> | undefined => {
     const result = getPathType(value)
 
-    return isPathType(result, requiredType) ? result.path : undefined
+    if (!isPathType(result, requiredType)) {
+        return undefined
+    }
+
+    return result.path as TypedPath<Type>
 }
 
 /** Return a branded path of the requested type or throw a TypeError. */
@@ -105,5 +109,5 @@ export const requirePathOfType = <Type extends FilePathType>(
         )
     }
 
-    return result.path
+    return result.path as TypedPath<Type>
 }
