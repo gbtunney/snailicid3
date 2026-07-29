@@ -86,7 +86,7 @@
         "@snailicid3/utils": "workspace:*",
         "@types/yargs-interactive": "^2.1.6",
         "add": "^2.0.6",
-        "chalk": "^5.6.2",
+        "chalk": "^6.0.0",
         "figlet": "^1.11.0",
         "type-fest": "^5.7.0",
         "yargs": "^18.0.0",
@@ -96,7 +96,7 @@
     "devDependencies": {
         "@microsoft/api-extractor": "^7.58.8",
         "@snailicid3/config": "workspace:*",
-        "@types/node": "^26.1.1",
+        "@types/node": "^26.1.2",
         "@types/yargs": "^17.0.35",
         "tsdown": "^0.22.2",
         "typedoc": "^0.28.19",
