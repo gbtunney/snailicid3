@@ -11,6 +11,12 @@ import {
     getFullPath,
     normalizePath,
 } from './file.path.array.js'
+import {
+    type FilePathType,
+    getPathType,
+    isPathType,
+    type TypedPath,
+} from './path.typed.js'
 
 /* * CUSTOM ZOD UTILITIES!! * */
 /** @group Zod Schemas */
@@ -81,6 +87,34 @@ export const fsPathTypeExists = (
         },
     )
 }
+
+/**
+ * Normalize, validate and brand a path as one required filesystem type.
+ *
+ * @group Zod Schemas
+ */
+export const fsTypedPath = <Type extends FilePathType>(
+    requiredType: Type,
+    root?: string,
+): z.ZodType<TypedPath<Type>, string> => {
+    return z
+        .string()
+        .transform((value) => getFullPath(value, root))
+        .transform((value, context) => {
+            const result = getPathType(value)
+
+            if (!isPathType(result, requiredType)) {
+                context.addIssue({
+                    code: 'custom',
+                    message: `Expected path type "${requiredType}", received "${result.type}"`,
+                })
+                return z.NEVER
+            }
+
+            return result.path
+        })
+}
+
 /**
  * Schema validates if it is a glob, and if it exists..
  *
