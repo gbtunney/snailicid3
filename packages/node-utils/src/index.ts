@@ -33,6 +33,29 @@ export * as filePath from './file.path.array.js'
 export type { FilePath, FileType } from './file.path.array.js'
 export * as typedPath from './path.typed.js'
 export type { FilePathType, PathTypeResult, TypedPath } from './path.typed.js'
+export {
+    FILE_PATH_TYPES,
+    getPathOfType,
+    getPathType,
+    isPathType,
+    requirePathOfType,
+} from './path.typed.js'
+export {
+    getArgsObject,
+    getYArgs,
+    parseArgv,
+    safeParseArgv,
+} from './yargs-util.js'
+export {
+    filePathDoesNotExist,
+    filePathExists,
+    fsPath,
+    fsPathArray,
+    fsPathArrayHasFiles,
+    fsPathExists,
+    fsPathTypeExists,
+    fsTypedPath,
+} from './zod.node.js'
 export type {
     FsTypedPathOptions,
     SelectedFilePathType,

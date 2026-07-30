@@ -28,7 +28,7 @@ export function isCallerEntrypoint(
         return undefined
     }
 
-    const entryPath = process.argv[1]
+    const entryPath: string | undefined = process.argv.at(1)
     const entryUrl =
         entryPath === undefined ? undefined : pathToFileURL(entryPath).href
 

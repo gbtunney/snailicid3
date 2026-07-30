@@ -12,6 +12,9 @@ import { z } from 'zod';
 const doesFileExist: (path: string) => boolean;
 
 // @public (undocumented)
+export const FILE_PATH_TYPES: readonly ["directory", "file", "glob", "symlink", "unknown"];
+
+// @public (undocumented)
 export type FilePath = {
     absolute: string;
     basename: string;
@@ -44,8 +47,43 @@ declare namespace filePath {
     }
 }
 
+// @public
+export const filePathDoesNotExist: () => ReturnType<typeof fsPathExists>;
+
+// @public
+export const filePathExists: () => ReturnType<typeof fsPathExists>;
+
+// @public (undocumented)
+export type FilePathType = (typeof FILE_PATH_TYPES)[number];
+
 // @public (undocumented)
 export type FileType = 'directory' | 'file' | 'glob' | 'symlink' | undefined;
+
+// @public
+export const fsPath: (root?: string) => z.ZodType<string, string>;
+
+// @public
+export const fsPathArray: (root?: string, getDirectoryFileContents?: boolean) => z.ZodType<Array<FilePath>, string>;
+
+// @public
+export const fsPathArrayHasFiles: (getDirectoryFileContents?: boolean, root?: string) => z.ZodType<Array<FilePath>, string>;
+
+// @public
+export const fsPathExists: (exists?: boolean, root?: string, allowedType?: "any" | (Array<Exclude<FileType, undefined>> | Exclude<FileType, undefined>)) => ReturnType<typeof fsPathTypeExists>;
+
+// @public
+export const fsPathTypeExists: (allowedType?: "any" | "none" | (Array<Exclude<FileType, undefined>> | Exclude<FileType, undefined>), root?: string) => z.ZodType<string, string>;
+
+// @public
+export const fsTypedPath: <Selector extends TypedPathSelector>(allowedTypes: Selector, rootOrOptions?: FsTypedPathOptions | string, options?: FsTypedPathOptions) => z.ZodType<TypedPath<SelectedFilePathType<Selector>>, string>;
+
+// @public (undocumented)
+export type FsTypedPathOptions = {
+    exists?: boolean;
+};
+
+// @public
+export const getArgsObject: (value?: string[]) => Promise<Record<string, unknown>> | Record<string, unknown>;
 
 // @public (undocumented)
 const getDirectoryArr: (_path: string) => Array<string>;
@@ -71,6 +109,15 @@ const getFullPath: (_value: string, _root: string | undefined) => string;
 // @public (undocumented)
 const getParentDirectory: (_path: string) => string | undefined;
 
+// @public
+export const getPathOfType: <Type extends FilePathType>(value: string | undefined, requiredType: Type) => TypedPath<Type> | undefined;
+
+// @public
+export const getPathType: (value: string | undefined) => PathTypeResult;
+
+// @public
+export const getYArgs: <Type extends z.ZodObject>(schema: Type, debug?: boolean, _yargs?: string[]) => undefined | z.infer<Type>;
+
 // @public (undocumented)
 export type ImageMimeType = 'bmp' | 'gif' | 'jpeg' | 'png' | 'svg';
 
@@ -86,6 +133,11 @@ const isFileArray: (value: string, exists?: boolean, allowDirectory?: boolean) =
 // @public
 const isGlob: (value: string) => boolean;
 
+// @public
+export const isPathType: <Type extends FilePathType>(result: PathTypeResult, requiredType: Type) => result is Extract<PathTypeResult, {
+    type: Type;
+}>;
+
 // @public (undocumented)
 export type JSONExportConfig = Array<JSONExportEntry>;
 
@@ -97,6 +149,13 @@ export type JSONExportEntry<Type = Json.Value, DataType = Type extends Jsonifiab
 
 // @public
 const node: {
+    FILE_PATH_TYPES: readonly ["directory", "file", "glob", "symlink", "unknown"];
+    getPathType: (value: string | undefined) => typedPath_2.PathTypeResult;
+    isPathType: <Type extends typedPath_2.FilePathType>(result: typedPath_2.PathTypeResult, requiredType: Type) => result is Extract<typedPath_2.PathTypeResult, {
+        type: Type;
+    }>;
+    getPathOfType: <Type extends typedPath_2.FilePathType>(value: string | undefined, requiredType: Type) => typedPath_2.TypedPath<Type> | undefined;
+    requirePathOfType: <Type extends typedPath_2.FilePathType>(value: string | undefined, requiredType: Type) => typedPath_2.TypedPath<Type>;
     getFilePathArr: (value: string, getDirectoryFiles?: boolean) => Array<filePath_3.FilePath>;
     isFileArray: (value: string, exists?: boolean, allowDirectory?: boolean) => boolean;
     getExistingPathType: (value: string) => filePath_3.FileType;
@@ -115,6 +174,7 @@ const node: {
     fsPathArray: (root?: string, getDirectoryFileContents?: boolean) => z.ZodType<Array<filePath_3.FilePath>, string>;
     fsPathExists: (exists?: boolean, root?: string, allowedType?: "any" | (Array<Exclude<filePath_3.FileType, undefined>> | Exclude<filePath_3.FileType, undefined>)) => ReturnType<typeof zod_fs_schema.fsPathTypeExists>;
     fsPathTypeExists: (allowedType?: "any" | "none" | (Array<Exclude<filePath_3.FileType, undefined>> | Exclude<filePath_3.FileType, undefined>), root?: string) => z.ZodType<string, string>;
+    fsTypedPath: <Selector extends zod_fs_schema.TypedPathSelector>(allowedTypes: Selector, rootOrOptions?: zod_fs_schema.FsTypedPathOptions | string, options?: zod_fs_schema.FsTypedPathOptions) => z.ZodType<typedPath_2.TypedPath<zod_fs_schema.SelectedFilePathType<Selector>>, string>;
     fsPathArrayHasFiles: (getDirectoryFileContents?: boolean, root?: string) => z.ZodType<Array<filePath_3.FilePath>, string>;
     filePathExists: () => ReturnType<typeof zod_fs_schema.fsPathExists>;
     filePathDoesNotExist: () => ReturnType<typeof zod_fs_schema.fsPathExists>;
@@ -130,6 +190,47 @@ export { node }
 // @public (undocumented)
 const normalizePath: (value: string) => string;
 
+// @public
+export const parseArgv: <Schema extends z.ZodType>(schema: Schema, argv: ReadonlyArray<string>) => z.output<Schema>;
+
+// @public (undocumented)
+export type PathTypeResult = {
+    [Type in FilePathType]: {
+        path: TypedPath<Type>;
+        type: Type;
+    };
+}[FilePathType];
+
+// @public
+export const requirePathOfType: <Type extends FilePathType>(value: string | undefined, requiredType: Type) => TypedPath<Type>;
+
+// @public
+export const safeParseArgv: <Schema extends z.ZodType>(schema: Schema, argv: ReadonlyArray<string>) => z.ZodSafeParseResult<z.output<Schema>>;
+
+// @public (undocumented)
+export type SelectedFilePathType<Selector extends TypedPathSelector> = Selector extends 'any' ? Exclude<FilePathType, 'unknown'> : Selector extends ReadonlyArray<infer Type extends FilePathType> ? Type : Extract<Selector, FilePathType>;
+
+// @public (undocumented)
+export type TypedPath<Type extends FilePathType = FilePathType> = string & {
+    readonly [PATH_TYPE]: Type;
+};
+
+declare namespace typedPath {
+    export {
+        FILE_PATH_TYPES,
+        FilePathType,
+        PathTypeResult,
+        TypedPath,
+        getPathType,
+        isPathType,
+        getPathOfType,
+        requirePathOfType
+    }
+}
+
+// @public (undocumented)
+export type TypedPathSelector = 'any' | FilePathType | ReadonlyArray<FilePathType>;
+
 // Warning: (ae-internal-missing-underscore) The name "zod" should be prefixed with an underscore because the declaration is marked as @internal
 //
 // @internal (undocumented)
@@ -137,8 +238,9 @@ export const zod: typeof z & typeof zod_fs_schema;
 
 // Warnings were encountered during analysis:
 //
-// src/index.ts:17:18 - (ae-forgotten-export) The symbol "filePath_3" needs to be exported by the entry point index.d.ts
-// src/index.ts:27:13 - (ae-forgotten-export) The symbol "zod_fs_schema" needs to be exported by the entry point index.d.ts
+// src/index.ts:18:18 - (ae-forgotten-export) The symbol "typedPath_2" needs to be exported by the entry point index.d.ts
+// src/index.ts:44:18 - (ae-forgotten-export) The symbol "zod_fs_schema" needs to be exported by the entry point index.d.ts
+// src/index.ts:64:1149 - (ae-forgotten-export) The symbol "filePath_3" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

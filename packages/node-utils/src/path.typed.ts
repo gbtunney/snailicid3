@@ -15,16 +15,16 @@ export type FilePathType = (typeof FILE_PATH_TYPES)[number]
 
 declare const PATH_TYPE: unique symbol
 
-export type TypedPath<Type extends FilePathType = FilePathType> = string & {
-    readonly [PATH_TYPE]: Type
-}
-
 export type PathTypeResult = {
     [Type in FilePathType]: {
         path: TypedPath<Type>
         type: Type
     }
 }[FilePathType]
+
+export type TypedPath<Type extends FilePathType = FilePathType> = string & {
+    readonly [PATH_TYPE]: Type
+}
 
 const createPathTypeResult = <Type extends FilePathType>(
     value: string,
@@ -39,8 +39,8 @@ const createPathTypeResult = <Type extends FilePathType>(
 /**
  * Normalize and classify a filesystem path or glob.
  *
- * Unknown values include undefined, empty strings, missing paths and
- * filesystem entries that are not files, directories or symbolic links.
+ * Unknown values include undefined, empty strings, missing paths and filesystem entries that are not files, directories
+ * or symbolic links.
  */
 export const getPathType = (value: string | undefined): PathTypeResult => {
     if (value === undefined || value.trim().length === 0) {
