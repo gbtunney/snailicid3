@@ -55,3 +55,32 @@ $ yarn add @snailicid3/node-utils
 #npm
 $ npm install @snailicid3/node-utils
 ```
+
+## Lightweight typed argument parsing
+
+Use `parseArgv` when a script needs typed command-line arguments without the application, generated
+help, or interactive behavior provided by `@snailicid3/cli-app`:
+
+```ts
+import { parseArgv } from '@snailicid3/node-utils'
+import { hideBin } from 'yargs/helpers'
+import { z } from 'zod'
+
+const schema = z.object({
+  count: z.coerce.number().int().default(1),
+  dryRun: z.boolean().default(false),
+  tags: z.array(z.string()).default([]),
+})
+
+const args = parseArgv(schema, hideBin(process.argv))
+```
+
+Repeated options become arrays, so `-z gbt -z gbt2` can be validated with `z.array(z.string())`. Raw
+option values remain strings; use schemas such as `z.coerce.number()` to control conversion.
+
+- `parseArgv(schema, argv)` returns the schema's typed and transformed output, or throws a
+  `ZodError`.
+- `safeParseArgv(schema, argv)` returns Zod's discriminated success/error result.
+
+Both functions support field-level and root-object transforms because they pass the parsed argument
+object directly to Zod without inspecting the schema.

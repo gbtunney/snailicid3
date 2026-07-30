@@ -14,7 +14,9 @@ import {
 } from './workspace/packages.js'
 import { normalizeRepoPath } from './workspace/paths.js'
 
-/** TODO: figure out how to add the filters via arg w the default like the last one */
+/** TODO: #187 figure out how to add the filters via arg w the default like the last one */
+
+/** TODO: #187 not sure if this works with top level packages or with npm */
 
 /** Run Knip once per workspace package, or once for the current child package. */
 export function main(args: Array<string> = process.argv.slice(2)): void {

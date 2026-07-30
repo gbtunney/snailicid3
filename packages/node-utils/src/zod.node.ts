@@ -1,7 +1,6 @@
 /* eslint  @typescript-eslint/explicit-function-return-type: "warn" */
 import { isString } from 'ramda-adjunct'
 import { z } from 'zod'
-
 import {
     doesFileExist,
     type FilePath,
@@ -11,6 +10,21 @@ import {
     getFullPath,
     normalizePath,
 } from './file.path.array.js'
+import {
+    getPathType,
+    isPathType,
+    type PathTypeSelectionOptions,
+    type PathTypeSelector,
+    type SelectedFilePathType,
+    type TypedPath,
+} from './path.typed.js'
+
+export type FsTypedPathOptions<Negate extends boolean = boolean> =
+    PathTypeSelectionOptions<Negate> & {
+        /** Require the path to exist. Globs must match at least one entry. */
+        exists?: boolean
+    }
+export type TypedPathSelector = PathTypeSelector
 
 /* * CUSTOM ZOD UTILITIES!! * */
 /** @group Zod Schemas */
@@ -81,6 +95,78 @@ export const fsPathTypeExists = (
         },
     )
 }
+
+/**
+ * Normalize, validate and brand a path as one or more filesystem types.
+ *
+ * The `any` selector accepts any recognized type and rejects `unknown`.
+ *
+ * @group Zod Schemas
+ */
+export const fsTypedPath = <
+    Selector extends TypedPathSelector,
+    Negate extends boolean = false,
+>(
+    allowedTypes: Selector,
+    rootOrOptions?: FsTypedPathOptions<Negate> | string,
+    options?: FsTypedPathOptions<Negate>,
+): z.ZodType<TypedPath<SelectedFilePathType<Selector, Negate>>, string> => {
+    const root = typeof rootOrOptions === 'string' ? rootOrOptions : undefined
+    const resolvedOptions =
+        typeof rootOrOptions === 'string' ? options : rootOrOptions
+    const requireExists = resolvedOptions?.exists ?? false
+    const negate = resolvedOptions?.negate ?? false
+
+    return z
+        .string()
+        .transform((value) => getFullPath(value, root))
+        .transform((value, context) => {
+            const result = getPathType(value)
+            const expected = negate
+                ? `any recognized path type except ${typeof allowedTypes === 'string' ? allowedTypes : allowedTypes.join(' | ')}`
+                : allowedTypes === 'any'
+                  ? 'a file, directory, symlink, or glob'
+                  : typeof allowedTypes === 'string'
+                    ? `path type "${allowedTypes}"`
+                    : `one of these path types: ${allowedTypes.join(' | ')}`
+            const accepted = isPathType(result, allowedTypes, {
+                negate,
+            })
+
+            if (!accepted) {
+                const exists = doesFileExist(result.path)
+                const message =
+                    result.type === 'unknown'
+                        ? exists
+                            ? `Path is not a supported filesystem entry: "${result.path}" (expected ${expected})`
+                            : `Path does not exist: "${result.path}" (expected ${expected})`
+                        : `Expected ${expected}, but "${result.path}" is path type "${result.type}"`
+
+                context.addIssue({
+                    code: 'custom',
+                    message,
+                })
+                return z.NEVER
+            }
+
+            if (requireExists && getExistingPathType(value) === undefined) {
+                const message =
+                    result.type === 'glob'
+                        ? `Glob pattern did not match any filesystem entries: "${result.path}"`
+                        : `Path does not exist: "${result.path}"`
+                context.addIssue({
+                    code: 'custom',
+                    message,
+                })
+                return z.NEVER
+            }
+
+            return result.path as TypedPath<
+                SelectedFilePathType<Selector, Negate>
+            >
+        })
+}
+
 /**
  * Schema validates if it is a glob, and if it exists..
  *
@@ -92,7 +178,7 @@ export const fsPathArrayHasFiles = (
 ): z.ZodType<Array<FilePath>, string> => {
     return fsPathArray(root, getDirectoryFileContents).refine(
         (val: Array<FilePath>) => {
-            if (val.length > 0 && val[0] !== undefined) {
+            if (val.length > 0) {
                 const _possibleDir: FilePath = val[0]
                 if (
                     !getDirectoryFileContents &&

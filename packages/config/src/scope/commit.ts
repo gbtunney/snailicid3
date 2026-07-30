@@ -319,7 +319,8 @@ function runCheckedPrecommit(
         )
     }
 }
-
+// TODO request feature - maube some way to add custom scopes for specific paths, like notes/* => "notes" via commitlints config?
+/** see filterFileArrByGlob function ? */
 function scopeForPath(
     repoRoot: string,
     inputPath: string,

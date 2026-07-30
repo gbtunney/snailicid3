@@ -82,5 +82,8 @@
         { "rule": "import/prefer-default-export", "severity": "off" },
         { "rule": "capitalized-comments", "severity": "off" }
     ],
-    "nxConsole.generateAiAgentRules": true
+    "nxConsole.generateAiAgentRules": true,
+    "files.readonlyInclude": {
+        "{.nx,node_modules}/**/*": false
+    }
 }

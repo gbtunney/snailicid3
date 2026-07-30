@@ -2,7 +2,7 @@
     "name": "@snailicid3/node-utils",
     "version": "0.0.5",
     "private": false,
-    "description": "Node.js filesystem, path and package.json utilities",
+    "description": "Node.js filesystem, path, zod schemas, and package.json utilities",
     "keywords": [
         "typescript",
         "snailicid3",
@@ -19,11 +19,6 @@
         "clean:nx": "nx run $npm_package_name:clean",
         "dev:nx": "nx run $npm_package_name:dev",
         "api:report:nx": "nx run $npm_package_name:api:report"
-    },
-    "buildConfig": {
-        "runtime": "node",
-        "product": "library",
-        "buildStrategy": "bundle"
     },
     "nx": {
         "targets": {
@@ -55,7 +50,6 @@
     },
     "type": "module",
     "main": "./dist/index.cjs",
-    "types": "./dist/index.d.cts",
     "exports": {
         ".": {
             "import": "./dist/index.mjs",
@@ -93,11 +87,12 @@
         "@microsoft/api-extractor": "^7.58.8",
         "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
-        "@types/node": "^26.1.1",
+        "@types/node": "^26.1.2",
         "@types/yargs": "^17.0.35",
         "tsdown": "^0.22.2",
         "typescript": "^6.0.3",
         "vitest": "^4.1.9"
     },
-    "module": "./dist/index.mjs"
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.cts"
 }

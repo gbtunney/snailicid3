@@ -10,6 +10,7 @@ const plan = defineBuildPlan(pkg, {
             // TODO lint=false is temporary fix for strange tsdown memory errors
             lint: false,
             output_formats: ['esm', 'cjs', 'ts'],
+            product: 'library',
             runtime: 'node',
             transpile: ['es2020'],
         },

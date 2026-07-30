@@ -72,17 +72,17 @@ export type CommonFlagsOutput = z.infer<typeof commonFlagsSchema>;
 // @public (undocumented)
 export type CommonFlagsSchema = typeof commonFlagsSchema;
 
-// @public (undocumented)
+// @public
 export const commonFlagsSchema: z.ZodObject<{
     debug: z.ZodDefault<z.ZodBoolean>;
-    outDir: z.ZodDefault<z.ZodString>;
+    outDir: z.ZodPrefault<z.ZodType<string, string, z.core.$ZodTypeInternals<string, string>>>;
 }, z.core.$strip>;
 
 // @public
-export const initApp: <AppOptionsSchema extends ZodObjectSchema>(optionsSchema: AppOptionsSchema, config: AppConfigIn, initFunction: InitSuccessCallback<AppOptionsSchema>, skip_interactive?: boolean, _yargs?: Array<string>) => Promise<Argv | undefined>;
+export const initApp: <AppOptionsSchema extends ZodObjectSchema>(optionsSchema: AppOptionsSchema, config: AppConfigIn<AppOptionsSchema>, initFunction: InitSuccessCallback<AppOptionsSchema>, skip_interactive?: boolean, _yargs?: Array<string>) => Promise<Argv | undefined>;
 
 // @public (undocumented)
-export const initializeApp: <AppOptionsSchema extends ZodObjectSchema>(optionsSchema: AppOptionsSchema, config: AppConfigIn, initFunction: InitSuccessCallback<AppOptionsSchema>, skip_interactive?: boolean, _yargs?: Array<string>) => Promise<Argv | undefined>;
+export const initializeApp: <AppOptionsSchema extends ZodObjectSchema>(optionsSchema: AppOptionsSchema, config: AppConfigIn<AppOptionsSchema>, initFunction: InitSuccessCallback<AppOptionsSchema>, skip_interactive?: boolean, _yargs?: Array<string>) => Promise<Argv | undefined>;
 
 // @public
 export type InitSuccessCallback<AppOptionsSchema extends ZodObjectSchema = z.ZodObject> = (args: z.infer<AppOptionsSchema>, config: AppConfig, // Or: z.infer<typeof appConfigSchema>

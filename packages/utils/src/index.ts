@@ -7,6 +7,18 @@ export {
 export { fmt, formatArgs, formatValue } from './fmt.js'
 export * as numeric from './number/index.js'
 export {
+    clampRange,
+    mapRange,
+    RANGE_DEGREES,
+    RANGE_FLOAT,
+    RANGE_PERCENT,
+    RANGE_RGB,
+    roundToDecimals,
+    roundToDecimalsNoCarry,
+    wrapRange,
+} from './number/range.js'
+export type { Range } from './number/range.js'
+export {
     entriesOf,
     fromEntries,
     keysOf,

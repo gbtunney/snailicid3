@@ -1,11 +1,23 @@
 import { describe, expect, test } from 'vitest'
-
+import { type TypedPath } from './path.typed.js'
 import * as zod from './zod.node.js'
 
 describe('zod custom schemas', () => {
     test('TODO: reenable', () => {
         expect(true).toBe(true)
+
+        // FsTypedPath
         //Todo: reenable
+
+        const testy = zod.fsTypedPath('directory', './')
+
+        const result = testy.parse('./sample_image/')
+        const funcTst = (_dir: TypedPath<'directory'>): string => {
+            return 'gfgfg'
+        }
+
+        const doIt = funcTst(result)
+
         expect(
             zod
                 .fsPathTypeExists('any', './')

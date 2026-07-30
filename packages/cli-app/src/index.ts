@@ -4,17 +4,15 @@ export type {
     AppConfigOut,
     AppConfigSchema,
     appConfigSchema,
-    AppFlagAliases,
-    AppHidden,
-} from './app-config.js'
-export { parsePackageJson } from './app-config.js'
-export { commonFlagsSchema } from './app-options.js'
+} from './app/config.js'
+export { parsePackageJson } from './app/config.js'
+export type { InitSuccessCallback } from './app/init.js'
+export { initApp, initializeApp } from './app/init.js'
+export { commonFlagsSchema } from './schema/common-flags.js'
 export type {
     CommonFlagsInput,
     CommonFlagsOutput,
     CommonFlagsSchema,
-} from './app-options.js'
-export type { InitSuccessCallback } from './app.js'
-export { initApp, initializeApp } from './app.js'
-export { wrapSchema } from './helpers.js'
-export type { WrappedSchema, ZodObjectSchema } from './helpers.js'
+} from './schema/common-flags.js'
+export { wrapSchema } from './schema/utils.js'
+export type { WrappedSchema, ZodObjectSchema } from './schema/utils.js'
