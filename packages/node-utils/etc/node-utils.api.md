@@ -75,10 +75,10 @@ export const fsPathExists: (exists?: boolean, root?: string, allowedType?: "any"
 export const fsPathTypeExists: (allowedType?: "any" | "none" | (Array<Exclude<FileType, undefined>> | Exclude<FileType, undefined>), root?: string) => z.ZodType<string, string>;
 
 // @public
-export const fsTypedPath: <Selector extends TypedPathSelector>(allowedTypes: Selector, rootOrOptions?: FsTypedPathOptions | string, options?: FsTypedPathOptions) => z.ZodType<TypedPath<SelectedFilePathType<Selector>>, string>;
+export const fsTypedPath: <Selector extends TypedPathSelector, Negate extends boolean = false>(allowedTypes: Selector, rootOrOptions?: FsTypedPathOptions<Negate> | string, options?: FsTypedPathOptions<Negate>) => z.ZodType<TypedPath<SelectedFilePathType<Selector, Negate>>, string>;
 
 // @public (undocumented)
-export type FsTypedPathOptions = {
+export type FsTypedPathOptions<Negate extends boolean = boolean> = PathTypeSelectionOptions<Negate> & {
     exists?: boolean;
 };
 
@@ -110,7 +110,7 @@ const getFullPath: (_value: string, _root: string | undefined) => string;
 const getParentDirectory: (_path: string) => string | undefined;
 
 // @public
-export const getPathOfType: <Type extends FilePathType>(value: string | undefined, requiredType: Type) => TypedPath<Type> | undefined;
+export const getPathOfType: <Selector extends PathTypeSelector, Negate extends boolean = false>(value: string | undefined, selector: Selector, options?: PathTypeSelectionOptions<Negate>) => TypedPath<SelectedFilePathType<Selector, Negate>> | undefined;
 
 // @public
 export const getPathType: (value: string | undefined) => PathTypeResult;
@@ -134,8 +134,8 @@ const isFileArray: (value: string, exists?: boolean, allowDirectory?: boolean) =
 const isGlob: (value: string) => boolean;
 
 // @public
-export const isPathType: <Type extends FilePathType>(result: PathTypeResult, requiredType: Type) => result is Extract<PathTypeResult, {
-    type: Type;
+export const isPathType: <Selector extends PathTypeSelector, Negate extends boolean = false>(result: PathTypeResult, selector: Selector, options?: PathTypeSelectionOptions<Negate>) => result is Extract<PathTypeResult, {
+    type: SelectedFilePathType<Selector, Negate>;
 }>;
 
 // @public (undocumented)
@@ -151,11 +151,11 @@ export type JSONExportEntry<Type = Json.Value, DataType = Type extends Jsonifiab
 const node: {
     FILE_PATH_TYPES: readonly ["directory", "file", "glob", "symlink", "unknown"];
     getPathType: (value: string | undefined) => typedPath_2.PathTypeResult;
-    isPathType: <Type extends typedPath_2.FilePathType>(result: typedPath_2.PathTypeResult, requiredType: Type) => result is Extract<typedPath_2.PathTypeResult, {
-        type: Type;
+    isPathType: <Selector extends typedPath_2.PathTypeSelector, Negate extends boolean = false>(result: typedPath_2.PathTypeResult, selector: Selector, options?: typedPath_2.PathTypeSelectionOptions<Negate>) => result is Extract<typedPath_2.PathTypeResult, {
+        type: typedPath_2.SelectedFilePathType<Selector, Negate>;
     }>;
-    getPathOfType: <Type extends typedPath_2.FilePathType>(value: string | undefined, requiredType: Type) => typedPath_2.TypedPath<Type> | undefined;
-    requirePathOfType: <Type extends typedPath_2.FilePathType>(value: string | undefined, requiredType: Type) => typedPath_2.TypedPath<Type>;
+    getPathOfType: <Selector extends typedPath_2.PathTypeSelector, Negate extends boolean = false>(value: string | undefined, selector: Selector, options?: typedPath_2.PathTypeSelectionOptions<Negate>) => typedPath_2.TypedPath<typedPath_2.SelectedFilePathType<Selector, Negate>> | undefined;
+    requirePathOfType: <Selector extends typedPath_2.PathTypeSelector, Negate extends boolean = false>(value: string | undefined, selector: Selector, options?: typedPath_2.PathTypeSelectionOptions<Negate>) => typedPath_2.TypedPath<typedPath_2.SelectedFilePathType<Selector, Negate>>;
     getFilePathArr: (value: string, getDirectoryFiles?: boolean) => Array<filePath_3.FilePath>;
     isFileArray: (value: string, exists?: boolean, allowDirectory?: boolean) => boolean;
     getExistingPathType: (value: string) => filePath_3.FileType;
@@ -174,7 +174,7 @@ const node: {
     fsPathArray: (root?: string, getDirectoryFileContents?: boolean) => z.ZodType<Array<filePath_3.FilePath>, string>;
     fsPathExists: (exists?: boolean, root?: string, allowedType?: "any" | (Array<Exclude<filePath_3.FileType, undefined>> | Exclude<filePath_3.FileType, undefined>)) => ReturnType<typeof zod_fs_schema.fsPathTypeExists>;
     fsPathTypeExists: (allowedType?: "any" | "none" | (Array<Exclude<filePath_3.FileType, undefined>> | Exclude<filePath_3.FileType, undefined>), root?: string) => z.ZodType<string, string>;
-    fsTypedPath: <Selector extends zod_fs_schema.TypedPathSelector>(allowedTypes: Selector, rootOrOptions?: zod_fs_schema.FsTypedPathOptions | string, options?: zod_fs_schema.FsTypedPathOptions) => z.ZodType<typedPath_2.TypedPath<zod_fs_schema.SelectedFilePathType<Selector>>, string>;
+    fsTypedPath: <Selector extends zod_fs_schema.TypedPathSelector, Negate extends boolean = false>(allowedTypes: Selector, rootOrOptions?: zod_fs_schema.FsTypedPathOptions<Negate> | string, options?: zod_fs_schema.FsTypedPathOptions<Negate>) => z.ZodType<typedPath_2.TypedPath<typedPath_2.SelectedFilePathType<Selector, Negate>>, string>;
     fsPathArrayHasFiles: (getDirectoryFileContents?: boolean, root?: string) => z.ZodType<Array<filePath_3.FilePath>, string>;
     filePathExists: () => ReturnType<typeof zod_fs_schema.fsPathExists>;
     filePathDoesNotExist: () => ReturnType<typeof zod_fs_schema.fsPathExists>;
@@ -201,14 +201,27 @@ export type PathTypeResult = {
     };
 }[FilePathType];
 
+// @public (undocumented)
+export type PathTypeSelectionOptions<Negate extends boolean = boolean> = {
+    negate?: Negate;
+};
+
+// @public (undocumented)
+export type PathTypeSelector = 'any' | ReadonlyArray<RecognizedFilePathType> | RecognizedFilePathType;
+
+// @public (undocumented)
+export type RecognizedFilePathType = Exclude<FilePathType, 'unknown'>;
+
 // @public
-export const requirePathOfType: <Type extends FilePathType>(value: string | undefined, requiredType: Type) => TypedPath<Type>;
+export const requirePathOfType: <Selector extends PathTypeSelector, Negate extends boolean = false>(value: string | undefined, selector: Selector, options?: PathTypeSelectionOptions<Negate>) => TypedPath<SelectedFilePathType<Selector, Negate>>;
 
 // @public
 export const safeParseArgv: <Schema extends z.ZodType>(schema: Schema, argv: ReadonlyArray<string>) => z.ZodSafeParseResult<z.output<Schema>>;
 
+// Warning: (ae-forgotten-export) The symbol "SelectorFilePathType" needs to be exported by the entry point index.d.ts
+//
 // @public (undocumented)
-export type SelectedFilePathType<Selector extends TypedPathSelector> = Selector extends 'any' ? Exclude<FilePathType, 'unknown'> : Selector extends ReadonlyArray<infer Type extends FilePathType> ? Type : Extract<Selector, FilePathType>;
+export type SelectedFilePathType<Selector extends PathTypeSelector, Negate extends boolean = false> = Negate extends true ? Exclude<RecognizedFilePathType, SelectorFilePathType<Selector>> : SelectorFilePathType<Selector>;
 
 // @public (undocumented)
 export type TypedPath<Type extends FilePathType = FilePathType> = string & {
@@ -219,6 +232,10 @@ declare namespace typedPath {
     export {
         FILE_PATH_TYPES,
         FilePathType,
+        PathTypeSelectionOptions,
+        PathTypeSelector,
+        RecognizedFilePathType,
+        SelectedFilePathType,
         PathTypeResult,
         TypedPath,
         getPathType,
@@ -229,7 +246,7 @@ declare namespace typedPath {
 }
 
 // @public (undocumented)
-export type TypedPathSelector = 'any' | FilePathType | ReadonlyArray<FilePathType>;
+export type TypedPathSelector = PathTypeSelector;
 
 // Warning: (ae-internal-missing-underscore) The name "zod" should be prefixed with an underscore because the declaration is marked as @internal
 //
@@ -239,8 +256,8 @@ export const zod: typeof z & typeof zod_fs_schema;
 // Warnings were encountered during analysis:
 //
 // src/index.ts:18:18 - (ae-forgotten-export) The symbol "typedPath_2" needs to be exported by the entry point index.d.ts
-// src/index.ts:44:18 - (ae-forgotten-export) The symbol "zod_fs_schema" needs to be exported by the entry point index.d.ts
-// src/index.ts:64:1149 - (ae-forgotten-export) The symbol "filePath_3" needs to be exported by the entry point index.d.ts
+// src/index.ts:39:22 - (ae-forgotten-export) The symbol "zod_fs_schema" needs to be exported by the entry point index.d.ts
+// src/index.ts:68:2713 - (ae-forgotten-export) The symbol "filePath_3" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
