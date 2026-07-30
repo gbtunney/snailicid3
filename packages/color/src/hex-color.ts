@@ -1,6 +1,5 @@
+import { fmt, mapRange, type Range, roundToDecimals } from '@snailicid3/utils'
 import ColorIO, { type ColorObject as Color, type Coords } from 'colorjs.io'
-import { mapRange, type Range, roundToDecimals } from './numeric.js'
-import { fmt } from './pretty.print.js'
 export type ColorJS = ColorIO
 // Branded hex type
 export type HexColor = `#${string}` & { readonly __hexBrand: 'HexColor' }

@@ -19,10 +19,8 @@
         "dev:nx": "nx run $npm_package_name:dev",
         "demo": "node ./bin/logger-demo.js"
     },
-    "buildConfig": {
-        "runtime": "node",
-        "product": "library",
-        "buildStrategy": "bundle"
+    "bin": {
+        "cli-app-example": "./dist/example.js"
     },
     "nx": {
         "targets": {

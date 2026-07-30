@@ -43,6 +43,19 @@ export {
 export { MASTER_NUMERIC_LITERAL, numericPatterns } from './patterns.js'
 
 export {
+    clampRange,
+    mapRange,
+    RANGE_DEGREES,
+    RANGE_FLOAT,
+    RANGE_PERCENT,
+    RANGE_RGB,
+    roundToDecimals,
+    roundToDecimalsNoCarry,
+    wrapRange,
+} from './range.js'
+export type { Range } from './range.js'
+
+export {
     numericToFloat,
     numericToInteger,
     toNumeric,
