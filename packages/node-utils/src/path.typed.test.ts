@@ -1,15 +1,8 @@
+import { afterAll, beforeAll, describe, expect, expectTypeOf, it } from 'vitest'
+import type z from 'zod'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-
-import {
-    afterAll,
-    beforeAll,
-    describe,
-    expect,
-    expectTypeOf,
-    it,
-} from 'vitest'
 
 import {
     getPathOfType,
@@ -86,16 +79,14 @@ describe('typed paths', () => {
         expect(requirePathOfType(directoryPath, 'directory')).toBe(
             path.resolve(directoryPath),
         )
-        expect(() => requirePathOfType(filePath, 'directory')).toThrowError(
+        expect(() => requirePathOfType(filePath, 'directory')).toThrow(
             'Expected path type "directory", received "file"',
         )
     })
 
     it('keeps brands distinct at compile time', () => {
         expectTypeOf<string>().not.toExtend<TypedPath<'directory'>>()
-        expectTypeOf<TypedPath<'file'>>().not.toExtend<
-            TypedPath<'directory'>
-        >()
+        expectTypeOf<TypedPath<'file'>>().not.toExtend<TypedPath<'directory'>>()
         expectTypeOf<TypedPath<'directory'>>().toExtend<string>()
     })
 
@@ -106,6 +97,54 @@ describe('typed paths', () => {
         expect(directory).toBe(path.resolve(directoryPath))
         expect(schema.safeParse(filePath).success).toBe(false)
         expectTypeOf(directory).toEqualTypeOf<TypedPath<'directory'>>()
+        expectTypeOf<z.input<typeof schema>>().toEqualTypeOf<string>()
+        expectTypeOf<z.output<typeof schema>>().toEqualTypeOf<
+            TypedPath<'directory'>
+        >()
+    })
+
+    it('parses and brands one of multiple requested path types with Zod', () => {
+        const schema = fsTypedPath(['file', 'directory'] as const)
+
+        expect(schema.parse(filePath)).toBe(path.resolve(filePath))
+        expect(schema.parse(directoryPath)).toBe(path.resolve(directoryPath))
+        expect(schema.safeParse(symlinkPath).success).toBe(false)
+        expectTypeOf<z.output<typeof schema>>().toEqualTypeOf<
+            TypedPath<'directory' | 'file'>
+        >()
+    })
+
+    it('accepts any recognized path type with Zod', () => {
+        const schema = fsTypedPath('any')
+
+        expect(schema.parse(filePath)).toBe(path.resolve(filePath))
+        expect(schema.parse(directoryPath)).toBe(path.resolve(directoryPath))
+        expect(schema.parse(symlinkPath)).toBe(path.resolve(symlinkPath))
+        expect(schema.parse(`${temporaryDirectory}/*.txt`)).toBe(
+            path.normalize(`${temporaryDirectory}/*.txt`),
+        )
+        expect(
+            schema.safeParse(path.join(temporaryDirectory, 'missing')).success,
+        ).toBe(false)
+        expectTypeOf<z.output<typeof schema>>().toEqualTypeOf<
+            TypedPath<'directory' | 'file' | 'glob' | 'symlink'>
+        >()
+    })
+
+    it('optionally requires typed paths to exist', () => {
+        const unmatchedGlob = path.join(temporaryDirectory, '*.missing')
+        const uncheckedSchema = fsTypedPath('glob')
+        const checkedSchema = fsTypedPath('glob', { exists: true })
+        const rootedSchema = fsTypedPath(
+            ['file', 'directory'] as const,
+            temporaryDirectory,
+            { exists: true },
+        )
+
+        expect(uncheckedSchema.safeParse(unmatchedGlob).success).toBe(true)
+        expect(checkedSchema.safeParse(unmatchedGlob).success).toBe(false)
+        expect(rootedSchema.safeParse('example.txt').success).toBe(true)
+        expect(rootedSchema.safeParse('missing.txt').success).toBe(false)
     })
 
     it('resolves relative Zod paths against a root', () => {

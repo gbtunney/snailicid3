@@ -11,12 +11,22 @@ import {
     getFullPath,
     normalizePath,
 } from './file.path.array.js'
-import {
-    type FilePathType,
-    getPathType,
-    isPathType,
-    type TypedPath,
-} from './path.typed.js'
+import { type FilePathType, getPathType, type TypedPath } from './path.typed.js'
+
+export type FsTypedPathOptions = {
+    /** Require the path to exist. Globs must match at least one entry. */
+    exists?: boolean
+}
+
+export type SelectedFilePathType<Selector extends TypedPathSelector> =
+    Selector extends 'any'
+        ? Exclude<FilePathType, 'unknown'>
+        : Selector extends ReadonlyArray<infer Type extends FilePathType>
+          ? Type
+          : Extract<Selector, FilePathType>
+
+export type TypedPathSelector =
+    'any' | FilePathType | ReadonlyArray<FilePathType>
 
 /* * CUSTOM ZOD UTILITIES!! * */
 /** @group Zod Schemas */
@@ -89,29 +99,56 @@ export const fsPathTypeExists = (
 }
 
 /**
- * Normalize, validate and brand a path as one required filesystem type.
+ * Normalize, validate and brand a path as one or more filesystem types.
+ *
+ * The `any` selector accepts any recognized type and rejects `unknown`.
  *
  * @group Zod Schemas
  */
-export const fsTypedPath = <Type extends FilePathType>(
-    requiredType: Type,
-    root?: string,
-): z.ZodType<TypedPath<Type>, string> => {
+export const fsTypedPath = <Selector extends TypedPathSelector>(
+    allowedTypes: Selector,
+    rootOrOptions?: FsTypedPathOptions | string,
+    options?: FsTypedPathOptions,
+): z.ZodType<TypedPath<SelectedFilePathType<Selector>>, string> => {
+    const root = typeof rootOrOptions === 'string' ? rootOrOptions : undefined
+    const requireExists =
+        (typeof rootOrOptions === 'string' ? options : rootOrOptions)?.exists ??
+        false
+
     return z
         .string()
         .transform((value) => getFullPath(value, root))
         .transform((value, context) => {
             const result = getPathType(value)
+            const accepted =
+                allowedTypes === 'any'
+                    ? result.type !== 'unknown'
+                    : typeof allowedTypes === 'string'
+                      ? result.type === allowedTypes
+                      : allowedTypes.includes(result.type)
 
-            if (!isPathType(result, requiredType)) {
+            if (!accepted) {
+                const expected =
+                    typeof allowedTypes === 'string'
+                        ? allowedTypes
+                        : allowedTypes.join(' | ')
+
                 context.addIssue({
                     code: 'custom',
-                    message: `Expected path type "${requiredType}", received "${result.type}"`,
+                    message: `Expected path type "${expected}", received "${result.type}"`,
                 })
                 return z.NEVER
             }
 
-            return result.path
+            if (requireExists && getExistingPathType(value) === undefined) {
+                context.addIssue({
+                    code: 'custom',
+                    message: 'Expected path to exist',
+                })
+                return z.NEVER
+            }
+
+            return result.path as TypedPath<SelectedFilePathType<Selector>>
         })
 }
 
@@ -126,7 +163,7 @@ export const fsPathArrayHasFiles = (
 ): z.ZodType<Array<FilePath>, string> => {
     return fsPathArray(root, getDirectoryFileContents).refine(
         (val: Array<FilePath>) => {
-            if (val.length > 0 && val[0] !== undefined) {
+            if (val.length > 0) {
                 const _possibleDir: FilePath = val[0]
                 if (
                     !getDirectoryFileContents &&
