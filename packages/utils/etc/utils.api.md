@@ -22,6 +22,9 @@ import type { UnknownRecord } from 'type-fest';
 import { ValueOf } from 'type-fest';
 import z from 'zod';
 
+// @public
+export const clampRange: (value: number, input: Range) => number;
+
 // @public (undocumented)
 const classifyNumericString: (raw: string) => NumericStringKind;
 
@@ -234,6 +237,9 @@ export const mapKeys: <ObjectType extends UnknownRecord, NewKey extends Property
 // @public (undocumented)
 export const mapObject: <ObjectType extends UnknownRecord, NewKey extends PropertyKey, NewValue>(object: ObjectType, mapper: <Key extends keyof ObjectType>(entry: readonly [Key, ObjectType[Key]], index: number) => null | readonly [NewKey, NewValue] | undefined) => Record<NewKey, NewValue>;
 
+// @public
+export const mapRange: (value: number, input: Range, input2: Range) => number;
+
 // @public (undocumented)
 export const mapValues: <ObjectType extends UnknownRecord, MappedValue>(object: ObjectType, mapper: <Key extends keyof ObjectType>(value: ObjectType[Key], key: Key, index: number) => MappedValue) => Simplify<{ [Key in keyof ObjectType]: MappedValue; }>;
 
@@ -282,6 +288,16 @@ declare namespace numeric {
         parseToNumeric,
         MASTER_NUMERIC_LITERAL,
         numericPatterns,
+        clampRange,
+        mapRange,
+        RANGE_DEGREES,
+        RANGE_FLOAT,
+        RANGE_PERCENT,
+        RANGE_RGB,
+        roundToDecimals,
+        roundToDecimalsNoCarry,
+        wrapRange,
+        Range,
         numericToFloat,
         numericToInteger,
         toNumeric,
@@ -432,6 +448,21 @@ export const prettyPrintJSON: <Type extends Jsonifiable>(value: Type, indentSpac
 // @public
 const randomIntInRange: <Min extends number, Max extends number>(min?: 0 | Integer<Min>, max?: 100 | Integer<Max>) => IntegerInRange;
 
+// @public
+export type Range = [number, number];
+
+// @public (undocumented)
+export const RANGE_DEGREES: Range;
+
+// @public (undocumented)
+export const RANGE_FLOAT: Range;
+
+// @public (undocumented)
+export const RANGE_PERCENT: Range;
+
+// @public (undocumented)
+export const RANGE_RGB: Range;
+
 // @public (undocumented)
 export const regexp: {
     cleanAnnotatedRegex(input: string): string;
@@ -465,6 +496,12 @@ export const regexp: {
 // @public (undocumented)
 type RegExpMatchArray_2 = ReturnType<typeof _match>;
 export { RegExpMatchArray_2 as RegExpMatchArray }
+
+// @public
+export const roundToDecimals: (value: number, decimals: number, round?: (value: number) => number) => number;
+
+// @public
+export const roundToDecimalsNoCarry: (value: number, decimals: number) => number;
 
 // @public
 export const safeDeserializeJson: (data: string) => Json.Value | undefined;
@@ -592,6 +629,9 @@ export type URLDomainExtention = ValueOf<typeof URL_DOMAIN_EXTENSION>;
 //
 // @public (undocumented)
 export type URLScheme = ValueOf<typeof URL_SCHEME>;
+
+// @public
+export const wrapRange: (value: number, input: Range) => number;
 
 // @public
 export const wrapSchema: <Schema extends z.ZodType>(schema: Schema) => Schema;

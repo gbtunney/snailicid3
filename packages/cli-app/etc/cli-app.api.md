@@ -6,17 +6,13 @@
 
 import type { Argv } from 'yargs';
 import { HexColor } from '@snailicid3/color';
-import { Merge } from 'type-fest';
 import { z } from 'zod';
 
 // @public (undocumented)
 export type AppConfig = AppConfigOut;
 
 // @public (undocumented)
-export type AppConfigIn<Schema extends ZodObjectSchema = typeof appConfigSchema> = z.input<z.ZodType<AppConfig, Merge<z.input<AppConfigSchema>, {
-    flag_aliases?: AppFlagAliases<Schema>;
-    hidden?: AppHidden<Schema>;
-}>>>;
+export type AppConfigIn = z.input<typeof appConfigSchema>;
 
 // @public (undocumented)
 export type AppConfigOut = z.infer<typeof appConfigSchema>;
@@ -26,14 +22,9 @@ export type AppConfigSchema = typeof appConfigSchema;
 
 // @public
 export const appConfigSchema: z.ZodObject<{
-    clear: z.ZodDefault<z.ZodBoolean>;
     description: z.ZodOptional<z.ZodString>;
     examples: z.ZodDefault<z.ZodArray<z.ZodTuple<[z.ZodString, z.ZodString], null>>>;
     figlet: z.ZodDefault<z.ZodBoolean>;
-    flag_aliases: z.ZodPipe<z.ZodDefault<z.ZodRecord<z.ZodString, z.ZodString>>, z.ZodTransform<{
-        help?: string;
-        version?: string;
-    }, Record<string, string>>>;
     log_level: z.ZodDefault<z.ZodEnum<{
         error: "error";
         trace: "trace";
@@ -45,23 +36,12 @@ export const appConfigSchema: z.ZodObject<{
     }>>;
     name: z.ZodPipe<z.ZodString, z.ZodTransform<string, string>>;
     print: z.ZodDefault<z.ZodBoolean>;
-    skip_interactive: z.ZodDefault<z.ZodBoolean>;
     title_color: z.ZodDefault<z.ZodObject<{
         bg: z.ZodPipe<z.ZodDefault<z.ZodString>, z.ZodTransform<HexColor, string>>;
         fg: z.ZodPipe<z.ZodDefault<z.ZodString>, z.ZodTransform<HexColor, string>>;
     }, z.core.$strip>>;
     version: z.ZodDefault<z.ZodString>;
 }, z.core.$strip>;
-
-// Warning: (ae-forgotten-export) The symbol "DefaultAliases" needs to be exported by the entry point index.d.ts
-//
-// @public
-export type AppFlagAliases<Schema extends ZodObjectSchema> = DefaultAliases & {
-    [Key in keyof z.infer<Schema>]?: string;
-};
-
-// @public (undocumented)
-export type AppHidden<Schema extends ZodObjectSchema> = Array<keyof z.infer<Schema>>;
 
 // @public (undocumented)
 export type CommonFlagsInput = z.input<typeof commonFlagsSchema>;
@@ -79,10 +59,10 @@ export const commonFlagsSchema: z.ZodObject<{
 }, z.core.$strip>;
 
 // @public
-export const initApp: <AppOptionsSchema extends ZodObjectSchema>(optionsSchema: AppOptionsSchema, config: AppConfigIn<AppOptionsSchema>, initFunction: InitSuccessCallback<AppOptionsSchema>, skip_interactive?: boolean, _yargs?: Array<string>) => Promise<Argv | undefined>;
+export const initApp: <AppOptionsSchema extends ZodObjectSchema>(optionsSchema: AppOptionsSchema, config: AppConfigIn, initFunction: InitSuccessCallback<AppOptionsSchema>, _yargs?: Array<string>) => Promise<Argv | undefined>;
 
 // @public (undocumented)
-export const initializeApp: <AppOptionsSchema extends ZodObjectSchema>(optionsSchema: AppOptionsSchema, config: AppConfigIn<AppOptionsSchema>, initFunction: InitSuccessCallback<AppOptionsSchema>, skip_interactive?: boolean, _yargs?: Array<string>) => Promise<Argv | undefined>;
+export const initializeApp: <AppOptionsSchema extends ZodObjectSchema>(optionsSchema: AppOptionsSchema, config: AppConfigIn, initFunction: InitSuccessCallback<AppOptionsSchema>, _yargs?: Array<string>) => Promise<Argv | undefined>;
 
 // @public
 export type InitSuccessCallback<AppOptionsSchema extends ZodObjectSchema = z.ZodObject> = (args: z.infer<AppOptionsSchema>, config: AppConfig, // Or: z.infer<typeof appConfigSchema>
