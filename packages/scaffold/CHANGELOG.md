@@ -1,5 +1,13 @@
 # @snailicid3/scaffold
 
+## 0.0.10
+
+### Patch Changes
+
+- Updated dependencies [f594cc6]
+  - @snailicid3/cli-app@0.1.0
+  - @snailicid3/node-utils@0.1.0
+
 ## 0.0.9
 
 ### Patch Changes
