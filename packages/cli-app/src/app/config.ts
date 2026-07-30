@@ -1,55 +1,17 @@
 import { isValidColor, parseColorToHex } from '@snailicid3/color'
 import { logger } from '@snailicid3/logger'
 import { stringUtils } from '@snailicid3/utils'
-import { type Merge } from 'type-fest'
 import { z } from 'zod'
-import { tgZodSchema, wrapSchema, type ZodObjectSchema } from './helpers.js'
-export type DefaultAliases = {
-    help?: string
-    version?: string
-}
-
-// ...existing code...
-
-const default_aliases: DefaultAliases = {
-    help: 'h',
-    version: 'v',
-}
+import { tgZodSchema, wrapSchema } from '../schema/utils.js'
 export type AppConfig = AppConfigOut
 
-export type AppConfigIn<
-    Schema extends ZodObjectSchema = typeof appConfigSchema,
-> = z.input<
-    z.ZodType<
-        AppConfig,
-        //  Z.ZodTypeDef,
-        Merge<
-            z.input<AppConfigSchema>,
-            {
-                flag_aliases?: AppFlagAliases<Schema>
-                hidden?: AppHidden<Schema>
-            }
-        >
-    >
->
+export type AppConfigIn = z.input<typeof appConfigSchema>
 export type AppConfigOut = z.infer<typeof appConfigSchema>
-/** This type is used to autocomplete the yargs aliases property. This creates shorthand values for option flags. */
-export type AppFlagAliases<Schema extends ZodObjectSchema> = DefaultAliases & {
-    [Key in keyof z.infer<Schema>]?: string
-}
-
-export type AppHidden<Schema extends ZodObjectSchema> = Array<
-    keyof z.infer<Schema>
->
 /**
  * This is the schema used to configure the Cli Application, these should NOT used in cli arguments when running the
  * client cli app
  */
 export const appConfigSchema = z.object({
-    clear: z
-        .boolean()
-        .default(true)
-        .meta({ description: 'Clear the terminal screen if possible.' }),
     description: z.string().optional(),
     /** Examples of usage */
     examples: z
@@ -65,21 +27,13 @@ export const appConfigSchema = z.object({
     /**
      * Shorthand Option Aliases (--help , -h )
      *
-     * @exqmple
-     * ```sh
-     *    pnpm test:example -h
-     *  # are equivalent
-     * pnpm  test:example --help
-     * ```
+     * @example
+     *     ;```sh
+     *        pnpm test:example -h
+     *      # are equivalent
+     *     pnpm  test:example --help
+     *     ```
      */
-    flag_aliases: z
-        .record(z.string(), z.string())
-        .default(default_aliases)
-        .transform((value) => {
-            // Defaults first, user overrides win
-            return { ...default_aliases, ...value }
-        }),
-
     log_level: z.enum(logger.LEVEL_NAMES).default('debug'),
     /** Hide an option from the help screen */
     /* hidden: z
@@ -92,8 +46,6 @@ export const appConfigSchema = z.object({
             stringUtils.hyphenate(value).toLowerCase(),
         ),
     print: z.boolean().default(true).meta({ description: 'Print the header' }),
-    /** Clears the terminal window */
-    skip_interactive: z.boolean().default(false),
     title_color: z
 
         .object({
@@ -135,10 +87,8 @@ export const appConfigSchema = z.object({
 
 export type AppConfigSchema = typeof appConfigSchema
 
-export const resolveAppConfigSchema = <
-    AppOptionsSchema extends ZodObjectSchema,
->(
-    value: AppConfigIn<AppOptionsSchema>,
+export const resolveAppConfigSchema = (
+    value: AppConfigIn,
     schema: AppConfigSchema, //Note : the default parameter errors like: schema:  AppConfigSchema=appConfigSchema
 ): undefined | z.infer<AppConfigSchema> => {
     if (tgZodSchema(schema, value)) {

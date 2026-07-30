@@ -1,14 +1,15 @@
 {
     "name": "@snailicid3/cli-app",
     "version": "0.0.9",
-    "private": true,
+    "private": false,
     "description": "Zod-backed CLI app framework",
     "scripts": {
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
         "dev:nx": "nx run $npm_package_name:dev",
-        "api:report:nx": "nx run $npm_package_name:api:report"
+        "api:report:nx": "nx run $npm_package_name:api:report",
+        "test:example": "nx run $npm_package_name:check:ts && pnpm exec tsx ./src/example/index.ts"
     },
     "nx": {
         "targets": {
@@ -52,14 +53,14 @@
         "product": "cli",
         "buildStrategy": "bundle"
     },
+    "publishConfig": {
+        "access": "public"
+    },
     "type": "module",
-    "main": "./dist/index.cjs",
     "types": "./dist/index.d.cts",
     "exports": {
-        ".": {
-            "import": "./dist/index.js",
-            "require": "./dist/index.cjs"
-        },
+        ".": "./dist/index.mjs",
+        "./example": "./dist/example.mjs",
         "./package.json": "./package.json"
     },
     "files": [
@@ -78,30 +79,26 @@
         "directory": "packages/cli-app"
     },
     "dependencies": {
-        "@snailicid3/build-config": "workspace:*",
         "@snailicid3/color": "workspace:*",
         "@snailicid3/logger": "workspace:*",
         "@snailicid3/node-utils": "workspace:*",
-        "@snailicid3/types": "workspace:*",
         "@snailicid3/utils": "workspace:*",
-        "@types/yargs-interactive": "^2.1.6",
-        "add": "^2.0.6",
         "chalk": "^6.0.0",
         "figlet": "^1.11.0",
         "type-fest": "^5.7.0",
         "yargs": "^18.0.0",
-        "yargs-interactive": "^3.0.1",
         "zod": "^4.3.6"
     },
     "devDependencies": {
         "@microsoft/api-extractor": "^7.58.8",
+        "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
         "@types/node": "^26.1.2",
         "@types/yargs": "^17.0.35",
         "tsdown": "^0.22.2",
+        "tsx": "^4.23.1",
         "typedoc": "^0.28.19",
         "typescript": "^6.0.3",
         "vitest": "^4.1.9"
-    },
-    "module": "./dist/index.js"
+    }
 }

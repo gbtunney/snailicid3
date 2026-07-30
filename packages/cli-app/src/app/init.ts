@@ -1,19 +1,14 @@
 import { logger } from '@snailicid3/logger'
-import { fmt, formatValue } from '@snailicid3/utils'
+import { fmt } from '@snailicid3/utils'
 import chalk from 'chalk'
 import yargs from 'yargs'
 import type { Argv, Options } from 'yargs'
-import yargsInteractive from 'yargs-interactive'
 import { type z } from 'zod'
-import {
-    type AppConfig,
-    type AppConfigIn,
-    appConfigSchema,
-} from './app-config.js'
+import { type AppConfig, type AppConfigIn, appConfigSchema } from './config.js'
 import { doPrintHeader, getHeader } from './header.js'
-import { wrapSchema, type ZodObjectSchema } from './helpers.js'
-import { prettyErrorLog, removeAnsi } from './string-utils.js'
-import { getYargAppOptionObject } from './zod-schema.js'
+import { prettyErrorLog, removeAnsi } from '../output/formatting.js'
+import { getYargAppOptionObject } from '../schema/to-yargs.js'
+import { wrapSchema, type ZodObjectSchema } from '../schema/utils.js'
 
 /**
  * A callback type that is invoked upon successful initialization of the application.
@@ -35,9 +30,8 @@ export type InitSuccessCallback<
  *
  * @template AppOptionsSchema - The schema for the application options.
  * @param {AppOptionsSchema} optionsSchema - The schema for validating the application options.
- * @param {AppConfigIn<AppOptionsSchema>} config - The configuration object for the application.
- * @param {InitSuccessCallback<AppOptionsSchema>} initFunction - The callback func ccalled successful init
- * @param {boolean} [skip_interactive] - Flag to skip interactive prompts. Default is `false`
+ * @param {AppConfigIn} config - The configuration object for the application.
+ * @param {InitSuccessCallback<AppOptionsSchema>} initFunction - Callback invoked after successful argument validation.
  * @param {string[]} [_yargs] - The command-line arguments to be parsed. Default is `process.argv`
  * @returns {Promise<Argv | undefined>} - Returns a Yargs instance or undefined if initialization fails.
  */
@@ -45,13 +39,11 @@ export const initApp = async <AppOptionsSchema extends ZodObjectSchema>(
     optionsSchema: AppOptionsSchema,
     config: AppConfigIn,
     initFunction: InitSuccessCallback<AppOptionsSchema>,
-    skip_interactive: boolean = false,
     _yargs: Array<string> = process.argv,
 ): Promise<Argv | undefined> => {
     const _appConfigResult = appConfigSchema.safeParse(config)
 
     if (_appConfigResult.success) {
-        /* RESOLBED APP CONFIG */
         const app_config: AppConfig = _appConfigResult.data
         /** .child({ module: 'initApp' }) */
         const LOGGER = logger.get().child('app_init')
@@ -75,11 +67,6 @@ export const initApp = async <AppOptionsSchema extends ZodObjectSchema>(
             ? doPrintHeader(getHeader(app_config))
             : fmt`\nWelcome to ${app_config.name} ${getHeader(app_config).divider}`
 
-        const getPlainArgsInstance = (
-            value = process.argv,
-        ): Argv<Record<string, unknown>> => {
-            return yargs(value)
-        }
         /** Function to Write commander like options from zod descriptions */
         const getArgsInstance = (
             value = process.argv,
@@ -95,7 +82,7 @@ export const initApp = async <AppOptionsSchema extends ZodObjectSchema>(
             return yargs_instance
         }
         // Build configured yargs first
-        const yargsInstance = getArgsInstance(_yargs).boolean('interactive')
+        const yargsInstance = getArgsInstance(_yargs)
 
         // Short-circuit for help/version so yargs handles printing and exit code
 
@@ -117,8 +104,6 @@ export const initApp = async <AppOptionsSchema extends ZodObjectSchema>(
 
         const argSuccess = optionsSchema.safeParse(raw_arguments)
 
-        /* I dont know what anything does after this */
-
         if (argSuccess.success) {
             const resolvedArgs: z.output<AppOptionsSchema> = argSuccess.data
             LOGGER.debug(fmt`SUCCESS! RESOLVED ARGUMENTS::${resolvedArgs}`)
@@ -126,8 +111,6 @@ export const initApp = async <AppOptionsSchema extends ZodObjectSchema>(
             await initFunction(resolvedArgs, app_config, removeAnsi(_help))
 
             return yargsInstance
-
-            /* IF WE ARE IN ERROR MODE , arggs did not parse */
         } else {
             const argParseError = argSuccess.error
 
@@ -138,48 +121,7 @@ export const initApp = async <AppOptionsSchema extends ZodObjectSchema>(
                     undefined,
                 ),
             )
-            /* Respect CLI flag if provided; otherwise fallback to config */
-            const interactive_arg = (raw_arguments as any)?.interactive
-            const interactive_bool =
-                typeof interactive_arg === 'boolean'
-                    ? interactive_arg
-                    : !_appConfigResult.data.skip_interactive
-
-            if (!interactive_bool) {
-                return undefined
-            } else {
-                const options: yargsInteractive.Option = {
-                    errorlist: {
-                        choices: ['HELP', 'SHOW ERROR', 'DONE'],
-                        describe: 'List test',
-                        type: 'list',
-                    },
-                    interactive: { default: true },
-                }
-                await yargsInteractive()
-                    .interactive(options)
-                    .then((result) => {
-                        if (result.errorlist === 'SHOW ERROR') {
-                            if (!argSuccess.success) {
-                                LOGGER.error(
-                                    prettyErrorLog(
-                                        argSuccess.error,
-                                        'Invalid command line arguments',
-                                    ),
-                                )
-                                LOGGER.error(
-                                    `Raw Yargs: \n ${formatValue(raw_arguments)}`,
-                                )
-                                return undefined
-                            }
-                        } else if (result.errorlist === 'HELP') {
-                            yargsInstance.showHelp()
-                        } else if (result.errorlist === 'DONE') {
-                            console.log('Done')
-                        }
-                        return undefined
-                    })
-            }
+            return undefined
         }
     } else
         logger
