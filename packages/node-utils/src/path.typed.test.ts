@@ -80,8 +80,41 @@ describe('typed paths', () => {
             path.resolve(directoryPath),
         )
         expect(() => requirePathOfType(filePath, 'directory')).toThrow(
-            'Expected path type "directory", received "file"',
+            'Expected path type "directory", received path type "file"',
         )
+    })
+
+    it('selects multiple or negated path types without Zod', () => {
+        const fileOrDirectory = getPathOfType(filePath, [
+            'file',
+            'directory',
+        ] as const)
+        const notDirectoryOrGlob = getPathOfType(
+            symlinkPath,
+            ['directory', 'glob'] as const,
+            { negate: true },
+        )
+        const rejectedDirectory = getPathOfType(
+            directoryPath,
+            ['directory', 'glob'] as const,
+            { negate: true },
+        )
+        const rejectedUnknown = getPathOfType(
+            path.join(temporaryDirectory, 'missing'),
+            ['directory', 'glob'] as const,
+            { negate: true },
+        )
+
+        expect(fileOrDirectory).toBe(path.resolve(filePath))
+        expect(notDirectoryOrGlob).toBe(path.resolve(symlinkPath))
+        expect(rejectedDirectory).toBeUndefined()
+        expect(rejectedUnknown).toBeUndefined()
+        expectTypeOf(fileOrDirectory).toEqualTypeOf<
+            TypedPath<'directory' | 'file'> | undefined
+        >()
+        expectTypeOf(notDirectoryOrGlob).toEqualTypeOf<
+            TypedPath<'file' | 'symlink'> | undefined
+        >()
     })
 
     it('keeps brands distinct at compile time', () => {
@@ -131,6 +164,22 @@ describe('typed paths', () => {
         >()
     })
 
+    it('supports negated path selectors with Zod', () => {
+        const schema = fsTypedPath(['directory', 'glob'] as const, {
+            negate: true,
+        })
+
+        expect(schema.parse(filePath)).toBe(path.resolve(filePath))
+        expect(schema.parse(symlinkPath)).toBe(path.resolve(symlinkPath))
+        expect(schema.safeParse(directoryPath).success).toBe(false)
+        expect(
+            schema.safeParse(path.join(temporaryDirectory, 'missing')).success,
+        ).toBe(false)
+        expectTypeOf<z.output<typeof schema>>().toEqualTypeOf<
+            TypedPath<'file' | 'symlink'>
+        >()
+    })
+
     it('optionally requires typed paths to exist', () => {
         const unmatchedGlob = path.join(temporaryDirectory, '*.missing')
         const uncheckedSchema = fsTypedPath('glob')
@@ -145,6 +194,28 @@ describe('typed paths', () => {
         expect(checkedSchema.safeParse(unmatchedGlob).success).toBe(false)
         expect(rootedSchema.safeParse('example.txt').success).toBe(true)
         expect(rootedSchema.safeParse('missing.txt').success).toBe(false)
+    })
+
+    it('reports actionable typed-path validation errors', () => {
+        const missingPath = path.join(temporaryDirectory, 'missing.txt')
+        const missingResult = fsTypedPath('file', {
+            exists: true,
+        }).safeParse(missingPath)
+        const wrongTypeResult = fsTypedPath('file').safeParse(directoryPath)
+        const unmatchedGlob = path.join(temporaryDirectory, '*.missing')
+        const globResult = fsTypedPath('glob', {
+            exists: true,
+        }).safeParse(unmatchedGlob)
+
+        expect(missingResult.error?.issues[0]?.message).toBe(
+            `Path does not exist: "${missingPath}" (expected path type "file")`,
+        )
+        expect(wrongTypeResult.error?.issues[0]?.message).toBe(
+            `Expected path type "file", but "${path.resolve(directoryPath)}" is path type "directory"`,
+        )
+        expect(globResult.error?.issues[0]?.message).toBe(
+            `Glob pattern did not match any filesystem entries: "${unmatchedGlob}"`,
+        )
     })
 
     it('resolves relative Zod paths against a root', () => {

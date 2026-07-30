@@ -91,7 +91,7 @@ export const exampleAppConfig: AppConfigIn = {
         ],
     ],
     name: 'cli-app-example',
-    print: false,
+    print: true,
     version: '0.0.0',
 }
 

@@ -32,7 +32,15 @@ export type { JSONExportConfig, JSONExportEntry } from './export.json.file.js'
 export * as filePath from './file.path.array.js'
 export type { FilePath, FileType } from './file.path.array.js'
 export * as typedPath from './path.typed.js'
-export type { FilePathType, PathTypeResult, TypedPath } from './path.typed.js'
+export type {
+    FilePathType,
+    PathTypeResult,
+    PathTypeSelectionOptions,
+    PathTypeSelector,
+    RecognizedFilePathType,
+    SelectedFilePathType,
+    TypedPath,
+} from './path.typed.js'
 export {
     FILE_PATH_TYPES,
     getPathOfType,
@@ -56,8 +64,4 @@ export {
     fsPathTypeExists,
     fsTypedPath,
 } from './zod.node.js'
-export type {
-    FsTypedPathOptions,
-    SelectedFilePathType,
-    TypedPathSelector,
-} from './zod.node.js'
+export type { FsTypedPathOptions, TypedPathSelector } from './zod.node.js'

@@ -19,9 +19,6 @@
         "dev:nx": "nx run $npm_package_name:dev",
         "demo": "node ./bin/logger-demo.js"
     },
-    "bin": {
-        "cli-app-example": "./dist/example.js"
-    },
     "nx": {
         "targets": {
             "dev": {},

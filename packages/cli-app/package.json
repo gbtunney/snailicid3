@@ -1,6 +1,6 @@
 {
     "name": "@snailicid3/cli-app",
-    "version": "0.0.9",
+    "version": "0.0.0",
     "private": false,
     "description": "Zod-backed CLI app framework",
     "scripts": {
@@ -9,7 +9,8 @@
         "clean:nx": "nx run $npm_package_name:clean",
         "dev:nx": "nx run $npm_package_name:dev",
         "api:report:nx": "nx run $npm_package_name:api:report",
-        "test:example": "nx run $npm_package_name:check:ts && pnpm exec tsx ./src/example/index.ts"
+        "test:example": "nx run $npm_package_name:check:ts && pnpm exec tsx ./src/example/index.ts --help",
+        "test:example:cli": "pnpm run build:nx && nx run $npm_package_name:check:ts && pnpm exec node ./dist/example.mjs --help"
     },
     "nx": {
         "targets": {
@@ -28,7 +29,6 @@
             "api:report": {},
             "api:check": {},
             "test": {},
-            "test:nx": {},
             "test:watch": {},
             "lint": {},
             "fix": {},
@@ -38,45 +38,6 @@
             "docs:build:ts": {},
             "docs:build": {}
         }
-    },
-    "keywords": [
-        "typescript",
-        "snailicid3",
-        "monorepo",
-        "cli",
-        "framework",
-        "zod",
-        "yargs"
-    ],
-    "buildConfig": {
-        "runtime": "node",
-        "product": "cli",
-        "buildStrategy": "bundle"
-    },
-    "publishConfig": {
-        "access": "public"
-    },
-    "type": "module",
-    "types": "./dist/index.d.cts",
-    "exports": {
-        ".": "./dist/index.mjs",
-        "./example": "./dist/example.mjs",
-        "./package.json": "./package.json"
-    },
-    "files": [
-        "CHANGELOG.md",
-        "dist",
-        "types"
-    ],
-    "author": {
-        "name": "Gillian Tunney",
-        "email": "gbtunney@mac.com"
-    },
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/gbtunney/snailicid3",
-        "directory": "packages/cli-app"
     },
     "dependencies": {
         "@snailicid3/color": "workspace:*",
@@ -100,5 +61,42 @@
         "typedoc": "^0.28.19",
         "typescript": "^6.0.3",
         "vitest": "^4.1.9"
+    },
+    "bin": {
+        "cli-app-example": "./dist/example.mjs"
+    },
+    "types": "./dist/index.d.mts",
+    "exports": {
+        ".": "./dist/index.mjs",
+        "./example": "./dist/example.mjs",
+        "./package.json": "./package.json"
+    },
+    "keywords": [
+        "typescript",
+        "snailicid3",
+        "monorepo",
+        "cli",
+        "framework",
+        "zod",
+        "yargs"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "type": "module",
+    "files": [
+        "CHANGELOG.md",
+        "dist",
+        "types"
+    ],
+    "author": {
+        "name": "Gillian Tunney",
+        "email": "gbtunney@mac.com"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/gbtunney/snailicid3",
+        "directory": "packages/cli-app"
     }
 }

@@ -50,7 +50,6 @@
     },
     "type": "module",
     "main": "./dist/index.cjs",
-    "types": "./dist/index.d.cts",
     "exports": {
         ".": {
             "import": "./dist/index.mjs",
@@ -94,5 +93,6 @@
         "typescript": "^6.0.3",
         "vitest": "^4.1.9"
     },
-    "module": "./dist/index.mjs"
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.cts"
 }

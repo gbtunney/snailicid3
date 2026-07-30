@@ -10,22 +10,21 @@ import {
     getFullPath,
     normalizePath,
 } from './file.path.array.js'
-import { type FilePathType, getPathType, type TypedPath } from './path.typed.js'
+import {
+    getPathType,
+    isPathType,
+    type PathTypeSelectionOptions,
+    type PathTypeSelector,
+    type SelectedFilePathType,
+    type TypedPath,
+} from './path.typed.js'
 
-export type FsTypedPathOptions = {
-    /** Require the path to exist. Globs must match at least one entry. */
-    exists?: boolean
-}
-
-export type SelectedFilePathType<Selector extends TypedPathSelector> =
-    Selector extends 'any'
-        ? Exclude<FilePathType, 'unknown'>
-        : Selector extends ReadonlyArray<infer Type extends FilePathType>
-          ? Type
-          : Extract<Selector, FilePathType>
-
-export type TypedPathSelector =
-    'any' | FilePathType | ReadonlyArray<FilePathType>
+export type FsTypedPathOptions<Negate extends boolean = boolean> =
+    PathTypeSelectionOptions<Negate> & {
+        /** Require the path to exist. Globs must match at least one entry. */
+        exists?: boolean
+    }
+export type TypedPathSelector = PathTypeSelector
 
 /* * CUSTOM ZOD UTILITIES!! * */
 /** @group Zod Schemas */
@@ -104,50 +103,67 @@ export const fsPathTypeExists = (
  *
  * @group Zod Schemas
  */
-export const fsTypedPath = <Selector extends TypedPathSelector>(
+export const fsTypedPath = <
+    Selector extends TypedPathSelector,
+    Negate extends boolean = false,
+>(
     allowedTypes: Selector,
-    rootOrOptions?: FsTypedPathOptions | string,
-    options?: FsTypedPathOptions,
-): z.ZodType<TypedPath<SelectedFilePathType<Selector>>, string> => {
+    rootOrOptions?: FsTypedPathOptions<Negate> | string,
+    options?: FsTypedPathOptions<Negate>,
+): z.ZodType<TypedPath<SelectedFilePathType<Selector, Negate>>, string> => {
     const root = typeof rootOrOptions === 'string' ? rootOrOptions : undefined
-    const requireExists =
-        (typeof rootOrOptions === 'string' ? options : rootOrOptions)?.exists ??
-        false
+    const resolvedOptions =
+        typeof rootOrOptions === 'string' ? options : rootOrOptions
+    const requireExists = resolvedOptions?.exists ?? false
+    const negate = resolvedOptions?.negate ?? false
 
     return z
         .string()
         .transform((value) => getFullPath(value, root))
         .transform((value, context) => {
             const result = getPathType(value)
-            const accepted =
-                allowedTypes === 'any'
-                    ? result.type !== 'unknown'
-                    : typeof allowedTypes === 'string'
-                      ? result.type === allowedTypes
-                      : allowedTypes.includes(result.type)
+            const expected = negate
+                ? `any recognized path type except ${typeof allowedTypes === 'string' ? allowedTypes : allowedTypes.join(' | ')}`
+                : allowedTypes === 'any'
+                  ? 'a file, directory, symlink, or glob'
+                  : typeof allowedTypes === 'string'
+                    ? `path type "${allowedTypes}"`
+                    : `one of these path types: ${allowedTypes.join(' | ')}`
+            const accepted = isPathType(result, allowedTypes, {
+                negate,
+            })
 
             if (!accepted) {
-                const expected =
-                    typeof allowedTypes === 'string'
-                        ? allowedTypes
-                        : allowedTypes.join(' | ')
+                const exists = doesFileExist(result.path)
+                const message =
+                    result.type === 'unknown'
+                        ? exists
+                            ? `Path is not a supported filesystem entry: "${result.path}" (expected ${expected})`
+                            : `Path does not exist: "${result.path}" (expected ${expected})`
+                        : `Expected ${expected}, but "${result.path}" is path type "${result.type}"`
 
                 context.addIssue({
                     code: 'custom',
-                    message: `Expected path type "${expected}", received "${result.type}"`,
+                    message,
                 })
                 return z.NEVER
             }
 
             if (requireExists && getExistingPathType(value) === undefined) {
+                const message =
+                    result.type === 'glob'
+                        ? `Glob pattern did not match any filesystem entries: "${result.path}"`
+                        : `Path does not exist: "${result.path}"`
                 context.addIssue({
                     code: 'custom',
-                    message: 'Expected path to exist',
+                    message,
                 })
                 return z.NEVER
             }
 
-            return result.path as TypedPath<SelectedFilePathType<Selector>>
+            return result.path as TypedPath<
+                SelectedFilePathType<Selector, Negate>
+            >
         })
 }
 
