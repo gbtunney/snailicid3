@@ -180,6 +180,26 @@ pnpm --filter @snailicid3/cli-app test:example --help
 pnpm --filter @snailicid3/cli-app test:example -z gbt -z gbt2
 ```
 
+## Progress bar utility
+
+The package includes a cute little spinner progress bar utility for visual feedback during
+long-running operations:
+
+```ts
+import { createProgressBar } from '@snailicid3/cli-app'
+
+const run: InitSuccessCallback<typeof optionsSchema> = async (args) => {
+  const progressBar = createProgressBar('Processing files:')
+  progressBar.start()
+
+  // Perform your operations
+  await processFiles(args)
+
+  progressBar.stop()
+  console.log('Complete!')
+}
+```
+
 ## Future improvement: interactive schema prompts
 
 Invalid arguments currently produce a formatted Zod error and return without invoking the success
