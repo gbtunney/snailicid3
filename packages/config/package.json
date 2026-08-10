@@ -28,6 +28,7 @@
         "snail-sh": "./bin/snail-sh-logger.sh",
         "scope-commit": "./bin/scope/commit.sh",
         "scope-affected": "./bin/scope/affected.sh",
+        "snail-package": "./bin/package-command.sh",
         "gbt-changeset": "./bin/changeset-branch.sh",
         "gbt-exec": "./bin/make-executable.sh",
         "gbt-setup": "./bin/completions/install-pnpm.sh",

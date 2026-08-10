@@ -5,6 +5,7 @@ import path from 'node:path'
 import { splitNonEmptyLines, uniqueSorted } from './../utilities/array.js'
 import { runCommand } from './../utilities/command.js'
 import { runCliIfEntrypoint } from './../utilities/entrypoint.js'
+import { runPackageBinary } from './../utilities/package-manager.js'
 import { getRepoRoot } from './../workspace/git.js'
 import { normalizeRepoPath } from './../workspace/paths.js'
 import {
@@ -93,18 +94,11 @@ function collectNxAffectedScopes(
     repoRoot: string,
     parsed: ParsedArgs,
 ): Array<string> {
-    const nxArgs = [
-        'nx',
-        'show',
-        'projects',
-        '--affected',
-        '--base',
-        parsed.nxBase,
-    ]
+    const nxArgs = ['show', 'projects', '--affected', '--base', parsed.nxBase]
 
     if (parsed.nxHead) nxArgs.push('--head', parsed.nxHead)
 
-    const result = runCommand('pnpm', nxArgs, { cwd: repoRoot })
+    const result = runPackageBinary(repoRoot, 'nx', nxArgs)
 
     if (result.status !== 0) return []
 
@@ -239,18 +233,18 @@ function parseChangesetPackageNames(markdown: string): Array<string> {
 
 function printHelp(): void {
     console.log(`Usage:
-  pnpm exec scope-affected [--csv|--list] [--keep-prefix] [--nx-only|--include-repo-scopes] [--base <ref>|--since <ref>] [--head <ref>]
-  pnpm exec scope-affected --changeset <file> [--no-nx]
-  pnpm exec scope-affected --changeset-only <file>
+  scope-affected [--csv|--list] [--keep-prefix] [--nx-only|--include-repo-scopes] [--base <ref>|--since <ref>] [--head <ref>]
+  scope-affected --changeset <file> [--no-nx]
+  scope-affected --changeset-only <file>
 
 Examples:
-  pnpm exec scope-affected
-  pnpm exec scope-affected --list
-  pnpm exec scope-affected --since v1.0.0
-  pnpm exec scope-affected --keep-prefix
-  pnpm exec scope-affected --nx-only
-  pnpm exec scope-affected --base v1.0.0 --head HEAD
-  pnpm exec scope-affected --changeset-only .changeset/example.md`)
+  scope-affected
+  scope-affected --list
+  scope-affected --since v1.0.0
+  scope-affected --keep-prefix
+  scope-affected --nx-only
+  scope-affected --base v1.0.0 --head HEAD
+  scope-affected --changeset-only .changeset/example.md`)
 }
 
 function readNextValue(

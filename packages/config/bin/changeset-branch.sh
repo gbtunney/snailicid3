@@ -35,6 +35,10 @@ unset BOOTSTRAP_CALLER_SOURCE
 PREFIX="${PREFIX_OVERRIDE:-${PREFIX:-changeset}}"
 ALLOW_DIRTY="${ALLOW_DIRTY:-false}"
 
+package_command() {
+    node "$PACKAGE_DIR/dist/utilities/package-command.js" "$@"
+}
+
 detect_default_branch() {
     # Prefer origin/HEAD if available
     git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2> /dev/null \
@@ -91,7 +95,7 @@ find .changeset -maxdepth 1 -type f -name '*.md' -print | sort > "$before"
 spacer 1
 section "Launching Changesets CLI..."
 spacer 1
-pnpm changeset add
+package_command exec changeset add
 
 # Find the new file
 find .changeset -maxdepth 1 -type f -name '*.md' -print | sort > "$after"
@@ -106,7 +110,7 @@ new_count="$(comm -13 "$before" "$after" | wc -l | tr -d ' ')"
 
 slug="$(basename "$new_file" .md)"
 branch="${PREFIX}/${slug}"
-scope="$(pnpm exec scope-affected --changeset-only "$new_file")"
+scope="$(package_command exec scope-affected --changeset-only "$new_file")"
 
 kv_pair "New changeset" "$new_file"
 kv_pair "Commit scope" "$scope"
@@ -122,7 +126,7 @@ git switch -c "$branch"
 log "Committing changeset..."
 spacer 1
 git add "$new_file"
-pnpm exec scope-commit --checked-commit changeset "$slug" --scope "$scope"
+package_command exec scope-commit --checked-commit changeset "$slug" --scope "$scope"
 
 success "Done."
 kv_pair "Branch" "$branch"

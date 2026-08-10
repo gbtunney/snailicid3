@@ -105,6 +105,18 @@ export function runPackageBinary(
     })
 }
 
+/** Run a package-manager-native command such as `root`, `list`, or `query`. */
+export function runPackageManager(
+    repoRoot: string,
+    args: ReadonlyArray<string> = [],
+    options: RunCommandOptions = {},
+): CommandResult {
+    return runCommand(getPackageManager(repoRoot), args, {
+        cwd: repoRoot,
+        ...options,
+    })
+}
+
 export function runPackageScript(
     repoRoot: string,
     script: string,
