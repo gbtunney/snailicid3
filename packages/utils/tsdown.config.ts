@@ -12,6 +12,7 @@ const plan = defineBuildPlan(pkg, {
             output_formats: ['esm', 'cjs', 'ts'],
         },
         {
+            include_dependencies: true,
             key: '*',
             // Refs #82
             // TODO Refs #195  inlined dependencies are not working with tsdown, so we need to disable linting for now

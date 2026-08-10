@@ -89,7 +89,8 @@ export function entryToTsdownConfig(
         deps: externals,
         dts: hasDts,
         entry: { [entry.fileName]: entry.sourcePath },
-        exports: true,
+        //TODO ##195 i hate this
+        exports: false,
         format: formats,
         logLevel: entry.logLevel,
         outDir: entry.outputDir,
