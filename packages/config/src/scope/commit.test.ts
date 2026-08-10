@@ -113,17 +113,15 @@ describe('scope-commit messages', () => {
         expect(output).toBe('chore(config): test scope message')
     })
 
-    it('accepts skip-lint-staged without changing generated scopes', async () => {
-        const output = await captureConsoleLog(async () => {
-            await main([
+    it('rejects the removed skip-lint-staged flag', async () => {
+        await expect(
+            main([
                 '--message',
                 'chore',
                 'test scope message',
                 '--skip-lint-staged',
                 'packages/config/package.json',
-            ])
-        })
-
-        expect(output).toBe('chore(config): test scope message')
+            ]),
+        ).rejects.toThrow('Unknown argument: --skip-lint-staged')
     })
 })

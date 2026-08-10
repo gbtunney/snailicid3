@@ -36,7 +36,6 @@ type ParsedArgs = {
     positionals: Array<string>
     runCommitBefore: boolean
     scopeFormat: ScopeFormat
-    skipLintStaged: boolean
     validateOnly: boolean
 }
 
@@ -73,9 +72,7 @@ export async function main(
     }
 
     if (parsed.runCommitBefore) {
-        runCheckedPrecommit(repoRoot, {
-            skipLintStaged: parsed.skipLintStaged,
-        })
+        prepareCheckedCommit(repoRoot)
     }
 
     const scopes = parsed.explicitScope
@@ -191,7 +188,6 @@ function parseArgs(args: Array<string>): ParsedArgs {
         positionals: [],
         runCommitBefore: false,
         scopeFormat: 'csv',
-        skipLintStaged: false,
         validateOnly: false,
     }
 
@@ -253,10 +249,6 @@ function parseArgs(args: Array<string>): ParsedArgs {
                 parsed.explicitScope = readNextValue(args, ++index, arg)
                 break
 
-            case '--skip-lint-staged':
-                parsed.skipLintStaged = true
-                break
-
             default:
                 if (arg.startsWith('--')) {
                     throw new Error(`Unknown argument: ${arg}`)
@@ -270,13 +262,27 @@ function parseArgs(args: Array<string>): ParsedArgs {
     return parsed
 }
 
+function prepareCheckedCommit(repoRoot: string): void {
+    const stagedDiff = runCommand('git', ['diff', '--cached', '--quiet'], {
+        cwd: repoRoot,
+    })
+
+    if (stagedDiff.status === 0) {
+        const addResult = runCommand('git', ['add', '-A'], { cwd: repoRoot })
+
+        if (addResult.status !== 0) {
+            throw new Error(addResult.stderr || 'git add -A failed')
+        }
+    }
+}
+
 function printHelp(): void {
     console.log(`Usage:
   scope-commit [--staged|--all] [--csv|--list] [--keep-prefix] [file ...]
   scope-commit --validate-type <type>
   scope-commit --message <type> <subject> [--staged|--all] [--keep-prefix] [file ...]
   scope-commit --commit <type> <subject> [--scope <scope>] [--staged|--all] [--keep-prefix] [--dry-run] [file ...]
-  scope-commit --checked-commit <type> <subject> [--scope <scope>] [--staged|--all] [--keep-prefix] [--skip-lint-staged] [--dry-run] [file ...]
+  scope-commit --checked-commit <type> <subject> [--scope <scope>] [--staged|--all] [--keep-prefix] [--dry-run] [file ...]
 
 Examples:
   scope-commit
@@ -287,7 +293,6 @@ Examples:
   scope-commit --commit --dry-run chore autofix
   scope-commit --message chore autofix --scope config
   scope-commit --checked-commit chore autofix
-  scope-commit --checked-commit --skip-lint-staged chore autofix
   scope-commit .github/workflows/call-pipeline.yml`)
 }
 
@@ -303,40 +308,6 @@ function readNextValue(
     }
 
     return value
-}
-
-function runCheckedPrecommit(
-    repoRoot: string,
-    options: { skipLintStaged: boolean },
-): void {
-    const stagedDiff = runCommand('git', ['diff', '--cached', '--quiet'], {
-        cwd: repoRoot,
-    })
-
-    if (stagedDiff.status === 0) {
-        const addResult = runCommand('git', ['add', '-A'], { cwd: repoRoot })
-
-        if (addResult.status !== 0) {
-            throw new Error(addResult.stderr || 'git add -A failed')
-        }
-    }
-
-    if (options.skipLintStaged) {
-        return
-    }
-
-    const lintResult = runPackageBinary(
-        repoRoot,
-        'lint-staged',
-        ['--debug', '--relative'],
-        { cwd: repoRoot, stdio: 'inherit' },
-    )
-
-    if (lintResult.status !== 0) {
-        throw new Error(
-            lintResult.stderr || lintResult.stdout || 'lint-staged failed',
-        )
-    }
 }
 function scopesForPath(
     repoRoot: string,
