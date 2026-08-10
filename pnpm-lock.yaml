@@ -9,10 +9,10 @@ importers:
         devDependencies:
             '@changesets/cli':
                 specifier: ^2.31.0
-                version: 2.31.1(@types/node@26.1.2)
+                version: 2.31.1(@types/node@26.2.0)
             '@commitlint/cli':
                 specifier: ^21.0.2
-                version: 21.2.1(@types/node@26.1.2)(conventional-commits-parser@7.1.2)(typescript@6.0.3)
+                version: 21.2.1(@types/node@26.2.0)(conventional-commits-parser@7.1.2)(typescript@6.0.3)
             '@eslint/config-inspector':
                 specifier: ^3.1.0
                 version: 3.2.0(eslint@10.8.1(jiti@2.7.0))(srvx@0.12.5)
@@ -23,13 +23,13 @@ importers:
                 specifier: workspace:*
                 version: link:packages/config
             '@types/node':
-                specifier: ^26.1.2
-                version: 26.1.2
+                specifier: ^26.2.0
+                version: 26.2.0
             '@vitest/coverage-v8':
-                specifier: ^4.1.9
+                specifier: ^4.1.10
                 version: 4.1.10(vitest@4.1.10)
             '@vitest/ui':
-                specifier: ^4.1.9
+                specifier: ^4.1.10
                 version: 4.1.10(vitest@4.1.10)
             eslint:
                 specifier: ^10.4.1
@@ -75,7 +75,7 @@ importers:
                 version: 19.2.8(react@19.2.8)
             vite:
                 specifier: ^8.0.16
-                version: 8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)
+                version: 8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)
         devDependencies:
             '@snailicid3/build-config':
                 specifier: workspace:*
@@ -84,20 +84,20 @@ importers:
                 specifier: workspace:*
                 version: link:../../packages/config
             '@types/node':
-                specifier: ^26.1.2
-                version: 26.1.2
+                specifier: ^26.2.0
+                version: 26.2.0
             '@types/react':
-                specifier: ^19.2.17
+                specifier: ^19.2.18
                 version: 19.2.18
             '@types/react-dom':
-                specifier: ^19.2.3
+                specifier: ^19.2.4
                 version: 19.2.4(@types/react@19.2.18)
             typescript:
                 specifier: ^6.0.3
                 version: 6.0.3
             vitest:
                 specifier: ^4.1.9
-                version: 4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+                version: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
 
     packages/build-config:
         dependencies:
@@ -133,7 +133,7 @@ importers:
                 version: 4.62.4
             rollup-plugin-node-externals:
                 specifier: ^9.0.1
-                version: 9.0.1(rollup@4.62.4)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+                version: 9.0.1(rollup@4.62.4)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
             rollup-plugin-polyfill-node:
                 specifier: ^0.13.0
                 version: 0.13.0(rollup@4.62.4)
@@ -145,38 +145,38 @@ importers:
                 version: 1.3.0
             tsdown:
                 specifier: ^0.22.2
-                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.11)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)))
+                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.11)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)))
             type-fest:
                 specifier: ^5.7.0
                 version: 5.8.0
             unplugin-unused:
                 specifier: ^0.6.0
-                version: 0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+                version: 0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
             vite:
                 specifier: ^8.0.16
-                version: 8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)
+                version: 8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)
             vite-plugin-dts:
                 specifier: ^5.0.2
-                version: 5.0.3(@microsoft/api-extractor@7.58.12(@types/node@26.1.2))(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(typescript@6.0.3)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+                version: 5.0.3(@microsoft/api-extractor@7.58.12(@types/node@26.2.0))(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(typescript@6.0.3)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
             zod:
                 specifier: ^4.4.2
                 version: 4.4.3
         devDependencies:
             '@microsoft/api-extractor':
                 specifier: ^7.58.8
-                version: 7.58.12(@types/node@26.1.2)
+                version: 7.58.12(@types/node@26.2.0)
             '@snailicid3/config':
                 specifier: workspace:*
                 version: link:../config
             '@types/node':
-                specifier: ^26.1.2
-                version: 26.1.2
+                specifier: ^26.2.0
+                version: 26.2.0
             typescript:
                 specifier: ^6.0.3
                 version: 6.0.3
             vitest:
                 specifier: ^4.1.9
-                version: 4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+                version: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
 
     packages/cli-app:
         dependencies:
@@ -213,7 +213,7 @@ importers:
         devDependencies:
             '@microsoft/api-extractor':
                 specifier: ^7.58.8
-                version: 7.58.12(@types/node@26.1.2)
+                version: 7.58.12(@types/node@26.2.0)
             '@snailicid3/build-config':
                 specifier: workspace:*
                 version: link:../build-config
@@ -221,14 +221,14 @@ importers:
                 specifier: workspace:*
                 version: link:../config
             '@types/node':
-                specifier: ^26.1.2
-                version: 26.1.2
+                specifier: ^26.2.0
+                version: 26.2.0
             '@types/yargs':
                 specifier: ^17.0.35
                 version: 17.0.35
             tsdown:
                 specifier: ^0.22.2
-                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.11)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)))
+                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.11)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)))
             tsx:
                 specifier: ^4.23.1
                 version: 4.23.11
@@ -240,7 +240,7 @@ importers:
                 version: 6.0.3
             vitest:
                 specifier: ^4.1.9
-                version: 4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+                version: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
 
     packages/color:
         dependencies:
@@ -265,7 +265,7 @@ importers:
         devDependencies:
             '@microsoft/api-extractor':
                 specifier: ^7.58.8
-                version: 7.58.12(@types/node@26.1.2)
+                version: 7.58.12(@types/node@26.2.0)
             '@snailicid3/build-config':
                 specifier: workspace:*
                 version: link:../build-config
@@ -273,17 +273,17 @@ importers:
                 specifier: workspace:*
                 version: link:../config
             '@types/node':
-                specifier: ^26.1.2
-                version: 26.1.2
+                specifier: ^26.2.0
+                version: 26.2.0
             tsdown:
                 specifier: ^0.22.2
-                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.11)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)))
+                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.11)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)))
             typescript:
                 specifier: ^6.0.3
                 version: 6.0.3
             vitest:
                 specifier: ^4.1.9
-                version: 4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+                version: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
 
     packages/config:
         dependencies:
@@ -318,8 +318,8 @@ importers:
                 specifier: ^17.0.35
                 version: 17.0.35
             '@vitest/eslint-plugin':
-                specifier: ^1.6.20
-                version: 1.6.26(@typescript-eslint/eslint-plugin@8.66.0(@typescript-eslint/parser@8.66.0(eslint@10.8.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.8.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.8.1(jiti@2.7.0))(typescript@6.0.3)(vitest@4.1.10)
+                specifier: ^1.6.27
+                version: 1.6.27(@typescript-eslint/eslint-plugin@8.66.0(@typescript-eslint/parser@8.66.0(eslint@10.8.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.8.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.8.1(jiti@2.7.0))(typescript@6.0.3)(vitest@4.1.10)
             ajv:
                 specifier: ^8.20.0
                 version: 8.20.0
@@ -330,16 +330,16 @@ importers:
                 specifier: ^0.4.0
                 version: 0.4.0
             eslint-plugin-check-file:
-                specifier: ^3.3.1
+                specifier: ^3.3.2
                 version: 3.3.2(eslint@10.8.1(jiti@2.7.0))
             eslint-plugin-import-x:
-                specifier: ^4.16.2
+                specifier: ^4.17.1
                 version: 4.17.1(@typescript-eslint/utils@8.66.0(eslint@10.8.1(jiti@2.7.0))(typescript@6.0.3))(eslint-import-resolver-node@0.4.0)(eslint@10.8.1(jiti@2.7.0))
             eslint-plugin-jsdoc:
-                specifier: ^63.0.4
-                version: 63.3.3(eslint@10.8.1(jiti@2.7.0))
+                specifier: ^64.0.2
+                version: 64.0.2(eslint@10.8.1(jiti@2.7.0))
             eslint-plugin-perfectionist:
-                specifier: ^5.9.1
+                specifier: ^5.10.1
                 version: 5.10.1(eslint@10.8.1(jiti@2.7.0))(typescript@6.0.3)
             eslint-plugin-react:
                 specifier: ^7.37.5
@@ -351,11 +351,11 @@ importers:
                 specifier: ^0.5.3
                 version: 0.5.3(eslint@10.8.1(jiti@2.7.0))
             eslint-plugin-storybook:
-                specifier: ^10.4.5
+                specifier: ^10.5.7
                 version: 10.5.7(eslint@10.8.1(jiti@2.7.0))(storybook@10.5.7(@types/react@19.2.18)(prettier@3.9.6)(react@19.2.8))(typescript@6.0.3)
             eslint-plugin-unicorn:
-                specifier: ^72.0.0
-                version: 72.0.0(eslint@10.8.1(jiti@2.7.0))
+                specifier: ^73.0.0
+                version: 73.0.0(eslint@10.8.1(jiti@2.7.0))
             eslint-plugin-unused-imports:
                 specifier: ^4.4.1
                 version: 4.4.1(@typescript-eslint/eslint-plugin@8.66.0(@typescript-eslint/parser@8.66.0(eslint@10.8.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.8.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.8.1(jiti@2.7.0))
@@ -437,10 +437,10 @@ importers:
         devDependencies:
             '@microsoft/api-extractor':
                 specifier: ^7.58.8
-                version: 7.58.12(@types/node@26.1.2)
+                version: 7.58.12(@types/node@26.2.0)
             '@types/node':
-                specifier: 26.1.2
-                version: 26.1.2
+                specifier: 26.2.0
+                version: 26.2.0
             nx:
                 specifier: ^23.0.0
                 version: 23.1.1
@@ -449,7 +449,7 @@ importers:
                 version: 6.0.3
             vitest:
                 specifier: ^4.1.9
-                version: 4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+                version: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
 
     packages/example-package:
         devDependencies:
@@ -460,17 +460,17 @@ importers:
                 specifier: workspace:*
                 version: link:../config
             '@types/node':
-                specifier: ^26.1.2
-                version: 26.1.2
+                specifier: ^26.2.0
+                version: 26.2.0
             tsdown:
                 specifier: ^0.22.2
-                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.11)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)))
+                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.11)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)))
             typescript:
                 specifier: ^6.0.3
                 version: 6.0.3
             vitest:
                 specifier: ^4.1.9
-                version: 4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+                version: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
 
     packages/logger:
         dependencies:
@@ -489,7 +489,7 @@ importers:
         devDependencies:
             '@microsoft/api-extractor':
                 specifier: ^7.58.8
-                version: 7.58.12(@types/node@26.1.2)
+                version: 7.58.12(@types/node@26.2.0)
             '@snailicid3/build-config':
                 specifier: workspace:*
                 version: link:../build-config
@@ -497,17 +497,17 @@ importers:
                 specifier: workspace:*
                 version: link:../config
             '@types/node':
-                specifier: ^26.1.2
-                version: 26.1.2
+                specifier: ^26.2.0
+                version: 26.2.0
             tsdown:
                 specifier: ^0.22.2
-                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.11)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)))
+                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.11)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)))
             typescript:
                 specifier: ^6.0.3
                 version: 6.0.3
             vitest:
                 specifier: ^4.1.9
-                version: 4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+                version: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
 
     packages/node-utils:
         dependencies:
@@ -541,7 +541,7 @@ importers:
         devDependencies:
             '@microsoft/api-extractor':
                 specifier: ^7.58.8
-                version: 7.58.12(@types/node@26.1.2)
+                version: 7.58.12(@types/node@26.2.0)
             '@snailicid3/build-config':
                 specifier: workspace:*
                 version: link:../build-config
@@ -549,20 +549,20 @@ importers:
                 specifier: workspace:*
                 version: link:../config
             '@types/node':
-                specifier: ^26.1.2
-                version: 26.1.2
+                specifier: ^26.2.0
+                version: 26.2.0
             '@types/yargs':
                 specifier: ^17.0.35
                 version: 17.0.35
             tsdown:
                 specifier: ^0.22.2
-                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.11)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)))
+                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.11)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)))
             typescript:
                 specifier: ^6.0.3
                 version: 6.0.3
             vitest:
                 specifier: ^4.1.9
-                version: 4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+                version: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
 
     packages/scaffold:
         dependencies:
@@ -581,22 +581,22 @@ importers:
         devDependencies:
             '@microsoft/api-extractor':
                 specifier: ^7.58.8
-                version: 7.58.12(@types/node@26.1.2)
+                version: 7.58.12(@types/node@26.2.0)
             '@snailicid3/config':
                 specifier: workspace:*
                 version: link:../config
             '@types/node':
-                specifier: ^26.1.2
-                version: 26.1.2
+                specifier: ^26.2.0
+                version: 26.2.0
             tsdown:
                 specifier: ^0.22.2
-                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.11)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)))
+                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.11)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)))
             typescript:
                 specifier: ^6.0.3
                 version: 6.0.3
             vitest:
                 specifier: ^4.1.9
-                version: 4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+                version: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
 
     packages/types:
         dependencies:
@@ -612,7 +612,7 @@ importers:
         devDependencies:
             '@microsoft/api-extractor':
                 specifier: ^7.58.8
-                version: 7.58.12(@types/node@26.1.2)
+                version: 7.58.12(@types/node@26.2.0)
             '@snailicid3/build-config':
                 specifier: workspace:*
                 version: link:../build-config
@@ -620,20 +620,20 @@ importers:
                 specifier: workspace:*
                 version: link:../config
             '@types/node':
-                specifier: ^26.1.2
-                version: 26.1.2
+                specifier: ^26.2.0
+                version: 26.2.0
             '@types/ramda':
                 specifier: ^0.32.0
                 version: 0.32.0
             tsdown:
                 specifier: ^0.22.2
-                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.11)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)))
+                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.11)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)))
             typescript:
                 specifier: ^6.0.3
                 version: 6.0.3
             vitest:
                 specifier: ^4.1.9
-                version: 4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+                version: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
 
     packages/utils:
         dependencies:
@@ -676,7 +676,7 @@ importers:
         devDependencies:
             '@microsoft/api-extractor':
                 specifier: ^7.58.8
-                version: 7.58.12(@types/node@26.1.2)
+                version: 7.58.12(@types/node@26.2.0)
             '@snailicid3/build-config':
                 specifier: workspace:*
                 version: link:../build-config
@@ -684,20 +684,20 @@ importers:
                 specifier: workspace:*
                 version: link:../config
             '@types/node':
-                specifier: ^26.1.2
-                version: 26.1.2
+                specifier: ^26.2.0
+                version: 26.2.0
             '@types/ramda':
                 specifier: ^0.32.0
                 version: 0.32.0
             '@types/semver':
-                specifier: ^7.7.1
+                specifier: ^7.8.0
                 version: 7.8.0
             '@types/sprintf-js':
                 specifier: ^1.1.4
                 version: 1.1.4
             tsdown:
                 specifier: ^0.22.2
-                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.11)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)))
+                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.11)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)))
             typedoc:
                 specifier: ^0.28.19
                 version: 0.28.20(typescript@6.0.3)
@@ -706,7 +706,7 @@ importers:
                 version: 6.0.3
             vitest:
                 specifier: ^4.1.9
-                version: 4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+                version: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
 
 packages:
     '@adobe/css-tools@4.5.0':
@@ -1194,12 +1194,12 @@ packages:
                 integrity: sha512-c95qOXkHdydNKhscBTebqEC1CVAZpyqOfVfBzQ1qgzyl3gfeldUjIggDbIZgDKsHLgnsM+igH7TJ/eAasaVuMA==,
             }
 
-    '@es-joy/jsdoccomment@0.91.0':
+    '@es-joy/jsdoccomment@0.93.2':
         resolution:
             {
-                integrity: sha512-vgqlMGNNhZxwDYbUNIHj3Hskb4R28iqdXx90ufHyt/NeuTQkeqjTDslAs9I0/GCAfbxP5BpH5WsL1R1fht5Lxg==,
+                integrity: sha512-yCvw3wFaTBl7M3LfCefGqdPMoGUS/RtZtj1iNcsxxqnTjYRmEvrHpx2Mb+mJQ4MblxUCaFd1irxTZsRcXtZI7g==,
             }
-        engines: { node: ^20.19.0 || ^22.13.0 || >=24 }
+        engines: { node: ^22.22.2 || >=24.15.0 }
 
     '@es-joy/resolve.exports@1.2.0':
         resolution:
@@ -3171,10 +3171,10 @@ packages:
                 integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==,
             }
 
-    '@types/node@26.1.2':
+    '@types/node@26.2.0':
         resolution:
             {
-                integrity: sha512-Vu4a5UFA9rIIFJ7rB/Vaafh9lrCQszopTCx6KjFboXTGQbPNasehVR5TEiithSDGyd1DEiUByggTZsg8jukeIg==,
+                integrity: sha512-5IviulTZeRNp2vAJ514cc/HUlY5nZ9fCbq9DMyC52BrhFZACo3nI0R7qBxhQmo/d27NFe96ur/b7Wwxklda+kg==,
             }
 
     '@types/ramda@0.32.0':
@@ -3670,10 +3670,10 @@ packages:
             '@vitest/browser':
                 optional: true
 
-    '@vitest/eslint-plugin@1.6.26':
+    '@vitest/eslint-plugin@1.6.27':
         resolution:
             {
-                integrity: sha512-2eawZk4MZvkEtMZFdScmCE0R1Rti85uRZpmbe9eAv5Q3blDZ5OxlrC9IHlSnxhDCqOO2xKNaD3oufl9BUlI0yA==,
+                integrity: sha512-X1RCAfwbatG4GFbJ/1PIHP9MSZMt0JJThqbYID+vS4L783k6QGlLPe421wQE8dHXuGCcenVLsydiM4qzsYWxhg==,
             }
         engines: { node: '>=18' }
         peerDependencies:
@@ -4171,12 +4171,12 @@ packages:
             }
         engines: { node: '>=8' }
 
-    are-docs-informative@0.0.2:
+    are-docs-informative@0.1.1:
         resolution:
             {
-                integrity: sha512-ixiS0nLNNG5jNQzgZJNoUpBKdo9yTYZMGJ+QgT2jmjR7G7+QHRCc4v6LQ3NgE7EBJq+o0ams3waJwkrlBom8Ig==,
+                integrity: sha512-sqRsNQBwbKLRX0jV5Cu5uzmtflf892n4Vukz7T659ebL4pz3mpOqCMU7lxMoBTFwnp10E3YB5ZcyHM41W5bcDA==,
             }
-        engines: { node: '>=14' }
+        engines: { node: '>=18' }
 
     argparse@1.0.10:
         resolution:
@@ -4890,13 +4890,6 @@ packages:
                 integrity: sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==,
             }
         engines: { node: '>= 12' }
-
-    comment-parser@1.4.7:
-        resolution:
-            {
-                integrity: sha512-0h+uSNtQGW3D98eQt3jJ8L06Fves8hncB4V/PKdw/Qb8Hnk19VaKuTr55UNRYiSoVa7WwrFls+rh3ux9agmkeQ==,
-            }
-        engines: { node: '>= 12.0.0' }
 
     comment-parser@1.4.8:
         resolution:
@@ -5689,12 +5682,12 @@ packages:
             eslint-import-resolver-node:
                 optional: true
 
-    eslint-plugin-jsdoc@63.3.3:
+    eslint-plugin-jsdoc@64.0.2:
         resolution:
             {
-                integrity: sha512-xI4IeVRzRFA2DGHrPLIxF3U+oJHU3FE+P9Zb27fVs5dPHgfcpoAs0PyCbznVhK7pwR+9BPUztFeXSgpw/CL4Yg==,
+                integrity: sha512-v4wT1chDIRtMYDxX1Y19E27PzlMJl95b5lreyw8ikfJKgo7rVfvT+GK8IvMgnI6rnSPxbOY+DiVNqazf0Dtm2g==,
             }
-        engines: { node: ^22.13.0 || >=24 }
+        engines: { node: ^22.22.2 || >=24.15.0 }
         peerDependencies:
             eslint: ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0
 
@@ -5742,10 +5735,10 @@ packages:
             eslint: '>=8'
             storybook: ^10.5.7
 
-    eslint-plugin-unicorn@72.0.0:
+    eslint-plugin-unicorn@73.0.0:
         resolution:
             {
-                integrity: sha512-hqO6ksoOHO+ZhdseTuKRVQbx9U7PRO/cv8qAR1mctwzdVO2hYud8uS9luAhp43RJgziYgHAph8eHyipT8GL0ng==,
+                integrity: sha512-V0YatLe9nkGhXEXKe2Qljb1EY0sJHwDV0HUF1NKFwtsHh/fU7qGHDgv+6fchzZcgU2/7noHo2gdjnmo0P2uDPw==,
             }
         engines: { node: '>=22' }
         peerDependencies:
@@ -7133,12 +7126,12 @@ packages:
                 integrity: sha512-UVU9dibq2JcFWxQPA6KCqj5O42VOmAY3zQUfEKxU0KpTGXwNoCjkX1e13eHNvw/xPynt6pU0rZ1htjWTNTSXsg==,
             }
 
-    jsdoc-type-pratt-parser@8.0.0:
+    jsdoc-type-pratt-parser@9.0.1:
         resolution:
             {
-                integrity: sha512-uQu/fXVqVaMg6gM8/E5G5+eygVcZ1NV0Z51CvqhNa2bDWxvHMl484ETr6vph4oPyC+KUcbP/w2W2pewfCiR9aQ==,
+                integrity: sha512-1LJ/negRKJxH0+ulOsJYEpUgzIs1DAOz9QctuS4In2LW/Ro3l8C4ej5al+5FU2hBGEOAY3R3SCnP6x8226JMIw==,
             }
-        engines: { node: '>=20.0.0' }
+        engines: { node: ^22.22.2 || >=24.15.0 }
 
     jsesc@3.1.0:
         resolution:
@@ -8935,12 +8928,12 @@ packages:
             }
         engines: { node: '>= 12.13.0' }
 
-    recast@0.23.19:
+    recast@0.23.20:
         resolution:
             {
-                integrity: sha512-T98lym7kH+pnZmRaD8yDRdaNqyUbwnbEBx0MuchrzMFOEMray4AO3ZJoTUZ5r78Ao78X/OhzW0DL8GB85w/I2w==,
+                integrity: sha512-VtSf75pThDqsIUpdaYrTdQvkw10/+yP0i7+Cax7h+K9SRvYjrJURZcRlcHMrH6TMzV275Q8a2A8+G7y7W9zqsg==,
             }
-        engines: { node: '>= 4' }
+        engines: { node: '>= 22' }
 
     redent@3.0.0:
         resolution:
@@ -11083,7 +11076,7 @@ snapshots:
         dependencies:
             '@changesets/types': 6.1.0
 
-    '@changesets/cli@2.31.1(@types/node@26.1.2)':
+    '@changesets/cli@2.31.1(@types/node@26.2.0)':
         dependencies:
             '@changesets/apply-release-plan': 7.1.1
             '@changesets/assemble-release-plan': 6.0.10
@@ -11099,7 +11092,7 @@ snapshots:
             '@changesets/should-skip-package': 0.1.2
             '@changesets/types': 6.1.0
             '@changesets/write': 0.4.0
-            '@inquirer/external-editor': 1.0.3(@types/node@26.1.2)
+            '@inquirer/external-editor': 1.0.3(@types/node@26.2.0)
             '@manypkg/get-packages': 1.1.3
             ansi-colors: 4.1.3
             enquirer: 2.4.1
@@ -11197,12 +11190,12 @@ snapshots:
             human-id: 4.2.0
             prettier: 2.8.8
 
-    '@commitlint/cli@21.2.1(@types/node@26.1.2)(conventional-commits-parser@7.1.2)(typescript@6.0.3)':
+    '@commitlint/cli@21.2.1(@types/node@26.2.0)(conventional-commits-parser@7.1.2)(typescript@6.0.3)':
         dependencies:
             '@commitlint/config-conventional': 21.2.0
             '@commitlint/format': 21.2.0
             '@commitlint/lint': 21.2.0
-            '@commitlint/load': 21.2.0(@types/node@26.1.2)(typescript@6.0.3)
+            '@commitlint/load': 21.2.0(@types/node@26.2.0)(typescript@6.0.3)
             '@commitlint/read': 21.2.1(conventional-commits-parser@7.1.2)
             '@commitlint/types': 21.2.0
             tinyexec: 1.3.0
@@ -11247,14 +11240,14 @@ snapshots:
             '@commitlint/rules': 21.2.0
             '@commitlint/types': 21.2.0
 
-    '@commitlint/load@21.2.0(@types/node@26.1.2)(typescript@6.0.3)':
+    '@commitlint/load@21.2.0(@types/node@26.2.0)(typescript@6.0.3)':
         dependencies:
             '@commitlint/config-validator': 21.2.0
             '@commitlint/execute-rule': 21.0.1
             '@commitlint/resolve-extends': 21.2.0
             '@commitlint/types': 21.2.0
             cosmiconfig: 9.0.2(typescript@6.0.3)
-            cosmiconfig-typescript-loader: 6.3.0(@types/node@26.1.2)(cosmiconfig@9.0.2(typescript@6.0.3))(typescript@6.0.3)
+            cosmiconfig-typescript-loader: 6.3.0(@types/node@26.2.0)(cosmiconfig@9.0.2(typescript@6.0.3))(typescript@6.0.3)
             es-toolkit: 1.50.0
             is-plain-obj: 4.1.0
             picocolors: 1.1.1
@@ -11392,13 +11385,13 @@ snapshots:
             tslib: 2.8.1
         optional: true
 
-    '@es-joy/jsdoccomment@0.91.0':
+    '@es-joy/jsdoccomment@0.93.2':
         dependencies:
             '@types/estree': 1.0.9
             '@typescript-eslint/types': 8.66.0
-            comment-parser: 1.4.7
+            comment-parser: 1.4.8
             esquery: 1.7.0
-            jsdoc-type-pratt-parser: 8.0.0
+            jsdoc-type-pratt-parser: 9.0.1
 
     '@es-joy/resolve.exports@1.2.0': {}
 
@@ -11563,12 +11556,12 @@ snapshots:
 
     '@humanwhocodes/retry@0.4.3': {}
 
-    '@inquirer/external-editor@1.0.3(@types/node@26.1.2)':
+    '@inquirer/external-editor@1.0.3(@types/node@26.2.0)':
         dependencies:
             chardet: 2.2.0
             iconv-lite: 0.7.3
         optionalDependencies:
-            '@types/node': 26.1.2
+            '@types/node': 26.2.0
 
     '@jest/diff-sequences@30.0.1': {}
 
@@ -11622,23 +11615,23 @@ snapshots:
 
     '@material/material-color-utilities@0.3.0': {}
 
-    '@microsoft/api-extractor-model@7.33.10(@types/node@26.1.2)':
+    '@microsoft/api-extractor-model@7.33.10(@types/node@26.2.0)':
         dependencies:
             '@microsoft/tsdoc': 0.16.0
             '@microsoft/tsdoc-config': 0.18.1
-            '@rushstack/node-core-library': 5.23.3(@types/node@26.1.2)
+            '@rushstack/node-core-library': 5.23.3(@types/node@26.2.0)
         transitivePeerDependencies:
             - '@types/node'
 
-    '@microsoft/api-extractor@7.58.12(@types/node@26.1.2)':
+    '@microsoft/api-extractor@7.58.12(@types/node@26.2.0)':
         dependencies:
-            '@microsoft/api-extractor-model': 7.33.10(@types/node@26.1.2)
+            '@microsoft/api-extractor-model': 7.33.10(@types/node@26.2.0)
             '@microsoft/tsdoc': 0.16.0
             '@microsoft/tsdoc-config': 0.18.1
-            '@rushstack/node-core-library': 5.23.3(@types/node@26.1.2)
+            '@rushstack/node-core-library': 5.23.3(@types/node@26.2.0)
             '@rushstack/rig-package': 0.7.3
-            '@rushstack/terminal': 0.24.2(@types/node@26.1.2)
-            '@rushstack/ts-command-line': 5.3.12(@types/node@26.1.2)
+            '@rushstack/terminal': 0.24.2(@types/node@26.2.0)
+            '@rushstack/ts-command-line': 5.3.12(@types/node@26.2.0)
             diff: 8.0.4
             minimatch: 10.2.3
             resolve: 1.22.12
@@ -12146,7 +12139,7 @@ snapshots:
     '@rollup/rollup-win32-x64-msvc@4.62.4':
         optional: true
 
-    '@rushstack/node-core-library@5.23.3(@types/node@26.1.2)':
+    '@rushstack/node-core-library@5.23.3(@types/node@26.2.0)':
         dependencies:
             ajv: 8.20.0
             ajv-draft-04: 1.0.0(ajv@8.20.0)
@@ -12157,28 +12150,28 @@ snapshots:
             resolve: 1.22.12
             semver: 7.7.4
         optionalDependencies:
-            '@types/node': 26.1.2
+            '@types/node': 26.2.0
 
-    '@rushstack/problem-matcher@0.2.1(@types/node@26.1.2)':
+    '@rushstack/problem-matcher@0.2.1(@types/node@26.2.0)':
         optionalDependencies:
-            '@types/node': 26.1.2
+            '@types/node': 26.2.0
 
     '@rushstack/rig-package@0.7.3':
         dependencies:
             jju: 1.4.0
             resolve: 1.22.12
 
-    '@rushstack/terminal@0.24.2(@types/node@26.1.2)':
+    '@rushstack/terminal@0.24.2(@types/node@26.2.0)':
         dependencies:
-            '@rushstack/node-core-library': 5.23.3(@types/node@26.1.2)
-            '@rushstack/problem-matcher': 0.2.1(@types/node@26.1.2)
+            '@rushstack/node-core-library': 5.23.3(@types/node@26.2.0)
+            '@rushstack/problem-matcher': 0.2.1(@types/node@26.2.0)
             supports-color: 8.1.1
         optionalDependencies:
-            '@types/node': 26.1.2
+            '@types/node': 26.2.0
 
-    '@rushstack/ts-command-line@5.3.12(@types/node@26.1.2)':
+    '@rushstack/ts-command-line@5.3.12(@types/node@26.2.0)':
         dependencies:
-            '@rushstack/terminal': 0.24.2(@types/node@26.1.2)
+            '@rushstack/terminal': 0.24.2(@types/node@26.2.0)
             '@types/argparse': 1.0.38
             argparse: 1.0.10
             string-argv: 0.3.2
@@ -12307,7 +12300,7 @@ snapshots:
 
     '@types/node@12.20.55': {}
 
-    '@types/node@26.1.2':
+    '@types/node@26.2.0':
         dependencies:
             undici-types: 8.3.0
 
@@ -12679,9 +12672,9 @@ snapshots:
             obug: 2.1.4
             std-env: 4.2.0
             tinyrainbow: 3.1.1
-            vitest: 4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+            vitest: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
 
-    '@vitest/eslint-plugin@1.6.26(@typescript-eslint/eslint-plugin@8.66.0(@typescript-eslint/parser@8.66.0(eslint@10.8.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.8.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.8.1(jiti@2.7.0))(typescript@6.0.3)(vitest@4.1.10)':
+    '@vitest/eslint-plugin@1.6.27(@typescript-eslint/eslint-plugin@8.66.0(@typescript-eslint/parser@8.66.0(eslint@10.8.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.8.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.8.1(jiti@2.7.0))(typescript@6.0.3)(vitest@4.1.10)':
         dependencies:
             '@typescript-eslint/scope-manager': 8.66.0
             '@typescript-eslint/utils': 8.66.0(eslint@10.8.1(jiti@2.7.0))(typescript@6.0.3)
@@ -12689,7 +12682,7 @@ snapshots:
         optionalDependencies:
             '@typescript-eslint/eslint-plugin': 8.66.0(@typescript-eslint/parser@8.66.0(eslint@10.8.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.8.1(jiti@2.7.0))(typescript@6.0.3)
             typescript: 6.0.3
-            vitest: 4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+            vitest: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
         transitivePeerDependencies:
             - supports-color
 
@@ -12710,13 +12703,13 @@ snapshots:
             chai: 6.2.2
             tinyrainbow: 3.1.1
 
-    '@vitest/mocker@4.1.10(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))':
+    '@vitest/mocker@4.1.10(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))':
         dependencies:
             '@vitest/spy': 4.1.10
             estree-walker: 3.0.3
             magic-string: 0.30.21
         optionalDependencies:
-            vite: 8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)
+            vite: 8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)
 
     '@vitest/pretty-format@3.2.4':
         dependencies:
@@ -12753,7 +12746,7 @@ snapshots:
             sirv: 3.0.2
             tinyglobby: 0.2.17
             tinyrainbow: 3.1.1
-            vitest: 4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+            vitest: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
 
     '@vitest/utils@3.2.4':
         dependencies:
@@ -12942,7 +12935,7 @@ snapshots:
 
     apache-md5@1.1.8: {}
 
-    are-docs-informative@0.0.2: {}
+    are-docs-informative@0.1.1: {}
 
     argparse@1.0.10:
         dependencies:
@@ -13337,8 +13330,6 @@ snapshots:
 
     commander@8.3.0: {}
 
-    comment-parser@1.4.7: {}
-
     comment-parser@1.4.8: {}
 
     commondir@1.0.1: {}
@@ -13407,9 +13398,9 @@ snapshots:
             object-assign: 4.1.1
             vary: 1.1.2
 
-    cosmiconfig-typescript-loader@6.3.0(@types/node@26.1.2)(cosmiconfig@9.0.2(typescript@6.0.3))(typescript@6.0.3):
+    cosmiconfig-typescript-loader@6.3.0(@types/node@26.2.0)(cosmiconfig@9.0.2(typescript@6.0.3))(typescript@6.0.3):
         dependencies:
-            '@types/node': 26.1.2
+            '@types/node': 26.2.0
             cosmiconfig: 9.0.2(typescript@6.0.3)
             jiti: 2.6.1
             typescript: 6.0.3
@@ -13843,14 +13834,14 @@ snapshots:
         transitivePeerDependencies:
             - supports-color
 
-    eslint-plugin-jsdoc@63.3.3(eslint@10.8.1(jiti@2.7.0)):
+    eslint-plugin-jsdoc@64.0.2(eslint@10.8.1(jiti@2.7.0)):
         dependencies:
-            '@es-joy/jsdoccomment': 0.91.0
+            '@es-joy/jsdoccomment': 0.93.2
             '@es-joy/resolve.exports': 1.2.0
-            are-docs-informative: 0.0.2
-            comment-parser: 1.4.7
+            are-docs-informative: 0.1.1
+            comment-parser: 1.4.8
             debug: 4.4.3(supports-color@7.2.0)
-            escape-string-regexp: 4.0.0
+            escape-string-regexp: 5.0.0
             eslint: 10.8.1(jiti@2.7.0)
             espree: 11.2.0
             esquery: 1.7.0
@@ -13919,7 +13910,7 @@ snapshots:
             - supports-color
             - typescript
 
-    eslint-plugin-unicorn@72.0.0(eslint@10.8.1(jiti@2.7.0)):
+    eslint-plugin-unicorn@73.0.0(eslint@10.8.1(jiti@2.7.0)):
         dependencies:
             '@eslint-community/eslint-utils': 4.10.1(eslint@10.8.1(jiti@2.7.0))
             '@eslint/css-tree': 4.0.5
@@ -14739,7 +14730,9 @@ snapshots:
 
     jsbn@0.1.1: {}
 
-    jsdoc-type-pratt-parser@8.0.0: {}
+    jsdoc-type-pratt-parser@9.0.1:
+        dependencies:
+            '@types/estree': 1.0.9
 
     jsesc@3.1.0: {}
 
@@ -16072,7 +16065,7 @@ snapshots:
 
     real-require@0.2.0: {}
 
-    recast@0.23.19:
+    recast@0.23.20:
         dependencies:
             ast-types: 0.16.1
             esprima: 4.0.1
@@ -16234,10 +16227,10 @@ snapshots:
             '@rolldown/binding-win32-arm64-msvc': 1.2.3
             '@rolldown/binding-win32-x64-msvc': 1.2.3
 
-    rollup-plugin-node-externals@9.0.1(rollup@4.62.4)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)):
+    rollup-plugin-node-externals@9.0.1(rollup@4.62.4)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)):
         optionalDependencies:
             rollup: 4.62.4
-            vite: 8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)
+            vite: 8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)
 
     rollup-plugin-polyfill-node@0.13.0(rollup@4.62.4):
         dependencies:
@@ -16537,7 +16530,7 @@ snapshots:
             open: 10.2.0
             oxc-parser: 0.127.0
             oxc-resolver: 11.24.2
-            recast: 0.23.19
+            recast: 0.23.20
             semver: 7.8.5
             use-sync-external-store: 1.6.0(react@19.2.8)
             ws: 8.21.3
@@ -16799,7 +16792,7 @@ snapshots:
             minimist: 1.2.8
             strip-bom: 3.0.0
 
-    tsdown@0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.11)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))):
+    tsdown@0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.11)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))):
         dependencies:
             ansis: 4.3.1
             cac: 7.0.0
@@ -16821,7 +16814,7 @@ snapshots:
             publint: 0.3.23
             tsx: 4.23.11
             typescript: 6.0.3
-            unplugin-unused: 0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+            unplugin-unused: 0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
         transitivePeerDependencies:
             - '@typescript/native-preview'
             - '@volar/typescript'
@@ -17017,7 +17010,7 @@ snapshots:
 
     unpipe@1.0.0: {}
 
-    unplugin-dts@1.0.3(@microsoft/api-extractor@7.58.12(@types/node@26.1.2))(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(typescript@6.0.3)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)):
+    unplugin-dts@1.0.3(@microsoft/api-extractor@7.58.12(@types/node@26.2.0))(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(typescript@6.0.3)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)):
         dependencies:
             '@rollup/pluginutils': 5.4.0(rollup@4.62.4)
             '@volar/typescript': 2.4.28
@@ -17029,20 +17022,20 @@ snapshots:
             typescript: 6.0.3
             unplugin: 2.3.11
         optionalDependencies:
-            '@microsoft/api-extractor': 7.58.12(@types/node@26.1.2)
+            '@microsoft/api-extractor': 7.58.12(@types/node@26.2.0)
             esbuild: 0.28.2
             rolldown: 1.2.3
             rollup: 4.62.4
-            vite: 8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)
+            vite: 8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)
         transitivePeerDependencies:
             - supports-color
 
-    unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)):
+    unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)):
         dependencies:
             empathic: 2.0.1
             escape-string-regexp: 5.0.0
             js-tokens: 10.0.0
-            unplugin: 3.3.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+            unplugin: 3.3.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
         transitivePeerDependencies:
             - '@farmfe/core'
             - '@rspack/core'
@@ -17061,7 +17054,7 @@ snapshots:
             picomatch: 4.0.5
             webpack-virtual-modules: 0.6.2
 
-    unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)):
+    unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)):
         dependencies:
             '@jridgewell/remapping': 2.3.5
             picomatch: 4.0.5
@@ -17070,7 +17063,7 @@ snapshots:
             esbuild: 0.28.2
             rolldown: 1.2.3
             rollup: 4.62.4
-            vite: 8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)
+            vite: 8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)
 
     unrs-resolver@1.12.2:
         dependencies:
@@ -17207,13 +17200,13 @@ snapshots:
             '@types/unist': 3.0.3
             vfile-message: 4.0.3
 
-    vite-plugin-dts@5.0.3(@microsoft/api-extractor@7.58.12(@types/node@26.1.2))(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(typescript@6.0.3)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)):
+    vite-plugin-dts@5.0.3(@microsoft/api-extractor@7.58.12(@types/node@26.2.0))(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(typescript@6.0.3)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)):
         dependencies:
-            unplugin-dts: 1.0.3(@microsoft/api-extractor@7.58.12(@types/node@26.1.2))(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(typescript@6.0.3)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+            unplugin-dts: 1.0.3(@microsoft/api-extractor@7.58.12(@types/node@26.2.0))(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(typescript@6.0.3)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
         optionalDependencies:
-            '@microsoft/api-extractor': 7.58.12(@types/node@26.1.2)
+            '@microsoft/api-extractor': 7.58.12(@types/node@26.2.0)
             rollup: 4.62.4
-            vite: 8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)
+            vite: 8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)
         transitivePeerDependencies:
             - '@rspack/core'
             - '@vue/language-core'
@@ -17223,7 +17216,7 @@ snapshots:
             - typescript
             - webpack
 
-    vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0):
+    vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0):
         dependencies:
             lightningcss: 1.33.0
             picomatch: 4.0.5
@@ -17231,7 +17224,7 @@ snapshots:
             rolldown: 1.2.3
             tinyglobby: 0.2.17
         optionalDependencies:
-            '@types/node': 26.1.2
+            '@types/node': 26.2.0
             esbuild: 0.28.2
             fsevents: 2.3.3
             jiti: 2.7.0
@@ -17239,10 +17232,10 @@ snapshots:
             tsx: 4.23.11
             yaml: 2.9.0
 
-    vitest@4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)):
+    vitest@4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)):
         dependencies:
             '@vitest/expect': 4.1.10
-            '@vitest/mocker': 4.1.10(vite@8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
+            '@vitest/mocker': 4.1.10(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0))
             '@vitest/pretty-format': 4.1.10
             '@vitest/runner': 4.1.10
             '@vitest/snapshot': 4.1.10
@@ -17259,10 +17252,10 @@ snapshots:
             tinyexec: 1.3.0
             tinyglobby: 0.2.17
             tinyrainbow: 3.1.1
-            vite: 8.2.1(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)
+            vite: 8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.2)(tsx@4.23.11)(yaml@2.9.0)
             why-is-node-running: 2.3.0
         optionalDependencies:
-            '@types/node': 26.1.2
+            '@types/node': 26.2.0
             '@vitest/coverage-v8': 4.1.10(vitest@4.1.10)
             '@vitest/ui': 4.1.10(vitest@4.1.10)
         transitivePeerDependencies:
