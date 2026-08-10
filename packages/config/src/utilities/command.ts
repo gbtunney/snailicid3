@@ -7,7 +7,7 @@ export type CommandResult = {
     success: boolean
 }
 
-type RunCommandOptions = {
+export type RunCommandOptions = {
     cwd?: string
     input?: string
     stdio?: 'inherit' | 'pipe'

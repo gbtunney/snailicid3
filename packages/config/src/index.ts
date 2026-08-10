@@ -169,6 +169,8 @@ export type {
 
 export * from './utilities/command.js'
 export * from './utilities/entrypoint.js'
+export * from './utilities/environment-report.js'
+export * from './utilities/environment.js'
 /* *  UTILITIES *  */
 export { expandExtensions } from './utilities/extensions.js'
 export type {
@@ -186,6 +188,7 @@ export type {
     JSONExportEntry,
     Jsonifiable,
 } from './utilities/json.js'
+export * from './utilities/package-manager.js'
 export {
     doesFileExist,
     getDirname,
