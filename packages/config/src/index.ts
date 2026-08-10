@@ -167,6 +167,8 @@ export type {
     TypedocTool,
 } from './typedoc/index.js'
 
+export * from './utilities/command.js'
+export * from './utilities/entrypoint.js'
 /* *  UTILITIES *  */
 export { expandExtensions } from './utilities/extensions.js'
 export type {

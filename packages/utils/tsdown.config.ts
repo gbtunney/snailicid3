@@ -15,7 +15,7 @@ const plan = defineBuildPlan(pkg, {
             include_dependencies: true,
             key: '*',
             // Refs #82
-            // TODO lint=false is temporary fix for strange tsdown memory errors
+            // TODO Refs #195  inlined dependencies are not working with tsdown, so we need to disable linting for now
             lint: false,
             output_formats: ['iife'],
             runtime: 'browser',
