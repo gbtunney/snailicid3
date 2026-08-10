@@ -4,6 +4,8 @@ import path from 'node:path'
 import { splitNonEmptyLines, uniqueSorted } from './../utilities/array.js'
 import { runCommand } from './../utilities/command.js'
 import { runCliIfEntrypoint } from './../utilities/entrypoint.js'
+import { readConfigEnvironment } from './../utilities/environment.js'
+import { runPackageBinary } from './../utilities/package-manager.js'
 import { getRepoRoot } from './../workspace/git.js'
 import {
     findNearestPackageJson,
@@ -254,23 +256,23 @@ function parseArgs(args: Array<string>): ParsedArgs {
 
 function printHelp(): void {
     console.log(`Usage:
-  pnpm exec scope-commit [--staged|--all] [--csv|--list] [--keep-prefix] [file ...]
-  pnpm exec scope-commit --validate-type <type>
-  pnpm exec scope-commit --message <type> <subject> [--staged|--all] [--keep-prefix] [file ...]
-  pnpm exec scope-commit --commit <type> <subject> [--scope <scope>] [--staged|--all] [--keep-prefix] [--dry-run] [file ...]
-  pnpm exec scope-commit --checked-commit <type> <subject> [--scope <scope>] [--staged|--all] [--keep-prefix] [--skip-lint-staged] [--dry-run] [file ...]
+  scope-commit [--staged|--all] [--csv|--list] [--keep-prefix] [file ...]
+  scope-commit --validate-type <type>
+  scope-commit --message <type> <subject> [--staged|--all] [--keep-prefix] [file ...]
+  scope-commit --commit <type> <subject> [--scope <scope>] [--staged|--all] [--keep-prefix] [--dry-run] [file ...]
+  scope-commit --checked-commit <type> <subject> [--scope <scope>] [--staged|--all] [--keep-prefix] [--skip-lint-staged] [--dry-run] [file ...]
 
 Examples:
-  pnpm exec scope-commit
-  pnpm exec scope-commit --all
-  pnpm exec scope-commit --list
-  pnpm exec scope-commit --csv --keep-prefix
-  pnpm exec scope-commit --message chore autofix
-  pnpm exec scope-commit --commit --dry-run chore autofix
-  pnpm exec scope-commit --message chore autofix --scope config
-  pnpm exec scope-commit --checked-commit chore autofix
-  pnpm exec scope-commit --checked-commit --skip-lint-staged chore autofix
-  pnpm exec scope-commit .github/workflows/call-pipeline.yml`)
+  scope-commit
+  scope-commit --all
+  scope-commit --list
+  scope-commit --csv --keep-prefix
+  scope-commit --message chore autofix
+  scope-commit --commit --dry-run chore autofix
+  scope-commit --message chore autofix --scope config
+  scope-commit --checked-commit chore autofix
+  scope-commit --checked-commit --skip-lint-staged chore autofix
+  scope-commit .github/workflows/call-pipeline.yml`)
 }
 
 function readNextValue(
@@ -307,9 +309,10 @@ function runCheckedPrecommit(
         return
     }
 
-    const lintResult = runCommand(
-        'pnpm',
-        ['exec', 'lint-staged', '--debug', '--relative'],
+    const lintResult = runPackageBinary(
+        repoRoot,
+        'lint-staged',
+        ['--debug', '--relative'],
         { cwd: repoRoot, stdio: 'inherit' },
     )
 
@@ -357,11 +360,12 @@ function splitExplicitScope(scopeValue: string): Array<string> {
 }
 
 function validateCommitMessage(repoRoot: string, message: string): void {
-    if (process.env.SCOPE_COMMIT_SKIP_COMMITLINT === '1') return
+    if (readConfigEnvironment().skipCommitlint) return
 
-    const result = runCommand(
-        'pnpm',
-        ['exec', 'commitlint', '--cwd', repoRoot],
+    const result = runPackageBinary(
+        repoRoot,
+        'commitlint',
+        ['--cwd', repoRoot],
         {
             cwd: repoRoot,
             input: `${message}\n`,

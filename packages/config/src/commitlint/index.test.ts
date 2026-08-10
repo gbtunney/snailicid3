@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { type CommandResult } from './../utilities/command.js'
-import { runCommand } from './../utilities/command.js'
+import { runPackageBinary } from './../utilities/package-manager.js'
 import { getRepoRoot } from './../workspace/git.js'
 import { Commitlint } from './index.js'
 
@@ -9,7 +9,7 @@ const repoRoot = getRepoRoot()
 const COMMITLINT_CLI_TIMEOUT = 45_000
 
 function runCommitlintFromStdin(commitMessage: string): CommandResult {
-    return runCommand('pnpm', ['exec', 'commitlint'], {
+    return runPackageBinary(repoRoot, 'commitlint', [], {
         cwd: repoRoot,
         input: `${commitMessage}\n`,
     })
