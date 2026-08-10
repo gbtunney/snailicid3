@@ -259,10 +259,21 @@ import { Commitlint } from '@snailicid3/config'
 export default Commitlint.defineConfig(
   Commitlint.config({
     cwd: import.meta,
-    scopeOptions: { mergeScopes: ['my-package'] },
+    scopeOptions: {
+      mergeScopes: ['my-package'],
+      matchers: {
+        docs: ['docs/**', '**/*.md'],
+        actions: null,
+      },
+    },
   }),
 )
 ```
+
+`scopeOptions.matchers` maps a commit scope to micromatch glob patterns used by both `scope-commit`
+and `scope-affected`. A configured key replaces that scope's built-in patterns; set it to `null` to
+disable the built-in mapping. Unspecified defaults remain enabled for `actions`, `notes`, and
+`scripts`.
 
 ### TypeDoc
 

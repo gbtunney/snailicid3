@@ -3,7 +3,7 @@
 import path from 'node:path'
 import { splitNonEmptyLines, uniqueSorted } from './../utilities/array.js'
 import { runCommand } from './../utilities/command.js'
-import { runCliIfEntrypoint } from './../utilities/entrypoint.js'
+import { runCliIfEntrypointAsync } from './../utilities/entrypoint.js'
 import { readConfigEnvironment } from './../utilities/environment.js'
 import { runPackageBinary } from './../utilities/package-manager.js'
 import { getRepoRoot } from './../workspace/git.js'
@@ -12,6 +12,11 @@ import {
     readPackageName,
 } from './../workspace/packages.js'
 import { normalizeRepoPath } from './../workspace/paths.js'
+import { loadScopePathMatchers } from './../workspace/scope-matcher-config.js'
+import {
+    matchScopesForPath,
+    type ScopePathMatchers,
+} from './../workspace/scope-matchers.js'
 import {
     formatScopes,
     isRootPackageName,
@@ -35,7 +40,9 @@ type ParsedArgs = {
     validateOnly: boolean
 }
 
-export function main(args: Array<string> = process.argv.slice(2)): void {
+export async function main(
+    args: Array<string> = process.argv.slice(2),
+): Promise<void> {
     const parsed = parseArgs(args)
     const repoRoot = getRepoRoot({ fallbackToCwd: true })
     if (parsed.validateOnly) {
@@ -73,7 +80,12 @@ export function main(args: Array<string> = process.argv.slice(2)): void {
 
     const scopes = parsed.explicitScope
         ? splitExplicitScope(parsed.explicitScope)
-        : collectScopesForInput(repoRoot, inputPaths, parsed)
+        : collectScopesForInput(
+              repoRoot,
+              inputPaths,
+              parsed,
+              await loadScopePathMatchers(repoRoot),
+          )
     const scopeValue = formatScopes(scopes, 'csv')
 
     if (parsed.outputMode === 'message' || parsed.outputMode === 'commit') {
@@ -136,9 +148,12 @@ function collectScopes(
     repoRoot: string,
     paths: ReadonlyArray<string>,
     keepPrefix: boolean,
+    matchers: ScopePathMatchers,
 ): Array<string> {
     return uniqueSorted(
-        paths.map((filePath) => scopeForPath(repoRoot, filePath, keepPrefix)),
+        paths.flatMap((filePath) =>
+            scopesForPath(repoRoot, filePath, keepPrefix, matchers),
+        ),
     )
 }
 
@@ -146,6 +161,7 @@ function collectScopesForInput(
     repoRoot: string,
     inputPaths: ReadonlyArray<string>,
     parsed: ParsedArgs,
+    matchers: ScopePathMatchers,
 ): Array<string> {
     const paths =
         inputPaths.length > 0
@@ -153,7 +169,7 @@ function collectScopesForInput(
             : collectChangedPaths(repoRoot, parsed.mode)
 
     return paths.length > 0
-        ? collectScopes(repoRoot, paths, parsed.keepPrefix)
+        ? collectScopes(repoRoot, paths, parsed.keepPrefix, matchers)
         : ['root']
 }
 
@@ -322,34 +338,28 @@ function runCheckedPrecommit(
         )
     }
 }
-// TODO request feature - maube some way to add custom scopes for specific paths, like notes/* => "notes" via commitlints config?
-/** see filterFileArrByGlob function ? */
-function scopeForPath(
+function scopesForPath(
     repoRoot: string,
     inputPath: string,
     keepPrefix: boolean,
-): string {
+    matchers: ScopePathMatchers,
+): Array<string> {
     const relativePath = normalizeRepoPath(repoRoot, inputPath)
+    const matchedScopes = matchScopesForPath(relativePath, matchers)
 
-    if (
-        relativePath.startsWith('.github/workflows/') ||
-        relativePath.startsWith('.github/actions/') ||
-        relativePath.startsWith('.github/scripts/')
-    ) {
-        return 'actions'
-    }
+    if (matchedScopes.length > 0) return matchedScopes
 
     const packageJsonPath = findNearestPackageJson(repoRoot, relativePath)
 
-    if (!packageJsonPath) return 'root'
-    if (path.dirname(packageJsonPath) === repoRoot) return 'root'
+    if (!packageJsonPath) return ['root']
+    if (path.dirname(packageJsonPath) === repoRoot) return ['root']
 
     const packageName = readPackageName(packageJsonPath)
 
-    if (!packageName) return 'root'
-    if (isRootPackageName(packageName)) return 'root'
+    if (!packageName) return ['root']
+    if (isRootPackageName(packageName)) return ['root']
 
-    return shortenScopeName(packageName, keepPrefix)
+    return [shortenScopeName(packageName, keepPrefix)]
 }
 
 function splitExplicitScope(scopeValue: string): Array<string> {
@@ -394,4 +404,4 @@ Console.log({
     isEntrypoint: isCallerEntrypoint(import.meta, { log: true }),
 })
 */
-runCliIfEntrypoint(import.meta, main, process.argv.slice(2))
+await runCliIfEntrypointAsync(import.meta, main, process.argv.slice(2))

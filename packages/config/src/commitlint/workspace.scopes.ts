@@ -1,6 +1,10 @@
 import { uniqueSorted } from './../utilities/array.js'
 import { getWorkspacePackagesList } from './../workspace/packages.js'
 import {
+    resolveScopePathMatchers,
+    type ScopePathMatcherOverrides,
+} from './../workspace/scope-matchers.js'
+import {
     formatScopes,
     isRootPackageName,
     shortenScopeName,
@@ -10,10 +14,11 @@ export type WorkspaceScopesOptions = {
     format?: 'array' | 'csv'
     includeBaseScopes?: boolean
     keepPrefix?: boolean
+    matchers?: ScopePathMatcherOverrides
     mergeScopes?: ReadonlyArray<string>
 }
 
-const BASE_COMMITLINT_SCOPES = ['root', 'actions'] as const
+const BASE_COMMITLINT_SCOPES = ['root'] as const
 
 export const workspaceScopes = (
     options: WorkspaceScopesOptions = {},
@@ -21,6 +26,7 @@ export const workspaceScopes = (
     const {
         includeBaseScopes = true,
         keepPrefix = false,
+        matchers = {},
         mergeScopes = [],
     } = options
 
@@ -29,6 +35,14 @@ export const workspaceScopes = (
     if (includeBaseScopes) {
         for (const scope of BASE_COMMITLINT_SCOPES) {
             scopes.add(scope)
+        }
+
+        for (const scope of Object.keys(resolveScopePathMatchers(matchers))) {
+            scopes.add(scope)
+        }
+    } else {
+        for (const [scope, patterns] of Object.entries(matchers)) {
+            if (patterns && patterns.length > 0) scopes.add(scope)
         }
     }
 

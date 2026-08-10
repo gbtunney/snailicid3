@@ -4,10 +4,15 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { splitNonEmptyLines, uniqueSorted } from './../utilities/array.js'
 import { runCommand } from './../utilities/command.js'
-import { runCliIfEntrypoint } from './../utilities/entrypoint.js'
+import { runCliIfEntrypointAsync } from './../utilities/entrypoint.js'
 import { runPackageBinary } from './../utilities/package-manager.js'
 import { getRepoRoot } from './../workspace/git.js'
 import { normalizeRepoPath } from './../workspace/paths.js'
+import { loadScopePathMatchers } from './../workspace/scope-matcher-config.js'
+import {
+    matchScopesForPath,
+    type ScopePathMatchers,
+} from './../workspace/scope-matchers.js'
 import {
     formatScopes,
     isRootPackageName,
@@ -25,7 +30,9 @@ type ParsedArgs = {
     scopeFormat: ScopeFormat
 }
 
-export function main(args: Array<string> = process.argv.slice(2)): void {
+export async function main(
+    args: Array<string> = process.argv.slice(2),
+): Promise<void> {
     const parsed = parseArgs(args)
     const repoRoot = getRepoRoot({ fallbackToCwd: true })
 
@@ -34,7 +41,11 @@ export function main(args: Array<string> = process.argv.slice(2)): void {
             ? collectNxAffectedScopes(repoRoot, parsed)
             : []),
         ...(parsed.includeRepoScopes
-            ? collectDirtyRepoScopes(repoRoot, parsed.keepPrefix)
+            ? collectDirtyRepoScopes(
+                  repoRoot,
+                  parsed.keepPrefix,
+                  await loadScopePathMatchers(repoRoot),
+              )
             : []),
         ...collectChangesetScopes(
             repoRoot,
@@ -68,6 +79,7 @@ function collectChangesetScopes(
 function collectDirtyRepoScopes(
     repoRoot: string,
     keepPrefix: boolean,
+    matchers: ScopePathMatchers,
 ): Array<string> {
     const staged = runCommand('git', ['diff', '--cached', '--name-only'], {
         cwd: repoRoot,
@@ -86,7 +98,8 @@ function collectDirtyRepoScopes(
     ).stdout
 
     return splitNonEmptyLines(`${staged}\n${unstaged}\n${untracked}`).flatMap(
-        (filePath) => collectRepoScopesForPath(repoRoot, filePath, keepPrefix),
+        (filePath) =>
+            collectRepoScopesForPath(repoRoot, filePath, keepPrefix, matchers),
     )
 }
 
@@ -111,19 +124,12 @@ function collectRepoScopesForPath(
     repoRoot: string,
     inputPath: string,
     keepPrefix: boolean,
+    matchers: ScopePathMatchers,
 ): Array<string> {
     const relativePath = normalizeRepoPath(repoRoot, inputPath)
+    const matchedScopes = matchScopesForPath(relativePath, matchers)
 
-    if (
-        relativePath.startsWith('.github/workflows/') ||
-        relativePath.startsWith('.github/actions/') ||
-        relativePath.startsWith('.github/scripts/')
-    ) {
-        return ['actions']
-    }
-
-    if (relativePath.startsWith('notes/')) return ['notes']
-    if (relativePath.startsWith('scripts/')) return ['scripts']
+    if (matchedScopes.length > 0) return matchedScopes
 
     if (
         relativePath.startsWith('.changeset/') &&
@@ -263,4 +269,4 @@ function readNextValue(
 
 export default main
 
-runCliIfEntrypoint(import.meta, main, process.argv.slice(2))
+await runCliIfEntrypointAsync(import.meta, main, process.argv.slice(2))

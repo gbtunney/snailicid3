@@ -12,6 +12,10 @@ import {
     defineConfig,
     defineConfigBuilder,
 } from '../core/index.js'
+import {
+    resolveScopePathMatchers,
+    SNAILICID3_COMMITLINT_CONFIG_KEY,
+} from '../workspace/scope-matchers.js'
 
 export type CommitlintConfig = CommitlintUserConfig
 
@@ -34,13 +38,19 @@ export const buildFunctionCommitlint = defineConfigBuilder<
     CommitlintConfig,
     CommitlintConfigFunctionOptions
 >(({ appendScopes, appendTypes = [], overrides = {}, scopeOptions }) => {
-    const scopes = workspaceScopes(appendScopes ?? scopeOptions)
+    const resolvedScopeOptions = appendScopes ?? scopeOptions
+    const scopes = workspaceScopes(resolvedScopeOptions)
     const typeEnum = [...new Set([...COMMIT_TYPES, ...appendTypes])]
 
     const enumRules = {
         rules: {
             'scope-enum': [2, 'always', scopes],
             'type-enum': [2, 'always', typeEnum],
+        },
+        [SNAILICID3_COMMITLINT_CONFIG_KEY]: {
+            scopeMatchers: resolveScopePathMatchers(
+                resolvedScopeOptions?.matchers,
+            ),
         },
     } satisfies CommitlintConfig
 
