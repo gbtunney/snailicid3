@@ -275,6 +275,21 @@ and `scope-affected`. A configured key replaces that scope's built-in patterns; 
 disable the built-in mapping. Unspecified defaults remain enabled for `actions`, `notes`, and
 `scripts`.
 
+### Git workflow environment
+
+Husky owns lint-staged and protected-branch checks. The workflow variables use the typed defaults
+reported by `snail-package environment`:
+
+```sh
+pnpm run commit:direct -- "message" # sets SKIP_LINT_STAGED=true
+SKIP_LINT_STAGED=true git commit -m "chore(root): message"
+PROTECTED_BRANCHES=main,master,release pnpm run commit:feat -- "message"
+pnpm exec snail-package environment
+```
+
+`SKIP_LINT_STAGED` defaults to `false`. `PROTECTED_BRANCHES` defaults to the exact branch names
+`main,master`; set it to an empty value to disable branch protection.
+
 ### TypeDoc
 
 ```ts

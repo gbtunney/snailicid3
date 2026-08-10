@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest'
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { formatEnvironmentReport } from './environment-report.js'
+import {
+    formatEnvironmentReport,
+    resolveEnvironmentVariable,
+} from './environment-report.js'
 
 describe('environment report', () => {
     it('shows resolved values and their sources', () => {
@@ -40,5 +43,18 @@ describe('environment report', () => {
         } finally {
             rmSync(repoRoot, { force: true, recursive: true })
         }
+    })
+
+    it('resolves individual values for shell consumers', () => {
+        expect(
+            resolveEnvironmentVariable('/repo', 'SKIP_LINT_STAGED', {
+                SKIP_LINT_STAGED: '1',
+            }),
+        ).toBe('true')
+        expect(
+            resolveEnvironmentVariable('/repo', 'PROTECTED_BRANCHES', {
+                PROTECTED_BRANCHES: 'main, release,main',
+            }),
+        ).toBe('main,release')
     })
 })

@@ -1,5 +1,7 @@
 import {
     type CONFIG_ENVIRONMENT_DEFAULTS,
+    CONFIG_ENVIRONMENT_VARIABLES,
+    type ConfigEnvironmentVariable,
     readConfigEnvironment,
 } from './environment.js'
 import { resolvePackageManager } from './package-manager.js'
@@ -93,6 +95,37 @@ export function formatEnvironmentReport(
         divider,
         ...rows.map(formatRow),
     ].join('\n')
+}
+
+/** Resolve one registered environment variable to its shell-safe display value. */
+export function resolveEnvironmentVariable(
+    repoRoot: string,
+    variable: ConfigEnvironmentVariable,
+    environment: NodeJS.ProcessEnv = process.env,
+): string {
+    if (variable === CONFIG_ENVIRONMENT_VARIABLES.packageManager) {
+        return resolvePackageManager(repoRoot, environment).packageManager
+    }
+
+    const resolved = readConfigEnvironment(environment)
+    const values: Record<
+        Exclude<ConfigEnvironmentVariable, 'PACKAGE_MANAGER'>,
+        boolean | ReadonlyArray<string> | string
+    > = {
+        ALLOW_DIRTY: resolved.allowDirty,
+        BASE_BRANCH: resolved.baseBranch,
+        COMMAND_NAME: resolved.commandName,
+        GBT_PATCH_CWD: resolved.patchCwd,
+        LOGGING: resolved.logging,
+        PREFIX: resolved.prefix,
+        PREFIX_OVERRIDE: resolved.prefixOverride,
+        PROTECTED_BRANCHES: resolved.protectedBranches,
+        SCOPE_COMMIT_SKIP_COMMITLINT: resolved.skipCommitlint,
+        SKIP_LINT_STAGED: resolved.skipLintStaged,
+    }
+    const value = values[variable]
+
+    return Array.isArray(value) ? value.join(',') : String(value)
 }
 
 function row(

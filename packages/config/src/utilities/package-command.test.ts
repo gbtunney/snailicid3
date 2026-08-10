@@ -40,9 +40,25 @@ describe('snail-package command', () => {
         )
     })
 
+    it('prints one registered environment value', () => {
+        const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+        vi.stubEnv('SKIP_LINT_STAGED', 'true')
+
+        main(['environment', 'SKIP_LINT_STAGED'])
+
+        expect(log).toHaveBeenCalledWith('true')
+        vi.unstubAllEnvs()
+    })
+
     it('rejects unknown commands', () => {
         expect(() => {
             main(['unknown'])
         }).toThrow('Unknown command: unknown')
+    })
+
+    it('rejects unknown environment variables', () => {
+        expect(() => {
+            main(['environment', 'UNKNOWN'])
+        }).toThrow('Unknown environment variable: UNKNOWN')
     })
 })

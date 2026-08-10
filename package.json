@@ -12,7 +12,7 @@
         "commit:test": "pnpm run commit test",
         "commit:build": "pnpm run commit build",
         "commit:docs": "pnpm run commit docs",
-        "commit:direct": "pnpm build:self && pnpm exec scope-commit --checked-commit --skip-lint-staged",
+        "commit:direct": "pnpm build:self && SKIP_LINT_STAGED=true pnpm exec scope-commit --checked-commit",
         "\n========== BUILD >> ==========": "",
         "build": "pnpm nx:build",
         "build:self": "pnpm exec nx run $npm_package_name:root:build",

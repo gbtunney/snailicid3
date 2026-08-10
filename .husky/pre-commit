@@ -1,45 +1,14 @@
 #!/usr/bin/env bash
-# filepath: /Users/gilliantunney/gbt-template-boilerplate/.husky/pre-commit
 set -eu
 (set -o pipefail 2> /dev/null) || true
 
-BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-PROTECTED_BRANCHES="^(master|main)$"
-
-# Allowed: A-Z a-z 0-9 space . _ - + @ /   (blocks unicode like —)
-BAD_FILENAME_RE='[^A-Za-z0-9._/@ +\-]'
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+. "$REPO_ROOT/.husky/functions.sh"
 
 printf "\n===\n>> Running in shell:: %s\n" "${SHELL:-unknown}"
-printf ">> Pre-commit Hook:: Checking BRANCH: %s\n===\n\n" "$BRANCH"
+printf ">> Pre-commit Hook:: Checking BRANCH: %s\n===\n\n" "$(get_current_branch)"
 
-# Protect branches from accidental commits.
-if echo "$BRANCH" | grep -Eq "$PROTECTED_BRANCHES"; then
-    printf "\nCommit directly to BRANCH '%s' is not allowed.\n\n" "$BRANCH"
-    exit 1
-fi
-
-# Validate branch name:
-# - alphanumeric (upper or lower) + digits
-# - segments separated by / or -
-if echo "$BRANCH" | grep -Eq '^[a-zA-Z0-9]+([/-][a-zA-Z0-9]+)*$'; then
-    echo "Branch name is valid"
-else
-    printf "\nBranch name must be alphanumeric and may contain '/' or '-': %s\n\n" "$BRANCH"
-    exit 1
-fi
-
-# Block bad characters in STAGED filenames (spaces allowed)
-BAD_FILES="$(
-    git diff --cached --name-only \
-        | LC_ALL=C grep -nE "$BAD_FILENAME_RE" \
-        || true
-)"
-if [ -n "$BAD_FILES" ]; then
-    printf "\nBad characters in staged filenames.\n"
-    printf "Allowed: A-Z a-z 0-9 space . _ - + @ /\n"
-    printf "Rename these files:\n%s\n\n" "$BAD_FILES"
-    exit 1
-fi
-
-# lint-staged is intentionally not run in Husky pre-commit.
-# Checked commit flow runs it before composing the scoped commit message.
+check_protected_branch commit
+validate_branch_name
+check_staged_filenames
+run_lint_staged_if_needed

@@ -1,7 +1,14 @@
 #!/usr/bin/env node
 
 import { runCliIfEntrypoint } from './entrypoint.js'
-import { formatEnvironmentReport } from './environment-report.js'
+import {
+    formatEnvironmentReport,
+    resolveEnvironmentVariable,
+} from './environment-report.js'
+import {
+    CONFIG_ENVIRONMENT_VARIABLES,
+    type ConfigEnvironmentVariable,
+} from './environment.js'
 import {
     getPackageManager,
     runPackageBinary,
@@ -17,7 +24,21 @@ export function main(args: Array<string> = process.argv.slice(2)): void {
 
     switch (command as PackageCommandName) {
         case 'environment':
-            console.log(formatEnvironmentReport(repoRoot))
+            if (commandArgs.length === 0) {
+                console.log(formatEnvironmentReport(repoRoot))
+                return
+            }
+
+            if (commandArgs.length !== 1 || !commandArgs[0]) {
+                throw new Error('environment accepts at most one variable name')
+            }
+
+            console.log(
+                resolveEnvironmentVariable(
+                    repoRoot,
+                    parseEnvironmentVariable(commandArgs[0]),
+                ),
+            )
             return
         case 'exec':
             runForwardedCommand(
@@ -50,10 +71,20 @@ export function main(args: Array<string> = process.argv.slice(2)): void {
     }
 }
 
+function parseEnvironmentVariable(value: string): ConfigEnvironmentVariable {
+    const variables = Object.values(CONFIG_ENVIRONMENT_VARIABLES)
+
+    if (variables.includes(value as ConfigEnvironmentVariable)) {
+        return value as ConfigEnvironmentVariable
+    }
+
+    throw new Error(`Unknown environment variable: ${value}`)
+}
+
 function printHelp(): void {
     console.log(`Usage:
   snail-package manager
-  snail-package environment
+  snail-package environment [VARIABLE]
   snail-package exec <binary> [arguments...]
   snail-package run <script> [arguments...]`)
 }
