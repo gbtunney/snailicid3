@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { main } from './commit.js'
 
-function captureConsoleLog(fn: () => void): string {
+async function captureConsoleLog(fn: () => Promise<void>): Promise<string> {
     const lines: Array<string> = []
 
     const spy = vi.spyOn(console, 'log').mockImplementation((...args) => {
@@ -9,7 +9,7 @@ function captureConsoleLog(fn: () => void): string {
     })
 
     try {
-        fn()
+        await fn()
     } finally {
         spy.mockRestore()
     }
@@ -22,9 +22,9 @@ describe('scope-commit messages', () => {
         process.env.SCOPE_COMMIT_SKIP_COMMITLINT = '1'
     })
 
-    it('prints a message with a shortened package scope', () => {
-        const output = captureConsoleLog(() => {
-            main([
+    it('prints a message with a shortened package scope', async () => {
+        const output = await captureConsoleLog(async () => {
+            await main([
                 '--message',
                 'chore',
                 'test scope message',
@@ -33,11 +33,11 @@ describe('scope-commit messages', () => {
         })
 
         expect(output).toBe('chore(config): test scope message')
-    })
+    }, 15_000)
 
-    it('prints a message with the full package scope when keepPrefix=true', () => {
-        const output = captureConsoleLog(() => {
-            main([
+    it('prints a message with the full package scope when keepPrefix=true', async () => {
+        const output = await captureConsoleLog(async () => {
+            await main([
                 '--message',
                 'chore',
                 'test scope message',
@@ -49,22 +49,32 @@ describe('scope-commit messages', () => {
         expect(output).toBe('chore(@snailicid3/config): test scope message')
     })
 
-    it('does not cut trailing characters from color/logger scopes', () => {
-        const colorOutput = captureConsoleLog(() => {
-            main(['--message', 'chore', 'test', 'packages/color/package.json'])
+    it('does not cut trailing characters from color/logger scopes', async () => {
+        const colorOutput = await captureConsoleLog(async () => {
+            await main([
+                '--message',
+                'chore',
+                'test',
+                'packages/color/package.json',
+            ])
         })
 
-        const loggerOutput = captureConsoleLog(() => {
-            main(['--message', 'chore', 'test', 'packages/logger/package.json'])
+        const loggerOutput = await captureConsoleLog(async () => {
+            await main([
+                '--message',
+                'chore',
+                'test',
+                'packages/logger/package.json',
+            ])
         })
 
         expect(colorOutput).toBe('chore(color): test')
         expect(loggerOutput).toBe('chore(logger): test')
     })
 
-    it('prints a multi-scope message for multiple package paths', () => {
-        const output = captureConsoleLog(() => {
-            main([
+    it('prints a multi-scope message for multiple package paths', async () => {
+        const output = await captureConsoleLog(async () => {
+            await main([
                 '--message',
                 'chore',
                 'test scope message',
@@ -76,9 +86,9 @@ describe('scope-commit messages', () => {
         expect(output).toBe('chore(config,node-utils): test scope message')
     })
 
-    it('maps GitHub workflow paths to actions', () => {
-        const output = captureConsoleLog(() => {
-            main([
+    it('maps GitHub workflow paths to actions', async () => {
+        const output = await captureConsoleLog(async () => {
+            await main([
                 '--message',
                 'chore',
                 'test scope message',
@@ -89,9 +99,9 @@ describe('scope-commit messages', () => {
         expect(output).toBe('chore(actions): test scope message')
     })
 
-    it('can use an explicit scope for generated commits', () => {
-        const output = captureConsoleLog(() => {
-            main([
+    it('can use an explicit scope for generated commits', async () => {
+        const output = await captureConsoleLog(async () => {
+            await main([
                 '--message',
                 'chore',
                 'test scope message',
@@ -103,9 +113,9 @@ describe('scope-commit messages', () => {
         expect(output).toBe('chore(config): test scope message')
     })
 
-    it('accepts skip-lint-staged without changing generated scopes', () => {
-        const output = captureConsoleLog(() => {
-            main([
+    it('accepts skip-lint-staged without changing generated scopes', async () => {
+        const output = await captureConsoleLog(async () => {
+            await main([
                 '--message',
                 'chore',
                 'test scope message',

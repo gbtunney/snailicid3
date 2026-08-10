@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { main } from './affected.js'
 
-function captureConsoleLog(fn: () => void): string {
+async function captureConsoleLog(fn: () => Promise<void>): Promise<string> {
     const lines: Array<string> = []
 
     const spy = vi.spyOn(console, 'log').mockImplementation((...args) => {
@@ -12,7 +12,7 @@ function captureConsoleLog(fn: () => void): string {
     })
 
     try {
-        fn()
+        await fn()
     } finally {
         spy.mockRestore()
     }
@@ -21,7 +21,7 @@ function captureConsoleLog(fn: () => void): string {
 }
 
 describe('scope-affected', () => {
-    it('prints package scopes from a changeset file', () => {
+    it('prints package scopes from a changeset file', async () => {
         const tempDirectory = mkdtempSync(
             path.join(tmpdir(), 'scope-affected-'),
         )
@@ -40,8 +40,8 @@ describe('scope-affected', () => {
                 ].join('\n'),
             )
 
-            const output = captureConsoleLog(() => {
-                main(['--changeset-only', changesetPath])
+            const output = await captureConsoleLog(async () => {
+                await main(['--changeset-only', changesetPath])
             })
 
             expect(output).toBe('config,node-utils')
@@ -50,7 +50,7 @@ describe('scope-affected', () => {
         }
     })
 
-    it('can keep package prefixes for changeset scopes', () => {
+    it('can keep package prefixes for changeset scopes', async () => {
         const tempDirectory = mkdtempSync(
             path.join(tmpdir(), 'scope-affected-prefixed-'),
         )
@@ -62,8 +62,8 @@ describe('scope-affected', () => {
                 ['---', "'@snailicid3/config': patch", '---'].join('\n'),
             )
 
-            const output = captureConsoleLog(() => {
-                main(['--changeset-only', changesetPath, '--keep-prefix'])
+            const output = await captureConsoleLog(async () => {
+                await main(['--changeset-only', changesetPath, '--keep-prefix'])
             })
 
             expect(output).toBe('@snailicid3/config')

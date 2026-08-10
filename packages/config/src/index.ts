@@ -25,7 +25,6 @@ export type { WorkspaceScopesOptions } from './commitlint/workspace.scopes.js'
  * @see Shared `defineConfig` identity helper and the `ConfigApi` adapter shape used by every tool namespace.
  */
 export { defineConfig, defineConfigBuilder } from './core/index.js'
-
 export type {
     AnyDefineConfig,
     BaseConfigFunctionOptions,
@@ -46,7 +45,6 @@ export type {
  * @see [typescript-eslint](https://typescript-eslint.io/getting-started/)
  */
 export { EsLint } from './eslint/index.js'
-
 // Do not re-export all types to avoid duplicate identifier error
 export type {
     EsLintConfig,
@@ -73,8 +71,8 @@ export type {
  * @see [davidAnson/markdownlint](https://github.com/DavidAnson/markdownlint)
  */
 export { Markdownlint } from './markdownlint/index.js'
-export type * from './markdownlint/index.js'
 
+export type * from './markdownlint/index.js'
 /**
  * @namespace Nx Pipeline Preset
  * @see [Nx - Smart Monorepos](https://nx.dev/)
@@ -83,6 +81,7 @@ export type * from './markdownlint/index.js'
  * `nx.json > extends`.
  */
 export { Nx } from './nx/index.js'
+
 export type {
     NxPreset,
     NxPresetFunctionOptions,
@@ -128,6 +127,7 @@ export {
     JSLIKE_FILE_EXTENSIONS,
     TS_FILE_EXTENSIONS,
 } from './shared.js'
+
 export type {
     JSFileExtensions,
     JSLikeFileExtensions,
@@ -135,19 +135,18 @@ export type {
 } from './shared.js'
 export { PRETTIER_FILE_EXTENSIONS } from './shared.js'
 export type { PrettierFileExtensions } from './shared.js'
-
 export { MARKDOWN_FILE_EXTENSIONS } from './shared.js'
 export type { MarkdownFileExtensions } from './shared.js'
 export type {
     ConfigToolRegistry,
     ConfigToolRegistryEntry,
 } from './tool-registry.js'
+
 /**
  * @namespace TypeDoc Configuration
  * @see [TypeDoc - Documentation Generator for TypeScript Projects](https://typedoc.org/)
  */
 export { Typedoc, typedoc } from './typedoc/index.js'
-
 export type {
     MaterialThemeOptions,
     RemarkPluginOptions,
@@ -166,10 +165,11 @@ export type {
     TypedocPluginRegistryEntry,
     TypedocTool,
 } from './typedoc/index.js'
-
 export * from './utilities/command.js'
 export * from './utilities/entrypoint.js'
+
 export * from './utilities/environment-report.js'
+
 export * from './utilities/environment.js'
 /* *  UTILITIES *  */
 export { expandExtensions } from './utilities/extensions.js'
@@ -213,5 +213,17 @@ export type {
     Writable,
     WritableDeep,
 } from './utilities/types.js'
+export { loadScopePathMatchers } from './workspace/scope-matcher-config.js'
+export {
+    DEFAULT_SCOPE_PATH_MATCHERS,
+    matchScopesForPath,
+    resolveScopePathMatchers,
+    scopeMatchersFromCommitlintConfig,
+} from './workspace/scope-matchers.js'
+export type {
+    ScopePathMatcherOverrides,
+    ScopePathMatchers,
+    Snailicid3CommitlintSettings,
+} from './workspace/scope-matchers.js'
 
 export { merge } from 'ts-deepmerge'

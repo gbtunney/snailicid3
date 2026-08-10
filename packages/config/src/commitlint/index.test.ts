@@ -89,4 +89,27 @@ describe('Commitlint config merge behavior', () => {
             [number, string, Array<string>] | undefined
         expect(scopeEnumRule?.[2]).toContain('extra-scope')
     })
+
+    test('scopeOptions.matchers updates the enum and matcher metadata', () => {
+        const config = Commitlint.config({
+            cwd,
+            scopeOptions: {
+                matchers: {
+                    actions: null,
+                    docs: ['docs/**'],
+                },
+            },
+        })
+        const scopeEnumRule = config.rules?.['scope-enum'] as
+            [number, string, Array<string>] | undefined
+
+        expect(scopeEnumRule?.[2]).toContain('docs')
+        expect(scopeEnumRule?.[2]).not.toContain('actions')
+        expect(config.snailicid3).toMatchObject({
+            scopeMatchers: {
+                docs: ['docs/**'],
+                scripts: ['scripts/**'],
+            },
+        })
+    })
 })
