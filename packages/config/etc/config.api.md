@@ -10,7 +10,11 @@ import type { Config as Config_2 } from 'prettier';
 import config_conventional from '@commitlint/config-conventional';
 import { Configuration } from 'lint-staged';
 import type { Configuration as Configuration_2 } from 'markdownlint';
+import { DEFAULT_SCOPE_PATH_MATCHERS } from '@snailicid3/workspace';
 import { defineConfig as defineConfig_2 } from '@eslint/config-helpers';
+import { getPackageBinaryCommand } from '@snailicid3/workspace';
+import { getPackageManager } from '@snailicid3/workspace';
+import { getPackageScriptCommand } from '@snailicid3/workspace';
 import { IConfigFile } from '@microsoft/api-extractor';
 import { IterableElement } from 'type-fest';
 import type { JsonArray } from 'type-fest';
@@ -20,6 +24,8 @@ import type { JsonPrimitive } from 'type-fest';
 import type { JsonValue } from 'type-fest';
 import type { KeyAsString } from 'type-fest';
 import { LiteralUnion } from 'type-fest';
+import { loadScopePathMatchers } from '@snailicid3/workspace';
+import { matchScopesForPath } from '@snailicid3/workspace';
 import type { Merge } from 'type-fest';
 import { merge } from 'ts-deepmerge';
 import type { NxJsonConfiguration } from 'nx/src/config/nx-json.js';
@@ -27,9 +33,21 @@ import { OmitDeep } from 'type-fest';
 import { OmitIndexSignature } from 'type-fest';
 import type { Options } from 'prettier-plugin-jsdoc';
 import type { Options as Options_2 } from 'prettier';
+import { PackageCommand } from '@snailicid3/workspace';
+import { PackageManager } from '@snailicid3/workspace';
+import { PackageManagerResolution } from '@snailicid3/workspace';
 import type { Plugin } from 'prettier';
 import { PluginOptions } from 'typedoc-plugin-markdown';
+import { resolvePackageManager } from '@snailicid3/workspace';
+import { resolveScopePathMatchers } from '@snailicid3/workspace';
+import { runPackageBinary } from '@snailicid3/workspace';
+import { runPackageManager } from '@snailicid3/workspace';
+import { runPackageScript } from '@snailicid3/workspace';
+import { scopeMatchersFromCommitlintConfig } from '@snailicid3/workspace';
+import { ScopePathMatcherOverrides } from '@snailicid3/workspace';
+import { ScopePathMatchers } from '@snailicid3/workspace';
 import { Simplify } from 'type-fest';
+import { Snailicid3CommitlintSettings } from '@snailicid3/workspace';
 import { Spread } from 'type-fest';
 import type { Tagged } from 'type-fest';
 import type { TargetConfiguration } from 'nx/src/config/workspace-json-project-json.js';
@@ -158,6 +176,8 @@ export type ConfigToolRegistryEntry<TConfig, TFunctionOptions> = {
 // @public (undocumented)
 export type ConventionalCommitType = KeyAsString<typeof config_conventional.prompt.questions.type.enum>;
 
+export { DEFAULT_SCOPE_PATH_MATCHERS }
+
 // @public
 export const defineConfig: <const TConfig>(config: TConfig) => TConfig;
 
@@ -220,6 +240,12 @@ export const getFilePath: (rootormeta: PathRoot | undefined, filePath: string) =
 
 // @public
 export const getFullPath: (value: string, root: PathRoot | undefined) => string;
+
+export { getPackageBinaryCommand }
+
+export { getPackageManager }
+
+export { getPackageScriptCommand }
 
 // @public
 export type IdentityDefineConfig<TConfig> = <const TValue extends TConfig>(config: TValue) => TValue;
@@ -305,6 +331,8 @@ export type LintStagedTool = ConfigTool<LintStagedConfig, LintStagedConfigFuncti
 
 export { LiteralUnion }
 
+export { loadScopePathMatchers }
+
 // @public (undocumented)
 export const MARKDOWN_FILE_EXTENSIONS: readonly ["md", "markdown"];
 
@@ -353,6 +381,8 @@ export type MarkdownlintRuleConfiguration<Bool extends boolean = true> = OmitMar
 // @public (undocumented)
 export type MarkdownlintTool = ConfigTool<MarkdownlintConfig, MarkdownlintConfigFunctionOptions, typeof Markdownlint.defineConfig, Omit<typeof Markdownlint, 'config' | 'defineConfig'>>;
 
+export { matchScopesForPath }
+
 // @public (undocumented)
 export type MaterialThemeOptions = {
     themeColor?: string;
@@ -391,6 +421,12 @@ export type NxTool = ConfigTool<NxPreset, NxPresetFunctionOptions, typeof Nx.def
 export { OmitDeep }
 
 export { OmitIndexSignature }
+
+export { PackageCommand }
+
+export { PackageManager }
+
+export { PackageManagerResolution }
 
 // @public (undocumented)
 export type PathRoot = ImportMeta | string;
@@ -549,10 +585,28 @@ export type ResolvedPrettierPlugin = Plugin & {
     readonly [RESOLVED_PRETTIER_PLUGIN]: true;
 };
 
+export { resolvePackageManager }
+
+export { resolveScopePathMatchers }
+
+export { runPackageBinary }
+
+export { runPackageManager }
+
+export { runPackageScript }
+
+export { scopeMatchersFromCommitlintConfig }
+
+export { ScopePathMatcherOverrides }
+
+export { ScopePathMatchers }
+
 // @public
 export const selectTargets: (targets: NxTargets, keys: Array<string>) => NxTargets;
 
 export { Simplify }
+
+export { Snailicid3CommitlintSettings }
 
 // @public
 export type StripIndexSignature<Type> = {
@@ -990,6 +1044,7 @@ export type WorkspaceScopesOptions = {
     format?: 'array' | 'csv';
     includeBaseScopes?: boolean;
     keepPrefix?: boolean;
+    matchers?: ScopePathMatcherOverrides;
     mergeScopes?: ReadonlyArray<string>;
 };
 
