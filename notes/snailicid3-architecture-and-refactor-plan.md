@@ -750,8 +750,11 @@ Notes that fell out of the audit:
 
 Steps:
 
-- [ ] Move `filterFileArrByGlob` to node-utils; update `shared.ts`, lint-staged, and the barrel;
-      keep a config re-export during migration.
+- [x] Move `filterFileArrByGlob` to node-utils; update `shared.ts`, lint-staged, and the barrel.
+      Done: added `node-utils/src/glob.ts` (+ test), pointed lint-staged at node-utils directly,
+      left `shared.ts` as formatting policy only, removed the stale `//GlobFileFilter` barrel slot,
+      and dropped `micromatch`/`@types/micromatch` from config. `LintStaged.filterFileArrByGlob`
+      still resolves; the pre-commit lint-staged run exercises it.
 - [x] Consolidate JSON file IO into node-utils (one `exportFile`/`importFile` contract, one
       `JSONExportConfig`/`JSONExportEntry`); keep config compatibility re-exports. Done: moved
       `config/src/utilities/json.ts` → `node-utils/src/json.ts` (the whole `json` namespace + value
@@ -802,11 +805,10 @@ Wonky items to resolve while doing the Phase 6 moves (do not defer these into Pa
   outside `@snailicid3/config`, so retiring it is safe. Remove it together with the JSON-IO
   consolidation — script, nx target, and file in one step — rather than leaving it as a stray output
   generator.
-- **`micromatch` becomes a config-only leftover.** config's sole `micromatch` use is
-  `filterFileArrByGlob` in `shared.ts`. After that helper moves to node-utils, drop `micromatch` and
-  `@types/micromatch` from `@snailicid3/config` dependencies.
-- **Stale barrel placeholder.** `config/src/index.ts` carries a commented `//GlobFileFilter,` export
-  slot; remove or wire it up when the glob helper lands in node-utils.
+- **`micromatch` becomes a config-only leftover.** _Resolved (2026-08-12)._ `filterFileArrByGlob`
+  moved to node-utils; `micromatch` and `@types/micromatch` dropped from `@snailicid3/config`.
+- **Stale barrel placeholder.** _Resolved (2026-08-12)._ The commented `//GlobFileFilter,` slot was
+  removed from `config/src/index.ts` when the glob helper landed in node-utils.
 - **`@snailicid3/workspace` is still `private: true`.** Expected mid-refactor (it is not published
   yet), but it must be flipped to public with a packed test before any consumer depends on it. Track
   this as a release-gate item, not silent state.
