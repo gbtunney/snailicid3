@@ -88,6 +88,7 @@
         "directory": "packages/node-utils"
     },
     "dependencies": {
+        "@snailicid3/utils": "workspace:*",
         "@types/is-glob": "^4.0.4",
         "@types/micromatch": "^4.0.10",
         "glob": "^13.0.6",

@@ -1,3 +1,8 @@
+import {
+    JsonGuards,
+    normalize as normalizeJsonValue,
+    parse as parseJsonText,
+} from '@snailicid3/utils'
 import { merge as deep_merge } from 'ts-deepmerge'
 import type {
     JsonArray,
@@ -93,56 +98,25 @@ export namespace Json {
     export type Value = JsonValue
 }
 
+// JSON value validation and normalization are owned by @snailicid3/utils (jsonValue). These are thin
+// typed adapters over that single implementation; node-utils keeps only the branding, file IO, and
+// object helpers below.
+
 /** Check whether a value is a finite JSON primitive. */
 export const isJsonPrimitive = (value: unknown): value is JsonPrimitive =>
-    value === null ||
-    typeof value === 'string' ||
-    typeof value === 'boolean' ||
-    (typeof value === 'number' && Number.isFinite(value))
-
-/** Recursively validate JSON values while detecting circular objects and arrays. */
-const isJsonValueInternal = (
-    value: unknown,
-    seen: WeakSet<object>,
-): value is JsonValue => {
-    if (isJsonPrimitive(value)) {
-        return true
-    }
-
-    if (Array.isArray(value)) {
-        if (seen.has(value)) {
-            return false
-        }
-
-        seen.add(value)
-        return value.every((entry) => isJsonValueInternal(entry, seen))
-    }
-
-    if (isPlainObject(value)) {
-        if (seen.has(value)) {
-            return false
-        }
-
-        seen.add(value)
-        return Object.values(value).every((entry) =>
-            isJsonValueInternal(entry, seen),
-        )
-    }
-
-    return false
-}
+    JsonGuards.primitive(value)
 
 /** Check whether an unknown value is valid, non-circular JSON data. */
 export const isJsonValue = (value: unknown): value is JsonValue =>
-    isJsonValueInternal(value, new WeakSet<object>())
+    JsonGuards.valueOf(value)
 
 /** Check whether a value is a valid JSON array. */
 export const isJsonArray = (value: unknown): value is JsonArray =>
-    Array.isArray(value) && isJsonValue(value)
+    JsonGuards.array(value)
 
 /** Check whether a value is a valid JSON object rather than an array. */
 export const isJsonObject = (value: unknown): value is JsonObject =>
-    isPlainObject(value) && isJsonValue(value)
+    JsonGuards.object(value)
 
 /** Brand output that has already passed through JSON.stringify. */
 const toJSONString = <Type extends JsonValue>(
@@ -150,33 +124,12 @@ const toJSONString = <Type extends JsonValue>(
 ): JSONStringOf<Type> => value as JSONStringOf<Type>
 
 /** Parse a string only when its result is valid JSON data. */
-const parseJSONString = (data: string): JsonValue | undefined => {
-    try {
-        const parsed: unknown = JSON.parse(data)
-        return isJsonValue(parsed) ? parsed : undefined
-    } catch {
-        return undefined
-    }
-}
+const parseJSONString = (data: string): JsonValue | undefined =>
+    parseJsonText(data)
 
 /** Normalize unknown in-memory data through a JSON serialization boundary. */
-const deserializeJSON = (data: unknown): JsonValue | undefined => {
-    if (typeof data === 'string') {
-        return parseJSONString(data) ?? data
-    }
-
-    try {
-        const serialized = JSON.stringify(data)
-
-        if (serialized === undefined) {
-            return undefined
-        }
-
-        return parseJSONString(serialized)
-    } catch {
-        return undefined
-    }
-}
+const deserializeJSON = (data: unknown): JsonValue | undefined =>
+    normalizeJsonValue(data)
 
 /** Normalize unknown data only when its result is a JSON object. */
 const deserializeJSONObject = (data: unknown): JsonObject | undefined => {

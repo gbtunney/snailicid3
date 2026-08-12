@@ -523,6 +523,9 @@ importers:
 
     packages/node-utils:
         dependencies:
+            '@snailicid3/utils':
+                specifier: workspace:*
+                version: link:../utils
             '@types/is-glob':
                 specifier: ^4.0.4
                 version: 4.0.4
