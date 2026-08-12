@@ -2,8 +2,8 @@
 import { z } from 'zod'
 
 import { getImageBase64 } from './encode-base64.js'
-import { exportJSONFile } from './export.json.file.js'
 import * as filePath from './file.path.array.js'
+import { json } from './json.js'
 import * as typedPath from './path.typed.js'
 import * as zod_fs_schema from './zod.node.js'
 
@@ -15,8 +15,10 @@ export const zod: typeof z & typeof zod_fs_schema = {
 
 /** @namespace Functions pertaining to nodejs files and path resolution */
 export const node = {
-    exportJSONFile,
+    /** @deprecated Use `json.exportFile`. Retained as a compatibility alias. */
+    exportJSONFile: json.exportFile,
     getImageBase64,
+    json,
     ...zod_fs_schema,
     ...filePath,
     ...typedPath,
@@ -29,9 +31,9 @@ export * from './command.js'
 export type { ImageMimeType } from './encode-base64.js'
 export * from './entrypoint.js'
 export * from './environment.js'
-export type { JSONExportConfig, JSONExportEntry } from './export.json.file.js'
 export * as filePath from './file.path.array.js'
 export type { FilePath, FileType } from './file.path.array.js'
+export * from './json.js'
 export * as typedPath from './path.typed.js'
 export type {
     FilePathType,
