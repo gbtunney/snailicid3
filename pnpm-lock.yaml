@@ -694,6 +694,9 @@ importers:
             '@snailicid3/node-utils':
                 specifier: workspace:*
                 version: link:../node-utils
+            '@snailicid3/utils':
+                specifier: workspace:*
+                version: link:../utils
             cosmiconfig:
                 specifier: ^9.0.2
                 version: 9.0.2(typescript@6.0.3)

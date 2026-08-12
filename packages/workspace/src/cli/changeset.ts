@@ -9,13 +9,19 @@
  * pending-message file. The git-mutating execution (create/switch, changeset CLI, `--commit`, `--pr`) wires onto this
  * same decision next.
  */
-import { runCliIfEntrypoint, safeParseArgv } from '@snailicid3/node-utils'
+import {
+    runCliIfEntrypoint,
+    runCommand,
+    safeParseArgv,
+} from '@snailicid3/node-utils'
+import { fmt } from '@snailicid3/utils'
 import { z } from 'zod'
 import {
     type BranchOperation,
     type BranchPrefix,
     decideBranchAction,
     deriveCommitFromBranch,
+    executeBranchAction,
     gatherBranchState,
     getCurrentBranch,
     getRepoRoot,
@@ -24,12 +30,14 @@ import {
 
 const optionsSchema = z.object({
     append: z.string().optional(),
+    apply: z.boolean().optional().default(false),
     base: z.string().optional(),
     json: z.boolean().optional().default(false),
     operation: z.enum(['continue', 'publish', 'start']).optional(),
     prefix: z.enum(['changeset', 'release']).optional(),
     scope: z.string().optional(),
     slug: z.string().optional(),
+    updateBase: z.boolean().optional().default(false),
 })
 
 type Options = z.output<typeof optionsSchema>
@@ -98,10 +106,24 @@ export function main(args: Array<string> = process.argv.slice(2)): void {
         console.log(
             JSON.stringify({ decision, derivedCommit, operation, state }),
         )
-        return
+    } else {
+        printPlan(operation, state, decision, derivedCommit)
     }
 
-    printPlan(operation, state, decision, derivedCommit)
+    // Mutation is opt-in. Without --apply the command is a read-only plan.
+    if (options.apply) {
+        if (options.updateBase && decision.offerUpdateWithBase) {
+            runCommand('git', ['fetch', 'origin', baseBranch], {
+                cwd: repoRoot,
+                stdio: 'inherit',
+            })
+        }
+        executeBranchAction(repoRoot, decision, state, {
+            inherit: true,
+            updateBase: options.updateBase,
+        })
+        console.log(fmt`applied — now on ${getCurrentBranch(repoRoot)}`)
+    }
 }
 
 function printPlan(
@@ -110,26 +132,30 @@ function printPlan(
     decision: ReturnType<typeof decideBranchAction>,
     derivedCommit: ReturnType<typeof deriveCommitFromBranch>,
 ): void {
-    console.log(`operation:      ${operation}`)
-    console.log(`current branch: ${state.currentBranch || '(detached HEAD)'}`)
-    console.log(`base:           ${state.baseBranch} (${state.baseSync})`)
-    console.log(`working tree:   ${state.workingTree}`)
-    console.log(`target branch:  ${state.targetBranch}`)
+    console.log(fmt`operation:      ${operation}`)
     console.log(
-        `target exists:  local=${String(state.targetExistsLocal)} origin=${String(state.targetExistsRemote)}`,
+        fmt`current branch: ${state.currentBranch || '(detached HEAD)'}`,
     )
-    console.log(`decision:       ${decision.action} — ${decision.reason}`)
+    console.log(fmt`base:           ${state.baseBranch} (${state.baseSync})`)
+    console.log(fmt`working tree:   ${state.workingTree}`)
+    console.log(fmt`target branch:  ${state.targetBranch}`)
+    console.log(
+        fmt`target exists:  local=${state.targetExistsLocal} origin=${state.targetExistsRemote}`,
+    )
+    console.log(fmt`decision:       ${decision.action} — ${decision.reason}`)
     if (decision.offerUpdateWithBase) {
-        console.log(`update base:    offered (${state.baseBranch} not in sync)`)
+        console.log(
+            fmt`update base:    offered (${state.baseBranch} not in sync)`,
+        )
     }
     if (decision.carriesDirtyChanges) {
         console.log('carries dirty:  yes')
     }
     for (const warning of decision.warnings) {
-        console.log(`warning:        ${warning}`)
+        console.log(fmt`warning:        ${warning}`)
     }
     if (derivedCommit) {
-        console.log(`commit (derived from branch): ${derivedCommit.message}`)
+        console.log(fmt`commit (derived from branch): ${derivedCommit.message}`)
     }
 }
 

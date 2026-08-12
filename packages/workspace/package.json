@@ -98,6 +98,7 @@
     },
     "dependencies": {
         "@snailicid3/node-utils": "workspace:*",
+        "@snailicid3/utils": "workspace:*",
         "cosmiconfig": "^9.0.2",
         "cosmiconfig-typescript-loader": "^6.3.0",
         "micromatch": "^4.0.8",

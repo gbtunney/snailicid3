@@ -943,8 +943,13 @@ decision table:
       offers an update — no flat denial. Done.
 - [x] **Publish candidates are the exception:** the decision blocks a `publish` operation off the
       base branch; keeps that guard. Done.
-- [ ] **Execute (next):** wire the decision into git — create/switch, `offerUpdateWithBase`, run the
-      changeset CLI, then `--commit`/`--pr` — currently only the read-only plan is wired.
+- [x] **Execute — branch action:** `core/branch-actions.ts` (`executeBranchAction`) performs the
+      decision (create from base / switch-relink / proceed / throw on block), verified by a temp-git
+      integration test. The command's `--apply` flag runs it (mutation opt-in; default stays the
+      read-only plan), with `--update-base` fetching `origin/<base>` first. Output uses `fmt` (which
+      already formats booleans, so no `String()` noise). e2e-smoked.
+- [ ] **Execute — remainder (next):** run the changeset CLI (`add`), then `--commit` (stage
+      changeset + commit with the derived message and real resolved scope) and `--pr`.
 
 #### 7.3 Command surface (the flow)
 
