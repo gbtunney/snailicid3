@@ -886,7 +886,25 @@ usage keeps working.
 
 **Parsing constraint.** All env reading and non-trivial arg parsing here MUST use the argv-schema
 primitives (`defineEnv`; `parseArgv`/`safeParseArgv`/`parseArgvPositionals`) — no hand-rolled
-parsing.
+parsing. The command is implemented in **Node/TypeScript**, not shell.
+
+**Settled decision — no hidden pending-message file.** Commit metadata is derived entirely from the
+**branch name**: the `changeset/` or `release/` prefix gives the commit type, the slug gives the
+subject, resolved scope goes in parens, and an optional `--append` message follows the slug (e.g.
+`changeset(config): wacky-walker — adjust output`). This resolves the original "how does it remember
+the commit message" question — the branch _is_ the durable state.
+
+**#206 is deferred (on hold).** The intent-vs-inventory split and the API-report gate below are held
+for a later round. This phase focuses on the local command, the shared plan/report, and CI reusing
+the CLI (like `scope-affected`). The `should_publish` decision keeps its current behavior until #206
+is picked up.
+
+**Progress (this session).** The pure core is landed in `@snailicid3/workspace`:
+`core/branch-state.ts` (`decideBranchAction` — create/switch/relink/proceed/block, replacing flat
+denial; `gatherBranchState` + git helpers), `core/branch-commit.ts` (`deriveCommitFromBranch` /
+`parseBranchName`), and `cli/changeset.ts` — a Node command on `safeParseArgv` that does the
+**read-only assessment/plan** (state → decision → derived commit). All unit-tested. The git-mutating
+execution (create/switch, changeset CLI, `--commit`, `--pr`) wires onto this next.
 
 #### 7.1 Shared release engine (the spine, in workspace)
 
@@ -896,9 +914,10 @@ Split the model along the two axes [#206] demands, and expose one report both su
       new-version vs already-published, unpublished candidates, registry lookup failures. Must
       handle `private: true` **local-only** packages as versionable/taggable inventory without
       treating them as publishable.
-- [ ] **Intent/policy (decision):** an explicit axis — `observe | prepare | publish` (naming open) —
-      supplied by caller/CI, never inferred from registry absence.
-      `should_publish = intent allows     publish AND no pending changesets AND publish candidates exist`.
+- [ ] _(deferred — #206)_ **Intent/policy (decision):** an explicit axis —
+      `observe | prepare |     publish` (naming open) — supplied by caller/CI, never inferred from
+      registry absence.
+      `should_publish = intent allows publish AND no pending changesets AND publish candidates exist`.
       This is [#206]'s core: a `private:false` flip must not silently select the release-candidate
       PR phase.
 - [ ] **Plan report:** the read-only surface (checked ref, phase, `should_version`/`should_publish`/
@@ -906,26 +925,26 @@ Split the model along the two axes [#206] demands, and expose one report both su
       human- and machine-readable form, with tests. `gbt-changeset plan` and the CI summary call the
       same function — this lets the Actions "dry-run" reporting be retired in favor of the shared
       one.
-- [ ] **API-report policy** ([#206]/#205): make it stop erroring for a package that is public but
-      still at `0.0.0` — require a baseline only once a version is bumped above `0.0.0` (or another
-      explicit gate), with a targeted "how to generate it" message. Confirm the current trigger
-      (`private:false` + `publishConfig.access:public`?) against the detector once the actions repo
-      is attached.
+- [ ] _(deferred — #206)_ **API-report policy** ([#206]/#205): make it stop erroring for a package
+      that is public but still at `0.0.0` — require a baseline only once a version is bumped above
+      `0.0.0` (or another explicit gate), with a targeted "how to generate it" message. Confirm the
+      current trigger (`private:false` + `publishConfig.access:public`?) against the detector.
 
 #### 7.2 Smart branch state machine (replace flat denial)
 
 The current script flatly dies if not on base, out of sync, or dirty. Replace with an assessment +
 decision table:
 
-- [ ] **Assess:** working tree clean/dirty; ahead/behind/up-to-date vs base; current prefix (`base`
-      / `changeset/*` / `release/*` / other); and whether a matching `changeset/<slug>` or
-      `release/<slug>` branch **already exists locally or on origin** (relink target).
-- [ ] **Decide, don't deny:** if clean and a matching prefixed branch exists → **switch/relink**; if
-      none → **create** from base; offer to **update the branch with base** when behind. Dirty is
-      allowed to proceed into an existing/new prefixed branch (carry the changes), instead of a hard
-      stop — keep an explicit override only where a stop is genuinely required.
-- [ ] **Publish candidates are the exception:** a publish operation must be on the base branch; keep
-      that guard.
+- [x] **Assess:** `gatherBranchState` reports working tree clean/dirty; base ahead/behind/diverged
+      vs its remote; current prefix (`base`/`changeset/*`/`release/*`/other); and whether the target
+      exists locally or on origin (relink probe). Done.
+- [x] **Decide, don't deny:** `decideBranchAction` (pure, unit-tested) → switch/relink to an
+      existing target, create from base, or proceed; dirty carries with a warning, out-of-sync base
+      offers an update — no flat denial. Done.
+- [x] **Publish candidates are the exception:** the decision blocks a `publish` operation off the
+      base branch; keeps that guard. Done.
+- [ ] **Execute (next):** wire the decision into git — create/switch, `offerUpdateWithBase`, run the
+      changeset CLI, then `--commit`/`--pr` — currently only the read-only plan is wired.
 
 #### 7.3 Command surface (the flow)
 
