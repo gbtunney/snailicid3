@@ -13,6 +13,9 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 
 const patchScript = path.resolve(import.meta.dirname, 'patch.sh')
+// These tests launch several Bash subprocesses. Full Nx coverage runs execute test files in
+// parallel, and process startup on the supported older Mac can exceed Vitest's unit-test timeout.
+const shellIntegrationTimeout = 30_000
 const temporaryDirectories: Array<string> = []
 
 function executable(filePath: string, contents: string): void {
@@ -95,50 +98,72 @@ afterEach(() => {
 })
 
 describe('gbt-patch local build cache', () => {
-    it('skips in CI without touching the installed binary', () => {
-        const test = fixture()
-        run({ ...test.environment, CI: 'true', GBT_PATCH_TEST_ALLOW_CI: '' })
+    it(
+        'skips in CI without touching the installed binary',
+        () => {
+            const test = fixture()
+            run({
+                ...test.environment,
+                CI: 'true',
+                GBT_PATCH_TEST_ALLOW_CI: '',
+            })
 
-        expect(readFileSync(test.target, 'utf8')).toContain('echo original')
-        expect(existsSync(test.log)).toBe(false)
-    })
+            expect(readFileSync(test.target, 'utf8')).toContain('echo original')
+            expect(existsSync(test.log)).toBe(false)
+        },
+        shellIntegrationTimeout,
+    )
 
-    it('builds, verifies, caches, and installs a missing patch', () => {
-        const test = fixture()
-        run(test.environment)
+    it(
+        'builds, verifies, caches, and installs a missing patch',
+        () => {
+            const test = fixture()
+            run(test.environment)
 
-        expect(
-            execFileSync(test.target, ['--version'], {
-                encoding: 'utf8',
-            }).trim(),
-        ).toBe('0.28.2')
-        const cacheDirectory = path.join(
-            test.root,
-            'cache/0.28.2/catalina-v1/Darwin/x86_64',
-        )
-        expect(existsSync(path.join(cacheDirectory, 'esbuild'))).toBe(true)
-        expect(
-            readFileSync(path.join(cacheDirectory, 'complete'), 'utf8'),
-        ).toMatch(/sha256=[a-f\d]{64}/u)
-    })
+            expect(
+                execFileSync(test.target, ['--version'], {
+                    encoding: 'utf8',
+                }).trim(),
+            ).toBe('0.28.2')
+            const cacheDirectory = path.join(
+                test.root,
+                'cache/0.28.2/catalina-v1/Darwin/x86_64',
+            )
+            expect(existsSync(path.join(cacheDirectory, 'esbuild'))).toBe(true)
+            expect(
+                readFileSync(path.join(cacheDirectory, 'complete'), 'utf8'),
+            ).toMatch(/sha256=[a-f\d]{64}/u)
+        },
+        shellIntegrationTimeout,
+    )
 
-    it('reuses a valid cache on repeated runs', () => {
-        const test = fixture()
-        run(test.environment)
-        run(test.environment)
+    it(
+        'reuses a valid cache on repeated runs',
+        () => {
+            const test = fixture()
+            run(test.environment)
+            run(test.environment)
 
-        expect(readFileSync(test.log, 'utf8').match(/^build$/gmu)).toHaveLength(
-            1,
-        )
-        expect(readFileSync(test.log, 'utf8').match(/^clone$/gmu)).toHaveLength(
-            1,
-        )
-    })
+            expect(
+                readFileSync(test.log, 'utf8').match(/^build$/gmu),
+            ).toHaveLength(1)
+            expect(
+                readFileSync(test.log, 'utf8').match(/^clone$/gmu),
+            ).toHaveLength(1)
+        },
+        shellIntegrationTimeout,
+    )
 
-    it('does not replace the installed binary when the build fails', () => {
-        const test = fixture({ failBuild: true })
+    it(
+        'does not replace the installed binary when the build fails',
+        () => {
+            const test = fixture({ failBuild: true })
 
-        expect(() => { run(test.environment); }).toThrow()
-        expect(readFileSync(test.target, 'utf8')).toContain('echo original')
-    })
+            expect(() => {
+                run(test.environment)
+            }).toThrow()
+            expect(readFileSync(test.target, 'utf8')).toContain('echo original')
+        },
+        shellIntegrationTimeout,
+    )
 })
