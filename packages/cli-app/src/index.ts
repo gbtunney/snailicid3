@@ -17,17 +17,21 @@ export type {
 export { wrapSchema } from './schema/utils.js'
 export type { WrappedSchema, ZodObjectSchema } from './schema/utils.js'
 export {
-    //GlobFileFilter,
-    isPlainObject,
-    json,
-} from '@snailicid3/config'
+    createProgressBar,
+    createSpinner,
+    type ProgressBar,
+    type Spinner,
+    type SpinnerOptions,
+    type SpinnerStatus,
+} from '@snailicid3/logger'
 
+export { isPlainObject, json } from '@snailicid3/node-utils'
 export type {
     Json,
     JSONExportConfig,
     JSONExportEntry,
     Jsonifiable,
-} from '@snailicid3/config'
+} from '@snailicid3/node-utils'
 export {
     doesFileExist,
     getDirname,
@@ -38,15 +42,7 @@ export {
     normalizePath,
     paths,
     resolveCwd,
-} from '@snailicid3/config'
-export {
-    createProgressBar,
-    createSpinner,
-    type ProgressBar,
-    type Spinner,
-    type SpinnerOptions,
-    type SpinnerStatus,
-} from '@snailicid3/logger'
+} from '@snailicid3/node-utils'
 export {
     fsPath,
     fsPathArray,
