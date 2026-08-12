@@ -569,8 +569,8 @@ documented migration is complete.
 Each phase has a checkpoint. Do not begin the next structural phase while its compatibility tests
 are red.
 
-**Part A (this round): Phases 0–6.** **Part B (deferred): Phases B1–B4.** Sections 8–10 below are the
-design reference for Part B and are not worked in this round.
+**Part A (this round): Phases 0–6.** **Part B (deferred): Phases B1–B4.** Sections 8–10 below are
+the design reference for Part B and are not worked in this round.
 
 ### Phase 0 — Freeze and audit the current contract
 
@@ -618,7 +618,7 @@ design reference for Part B and are not worked in this round.
 - [ ] Finish the config utility ownership cleanup. This is now scheduled and detailed as **Phase 6**
       below (the closing phase of this round). Summary: move generic JSON file IO, JSON value
       helpers, glob filtering, and generic path primitives out of `@snailicid3/config` into
-      `@snailicid3/node-utils` (and runtime-neutral JSON *types* into `@snailicid3/types`), leaving
+      `@snailicid3/node-utils` (and runtime-neutral JSON _types_ into `@snailicid3/types`), leaving
       config with policy and configuration composition only. The 2026-08-12 audit that scopes this
       work is recorded in Phase 6.
 
@@ -717,15 +717,15 @@ This is the closing phase of Part A. It has two independent workstreams that sha
 `@snailicid3/config` already declares `@snailicid3/node-utils`, `@snailicid3/workspace`, and
 `@snailicid3/logger` as dependencies, so the destination edges already exist.
 
-| Config surface                                              | Verdict                                | Destination                                                                                       |
-| ----------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `utilities/json.ts` — `json.exportFile/importFile/importObject` | Move (generic JSON file IO)            | node-utils; **consolidate with the existing `export.json.file.ts`** rather than shipping two APIs  |
-| `utilities/json.ts` — `serialize/deserialize/isValue/isObject/prettyPrint`, `isPlainObject`, `deepMerge` | Move (generic JSON/object primitives)  | node-utils                                                                                         |
-| `utilities/json-value.ts` — runtime-neutral value types + guards | Move (pure, "does not read/write files") | `@snailicid3/types` (value types), with guards to node-utils; consolidate its overlap with `json.ts` |
-| `utilities/path.ts` — `getDirname/normalizePath/getFullPath/resolveCwd/doesFileExist/paths` | Move (generic path/fs primitives)      | node-utils; reconcile overlap with existing `path.typed.ts` / `file.path.array.ts`                 |
-| `shared.ts` — `filterFileArrByGlob` (micromatch)            | Move (generic glob file filter)        | node-utils (used by lint-staged; the barrel already has a commented `//GlobFileFilter` slot)       |
-| `shared.ts` — extension constants + `SHARED_FORMATTING_RULES` + `getScaledWidth` | Keep, but relocate                     | Stays in config as shared formatting **policy**; split into a clean `shared/` module, separated from the glob util that leaves |
-| commitlint scope matcher / resolver                          | **Already correct — no action**        | `resolveScopePathMatchers`, `matchScopesForPath`, `scopeMatchersFromCommitlintConfig`, `loadScopePathMatchers` already live in `workspace/src/core/scope-matchers.ts`; config's commitlint only composes them |
+| Config surface                                                                                           | Verdict                                  | Destination                                                                                                                                                                                                   |
+| -------------------------------------------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `utilities/json.ts` — `json.exportFile/importFile/importObject`                                          | Move (generic JSON file IO)              | node-utils; **consolidate with the existing `export.json.file.ts`** rather than shipping two APIs                                                                                                             |
+| `utilities/json.ts` — `serialize/deserialize/isValue/isObject/prettyPrint`, `isPlainObject`, `deepMerge` | Move (generic JSON/object primitives)    | node-utils                                                                                                                                                                                                    |
+| `utilities/json-value.ts` — runtime-neutral value types + guards                                         | Move (pure, "does not read/write files") | `@snailicid3/types` (value types), with guards to node-utils; consolidate its overlap with `json.ts`                                                                                                          |
+| `utilities/path.ts` — `getDirname/normalizePath/getFullPath/resolveCwd/doesFileExist/paths`              | Move (generic path/fs primitives)        | node-utils; reconcile overlap with existing `path.typed.ts` / `file.path.array.ts`                                                                                                                            |
+| `shared.ts` — `filterFileArrByGlob` (micromatch)                                                         | Move (generic glob file filter)          | node-utils (used by lint-staged; the barrel already has a commented `//GlobFileFilter` slot)                                                                                                                  |
+| `shared.ts` — extension constants + `SHARED_FORMATTING_RULES` + `getScaledWidth`                         | Keep, but relocate                       | Stays in config as shared formatting **policy**; split into a clean `shared/` module, separated from the glob util that leaves                                                                                |
+| commitlint scope matcher / resolver                                                                      | **Already correct — no action**          | `resolveScopePathMatchers`, `matchScopesForPath`, `scopeMatchersFromCommitlintConfig`, `loadScopePathMatchers` already live in `workspace/src/core/scope-matchers.ts`; config's commitlint only composes them |
 
 Notes that fell out of the audit:
 
@@ -739,20 +739,29 @@ Notes that fell out of the audit:
 - The **matcher-resolver that crosses the workspace↔commitlint barrier already landed** in workspace
   and is composed by config through the public API. This item from the original brief is effectively
   done; the only generic glob helper still misplaced in config is `filterFileArrByGlob`.
-- `build-exporter.ts` (which consumes `json.object`/`json.exportFile`) is already marked TEMPORARY in
-  its own header; do not preserve it as a contract — retarget it at node-utils and let it be retired.
+- `build-exporter.ts` (which consumes `json.object`/`json.exportFile`) is already marked TEMPORARY
+  in its own header; do not preserve it as a contract — retarget it at node-utils and let it be
+  retired.
 
 Steps:
 
 - [ ] Move `filterFileArrByGlob` to node-utils; update `shared.ts`, lint-staged, and the barrel;
       keep a config re-export during migration.
-- [ ] Consolidate JSON file IO into node-utils (one `exportFile`/`importFile` contract, one
-      `JSONExportConfig`/`JSONExportEntry`); retarget `build-exporter.ts`, api-extractor, and other
-      callers; keep config compatibility re-exports.
+- [x] Consolidate JSON file IO into node-utils (one `exportFile`/`importFile` contract, one
+      `JSONExportConfig`/`JSONExportEntry`); keep config compatibility re-exports. Done: moved
+      `config/src/utilities/json.ts` → `node-utils/src/json.ts` (the whole `json` namespace + value
+      helpers + `isPlainObject`/`deepMerge`), removed the duplicate
+      `node-utils/export.json.file.ts`, added a config re-export shim, added `ts-deepmerge` to
+      node-utils, added a node-utils json test. `build-exporter.ts` and api-extractor resolve
+      through the shim. Full `check:ts` and both test suites pass.
 - [ ] Land the runtime-neutral JSON value types/guards in their owner (`@snailicid3/types` +
-      node-utils) and remove the `json.ts`/`json-value.ts` duplication.
+      node-utils) and remove the `json.ts`/`json-value.ts` duplication. Still pending:
+      `config/src/utilities/json-value.ts` (the parallel `jsonValue` namespace) is currently
+      test-only and remains in config; move it to `@snailicid3/types` and de-duplicate against the
+      moved `json.ts`.
 - [ ] Move generic path primitives to node-utils, reconciling overlap with `path.typed.ts`; leave
-      repository-aware path behavior in workspace and config-relative path reads composing node-utils.
+      repository-aware path behavior in workspace and config-relative path reads composing
+      node-utils.
 - [ ] Regroup the surviving formatting policy (extensions, widths, `SHARED_FORMATTING_RULES`) into a
       clean config `shared/` module, separate from anything that moved.
 - [ ] Update imports, package dependencies, tests, and compatibility exports after every caller has
@@ -765,17 +774,17 @@ resolve through compatibility re-exports.
 #### 6B — Branch-aware changeset and release-plan report ([#201])
 
 Folded into this round because it is repository/workspace ownership work, not build-system work, and
-it reuses the scope-resolution audit above. Behavior is defined by [#201]; final package ownership is
-workspace.
+it reuses the scope-resolution audit above. Behavior is defined by [#201]; final package ownership
+is workspace.
 
 - [ ] Add a generic branch-generation helper (type/prefix + adjective–noun slug + optional
       description); branch names carry durable state and **do not** encode commit scope
       (`changeset/wacky-walker`, `release/wacky-walker`).
-- [ ] Derive commit type from the `changeset/` or `release/` branch prefix, the subject slug from the
-      branch name, and scope through the existing scope mechanism (audit `scope-commit` vs
+- [ ] Derive commit type from the `changeset/` or `release/` branch prefix, the subject slug from
+      the branch name, and scope through the existing scope mechanism (audit `scope-commit` vs
       `scope-affected` vs their shared matcher logic — the matcher already lives in workspace).
-- [ ] Keep starting the workflow side-effect free: no commit or push merely from creating a branch or
-      adding a changeset; an explicit command commits, and push/PR is limited to the `changeset/`
+- [ ] Keep starting the workflow side-effect free: no commit or push merely from creating a branch
+      or adding a changeset; an explicit command commits, and push/PR is limited to the `changeset/`
       flow with the derived title and changeset body.
 - [ ] Extract the reusable-Actions release-state/report logic into shared repo tooling and add a
       read-only `gbt-changeset plan` command that reports checked ref, phase, `should_version`,
@@ -800,12 +809,13 @@ Completed housekeeping (2026-08-12):
 
 Wonky items to resolve while doing the 6A moves (do not defer these into Part B):
 
-- **Duplicate JSON layers.** `config/src/utilities/json.ts` and `config/src/utilities/json-value.ts`
-  each define JSON array/value guards and branded serialized-string types. Collapse to one value
-  layer during the move.
-- **Duplicate JSON file-IO contracts.** `config`'s `json.exportFile` and node-utils'
-  `export.json.file.ts` `exportJSONFile` are two APIs with duplicate `JSONExportConfig` /
-  `JSONExportEntry` type names. Keep exactly one; config re-exports it during migration.
+- **Duplicate JSON layers.** _Partly resolved._ `json.ts` moved to node-utils; `json-value.ts` (the
+  parallel `jsonValue` namespace, now test-only) still lives in config. Move it to
+  `@snailicid3/types` and collapse the remaining guard/branded-string duplication against the moved
+  `json.ts`.
+- **Duplicate JSON file-IO contracts.** _Resolved (2026-08-12)._ One contract now lives in
+  node-utils (`json.exportFile`); the duplicate `export.json.file.ts` was removed and config
+  re-exports the node-utils API.
 - **`build-exporter.ts` is TEMPORARY and wired in.** It is self-flagged for removal but still has a
   `build:exporter` package script and an nx target (`packages/config/package.json`) and depends on
   `json.exportFile`. Retire it together with the JSON-IO consolidation — script, nx target, and file
@@ -898,9 +908,9 @@ Do not silently revive these in implementation:
 
 These remain open deliberately (items 6, 7, 10 belong to the deferred Part B track):
 
-1. The gbt-changeset direction is now captured by [#201] and Phase 6B; the remaining open sub-choices
-   are which scope command is authoritative, whether push/PR need separate confirmations, and the
-   adjective–noun slug source.
+1. The gbt-changeset direction is now captured by [#201] and Phase 6B; the remaining open
+   sub-choices are which scope command is authoritative, whether push/PR need separate
+   confirmations, and the adjective–noun slug source.
 2. Should --skip-lint-staged be restored, translated to the current environment-variable behavior,
    or formally migrated?
 3. Does gbt-exec have an unobserved consumer, or can it enter a deprecation window?
@@ -908,9 +918,10 @@ These remain open deliberately (items 6, 7, 10 belong to the deferred Part B tra
 5. Does the workspace bootstrap module eventually justify a separate public package?
 6. Which Storybook frameworks/presets require supported variants?
 7. Does BuildPlan keep its current name after its responsibility is reduced?
-8. Scaffold is gone (no scaffold directory remains). **Decision:** `@snailicid3/example-package` is a
-   deliberate **doctor test fixture** — its intentionally mismatched/"busted" exports are the input
-   for Phase B3 diagnostics. It stays `private: true` and must never be published in that state.
+8. Scaffold is gone (no scaffold directory remains). **Decision:** `@snailicid3/example-package` is
+   a deliberate **doctor test fixture** — its intentionally mismatched/"busted" exports are the
+   input for Phase B3 diagnostics. It stays `private: true` and must never be published in that
+   state.
 9. After the main refactor, should types and color remain packages or become lighter
    subpaths/modules?
 10. Which custom doctor finding, if any, is not already covered by Knip, Publint, ATTW, packed
