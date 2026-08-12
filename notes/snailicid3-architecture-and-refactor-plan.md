@@ -1132,23 +1132,41 @@ Part A. The phases remain numbered `B1`–`B4`, and Section 10.3 is the Doctor f
 
 ### Phase B1 — Reframe build configuration
 
-- Move pure Build, tsdown, Vite, Vitest, and export-plan helpers into the config API family.
-- Remove build execution and manifest mutation.
-- Convert build-config into a compatibility facade.
-- Keep existing build mechanisms unchanged.
+**Decision (owner):** full move — literally relocate vite/tsdown/vitest and the build helpers into
+`@snailicid3/config` using the config API style, and **delete `@snailicid3/build-config`** (no
+lingering facade). The config↔node-utils build cycle this creates (build-config is imported by every
+package's `tsdown.config.ts`; config imports node-utils at runtime) is handled with a **build-only
+config subpath + negative `implicitDependencies`** — the tsdown-config→config edge is a
+static-config edge, not a runtime one (rule 2.3's escape hatch). Verify every package still builds
+at each step.
 
-**Done when:** config returns configuration only, Nx/workspace executes it, and active build-config
-consumers pass.
+- Move pure Build, tsdown, Vite, Vitest helpers into the config API family.
+- **`toPackageExportsPlan` / the export-plan helper does NOT go into config's build API — it belongs
+  to doctor (Phase B3).** (Owner decision.)
+- Remove build execution and manifest mutation (`viteAdapter.build()`, `docServer`, tsdown mutating
+  `package.json` exports, publint/attw inside tsdown options).
+- Delete build-config; repoint every `tsdown.config.ts` / `vite.docs.config.ts` at config.
 
-### Phase B2 — Add Storybook configuration
+**Done when:** config returns configuration only, Nx/workspace executes it, build-config is gone,
+and every package builds.
 
-- Create the separate Storybook config package.
-- Resolve framework/addon packages internally.
-- Keep consumer .storybook entry files thin.
-- Identify static Storybook targets as auxiliary builds.
+### Phase B2 — Add Storybook configuration — DONE (2026-08-12)
 
-**Done when:** a component consumer installs one Snailicid3 Storybook dev dependency and builds
-Storybook successfully.
+- [x] Created `@snailicid3/storybook-config` — a thin wrapper over Storybook's default config
+      (`defineStorybookMain` / `defineStorybookPreview` / `defineStorybookManager` + a `Storybook`
+      namespace mirroring the config tool-API style), so consumer `.storybook/*.ts` files reduce to
+      `export default defineStorybookMain()`.
+- [x] Framework + addons are pre-wired and overridable per project; **default framework
+      `@storybook/react-vite`** (the owner's consumers — gbt-template-boilerplate, gbt-schema-form,
+      gbt-monorepo — are React). Story globs default sensibly.
+- [x] **No Nx targets bundled** — `build:storybook` / `chromatic` already ship in config's nx preset
+      (`nx/fragments/misc.ts`), so this package is config only.
+- [x] **No heavy Storybook install here** — Storybook + the framework are the _consumer's_
+      dependencies; this package depends only on `@snailicid3/config`. Builds (tsdown), typechecks,
+      and tests pass.
+- [ ] Follow-up: validate against a real consumer (`storybook build` in gbt-schema-form /
+      gbt-template-boilerplate) and, if wanted, add `import.meta.resolve` framework/addon path
+      resolution to hide package-name strings entirely.
 
 ### Phase B3 — Implement doctor, then validate
 
