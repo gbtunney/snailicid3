@@ -16,7 +16,7 @@ The plan is intentionally decision-led:
 - unresolved choices remain visibly unresolved
 - architecture changes are separated from build-system experiments
 
-## Scope boundary — this round pauses after Phase 6
+## Scope boundary — this round pauses after Phase 7
 
 The refactor is deliberately split into two tracks so the ownership work can land and be released
 without waiting on a build-system rewrite.
