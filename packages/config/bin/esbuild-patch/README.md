@@ -1,207 +1,133 @@
 # esbuild Catalina patch
 
-Provides Catalina-compatible Darwin x64 builds of `esbuild` for pnpm workspaces.
+`gbt-patch` replaces installed Darwin x64 esbuild executables with binaries built locally for macOS
+Catalina. It does not ship native executables in `@snailicid3/config`.
 
-The patch command detects each installed `@esbuild/darwin-x64` version and replaces its executable
-with the matching Catalina-compatible binary bundled with this package.
-
-Run after dependencies are installed:
+Run it from the consumer repository after dependencies are installed:
 
 ```sh
 pnpm exec gbt-patch
 ```
 
-## Bundled binaries
+On Darwin x64, the command discovers every installed `@esbuild/darwin-x64` package in pnpm's virtual
+store. For each exact esbuild version it:
 
-Catalina-compatible builds are stored by exact esbuild version:
+1. clones the matching esbuild tag;
+2. builds `./cmd/esbuild` with the local Go toolchain;
+3. verifies the reported version;
+4. records a SHA-256 completion marker;
+5. installs the binary only after all build and verification steps succeed.
 
-```text
-esbuild-patch/
-├── binaries/
-│   ├── 0.28.1/
-│   │   └── esbuild-darwin-x64
-│   └── 0.28.2/
-│       └── esbuild-darwin-x64
-├── build-new.sh
-├── patch.sh
-└── README.md
-```
+The cache lives below `/tmp/snailicid3/gbt-patch` and is keyed by esbuild version, patch revision,
+platform, and architecture. A valid cached build is reused, making repeated runs idempotent.
+Removing the temp cache simply causes the next run to rebuild it.
 
-The JavaScript package and native esbuild executable must use the same version, so a separate
-Catalina build is maintained for each supported esbuild version.
+The command exits successfully without changing anything on other platforms or when no matching
+esbuild package is installed. It also exits successfully without building or patching whenever `CI`
+is set; this compatibility patch is intended only for local development. A build failure exits
+nonzero and leaves the installed executable unchanged.
 
-For example:
+Requirements on Darwin x64:
 
-```text
-@esbuild/darwin-x64@0.28.1
-→ binaries/0.28.1/esbuild-darwin-x64
+- `git`
+- a Go toolchain capable of building esbuild
+- `node`
+- `shasum` (provided by macOS)
 
-@esbuild/darwin-x64@0.28.2
-→ binaries/0.28.2/esbuild-darwin-x64
-```
+## Go setup for Catalina
 
-If an installed esbuild version does not have a matching bundled binary, `gbt-patch` reports the
-unsupported version and skips it.
-
-## Patch behavior
-
-`gbt-patch`:
-
-- does nothing on platforms other than Darwin x64;
-- discovers installed `@esbuild/darwin-x64` packages in the pnpm store;
-- determines each package's exact esbuild version;
-- selects the corresponding binary from `binaries/<version>/`;
-- verifies that the bundled binary reports the expected version;
-- installs it over the incompatible executable;
-- verifies that the copied binary matches the bundled binary;
-- warns when an installed version has no Catalina-compatible build.
-
-Set `GBT_PATCH_CWD` to patch a workspace other than the current directory.
-
----
-
-### Adding support for a new esbuild version
-
-Use `build-new.sh` when the project updates to a new esbuild version.
-
-#### Make sure Catalina-compatible Go is installed
-
-This setup uses Go 1.20.14.
+This patch has been tested with Go 1.20.14 for Darwin AMD64. Check the installed toolchain:
 
 ```sh
 go version
 ```
 
-Expected:
+Expected output is similar to:
 
 ```text
 go version go1.20.14 darwin/amd64
 ```
 
-If Go is installed but not found:
+The official installer places Go at `/usr/local/go/bin/go`. `gbt-patch` checks the current `PATH`
+first and automatically adds `/usr/local/go/bin` for its own process when necessary. To make Go
+available in your interactive shell too, add it to your shell configuration:
 
 ```sh
 export PATH="/usr/local/go/bin:$PATH"
 ```
 
-#### Install Go 1.20.14 if needed
+For zsh, persist that line in `~/.zshrc`, then reload the shell:
 
 ```sh
-cd ~/Downloads
-
-curl -LO https://go.dev/dl/go1.20.14.darwin-amd64.tar.gz
-
-sudo tar -C /usr/local -xzf go1.20.14.darwin-amd64.tar.gz
-
-rm go1.20.14.darwin-amd64.tar.gz
-
-export PATH="/usr/local/go/bin:$PATH"
-
+source ~/.zshrc
 go version
 ```
 
----
+### Installing Go 1.20.14
 
-#### Determine the required esbuild version
+If the compatible toolchain is not installed, download and install the Darwin AMD64 archive:
 
-From the `snailicid3` repo root:
+```sh
+cd ~/Downloads
+curl -LO https://go.dev/dl/go1.20.14.darwin-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.20.14.darwin-amd64.tar.gz
+rm go1.20.14.darwin-amd64.tar.gz
+export PATH="/usr/local/go/bin:$PATH"
+go version
+```
+
+Installing into `/usr/local` requires administrator access. If an incompatible Go installation
+already exists at `/usr/local/go`, move or remove it deliberately before extracting the archive.
+
+## Dynamic version selection
+
+There is no version to update in this package. The command reads the exact version from each
+installed `@esbuild/darwin-x64/package.json`, clones the corresponding `v<version>` esbuild tag, and
+uses that version in its cache key. To inspect the versions selected by the workspace before running
+the patch:
 
 ```sh
 pnpm why esbuild
 ```
 
-Example:
+After running `pnpm exec gbt-patch`, the output reports every installed version, cache source, and
+patched target. A first run builds the binary; subsequent runs reuse the verified cache.
+
+## Cache inspection and rebuilding
+
+Cached binaries use this layout:
 
 ```text
-esbuild@0.28.2
+/tmp/snailicid3/gbt-patch/
+└── <esbuild-version>/
+    └── <patch-revision>/
+        └── Darwin/
+            └── x86_64/
+                ├── complete
+                └── esbuild
 ```
 
----
-
-#### Set the version in `build-new.sh`
-
-Update:
+Verify a cached binary directly by passing `--version`, for example:
 
 ```sh
-ESBUILD_VERSION=0.28.1
+/tmp/snailicid3/gbt-patch/0.28.2/catalina-v1/Darwin/x86_64/esbuild --version
 ```
 
-to the version being added, for example:
+To force a clean local rebuild, remove only the version-specific cache directory and rerun the
+command:
 
 ```sh
-ESBUILD_VERSION=0.28.2
+rm -rf /tmp/snailicid3/gbt-patch/0.28.2
+pnpm exec gbt-patch
 ```
 
-Then run the script from the `snailicid3` repo root:
+No cache or native executable is committed to this repository or included in the npm package.
 
-```sh
-./packages/config/bin/esbuild-patch/build-new.sh
-```
+## Other behavior
 
-The script:
-
-1. clones the requested esbuild release into `/tmp/esbuild`;
-2. builds it locally using the Catalina-compatible Go installation;
-3. verifies the compiled version;
-4. creates the corresponding version directory;
-5. copies the binary into the package;
-6. marks it executable;
-7. verifies the bundled copy;
-8. runs `pnpm exec gbt-patch`.
-
-For version `0.28.2`, the resulting binary is:
-
-```text
-packages/config/bin/esbuild-patch/binaries/0.28.2/esbuild-darwin-x64
-```
-
----
-
-#### Check the result
-
-Verify the newly bundled binary directly:
-
-```sh
-./packages/config/bin/esbuild-patch/binaries/0.28.2/esbuild-darwin-x64 --version
-```
-
-Expected:
-
-```text
-0.28.2
-```
-
-Then check the repository changes:
-
-```sh
-git status
-```
-
-Optional:
-
-```sh
-git diff --summary
-```
-
-The new or changed binary should appear under:
-
-```text
-packages/config/bin/esbuild-patch/binaries/<version>/esbuild-darwin-x64
-```
-
-#### Updating esbuild
-
-Normal future update procedure:
-
-```text
-1. pnpm why esbuild
-2. Note the new exact version.
-3. Update ESBUILD_VERSION in build-new.sh.
-4. Run build-new.sh.
-5. Verify the new binaries/<version>/ directory.
-6. Run/test pnpm exec gbt-patch.
-7. Commit the new binary.
-```
-
-Existing versioned binaries should generally remain in the repository while they are still needed by
-consuming projects.
+- Set `GBT_PATCH_CWD` to patch a workspace other than the current directory.
+- When `CI` is set, the command exits successfully without building or patching.
+- On platforms other than Darwin x64, it exits successfully without changing anything.
+- If no matching pnpm package is installed, it reports that fact and exits successfully.
+- Clone, build, version-check, or checksum failures exit nonzero without replacing the installed
+  executable.

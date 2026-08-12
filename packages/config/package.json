@@ -122,7 +122,8 @@
         "dist",
         "types",
         "typescript-config",
-        "bin",
+        "bin/**/*.sh",
+        "bin/**/*.md",
         "completions"
     ],
     "author": {
