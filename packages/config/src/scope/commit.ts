@@ -265,10 +265,18 @@ function parseArgs(args: Array<string>): ParsedArgs {
 }
 
 function prepareCheckedCommit(repoRoot: string): void {
-    const addResult = runCommand('git', ['add', '-A'], { cwd: repoRoot })
+    const stagedDiff = runCommand('git', ['diff', '--cached', '--quiet'], {
+        cwd: repoRoot,
+    })
 
-    if (addResult.status !== 0) {
-        throw new Error(addResult.stderr || 'git add -A failed')
+    if (stagedDiff.status === 0) {
+        throw new Error(
+            'Nothing is staged. Stage the files you want to commit first.',
+        )
+    }
+
+    if (stagedDiff.status !== 1) {
+        throw new Error(stagedDiff.stderr || 'Unable to inspect staged files')
     }
 }
 
