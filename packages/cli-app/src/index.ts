@@ -16,14 +16,12 @@ export type {
 } from './schema/common-flags.js'
 export { wrapSchema } from './schema/utils.js'
 export type { WrappedSchema, ZodObjectSchema } from './schema/utils.js'
-export type { ProgressBar } from './ui/progressBar.js'
-export { createProgressBar } from './ui/progressBar.js'
-
 export {
     //GlobFileFilter,
     isPlainObject,
     json,
 } from '@snailicid3/config'
+
 export type {
     Json,
     JSONExportConfig,
@@ -41,6 +39,14 @@ export {
     paths,
     resolveCwd,
 } from '@snailicid3/config'
+export {
+    createProgressBar,
+    createSpinner,
+    type ProgressBar,
+    type Spinner,
+    type SpinnerOptions,
+    type SpinnerStatus,
+} from '@snailicid3/logger'
 export {
     fsPath,
     fsPathArray,

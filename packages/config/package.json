@@ -21,21 +21,19 @@
         "clean:nx": "nx run $npm_package_name:clean",
         "dev:nx": "nx run $npm_package_name:dev",
         "api:report:nx": "nx run $npm_package_name:api:report",
-        "demo:logger": "pnpm exec ./bin/snail-sh-test.sh",
+        "demo:logger": "pnpm --filter=@snailicid3/workspace exec ./bin/snail-sh-test.sh",
         "demo:2": "pnpm exec snail-sh header '🐌 SNAIL BUILD' '50%'  '~'"
     },
     "bin": {
-        "snail-sh": "./bin/snail-sh-logger.sh",
-        "scope-commit": "./bin/scope/commit.sh",
-        "scope-affected": "./bin/scope/affected.sh",
-        "snail-package": "./bin/package-command.sh",
-        "gbt-changeset": "./bin/changeset-branch.sh",
-        "gbt-exec": "./bin/make-executable.sh",
-        "gbt-setup": "./bin/completions/install-pnpm.sh",
-        "gbt-uninstall": "./bin/uninstall.sh",
-        "gbt-patch": "./bin/esbuild-patch/patch.sh",
-        "inspect-dependencies": "./bin/inspect-dependencies.sh",
-        "inspect-deps": "./bin/inspect-dependencies.sh"
+        "snail-sh": "./bin/workspace/snail-sh.sh",
+        "workspace-hook": "./bin/workspace/workspace-hook.sh",
+        "scope-commit": "./bin/workspace/scope-commit.sh",
+        "scope-affected": "./bin/workspace/scope-affected.sh",
+        "gbt-changeset": "./bin/workspace/gbt-changeset.sh",
+        "gbt-exec": "./bin/workspace/gbt-exec.sh",
+        "gbt-setup": "./bin/workspace/gbt-setup.sh",
+        "gbt-uninstall": "./bin/workspace/gbt-uninstall.sh",
+        "gbt-patch": "./bin/workspace/gbt-patch.sh"
     },
     "buildConfig": {
         "runtime": "node",
@@ -122,7 +120,8 @@
         "dist",
         "types",
         "typescript-config",
-        "bin",
+        "bin/**/*.sh",
+        "bin/**/*.md",
         "completions"
     ],
     "author": {
@@ -136,6 +135,9 @@
         "directory": "packages/config"
     },
     "dependencies": {
+        "@snailicid3/logger": "workspace:*",
+        "@snailicid3/node-utils": "workspace:*",
+        "@snailicid3/workspace": "workspace:*",
         "@commitlint/config-conventional": "^21.0.2",
         "@commitlint/types": "^21.0.1",
         "@eslint-community/eslint-plugin-eslint-comments": "^4.7.2",
@@ -166,7 +168,6 @@
         "json-schema": "^0.4.0",
         "json-schema-to-typescript": "^15.0.4",
         "jsonc-parser": "^3.3.1",
-        "knip": "^6.18.0",
         "lint-staged": "^17.0.7",
         "markdownlint": "^0.41.0",
         "markdownlint-cli2": "^0.23.1",

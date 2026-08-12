@@ -7,9 +7,14 @@ import {
     resetLogger,
     setLogger,
 } from './logger.js'
+import { createProgressBar, createSpinner } from './spinner.js'
+import { table } from './table.js'
 import {
+    block,
     buildRule,
+    GRAY_RAMP,
     grayRamp,
+    GREY_RAMP,
     greyRamp,
     header,
     kabob,
@@ -28,17 +33,19 @@ import {
     subheader,
     visibleLength,
 } from './terminal.js'
-import {
-    getColorChalkInstance,
-    wrapColorChalkInstanceText,
-} from './utilities/chalk.js'
+import { getColorAnsiInstance, wrapColorAnsiText } from './utilities/ansi.js'
 
 export type LoggerApi = {
+    block: typeof block
     buildRule: typeof buildRule
     create: typeof createLogger
+    createProgressBar: typeof createProgressBar
+    createSpinner: typeof createSpinner
     get: typeof getLogger
-    getChalkInstance: typeof getColorChalkInstance
+    getAnsiInstance: typeof getColorAnsiInstance
+    GRAY_RAMP: typeof GRAY_RAMP
     grayRamp: typeof grayRamp
+    GREY_RAMP: typeof GREY_RAMP
     greyRamp: typeof greyRamp
     header: typeof header
     kabob: typeof kabob
@@ -60,17 +67,23 @@ export type LoggerApi = {
     stripAnsi: typeof stripAnsi
     styleText: typeof styleText
     subheader: typeof subheader
+    table: typeof table
     visibleLength: typeof visibleLength
-    wrapChalkText: typeof wrapColorChalkInstanceText
+    wrapAnsiText: typeof wrapColorAnsiText
 }
 
 /** @internal */
 export const logger: LoggerApi = {
+    block: block,
     buildRule: buildRule,
     create: createLogger,
+    createProgressBar: createProgressBar,
+    createSpinner: createSpinner,
     get: getLogger,
-    getChalkInstance: getColorChalkInstance,
+    getAnsiInstance: getColorAnsiInstance,
+    GRAY_RAMP: GRAY_RAMP,
     grayRamp: grayRamp,
+    GREY_RAMP: GREY_RAMP,
     greyRamp: greyRamp,
     header: header,
     kabob: kabob,
@@ -92,8 +105,9 @@ export const logger: LoggerApi = {
     stripAnsi: stripAnsi,
     styleText: styleText,
     subheader: subheader,
+    table: table,
     visibleLength: visibleLength,
-    wrapChalkText: wrapColorChalkInstanceText,
+    wrapAnsiText: wrapColorAnsiText,
 }
 
 /** @internal */
@@ -102,6 +116,7 @@ export default logger
 export {
     buildLoggerDemo,
     type LoggerDemoOptions,
+    runLevelLoggerDemo,
     runLoggerDemo,
 } from './demo.js'
 export type {
@@ -112,17 +127,24 @@ export type {
 } from './logger.js'
 
 export { getLogger, LOG_LEVELS } from './logger.js'
+export { formatArgs, formatValue, prettify } from './pretty.print.js'
+export { fmt } from './pretty.print.js'
 export {
-    fmt,
-    formatArgs,
-    formatValue,
-    prettify,
-    prettyPrint,
-} from './pretty.print.js'
+    createProgressBar,
+    createSpinner,
+    type ProgressBar,
+    type Spinner,
+    type SpinnerOptions,
+    type SpinnerStatus,
+} from './spinner.js'
+export { table, type TableOptions, type TableRow } from './table.js'
 
 export {
+    block,
     buildRule,
+    GRAY_RAMP,
     grayRamp,
+    GREY_RAMP,
     greyRamp,
     header,
     kabob,
@@ -144,6 +166,7 @@ export {
     visibleLength,
 } from './terminal.js'
 export type {
+    BlockOptions,
     KabobOptions,
     KeyValuePairOptions,
     RuleOptions,
@@ -152,5 +175,19 @@ export type {
     TerminalStyle,
     WidthSpec,
 } from './terminal.js'
-export { type ChalkColor } from './utilities/chalk.js'
+export {
+    type AnsiColorPreset,
+    ansiPresetToColorJS,
+    ansiPresetToHex,
+    getColorAnsiInstance,
+    GRAY,
+    GREY,
+    type GreyAlias,
+    type GreyPalette,
+    type GreyShade,
+    isAnsiColorPreset,
+    type LoggerColor,
+    terminalLink,
+    wrapColorAnsiText,
+} from './utilities/ansi.js'
 export { parseColorToHexStrict as parseHexColor } from './utilities/color.js'

@@ -15,6 +15,9 @@
         "buildStrategy": "bundle"
     },
     "nx": {
+        "implicitDependencies": [
+            "!@snailicid3/config"
+        ],
         "targets": {
             "build:ts": {},
             "check:ts": {},

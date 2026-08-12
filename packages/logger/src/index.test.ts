@@ -3,9 +3,13 @@ import {
     fmt,
     formatArgs,
     formatValue,
+    getColorAnsiInstance,
+    GRAY,
+    GREY,
     LOG_LEVELS,
     parseHexColor,
     prettify,
+    terminalLink,
 } from './index.js'
 
 describe('fmt tagged template', () => {
@@ -71,6 +75,30 @@ describe('parseHexColor', () => {
         const result = parseHexColor('#ff0000')
         expect(typeof result).toBe('string')
         expect(result.startsWith('#')).toBe(true)
+    })
+})
+
+describe('Ansis colors', () => {
+    test('exposes numbered gray stops and short aliases as strings', () => {
+        expect(GREY[200]).toBe('gainsboro')
+        expect(GREY.lt).toBe(GREY[200])
+        expect(GREY.md).toBe(GREY[600])
+        expect(GREY.dk).toBe(GREY[700])
+        expect(GRAY).toBe(GREY)
+    })
+
+    test('resolves CSS color names and convenience aliases', () => {
+        expect(getColorAnsiInstance('rebeccapurple')('value')).toContain(
+            'value',
+        )
+        expect(getColorAnsiInstance('grey-lt')('value')).toContain('value')
+        expect(() => getColorAnsiInstance('not-a-real-color')).toThrow()
+    })
+
+    test('creates a readable terminal link', () => {
+        expect(terminalLink('logger source', 'https://example.com')).toContain(
+            'logger source',
+        )
     })
 })
 

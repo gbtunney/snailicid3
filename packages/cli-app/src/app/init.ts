@@ -1,6 +1,5 @@
 import { logger } from '@snailicid3/logger'
 import { fmt } from '@snailicid3/utils'
-import chalk from 'chalk'
 import yargs from 'yargs'
 import type { Argv, Options } from 'yargs'
 import { type z } from 'zod'
@@ -77,7 +76,7 @@ export const initApp = async <AppOptionsSchema extends ZodObjectSchema>(
                 .version(app_config.version)
                 .options(yargsAppOptionsConfig)
                 .usage(desc)
-                .usage(chalk.bgHex('#727272')('$ $0 [args]'))
+                .usage(logger.getAnsiInstance('#727272', 'bg')('$ $0 [args]'))
                 .example(app_config.examples)
             return yargs_instance
         }

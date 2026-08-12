@@ -16,6 +16,9 @@
         "buildStrategy": "bundle"
     },
     "nx": {
+        "implicitDependencies": [
+            "!@snailicid3/config"
+        ],
         "targets": {
             "dev": {},
             "dev:ts": {},

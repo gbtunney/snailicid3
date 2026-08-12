@@ -4,7 +4,7 @@
 ![License: MIT](https://img.shields.io/npm/l/@snailicid3/logger)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
-_Unified Node.js logger with chalk-powered colored output._
+_Unified Node.js logger with Ansis-powered colored output._
 
 ---
 
@@ -32,16 +32,33 @@ _Unified Node.js logger with chalk-powered colored output._
 
 ---
 
-This package provides a structured Node.js logger with configurable chalk colors per log level. Log
-levels include `info`, `warn`, `error`, `debug`, and `trace`. Colors can be specified as chalk color
-names or hex strings.
+This package provides a structured Node.js logger with configurable colors per log level. Log levels
+include `info`, `warn`, `error`, `debug`, and `trace`. Colors are ordinary strings: use terminal
+palette names, convenience spellings such as `grey`, any valid CSS color name such as
+`rebeccapurple`, or a hex string. Ansis renders the terminal styles while `@snailicid3/color`
+normalizes CSS colors.
+
+The package has two deliberately named presentation surfaces:
+
+- **Terminal UI** — the cute snail presentation: sections, rules, status pairs, swatches, ramps,
+  spinners, and the future `snail-sh` adapter. `runLoggerDemo()` demonstrates this surface.
+- **Level logger** — conventional `trace`/`debug`/`info`/`warn`/`error` messages, optionally with
+  timestamps. `runLevelLoggerDemo()` demonstrates it separately.
 
 ### `@snailicid3/logger` _contains:_
 
 - **`getLogger`** — create a logger instance with per-level color configuration
 - **Log levels** — `info`, `warn`, `error`, `debug`, `trace`
-- **Color support** — chalk color names and hex color strings via `@snailicid3/color`
-- **Types** — `LogLevelName`, `ChalkColor`
+- **Color support** — terminal names, CSS color-name strings, and hex strings
+- **Types** — `LogLevelName`, `LoggerColor`
+- **Gray ramp** — `greyRamp()`/`grayRamp()`, the `GREY_RAMP`/`GRAY_RAMP` palettes, and numbered or
+  short aliases such as `GREY[200]`, `GREY.lt`, `GREY[600]`, `GREY.md`, and `GREY.dk`
+- **Spinner** — `createSpinner()` owns generic Ora progress output; `createProgressBar()` remains as
+  a compatibility alias. Spinners expose idle/running/final status and can finish with `succeed()`,
+  `fail()`, `warn()`, `info()`, or a persistent `🐌` symbol.
+- **Clean spacing** — `block(content, { before, after })` normalizes surrounding newlines.
+- **Tables** — `table(rows, { head, widths })` renders compact Unicode status/report tables with
+  cli-table3.
 
 ## Installation
 
@@ -54,6 +71,17 @@ $ yarn add @snailicid3/logger
 
 #npm
 $ npm install @snailicid3/logger
+```
+
+## Shell adapter
+
+The logger package owns the schema-validated `snail-sh` dispatcher. Hyphenated and underscored
+action names are equivalent:
+
+```sh
+snail-sh success "Build passed"
+snail-sh status-pair "lint-staged" "passed" "success"
+snail-sh kabob "🐌 Running tests" "90%" "magenta" "true"
 ```
 
 ## Examples

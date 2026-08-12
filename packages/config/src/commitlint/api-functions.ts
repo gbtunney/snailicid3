@@ -1,4 +1,8 @@
 import type { UserConfig as CommitlintUserConfig } from '@commitlint/types'
+import {
+    resolveScopePathMatchers,
+    SNAILICID3_COMMITLINT_CONFIG_KEY,
+} from '@snailicid3/workspace'
 import { merge as deepMerge } from 'ts-deepmerge'
 import type { LiteralUnion } from 'type-fest'
 import { commitlintDefaultConfig } from './base.js'
@@ -12,10 +16,6 @@ import {
     defineConfig,
     defineConfigBuilder,
 } from '../core/index.js'
-import {
-    resolveScopePathMatchers,
-    SNAILICID3_COMMITLINT_CONFIG_KEY,
-} from '../workspace/scope-matchers.js'
 
 export type CommitlintConfig = CommitlintUserConfig
 

@@ -1,11 +1,16 @@
-import { type Json, type Jsonifiable, prettyPrintJSON } from '@snailicid3/utils'
+import { type Jsonifiable } from 'type-fest'
 import fs from 'node:fs'
 import path from 'node:path'
+
+type JsonValue = Jsonifiable
+
+const prettyPrintJSON = <Type extends Jsonifiable>(value: Type): string =>
+    JSON.stringify(JSON.parse(JSON.stringify(value)), undefined, 4)
 
 export type JSONExportConfig = Array<JSONExportEntry>
 
 export type JSONExportEntry<
-    Type = Json.Value,
+    Type = JsonValue,
     DataType = Type extends Jsonifiable ? Type : never,
 > = {
     data: DataType

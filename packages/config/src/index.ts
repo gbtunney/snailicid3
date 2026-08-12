@@ -165,12 +165,6 @@ export type {
     TypedocPluginRegistryEntry,
     TypedocTool,
 } from './typedoc/index.js'
-export * from './utilities/command.js'
-export * from './utilities/entrypoint.js'
-
-export * from './utilities/environment-report.js'
-
-export * from './utilities/environment.js'
 /* *  UTILITIES *  */
 export { expandExtensions } from './utilities/extensions.js'
 export type {
@@ -188,7 +182,6 @@ export type {
     JSONExportEntry,
     Jsonifiable,
 } from './utilities/json.js'
-export * from './utilities/package-manager.js'
 export {
     doesFileExist,
     getDirname,
@@ -213,17 +206,31 @@ export type {
     Writable,
     WritableDeep,
 } from './utilities/types.js'
-export { loadScopePathMatchers } from './workspace/scope-matcher-config.js'
+export {
+    getPackageBinaryCommand,
+    getPackageManager,
+    getPackageScriptCommand,
+    resolvePackageManager,
+    runPackageBinary,
+    runPackageManager,
+    runPackageScript,
+} from '@snailicid3/workspace'
+export type {
+    PackageCommand,
+    PackageManager,
+    PackageManagerResolution,
+} from '@snailicid3/workspace'
+export { loadScopePathMatchers } from '@snailicid3/workspace'
 export {
     DEFAULT_SCOPE_PATH_MATCHERS,
     matchScopesForPath,
     resolveScopePathMatchers,
     scopeMatchersFromCommitlintConfig,
-} from './workspace/scope-matchers.js'
+} from '@snailicid3/workspace'
 export type {
     ScopePathMatcherOverrides,
     ScopePathMatchers,
     Snailicid3CommitlintSettings,
-} from './workspace/scope-matchers.js'
+} from '@snailicid3/workspace'
 
 export { merge } from 'ts-deepmerge'

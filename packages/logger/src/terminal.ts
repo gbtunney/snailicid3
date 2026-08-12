@@ -1,10 +1,15 @@
-import chalk from 'chalk'
+import ansis from 'ansis'
 import {
-    type ChalkColor,
-    type ChalkColorPreset,
-    getColorChalkInstance,
-    isChalkColorPreset,
-} from './utilities/chalk.js'
+    getColorAnsiInstance,
+    GREY,
+    isAnsiColorPreset,
+    type LoggerColor,
+} from './utilities/ansi.js'
+
+export type BlockOptions = {
+    after?: number
+    before?: number
+}
 
 export type KabobOptions = {
     invert?: boolean
@@ -111,19 +116,16 @@ export const repeatRule = (marker = '-', width = 40, height = 1): string => {
     return Array.from({ length: normalizedHeight }, () => line).join('\n')
 }
 
-const toChalkColorName = (style: string): ChalkColorPreset | undefined => {
+const toAnsiColorName = (style: string): LoggerColor | undefined => {
     const normalized = style.trim().toLowerCase().replaceAll('_', '-')
-    const colorName = normalized.startsWith('bright-')
-        ? `${normalized.slice('bright-'.length)}Bright`
-        : normalized
-    const camelName = colorName.replace(/-([a-z])/g, (_match, letter: string) =>
-        letter.toUpperCase(),
-    )
+    if (isAnsiColorPreset(normalized)) return normalized
 
-    if (isChalkColorPreset(camelName)) return camelName
-    if (camelName === 'grey' && isChalkColorPreset('gray')) return 'gray'
-    if (camelName === 'gray' && isChalkColorPreset('grey')) return 'grey'
-    return undefined
+    try {
+        getColorAnsiInstance(normalized)
+        return normalized
+    } catch {
+        return undefined
+    }
 }
 
 export const styleText = (
@@ -133,19 +135,19 @@ export const styleText = (
     if (style === undefined || style === '' || style === 'reset') return value
 
     const normalized = style.trim().toLowerCase().replaceAll('_', '-')
-    if (normalized === 'bold') return chalk.bold(value)
-    if (normalized === 'dim') return chalk.dim(value)
-    if (normalized === 'italic') return chalk.italic(value)
-    if (normalized === 'underline') return chalk.underline(value)
+    if (normalized === 'bold') return ansis.bold(value)
+    if (normalized === 'dim') return ansis.dim(value)
+    if (normalized === 'italic') return ansis.italic(value)
+    if (normalized === 'underline') return ansis.underline(value)
     if (normalized === 'reverse' || normalized === 'inverse') {
-        return chalk.inverse(value)
+        return ansis.inverse(value)
     }
 
     if (normalized.startsWith('bold-')) {
-        return chalk.bold(styleText(value, normalized.slice('bold-'.length)))
+        return ansis.bold(styleText(value, normalized.slice('bold-'.length)))
     }
     if (normalized.startsWith('reverse-')) {
-        return chalk.inverse(
+        return ansis.inverse(
             styleText(value, normalized.slice('reverse-'.length)),
         )
     }
@@ -153,15 +155,12 @@ export const styleText = (
         return styleText(value, normalized.slice('fg-'.length))
     }
     if (normalized.startsWith('bg-')) {
-        const color = toChalkColorName(normalized.slice('bg-'.length))
-        return color ? getColorChalkInstance(color, 'bg')(value) : value
-    }
-    if (normalized.startsWith('#')) {
-        return getColorChalkInstance(normalized as ChalkColor, 'fg')(value)
+        const color = toAnsiColorName(normalized.slice('bg-'.length))
+        return color ? getColorAnsiInstance(color, 'bg')(value) : value
     }
 
-    const color = toChalkColorName(normalized)
-    return color ? getColorChalkInstance(color, 'fg')(value) : value
+    const color = toAnsiColorName(normalized)
+    return color ? getColorAnsiInstance(color, 'fg')(value) : value
 }
 
 export const rule = (options: RuleOptions = {}): string => {
@@ -184,9 +183,18 @@ export const spacer = (height = 1): string => {
     return '\n'.repeat(normalizedHeight)
 }
 
+/** Wrap content with an exact amount of clean vertical space. */
+export const block = (content: string, options: BlockOptions = {}): string => {
+    const before = Math.max(0, options.before ?? 1)
+    const after = Math.max(0, options.after ?? 1)
+    const normalized = content.replace(/^\n+|\n+$/gu, '')
+    return `${'\n'.repeat(before)}${normalized}${'\n'.repeat(after)}`
+}
+
 const resolveKabobSideWidths = (
     width: WidthSpec,
     availableWidth: number,
+    middleWidth: number,
     terminalWidth: number,
 ): [number, number] => {
     const widthValue = String(width).trim()
@@ -195,10 +203,14 @@ const resolveKabobSideWidths = (
         return [fixedWidth, fixedWidth]
     }
 
-    const totalRuleWidth =
+    const requestedRuleWidth =
         widthValue === '' || widthValue === 'auto'
             ? availableWidth
-            : Math.min(resolveWidth(width, terminalWidth), availableWidth)
+            : resolveWidth(width, terminalWidth) - middleWidth
+    const totalRuleWidth = Math.min(
+        Math.max(0, requestedRuleWidth),
+        availableWidth,
+    )
     const leftWidth = Math.floor(Math.max(0, totalRuleWidth) / 2)
     return [leftWidth, Math.max(0, totalRuleWidth - leftWidth)]
 }
@@ -214,6 +226,7 @@ export const kabob = (text: string, options: KabobOptions = {}): string => {
     const [leftWidth, rightWidth] = resolveKabobSideWidths(
         options.width ?? 'auto',
         availableWidth,
+        middleWidth,
         terminalWidth,
     )
     const marker = options.marker ?? '-'
@@ -222,7 +235,7 @@ export const kabob = (text: string, options: KabobOptions = {}): string => {
     const paddingText = ' '.repeat(Math.max(0, padding))
     const textStyle = options.invert
         ? (value: string): string =>
-              chalk.inverse(styleText(value, options.textStyle))
+              ansis.inverse(styleText(value, options.textStyle))
         : (value: string): string => styleText(value, options.textStyle)
     const output = `${leftRule}${paddingText}${textStyle(text)}${paddingText}${rightRule}`
     const styledOutput = styleText(output, options.style)
@@ -322,12 +335,30 @@ export const statusPair = (
                 : statusStyleForLevel(options.level)),
     })
 
-export const greyRamp = (marker = ' ', segmentWidth = 5): string =>
-    [
-        styleText(buildRule(marker, segmentWidth), 'bg-bright-white'),
-        styleText(buildRule(marker, segmentWidth), 'bg-white'),
-        styleText(buildRule(marker, segmentWidth), 'bg-gray'),
-        styleText(buildRule(marker, segmentWidth), 'bg-black'),
-    ].join('')
+export const GREY_RAMP: ReadonlyArray<string> = [
+    GREY[50],
+    GREY[100],
+    GREY[200],
+    GREY[300],
+    GREY[400],
+    GREY[500],
+    GREY[600],
+    GREY[700],
+    GREY[800],
+    GREY[900],
+]
+
+export const GRAY_RAMP: typeof GREY_RAMP = GREY_RAMP
+
+export const greyRamp = (
+    marker = ' ',
+    segmentWidth = 5,
+    colors: ReadonlyArray<string> = GREY_RAMP,
+): string =>
+    colors
+        .map((color) =>
+            styleText(buildRule(marker, segmentWidth), `bg-${color}`),
+        )
+        .join('')
 
 export const grayRamp: typeof greyRamp = greyRamp

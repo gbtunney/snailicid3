@@ -5,7 +5,34 @@
 ```ts
 
 import type { Argv } from 'yargs';
+import { createProgressBar } from '@snailicid3/logger';
+import { createSpinner } from '@snailicid3/logger';
+import { doesFileExist } from '@snailicid3/config';
+import { fsPath } from '@snailicid3/node-utils';
+import { fsPathArray } from '@snailicid3/node-utils';
+import { fsPathArrayHasFiles } from '@snailicid3/node-utils';
+import { fsPathExists } from '@snailicid3/node-utils';
+import { fsPathTypeExists } from '@snailicid3/node-utils';
+import { fsTypedPath } from '@snailicid3/node-utils';
+import { getDirname } from '@snailicid3/config';
+import { getExt } from '@snailicid3/config';
+import { getFilename } from '@snailicid3/config';
+import { getFilePath } from '@snailicid3/config';
+import { getFullPath } from '@snailicid3/config';
 import { HexColor } from '@snailicid3/color';
+import { isPlainObject } from '@snailicid3/config';
+import { Json } from '@snailicid3/config';
+import { json } from '@snailicid3/config';
+import { JSONExportConfig } from '@snailicid3/config';
+import { JSONExportEntry } from '@snailicid3/config';
+import { Jsonifiable } from '@snailicid3/config';
+import { normalizePath } from '@snailicid3/config';
+import { paths } from '@snailicid3/config';
+import { ProgressBar } from '@snailicid3/logger';
+import { resolveCwd } from '@snailicid3/config';
+import { Spinner } from '@snailicid3/logger';
+import { SpinnerOptions } from '@snailicid3/logger';
+import { SpinnerStatus } from '@snailicid3/logger';
 import { z } from 'zod';
 
 // @public (undocumented)
@@ -58,6 +85,34 @@ export const commonFlagsSchema: z.ZodObject<{
     outDir: z.ZodPrefault<z.ZodType<string, string, z.core.$ZodTypeInternals<string, string>>>;
 }, z.core.$strip>;
 
+export { createProgressBar }
+
+export { createSpinner }
+
+export { doesFileExist }
+
+export { fsPath }
+
+export { fsPathArray }
+
+export { fsPathArrayHasFiles }
+
+export { fsPathExists }
+
+export { fsPathTypeExists }
+
+export { fsTypedPath }
+
+export { getDirname }
+
+export { getExt }
+
+export { getFilename }
+
+export { getFilePath }
+
+export { getFullPath }
+
 // @public
 export const initApp: <AppOptionsSchema extends ZodObjectSchema>(optionsSchema: AppOptionsSchema, config: AppConfigIn, initFunction: InitSuccessCallback<AppOptionsSchema>, _yargs?: Array<string>) => Promise<Argv | undefined>;
 
@@ -68,10 +123,36 @@ export const initializeApp: <AppOptionsSchema extends ZodObjectSchema>(optionsSc
 export type InitSuccessCallback<AppOptionsSchema extends ZodObjectSchema = z.ZodObject> = (args: z.infer<AppOptionsSchema>, config: AppConfig, // Or: z.infer<typeof appConfigSchema>
 help: string | undefined) => Promise<void> | void;
 
+export { isPlainObject }
+
+export { Json }
+
+export { json }
+
+export { JSONExportConfig }
+
+export { JSONExportEntry }
+
+export { Jsonifiable }
+
+export { normalizePath }
+
 // Warning: (ae-forgotten-export) The symbol "packageSchema" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
 export const parsePackageJson: (pkg: unknown) => undefined | z.infer<typeof packageSchema>;
+
+export { paths }
+
+export { ProgressBar }
+
+export { resolveCwd }
+
+export { Spinner }
+
+export { SpinnerOptions }
+
+export { SpinnerStatus }
 
 // @public (undocumented)
 export type WrappedSchema<Schema extends ZodObjectSchema> = Schema extends ZodObjectSchema ? Schema : never;

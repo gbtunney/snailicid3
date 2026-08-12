@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import { logger } from '@snailicid3/logger'
 import figlet from 'figlet'
 import { type AppConfig } from './config.js'
 
@@ -10,7 +10,7 @@ const getTitleColor = (
     value: string,
     color: AppConfig['title_color'],
 ): string => {
-    return chalk.bgHex(color.bg).hex(color.fg)(value)
+    return logger.getAnsiInstance(color.bg, 'bg').hex(color.fg)(value)
 }
 export const doPrintHeader = (header: PrintHeader): string => {
     return `${header.app_title}\n${header.divider}\n`

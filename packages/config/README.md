@@ -277,14 +277,13 @@ disable the built-in mapping. Unspecified defaults remain enabled for `actions`,
 
 ### Git workflow environment
 
-Husky owns lint-staged and protected-branch checks. The workflow variables use the typed defaults
-reported by `snail-package environment`:
+Husky delegates lint-staged, commit-message, filename, branch-name, and protected-branch checks to
+the `workspace-hook` Node dispatcher. Workspace environment defaults are defined by its Zod schema:
 
 ```sh
 pnpm run commit:direct -- "message" # sets SKIP_LINT_STAGED=true
 SKIP_LINT_STAGED=true git commit -m "chore(root): message"
 PROTECTED_BRANCHES=main,master,release pnpm run commit:feat -- "message"
-pnpm exec snail-package environment
 ```
 
 `SKIP_LINT_STAGED` defaults to `false`. `PROTECTED_BRANCHES` defaults to the exact branch names
