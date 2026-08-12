@@ -27,7 +27,7 @@ terminal text. Used internally by scaffold and other CLI tools in this monorepo.
 ### `@snailicid3/cli-app` _contains:_
 
 - **CLI framework** — `yargs`-based command routing with Zod schema validation
-- **Styled output** — chalk + figlet header banners
+- **Styled output** — logger/Ansis + figlet header banners
 - **Logging** — integrated `@snailicid3/logger` support
 - **Types** — typed argument schemas via Zod
 
@@ -180,22 +180,22 @@ pnpm --filter @snailicid3/cli-app test:example --help
 pnpm --filter @snailicid3/cli-app test:example -z gbt -z gbt2
 ```
 
-## Progress bar utility
+## Spinner utility
 
-The package includes a cute little spinner progress bar utility for visual feedback during
-long-running operations:
+The spinner is owned by `@snailicid3/logger`; cli-app temporarily re-exports its original
+`createProgressBar` name for compatibility. New code can use `createSpinner`:
 
 ```ts
-import { createProgressBar } from '@snailicid3/cli-app'
+import { createSpinner } from '@snailicid3/cli-app'
 
 const run: InitSuccessCallback<typeof optionsSchema> = async (args) => {
-  const progressBar = createProgressBar('Processing files:')
-  progressBar.start()
+  const spinner = createSpinner('Processing files:')
+  spinner.start()
 
   // Perform your operations
   await processFiles(args)
 
-  progressBar.stop()
+  spinner.stop()
   console.log('Complete!')
 }
 ```

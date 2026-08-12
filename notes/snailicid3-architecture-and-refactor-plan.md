@@ -587,6 +587,13 @@ are red.
 - [ ] Revisit `@snailicid3/parser` only when another package needs a genuinely runtime-neutral
       parser abstraction; do not create it merely to satisfy the original package diagram.
 - [x] Keep functional APIs, explicit argv inputs, local ESM `.js` imports, and focused tests.
+- [ ] Finish the config utility ownership cleanup. The known remaining candidates are
+      `packages/config/src/utilities/path.ts`, `packages/config/src/utilities/json.ts`, and their
+      tests; also review `json-value.ts` separately so its runtime-neutral JSON value/serialization
+      types land with the package that actually owns them. Move generic filesystem, file-path, and
+      JSON read/write/save mechanics to node-utils; move repository-aware path behavior to
+      workspace; and leave config with policy and configuration composition only. Update imports,
+      dependencies, tests, and compatibility exports after every caller has moved.
 
 The schema cleanup completed during the workspace move applies to environment input rather than
 command-line input. `workspaceEnvironment` now validates and defaults these values through
@@ -599,6 +606,16 @@ intentionally deferred, and node-utils contains no workspace-aware policy.
 
 ### Phase 3 — Consolidate logger and snail-sh
 
+- [x] Replace direct Chalk usage in logger and cli-app with Ansis. Treat color configuration as
+      ordinary strings: resolve terminal palette names directly and normalize valid CSS color names
+      through `@snailicid3/color` before applying Ansis hex styles.
+- [x] Add `grey`/`gray` convenience normalization, numbered neutral stops, `lt`/`md`/`dk` aliases,
+      and configurable `greyRamp()`/`grayRamp()` output.
+- [x] Move the generic Ora spinner from cli-app to logger as `createSpinner()`, with semantic
+      running/final status, success/failure/warning/info finishes, and persistent snail output. Keep
+      cli-app's `createProgressBar` API as a compatibility re-export.
+- [x] Remove logger's duplicate tagged-template formatter and direct `prettyPrint()` side effect;
+      reuse utils' `fmt` while retaining logger-specific value-to-terminal formatting.
 - [ ] Inventory the current logger public API, the workspace `snail-sh` shell commands, formatting,
       exit behavior, environment switches, and every repository/consumer call site.
 - [ ] Add typed logger functions for the behavior hooks currently need: section/start messages,

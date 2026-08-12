@@ -61,7 +61,6 @@
     },
     "type": "module",
     "bin": {
-        "snail-sh": "./bin/snail-sh-logger.sh",
         "workspace-hook": "./dist/cli/hooks.js",
         "scope-commit": "./dist/cli/commit.js",
         "scope-affected": "./dist/cli/affected.js",

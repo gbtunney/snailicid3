@@ -44,9 +44,7 @@
         "@snailicid3/logger": "workspace:*",
         "@snailicid3/node-utils": "workspace:*",
         "@snailicid3/utils": "workspace:*",
-        "chalk": "^6.0.0",
         "figlet": "^1.11.0",
-        "ora": "^9.4.1",
         "type-fest": "^5.7.0",
         "yargs": "^18.0.0",
         "zod": "^4.3.6"

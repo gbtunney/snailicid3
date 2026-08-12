@@ -4,9 +4,21 @@
 
 ```ts
 
-import { ChalkInstance } from 'chalk';
-import { ColorName } from 'chalk';
+import { AnsiColors } from 'ansis';
+import { Ansis } from 'ansis';
+import { fmt } from '@snailicid3/utils';
+import { Options } from 'ora';
+import { parseColorJS } from '@snailicid3/color';
 import { parseColorToHexStrict as parseHexColor } from '@snailicid3/color';
+
+// @public (undocumented)
+export type AnsiColorPreset = AnsiColors;
+
+// @public (undocumented)
+export const ansiPresetToColorJS: (color: AnsiColorPreset) => ReturnType<typeof parseColorJS>;
+
+// @public (undocumented)
+export const ansiPresetToHex: (color: AnsiColorPreset) => string;
 
 // @public (undocumented)
 export const buildLoggerDemo: (options?: LoggerDemoOptions) => string;
@@ -14,14 +26,13 @@ export const buildLoggerDemo: (options?: LoggerDemoOptions) => string;
 // @public (undocumented)
 export const buildRule: (marker?: string, width?: number) => string;
 
-// Warning: (ae-forgotten-export) The symbol "ChalkColorPreset" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "HexColor" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export type ChalkColor = ChalkColorPreset | HexColor;
-
 // @public
-export const fmt: (strings: TemplateStringsArray, ...values: Array<unknown>) => string;
+export const createProgressBar: typeof createSpinner;
+
+// @public (undocumented)
+export const createSpinner: (text?: string, options?: SpinnerOptions) => Spinner;
+
+export { fmt }
 
 // @public
 export const formatArgs: (prefix: string, ...args: Array<unknown>) => string;
@@ -30,16 +41,43 @@ export const formatArgs: (prefix: string, ...args: Array<unknown>) => string;
 export const formatValue: (value: unknown) => string;
 
 // @public
+export const getColorAnsiInstance: (color: LoggerColor, theme?: "bg" | "fg") => Ansis;
+
+// @public
 export const getLogger: (opts?: LoggerOpts, makeDefault?: boolean) => Logger;
+
+// @public (undocumented)
+export const GRAY: typeof GREY;
+
+// @public (undocumented)
+export const GRAY_RAMP: typeof GREY_RAMP;
 
 // @public (undocumented)
 export const grayRamp: typeof greyRamp;
 
+// @public
+export const GREY: GreyPalette;
+
 // @public (undocumented)
-export const greyRamp: (marker?: string, segmentWidth?: number) => string;
+export const GREY_RAMP: ReadonlyArray<string>;
+
+// @public (undocumented)
+export type GreyAlias = 'dk' | 'lt' | 'md';
+
+// @public (undocumented)
+export type GreyPalette = Readonly<Record<GreyAlias | GreyShade, string>>;
+
+// @public (undocumented)
+export const greyRamp: (marker?: string, segmentWidth?: number, colors?: ReadonlyArray<string>) => string;
+
+// @public (undocumented)
+export type GreyShade = 50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
 
 // @public (undocumented)
 export const header: (message: string, options?: RuleOptions) => string;
+
+// @public (undocumented)
+export const isAnsiColorPreset: (value: string) => value is AnsiColorPreset;
 
 // @public (undocumented)
 export const kabob: (text: string, options?: KabobOptions) => string;
@@ -105,9 +143,13 @@ export { logger }
 export type LoggerApi = {
     buildRule: typeof buildRule;
     create: typeof createLogger;
+    createProgressBar: typeof createProgressBar;
+    createSpinner: typeof createSpinner;
     get: typeof getLogger;
-    getChalkInstance: typeof getColorChalkInstance;
+    getAnsiInstance: typeof getColorAnsiInstance;
+    GRAY_RAMP: typeof GRAY_RAMP;
     grayRamp: typeof grayRamp;
+    GREY_RAMP: typeof GREY_RAMP;
     greyRamp: typeof greyRamp;
     header: typeof header;
     kabob: typeof kabob;
@@ -130,8 +172,11 @@ export type LoggerApi = {
     styleText: typeof styleText;
     subheader: typeof subheader;
     visibleLength: typeof visibleLength;
-    wrapChalkText: typeof wrapColorChalkInstanceText;
+    wrapAnsiText: typeof wrapColorAnsiText;
 };
+
+// @public
+export type LoggerColor = string;
 
 // @public (undocumented)
 export type LoggerDemoOptions = {
@@ -148,7 +193,7 @@ export type LoggerOpts = {
 };
 
 // @public (undocumented)
-export type LogLevelColors = ChalkColor;
+export type LogLevelColors = LoggerColor;
 
 // @public (undocumented)
 export type LogLevelName = (typeof LEVEL_NAMES)[number];
@@ -159,7 +204,7 @@ export { parseHexColor }
 export const prettify: (value: unknown, depth?: number) => string;
 
 // @public
-export const prettyPrint: (value: unknown, depth?: number) => void;
+export type ProgressBar = Spinner;
 
 // @public (undocumented)
 export const repeatRule: (marker?: string, width?: number, height?: number) => string;
@@ -188,6 +233,25 @@ export const section: (title: string, options?: KabobOptions) => string;
 
 // @public (undocumented)
 export const spacer: (height?: number) => string;
+
+// @public (undocumented)
+export type Spinner = {
+    fail: (text?: string) => void;
+    info: (text?: string) => void;
+    persist: (text?: string, symbol?: string) => void;
+    setText: (text: string) => void;
+    start: () => void;
+    readonly status: SpinnerStatus;
+    stop: () => void;
+    succeed: (text?: string) => void;
+    warn: (text?: string) => void;
+};
+
+// @public (undocumented)
+export type SpinnerOptions = Pick<Options, 'color' | 'indent' | 'isEnabled' | 'isSilent' | 'prefixText' | 'spinner' | 'suffixText'>;
+
+// @public (undocumented)
+export type SpinnerStatus = 'failed' | 'idle' | 'info' | 'persisted' | 'spinning' | 'succeeded' | 'warning';
 
 // @public (undocumented)
 export type StatusLevel = 'critical' | 'err' | 'error' | 'fail' | 'failed' | 'fatal' | 'info' | 'ok' | 'pass' | 'passed' | 'success' | 'warn' | 'warning';
@@ -227,15 +291,16 @@ export const visibleLength: (value: string) => number;
 // @public (undocumented)
 export type WidthSpec = 'auto' | `${number}%` | `${number}` | number;
 
+// @public (undocumented)
+export const wrapColorAnsiText: (value: string, color: LoggerColor, theme?: "bg" | "fg") => string;
+
 // Warnings were encountered during analysis:
 //
 // src/index.ts:38:5 - (ae-forgotten-export) The symbol "createLogger" needs to be exported by the entry point index.d.ts
-// src/index.ts:40:5 - (ae-forgotten-export) The symbol "getColorChalkInstance" needs to be exported by the entry point index.d.ts
-// src/index.ts:47:5 - (ae-forgotten-export) The symbol "LEVEL_COLORS" needs to be exported by the entry point index.d.ts
-// src/index.ts:48:5 - (ae-forgotten-export) The symbol "LEVEL_NAMES" needs to be exported by the entry point index.d.ts
-// src/index.ts:52:5 - (ae-forgotten-export) The symbol "resetLogger" needs to be exported by the entry point index.d.ts
-// src/index.ts:56:5 - (ae-forgotten-export) The symbol "setLogger" needs to be exported by the entry point index.d.ts
-// src/index.ts:64:5 - (ae-forgotten-export) The symbol "wrapColorChalkInstanceText" needs to be exported by the entry point index.d.ts
+// src/index.ts:51:5 - (ae-forgotten-export) The symbol "LEVEL_COLORS" needs to be exported by the entry point index.d.ts
+// src/index.ts:52:5 - (ae-forgotten-export) The symbol "LEVEL_NAMES" needs to be exported by the entry point index.d.ts
+// src/index.ts:56:5 - (ae-forgotten-export) The symbol "resetLogger" needs to be exported by the entry point index.d.ts
+// src/index.ts:60:5 - (ae-forgotten-export) The symbol "setLogger" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

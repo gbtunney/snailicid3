@@ -1,14 +1,13 @@
-import chalk, { modifierNames } from 'chalk'
+import ansis from 'ansis'
 import dayjs from 'dayjs'
 import { fmt, formatArgs } from './pretty.print.js'
 import {
-    type ChalkColor,
-    getColorChalkInstance,
-    wrapColorChalkInstanceText,
-} from './utilities/chalk.js'
-import { parseColorToHexStrict } from './utilities/color.js'
+    getColorAnsiInstance,
+    type LoggerColor,
+    wrapColorAnsiText,
+} from './utilities/ansi.js'
 
-export type LogLevelColors = ChalkColor
+export type LogLevelColors = LoggerColor
 
 export const LEVEL_NAMES = [
     'trace',
@@ -51,17 +50,15 @@ export const LOG_LEVELS: LoggerRecord<number> = {
     warn: 40,
 }
 
-export const LEVEL_COLORS: LoggerRecord<ChalkColor> = {
+export const LEVEL_COLORS: LoggerRecord<LoggerColor> = {
     debug: 'blue',
     error: 'red',
     fatal: 'magenta',
-    info: parseColorToHexStrict('#0bb806'),
+    info: '#0bb806',
     silent: 'white',
     trace: 'gray',
     warn: 'yellow',
 }
-const LEVEL_STYLES = modifierNames
-
 const isBrowser = (): boolean => 'document' in globalThis
 
 const RESET = '\x1b[0m'
@@ -160,11 +157,10 @@ export const createLogger = (opts?: LoggerOpts): Logger => {
         LOG_LEVELS[level] >= minLevel && level !== 'silent'
 
     const prefix = (level: LogLevelName): string => {
-        const bg_color = getColorChalkInstance(colors[level], 'bg')
-        //AssertChalkColor( color)
+        const backgroundColor = getColorAnsiInstance(colors[level], 'bg')
         return [
-            bg_color.bold(` ===> ${chalk.bold(level.toUpperCase())} `),
-            chalk.italic(showTime ? dayjs().format(timeFormat) : ''),
+            backgroundColor.bold(` ===> ${ansis.bold(level.toUpperCase())} `),
+            ansis.italic(showTime ? dayjs().format(timeFormat) : ''),
             name ? [`[${name}]`] : [],
         ].join(' ')
     }
@@ -181,11 +177,7 @@ export const createLogger = (opts?: LoggerOpts): Logger => {
             const [fmt, css, reset] = colorizeBrowser(head, 'red')
             out(fmt, css, reset, ...args)
         } else {
-            //Chalk.bgRed('THIS IS A COLOR ', color)
-            out(
-                wrapColorChalkInstanceText(head, color, 'fg'),
-                formatArgs('', ...args),
-            )
+            out(wrapColorAnsiText(head, color, 'fg'), formatArgs('', ...args))
         }
     }
 

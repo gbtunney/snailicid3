@@ -2,13 +2,13 @@
     "name": "@snailicid3/logger",
     "version": "0.0.6",
     "private": false,
-    "description": "Unified Node logger with chalk output and shell script counterpart",
+    "description": "Unified Node logger with Ansis terminal output and a shell adapter",
     "keywords": [
         "typescript",
         "snailicid3",
         "monorepo",
         "logger",
-        "chalk",
+        "ansis",
         "logging",
         "node"
     ],
@@ -17,9 +17,15 @@
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
         "dev:nx": "nx run $npm_package_name:dev",
-        "demo": "node ./bin/logger-demo.js"
+        "demo": "pnpm exec nx run $npm_package_name:check:ts && pnpm exec tsx ./src/demo-cli.ts",
+        "demo:levels": "pnpm exec nx run $npm_package_name:check:ts && pnpm exec tsx ./src/demo-cli.ts levels",
+        "demo:spinner": "pnpm exec nx run $npm_package_name:check:ts && pnpm exec tsx ./src/demo-cli.ts spinner",
+        "demo:all": "pnpm exec nx run $npm_package_name:check:ts && pnpm exec tsx ./src/demo-cli.ts all"
     },
     "nx": {
+        "implicitDependencies": [
+            "!@snailicid3/config"
+        ],
         "targets": {
             "dev": {},
             "dev:ts": {},
@@ -48,6 +54,9 @@
         "access": "public"
     },
     "type": "module",
+    "bin": {
+        "snail-sh": "./dist/snail-sh.mjs"
+    },
     "main": "./dist/index.cjs",
     "types": "./dist/index.d.cts",
     "exports": {
@@ -76,11 +85,12 @@
     },
     "dependencies": {
         "@snailicid3/color": "workspace:*",
-        "@snailicid3/utils": "workspace:*",
+        "@snailicid3/node-utils": "workspace:*",
         "ansis": "^4.3.1",
-        "chalk": "^6.0.0",
         "cli-table3": "^0.6.5",
-        "dayjs": "^1.11.21"
+        "dayjs": "^1.11.21",
+        "ora": "^9.4.1",
+        "zod": "^4.4.3"
     },
     "devDependencies": {
         "@microsoft/api-extractor": "^7.58.8",
@@ -88,6 +98,7 @@
         "@snailicid3/config": "workspace:*",
         "@types/node": "^26.2.0",
         "tsdown": "^0.22.2",
+        "tsx": "^4.23.12",
         "typescript": "^6.0.3",
         "vitest": "^4.1.9"
     },

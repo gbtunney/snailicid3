@@ -35,10 +35,9 @@ const environment = workspaceEnvironment.parse(process.env)
 
 ## Logging migration note
 
-The existing `snail-sh` presentation is intentionally retained for now because its colorful rules,
-sections, status messages, and key/value output are useful and pleasant to read. Its long-term owner
-is `@snailicid3/logger`. When it moves, preserve the current visual character and command behavior;
-do not replace it with unformatted output while deduplicating the shell and TypeScript logger paths.
+`@snailicid3/logger` now owns the public `snail-sh` binary and its schema-validated Node dispatcher.
+The shell implementation remains here only as the dependency-free bootstrap floor while setup runs
+before compiled package bins are available; it is no longer exported as workspace's `snail-sh` bin.
 
 ## Build and Nx
 

@@ -1,14 +1,13 @@
-import { type ChalkColor, logger } from '@snailicid3/logger'
-import { type ChalkInstance } from 'chalk'
+import { logger, type LoggerColor } from '@snailicid3/logger'
 import { z } from 'zod'
 
 export const prettyErrorLog = (
     error: z.ZodError,
     message: string,
-    color: ChalkColor = 'red',
+    color: LoggerColor = 'red',
     theme: 'bg' | 'fg' = 'fg',
 ): string => {
-    const _instance: ChalkInstance = logger.getChalkInstance(color, theme)
+    const _instance = logger.getAnsiInstance(color, theme)
     return `${_instance.underline(`\n------ ✖ ${message} ------`)}\n${z.prettifyError(error)}`
 }
 

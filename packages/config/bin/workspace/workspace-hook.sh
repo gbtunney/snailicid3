@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-exec "$(dirname "$0")/../workspace-bin.sh" workspace-hook "$@"
+exec "$(dirname "$0")/../package-bin.sh" @snailicid3/workspace workspace-hook "$@"

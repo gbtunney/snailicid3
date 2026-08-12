@@ -1,7 +1,9 @@
 import { describe, expect, test } from 'vitest'
 import { buildLoggerDemo } from './demo.js'
 import {
+    block,
     buildRule,
+    GREY_RAMP,
     header,
     kabob,
     kvPair,
@@ -16,6 +18,7 @@ import {
     statusStyleForValue,
     step,
     stripAnsi,
+    styleText,
     subheader,
     visibleLength,
 } from './terminal.js'
@@ -48,6 +51,27 @@ describe('terminal width and rule helpers', () => {
         expect(spacer(2)).toBe('\n\n')
         expect(spacer(0)).toBe('\n')
     })
+
+    test('wraps content with exact clean spacing', () => {
+        expect(block('\n\nDetails\n\n')).toBe('\nDetails\n')
+        expect(block('Details', { after: 2, before: 0 })).toBe('Details\n\n')
+    })
+
+    test('builds the default and custom gray ramps', () => {
+        expect(GREY_RAMP).toHaveLength(10)
+        expect(visibleLength(logger.greyRamp(' ', 2))).toBe(20)
+        expect(visibleLength(logger.grayRamp('x', 3, ['white', 'black']))).toBe(
+            6,
+        )
+    })
+
+    test('accepts CSS names and gray convenience aliases as style strings', () => {
+        expect(stripAnsi(styleText('css', 'rebeccapurple'))).toBe('css')
+        expect(stripAnsi(styleText('light', 'grey-lt'))).toBe('light')
+        expect(stripAnsi(styleText('middle', 'bg-grey-600'))).toBe('middle')
+        expect(stripAnsi(styleText('dark', 'dark-grey'))).toBe('dark')
+        expect(styleText('plain', 'not-a-real-color')).toBe('plain')
+    })
 })
 
 describe('terminal text blocks', () => {
@@ -74,6 +98,90 @@ describe('terminal text blocks', () => {
         })
 
         expect(stripAnsi(output)).toBe('*** Hi ***')
+    })
+
+    test('fits percentage kabobs around text and padding', () => {
+        const compact = kabob('Hi', {
+            newline: false,
+            padding: 1,
+            terminalWidth: 40,
+            width: '50%',
+        })
+        const padded = kabob('Longer label', {
+            newline: false,
+            padding: 3,
+            terminalWidth: 40,
+            width: '75%',
+        })
+
+        expect(visibleLength(compact)).toBe(20)
+        expect(visibleLength(padded)).toBe(30)
+    })
+
+    test('subtracts text and padding from 100% kabob rule width', () => {
+        const output = kabob('Build output', {
+            newline: false,
+            padding: 3,
+            terminalWidth: 48,
+            width: '100%',
+        })
+        const plainOutput = stripAnsi(output)
+        const ruleWidth = 48 - 'Build output'.length - 3 * 2
+
+        expect(visibleLength(output)).toBe(48)
+        expect(
+            plainOutput.startsWith('-'.repeat(Math.floor(ruleWidth / 2))),
+        ).toBe(true)
+        expect(plainOutput.endsWith('-'.repeat(Math.ceil(ruleWidth / 2)))).toBe(
+            true,
+        )
+    })
+
+    test.each([
+        ['A', 0, 24],
+        ['Short', 1, 32],
+        ['A medium section title', 3, 48],
+        ['A considerably longer section title', 5, 72],
+    ])(
+        'keeps 100%% width for text %j with padding %i',
+        (text, padding, terminalWidth) => {
+            const output = kabob(text, {
+                newline: false,
+                padding,
+                terminalWidth,
+                width: '100%',
+            })
+
+            expect(visibleLength(output)).toBe(terminalWidth)
+        },
+    )
+
+    test('keeps a 100% section line at the terminal width', () => {
+        const output = stripAnsi(
+            section('A longer section title', {
+                terminalWidth: 52,
+                width: '100%',
+            }),
+        )
+        const sectionLine = output.split('\n').find((value) => value !== '')
+
+        expect(sectionLine).toHaveLength(52)
+    })
+
+    test('keeps auto kabobs within terminal width as content changes', () => {
+        const compact = kabob('Hi', {
+            newline: false,
+            padding: 0,
+            terminalWidth: 24,
+        })
+        const padded = kabob('Long label', {
+            newline: false,
+            padding: 3,
+            terminalWidth: 24,
+        })
+
+        expect(visibleLength(compact)).toBe(24)
+        expect(visibleLength(padded)).toBe(24)
     })
 
     test('builds headers and sections', () => {
@@ -140,8 +248,16 @@ describe('logger demo', () => {
     test('builds a printable demo string', () => {
         const output = stripAnsi(buildLoggerDemo({ terminalWidth: 48 }))
 
-        expect(output).toContain('Snailicid3 Logger')
-        expect(output).toContain('Terminal Helpers')
+        expect(output).toContain('Snail Terminal UI')
+        expect(output).toContain('Rules and Sections')
+        expect(output).toContain('Width, Height, and Padding')
+        expect(output).toContain('percentage widths: 25% / 40% / 50%')
+        expect(output).toContain('kabob padding: 0 / 1 / 4')
+        expect(output).toContain('Colors and Stuff')
+        expect(output).toContain('Grey Ramp')
+        expect(output).toContain('ANSI 256 Color Index')
+        expect(output).toContain('255')
+        expect(output).toContain('Terminal presentation ready')
         expect(output).toContain('@snailicid3/logger')
         expect(output).toContain('workspace')
         expect(output).toContain('tests')
