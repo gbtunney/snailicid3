@@ -1,4 +1,3 @@
-import { type Jsonifiable } from 'type-fest'
 import { z } from 'zod'
 
 /** Input value type for serialization (raw object value). This is BEFORE JSON.stringify. */
@@ -122,68 +121,3 @@ export const jsonStringified = <TSchema extends z.ZodType>(
 export const jsonSchema = <TSchema extends z.ZodType>(
     schema: TSchema,
 ): JsonStringifiedSchema<TSchema> => makeJsonStringifiedSchema(schema)
-
-/** WIP @todo - some other day */
-export const jsonLooseCodec = <
-    TSchema extends z.ZodType<Exclude<Jsonifiable, boolean | null | number>>,
->(
-    schema: TSchema,
-): z.ZodType<string | z.output<TSchema>> => {
-    const jsonStringSchema = z.string().brand('JsonEncoded')
-    type BrandedString = z.infer<typeof jsonStringSchema>
-
-    const userSchema = schema.brand('Jsonifiable')
-    type BrandedSchema = z.input<typeof userSchema>
-
-    const JsonCodec: z.ZodType<
-        z.infer<TSchema>,
-        z.input<typeof jsonStringSchema>
-    > = z.codec(jsonStringSchema, userSchema, {
-        decode: (
-            jsonString: BrandedString,
-            ctx,
-        ): z.input<typeof userSchema> => {
-            try {
-                const _data = JSON.parse(jsonString) as z.input<
-                    typeof userSchema
-                >
-                const myresult: z.output<typeof userSchema> =
-                    userSchema.parse(_data)
-                return _data
-            } catch (err: any) {
-                ctx.issues.push({
-                    code: 'invalid_format',
-                    format: 'json',
-                    input: jsonString,
-                    message: err?.message ?? 'Invalid JSON',
-                })
-                return z.NEVER
-            }
-        },
-        encode: (
-            value: BrandedSchema,
-            ctx,
-        ): z.infer<typeof jsonStringSchema> => {
-            try {
-                const parseResult = userSchema.parse(value)
-                return JSON.stringify(value) as z.infer<typeof jsonStringSchema>
-            } catch (err: unknown) {
-                ctx.issues.push({
-                    code: 'invalid_format',
-                    format: 'json',
-                    input: 'fff',
-                    // input:// value.toString(),
-                    message: 'Data could not be encoded to JSON',
-                })
-                return z.NEVER
-            }
-        },
-    })
-
-    // Allow both JSON string and raw object
-    const _result: z.ZodType<string | z.output<typeof userSchema>> = z.union([
-        JsonCodec,
-        schema,
-    ])
-    return _result //Z.union([JsonCodec, schema]) //.transform(val => val);
-}
