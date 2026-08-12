@@ -870,7 +870,9 @@ These remain open deliberately (items 6, 7, 10 belong to the deferred Part B tra
 5. Does the workspace bootstrap module eventually justify a separate public package?
 6. Which Storybook frameworks/presets require supported variants?
 7. Does BuildPlan keep its current name after its responsibility is reduced?
-8. Is scaffold intentionally gone, and is example-package a fixture, template, or residue?
+8. Scaffold is gone (no scaffold directory remains). **Decision:** `@snailicid3/example-package` is a
+   deliberate **doctor test fixture** — its intentionally mismatched/"busted" exports are the input
+   for Phase B3 diagnostics. It stays `private: true` and must never be published in that state.
 9. After the main refactor, should types and color remain packages or become lighter
    subpaths/modules?
 10. Which custom doctor finding, if any, is not already covered by Knip, Publint, ATTW, packed
