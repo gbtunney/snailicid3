@@ -277,8 +277,8 @@ rejected.
 | scope-affected       | @snailicid3/workspace                            | Preserve; it is also used by gbt-changeset                                       |
 | snail-package        | @snailicid3/workspace                            | Preserve while auditing its package-manager abstraction                          |
 | gbt-changeset        | @snailicid3/workspace                            | Treat the user's current revised implementation as authoritative                 |
-| inspect-dependencies | @snailicid3/workspace                            | Preserve as the Knip/report command                                              |
-| inspect-deps         | @snailicid3/workspace                            | Preserve as an active alias                                                      |
+| inspect-dependencies | Removed                                          | Defer dependency reporting and Knip integration until Doctor                     |
+| inspect-deps         | Removed                                          | Remove the alias with the temporary implementation                               |
 | gbt-setup            | @snailicid3/workspace bootstrap module initially | Preserve; audit shell configuration mutations                                    |
 | gbt-uninstall        | @snailicid3/workspace bootstrap module initially | Preserve and harden destructive target resolution                                |
 | gbt-patch            | @snailicid3/workspace bootstrap module initially | Preserve command; replace shipped binaries with local build/cache                |
@@ -569,43 +569,99 @@ are red.
 
 ### Phase 2 — Establish foundational packages
 
-- Create @snailicid3/parser with Zod-based typed parsing.
-- Move generic Node JSON, path, filesystem-schema, and process primitives into node-utils.
-- Keep functional APIs and explicit argv inputs.
-- Migrate one internal caller at a time with tests.
+- [x] Move generic Node command, entrypoint, environment, JSON, path, filesystem-schema, and process
+      primitives into node-utils.
+- [x] Export the moved runtime utilities from the node-utils public barrel and update repository
+      imports and package dependencies.
+- [x] Establish the argv schema work in node-utils without forcing a general parser package before
+      its contract is understood.
+- [x] Add the Yargs-backed `parseArgv`, `safeParseArgv`, and `parseArgvPositionals` primitives, with
+      Zod object/record/discriminated-union option schemas and array/tuple positional schemas. Tests
+      cover plain options, safe and throwing failures, fixed tuples, variadic tuple tails, records,
+      and discriminated unions.
+- [ ] Migrate real command parsers to the argv schema primitive. No repository CLI has been migrated
+      yet: `scope-commit`, `scope-affected`, and `workspace-hook` still parse their arguments
+      manually. Prioritize `scope-commit` and `scope-affected`, whose aliases, modes, and positional
+      arguments currently produce the longest parsing branches; preserve every existing flag and
+      error message while doing so.
+- [ ] Revisit `@snailicid3/parser` only when another package needs a genuinely runtime-neutral
+      parser abstraction; do not create it merely to satisfy the original package diagram.
+- [x] Keep functional APIs, explicit argv inputs, local ESM `.js` imports, and focused tests.
 
-**Done when:** parser and node-utils have clear tests and no workspace knowledge.
+The schema cleanup completed during the workspace move applies to environment input rather than
+command-line input. `workspaceEnvironment` now validates and defaults these values through
+`defineEnv`: `ALLOW_DIRTY`, `BASE_BRANCH`, `COMMAND_NAME`, `LOGGING`, `PACKAGE_MANAGER`,
+`GBT_PATCH_CWD`, `PREFIX`, `PREFIX_OVERRIDE`, `PROTECTED_BRANCHES`, `SCOPE_COMMIT_SKIP_COMMITLINT`,
+and `SKIP_LINT_STAGED`.
+
+**Current checkpoint:** the Node runtime ownership cleanup is complete. A separate parser is
+intentionally deferred, and node-utils contains no workspace-aware policy.
 
 ### Phase 3 — Consolidate logger and snail-sh
 
-- Make snail-sh the shell-facing adapter to the real logger.
-- Use parser for its arguments.
-- Preserve only the smallest dependency-free shell floor required before built JavaScript exists.
-- Pack and test the logger bin under npm and pnpm.
-- Add a config compatibility wrapper.
+- [ ] Inventory the current logger public API, the workspace `snail-sh` shell commands, formatting,
+      exit behavior, environment switches, and every repository/consumer call site.
+- [ ] Add typed logger functions for the behavior hooks currently need: section/start messages,
+      success, warning, critical/failure, plain information, and aligned status pairs.
+- [ ] Preserve the existing snail styling and readable failure messages; formatting changes are not
+      part of this ownership move.
+- [ ] Give `@snailicid3/logger` ownership of the `snail-sh` binary and its argv adapter. Reuse the
+      existing argv/schema utility only where it simplifies the contract; do not introduce a
+      separate parser package for this phase.
+- [ ] Make `snail-sh` the first production command migrated to the Yargs/Zod argv primitive, and
+      record its command/action schema and positional tail explicitly before removing the shell
+      parser.
+- [ ] Change workspace hook functions to import the logger API directly instead of spawning
+      `pnpm exec snail-sh` for normal logging.
+- [ ] Keep only the minimal shell fallback needed before compiled JavaScript is available during
+      bootstrap. Document exactly which bootstrap path requires it.
+- [ ] Add a temporary config compatibility wrapper that resolves the logger package correctly from
+      both workspace links and packed npm installs.
+- [ ] Remove `snail-sh` ownership, copied logger assets, and obsolete subprocess helpers from
+      workspace after direct logger calls and compatibility wrappers pass.
+- [ ] Declare the resulting package dependencies explicitly and verify that no new Nx project or
+      task cycle is introduced. Use negative `implicitDependencies` only for proven static-config
+      edges, never to hide a runtime dependency.
+- [ ] Add focused tests for formatting, argument dispatch, non-zero exits, hook-phase failures,
+      fallback output when logging itself fails, and paths containing spaces.
+- [ ] From the monorepo root, run filtered typechecks, tests, and builds for logger, workspace, and
+      config; then pack logger and config and smoke-test `snail-sh` through both the new binary and
+      the compatibility wrapper under npm and pnpm fixtures.
 
-**Done when:** normal logging semantics exist in one implementation without breaking bootstrap.
+**Done when:** logger contains the one normal logging implementation, workspace hooks call it
+directly, `snail-sh` remains compatible, bootstrap still reports actionable failures, and packed
+consumer tests pass.
 
 ### Phase 4 — Create the public workspace package
 
-- Move repo roots, package discovery, paths, git, affected logic, ownership, and scope matching.
-- Add the exact getWorkspaceScopes() contract.
-- Migrate commitlint composition without changing its established API.
-- Move lint-staged/ESLint/Nx/TypeDoc discovery only where the crossover audit proves it belongs.
-- Keep Nx integration optional.
+- [x] Create the public, Node-runtime `@snailicid3/workspace` package with a tsc-only build.
+- [x] Move repo roots, package discovery, paths, git, affected logic, environment policy, ownership,
+      and scope matching.
+- [x] Migrate commitlint composition without changing its established API.
+- [x] Model the static config tsconfig input without treating it as a runtime dependency in the Nx
+      graph.
+- [ ] Complete the packed single-package, non-Nx fixture before declaring this phase closed.
 
-**Done when:** workspace works in both a monorepo and a single-package non-Nx fixture.
+**Current checkpoint:** the monorepo implementation and tests are committed; the packed non-Nx
+consumer check remains.
 
 ### Phase 5 — Move repo commands and preserve config bins
 
-- Move repo-aware implementations into workspace core/CLI/bootstrap modules.
-- Keep every current config bin as a thin compatibility wrapper.
-- Fix npm symlink resolution.
-- Freeze or intentionally migrate all flags.
-- Run the full consumer matrix.
+- [x] Move repo-aware implementations into workspace core, CLI, and bootstrap modules.
+- [x] Replace reusable Husky shell functions with a Node hook dispatcher and minimal hook scripts.
+- [x] Move `scope-commit`, `scope-affected`, changeset, setup, uninstall, patch, and execution
+      assets into workspace while retaining config compatibility bins.
+- [x] Remove the unused `snail-package` command before it becomes a supported contract.
+- [x] Remove the temporary `inspect-dependencies`/`inspect-deps` command and Knip dependency; Doctor
+      will introduce dependency reporting with a purpose-built contract.
+- [x] Preserve staged-only commit behavior and visible failure logging for lint-staged and hooks.
+- [x] Resolve compatibility binaries by package metadata so workspace links and paths containing
+      spaces work correctly.
+- [ ] Run the full packed consumer matrix after logger ownership is settled, since `snail-sh` is the
+      one intentionally temporary workspace-owned binary.
 
-**Done when:** consumers can use old config commands and new owner-package commands with equivalent
-behavior.
+**Current checkpoint:** the repository command migration is committed and passes the monorepo
+checks. Final packed compatibility verification is coupled to Phase 3's logger move.
 
 ### Phase 6 — Reframe build configuration
 
