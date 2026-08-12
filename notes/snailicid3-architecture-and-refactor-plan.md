@@ -796,6 +796,13 @@ Completed housekeeping (2026-08-12):
 - [x] Confirmed `@snailicid3/example-package` is a deliberate doctor fixture (intentionally busted
       exports) and stays `private: true`; retained its `node2.ts` / `random/randomfile.ts` because
       they are wired into the fixture's `tsdown.config.ts`.
+- [x] Repointed `@snailicid3/cli-app` to re-export the moved JSON/path utilities from
+      `@snailicid3/node-utils` (their real owner) instead of `@snailicid3/config`. These were
+      phantom imports — `@snailicid3/config` was never a declared cli-app dependency — so this also
+      removed an undeclared-dependency edge. Audit result: no other internal package imports the
+      moved symbols from config; the config json/path shims exist only for external-consumer compat,
+      and no package declares `@snailicid3/config` as a runtime dependency (it is dev/build-time
+      tooling only).
 
 Wonky items to resolve while doing the Phase 6 moves (do not defer these into Part B):
 
