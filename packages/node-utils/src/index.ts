@@ -37,6 +37,7 @@ export * as filePath from './file.path.array.js'
 export type { FilePath, FileType } from './file.path.array.js'
 export * from './glob.js'
 export * from './json.js'
+export * from './path.js'
 export * as typedPath from './path.typed.js'
 export type {
     FilePathType,
