@@ -1,13 +1,13 @@
 # Snailicid3 Architecture and Refactor Plan
 
 **Status:** in progress · **Date:** 2026-08-12 · **Implementation:** Phases 0–5 largely landed.
-Phase 6 (config-ownership cleanup) is underway — audit, housekeeping, and the JSON file-IO, glob,
-path, and json-value moves are done (config's generic JSON/path/glob utilities now live in
-node-utils; cli-app re-exports from node-utils). Remaining in Phase 6: collapse the two node-utils
-JSON value layers (`json.ts` + `json-value.ts`) into one, and the shared-formatting regroup;
-`build-exporter.ts` stays because its generated JSON files are a published config export. Phase 7
-(branch-aware changeset/release workflow, [#201]) is the closing phase of this round and is not
-started.
+Phase 6 (config-ownership cleanup) is underway — the JSON file-IO/glob/path moves (config →
+node-utils) and the pure JSON value layer (`json-value` → `@snailicid3/utils`, with the
+double-serialize bug fixed) are done; cli-app re-exports from node-utils. Remaining in Phase 6:
+point `node-utils/json.ts` file IO at utils' `jsonValue` (retire node-utils' duplicate value
+helpers) and the shared-formatting regroup; `build-exporter.ts` stays because its generated JSON
+files are a published config export. Phase 7 (branch-aware changeset/release workflow, [#201]) is
+the closing phase of this round and is not started.
 
 This document replaces the earlier architecture draft. It preserves the useful diagnosis from that
 draft, but removes its rejected assumptions about private consumer bins, the parser package, build
@@ -766,13 +766,18 @@ Steps:
       `node-utils/export.json.file.ts`, added a config re-export shim, added `ts-deepmerge` to
       node-utils, added a node-utils json test. `build-exporter.ts` and api-extractor resolve
       through the shim. Full `check:ts` and both test suites pass.
-- [x] Move the runtime-neutral JSON value layer out of config. Done (option a): `json-value.ts` (the
-      `jsonValue` namespace — parse/normalize/serialize + typed guards) and its test moved to
-      node-utils beside `json.ts`; it was test-only and not in config's public barrel, so no config
-      API change; config's `json.test.ts` now imports `jsonValue` from `@snailicid3/node-utils`.
-      **Follow-up still open:** `json.ts` and `json-value.ts` are two overlapping JSON value layers
-      in node-utils; collapse them into one (and optionally re-home the pure value _types_ to
-      `@snailicid3/types`).
+- [x] Move the runtime-neutral JSON value layer to its correct owner and fix the double-serialize
+      bug (option B). `json-value.ts` (the `jsonValue` namespace — parse/normalize/serialize + typed
+      guards) now lives in **`@snailicid3/utils`** (the pure package: no `fs`/`path`, only depends
+      on `@snailicid3/types`), not node-utils. The utils barrel re-exports its functions + unique
+      members (its base JSON value type names stay owned by `@snailicid3/types`).
+      `utils/object/json.ts`'s buggy `prettyPrintJSON` (which double-escaped already-serialized JSON
+      strings) now `normalize()`s first; a regression test guards it. config's `json.test.ts`
+      imports `jsonValue` from `@snailicid3/utils` (added as a config devDependency). **Follow-up
+      still open:** `node-utils/json.ts` still carries its own value helpers; point its file IO
+      (`importFile`/`exportFile`) at utils' `jsonValue` so there is one value implementation. This
+      touches the `build-exporter` published-artifact path and api-extractor, so it is a careful
+      contract-preserving change, not a drive-by.
 - [x] Move generic path primitives to node-utils; leave config-relative path reads composing
       node-utils. Done: moved `config/src/utilities/path.ts` → `node-utils/src/path.ts` (getDirname,
       resolveCwd, getFullPath, getFilePath, getFilename, getExt, normalizePath, doesFileExist,
@@ -812,10 +817,14 @@ Completed housekeeping (2026-08-12):
 
 Wonky items to resolve while doing the Phase 6 moves (do not defer these into Part B):
 
-- **Duplicate JSON layers.** _Both moved; de-dup still open._ `json.ts` and `json-value.ts` now both
-  live in node-utils. They remain two overlapping value layers (JSON guards + branded serialized
-  strings). Collapse them into one within node-utils; optionally re-home the pure value _types_ to
-  `@snailicid3/types`.
+- **Duplicate JSON layers.** _Split by owner; one de-dup edge left._ The pure value layer
+  (`json-value` → `jsonValue`) now lives in `@snailicid3/utils`, and `utils/object/json.ts`'s buggy
+  `prettyPrintJSON` was fixed to normalize-first (no more double-serialization). The four-way JSON
+  sprawl now reads: (1) `utils/object/json-value.ts` = canonical pure value layer; (2)
+  `utils/object/json.ts` = thin `prettyPrintJSON`/`safeSerialize`/`safeDeserialize` on top of it;
+  (3) `node-utils/json.ts` = file IO (keep) **+ duplicate value helpers (retire — point at utils)**;
+  (4) `utils/zod_helpers/json-stringified.ts` = zod codec for branded JSON strings, a separate
+  concern used by cli-app (keep). The single remaining de-dup edge is (3)'s value helpers.
 - **Duplicate JSON file-IO contracts.** _Resolved (2026-08-12)._ One contract now lives in
   node-utils (`json.exportFile`); the duplicate `export.json.file.ts` was removed and config
   re-exports the node-utils API.
