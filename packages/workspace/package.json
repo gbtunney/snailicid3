@@ -1,7 +1,7 @@
 {
     "name": "@snailicid3/workspace",
     "version": "0.0.0",
-    "private": false,
+    "private": true,
     "description": "Workspace discovery, repository operations, and Snailicid3 workspace commands",
     "keywords": [
         "typescript",
@@ -69,9 +69,7 @@
         "gbt-exec": "./bin/make-executable.sh",
         "gbt-setup": "./bin/completions/install-pnpm.sh",
         "gbt-uninstall": "./bin/uninstall.sh",
-        "gbt-patch": "./bin/esbuild-patch/patch.sh",
-        "inspect-dependencies": "./dist/cli/inspect-dependencies.js",
-        "inspect-deps": "./dist/cli/inspect-dependencies.js"
+        "gbt-patch": "./bin/esbuild-patch/patch.sh"
     },
     "main": "./dist/index.js",
     "types": "./types/index.d.ts",
@@ -103,7 +101,6 @@
         "@snailicid3/node-utils": "workspace:*",
         "cosmiconfig": "^9.0.2",
         "cosmiconfig-typescript-loader": "^6.3.0",
-        "knip": "^6.18.0",
         "micromatch": "^4.0.8",
         "zod": "^4.4.3"
     },

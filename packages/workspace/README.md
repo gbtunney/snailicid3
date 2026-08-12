@@ -2,14 +2,21 @@
 
 Workspace discovery, repository operations, scope resolution, and repository-aware CLI commands.
 
+> Workspace is temporarily private while its public contract is under construction, so feature PRs
+> are not classified as pending releases. Restore its publishable version and `private: false`
+> before packed-consumer and release validation; public config artifacts must not retain a private
+> workspace dependency.
+
 ## Commands
 
 - `scope-commit` and `scope-affected` resolve changed paths to workspace scopes.
 - `workspace-hook` dispatches the Husky pre-commit, commit-msg, and pre-push workflows.
 - `gbt-changeset`, `gbt-exec`, `gbt-setup`, `gbt-uninstall`, and `gbt-patch` retain the existing
   repository bootstrap behavior.
-- `inspect-dependencies` and its `inspect-deps` alias are transitional; their reporting will
-  ultimately move to doctor.
+
+Dependency inspection is intentionally deferred to the Doctor phase. The temporary
+`inspect-dependencies`/`inspect-deps` Knip wrapper was removed rather than preserving an API that
+Doctor will replace.
 
 `snail-package` was removed before publication. Package-manager selection and execution are exposed
 as ordinary workspace functions, and Husky calls `workspace-hook` directly.
