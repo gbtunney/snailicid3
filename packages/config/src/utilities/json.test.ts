@@ -1,9 +1,9 @@
+import { jsonValue } from '@snailicid3/node-utils'
 import { describe, expect, expectTypeOf, it, test } from 'vitest'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { type MarkdownlintTool } from './../markdownlint/index.js'
-import { jsonValue } from './json-value.js'
 import { isJsonValue, json } from './json.js'
 
 const makeTemporaryDirectory = (): string =>
