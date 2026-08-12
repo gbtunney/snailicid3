@@ -1,9 +1,11 @@
 # Snailicid3 Architecture and Refactor Plan
 
 **Status:** in progress · **Date:** 2026-08-12 · **Implementation:** Phases 0–5 largely landed.
-Phase 6 (config-ownership cleanup) is underway — audit, housekeeping, and the JSON file-IO move are
-done; the glob/path moves remain. Phase 7 (branch-aware changeset/release workflow, [#201]) is the
-closing phase of this round and is not started.
+Phase 6 (config-ownership cleanup) is underway — audit, housekeeping, and the JSON file-IO, glob,
+and path moves are done. Remaining in Phase 6: the `json-value.ts` → types de-dup (test-only) and
+the shared-formatting regroup; `build-exporter.ts` stays because its generated JSON files are a
+published config export. Phase 7 (branch-aware changeset/release workflow, [#201]) is the closing
+phase of this round and is not started.
 
 This document replaces the earlier architecture draft. It preserves the useful diagnosis from that
 draft, but removes its rejected assumptions about private consumer bins, the parser package, build
@@ -767,9 +769,14 @@ Steps:
       `config/src/utilities/json-value.ts` (the parallel `jsonValue` namespace) is currently
       test-only and remains in config; move it to `@snailicid3/types` and de-duplicate against the
       moved `json.ts`.
-- [ ] Move generic path primitives to node-utils, reconciling overlap with `path.typed.ts`; leave
-      repository-aware path behavior in workspace and config-relative path reads composing
-      node-utils.
+- [x] Move generic path primitives to node-utils; leave config-relative path reads composing
+      node-utils. Done: moved `config/src/utilities/path.ts` → `node-utils/src/path.ts` (getDirname,
+      resolveCwd, getFullPath, getFilePath, getFilename, getExt, normalizePath, doesFileExist,
+      paths, PathRoot), added a config re-export shim (config barrel, cli-app re-exports, and
+      internal callers unchanged). **Residual dup follow-up:** `node-utils/file.path.array.ts` has
+      its own naive `getFullPath` (string concat) wired into the `zod.node.ts` fs schemas; unifying
+      it with the robust `path.ts` version is semantics-sensitive and deferred, not done in this
+      pass.
 - [ ] Regroup the surviving formatting policy (extensions, widths, `SHARED_FORMATTING_RULES`) into a
       clean config `shared/` module, separate from anything that moved.
 - [ ] Update imports, package dependencies, tests, and compatibility exports after every caller has
@@ -799,12 +806,17 @@ Wonky items to resolve while doing the Phase 6 moves (do not defer these into Pa
 - **Duplicate JSON file-IO contracts.** _Resolved (2026-08-12)._ One contract now lives in
   node-utils (`json.exportFile`); the duplicate `export.json.file.ts` was removed and config
   re-exports the node-utils API.
-- **`build-exporter.ts` is TEMPORARY and wired in.** It is self-flagged for removal but still has a
-  `build:exporter` package script and an nx target (`packages/config/package.json`) and depends on
-  `json.exportFile`. **Confirmed config-internal only** — it is not (and should not be) consumed
-  outside `@snailicid3/config`, so retiring it is safe. Remove it together with the JSON-IO
-  consolidation — script, nx target, and file in one step — rather than leaving it as a stray output
-  generator.
+- **`build-exporter.ts` — its OUTPUTS are a published contract; do NOT simply retire it.**
+  _Correction (2026-08-12): the earlier "config-internal, safe to retire" note was wrong._ The
+  `build-exporter.ts` code is config-internal, but the `dist/*.json` files it generates are public:
+  config's `package.json` `exports` map points `./prettier` → `dist/.prettierrc.json`,
+  `./markdownlint` → `dist/.markdownlint.json`, `./nx-preset.json` → `dist/nx-preset.json`, and
+  `./api-extractor/base.json` → `dist/.api-extractor-base.json`; and `packages/types` +
+  `packages/build-config` both `extends: "@snailicid3/config/dist/.api-extractor-base.json"`.
+  Deleting the exporter breaks those exports and consumers. Its `json.exportFile` dependency already
+  resolves through node-utils via the shim, so the JSON-IO move did not touch it. Any future removal
+  must first replace the artifact-generation mechanism (how consumers obtain those JSON files) —
+  this is a design task, not a cleanup, and is out of scope for a quick pass.
 - **`micromatch` becomes a config-only leftover.** _Resolved (2026-08-12)._ `filterFileArrByGlob`
   moved to node-utils; `micromatch` and `@types/micromatch` dropped from `@snailicid3/config`.
 - **Stale barrel placeholder.** _Resolved (2026-08-12)._ The commented `//GlobFileFilter,` slot was
