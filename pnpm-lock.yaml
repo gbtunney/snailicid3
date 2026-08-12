@@ -311,9 +311,6 @@ importers:
             '@types/json-schema':
                 specifier: ^7.0.15
                 version: 7.0.15
-            '@types/micromatch':
-                specifier: ^4.0.10
-                version: 4.0.10
             '@types/yargs':
                 specifier: ^17.0.35
                 version: 17.0.35
@@ -386,9 +383,6 @@ importers:
             markdownlint-cli2:
                 specifier: ^0.23.1
                 version: 0.23.2
-            micromatch:
-                specifier: ^4.0.8
-                version: 4.0.8
             prettier:
                 specifier: ^3.8.4
                 version: 3.9.6
@@ -526,18 +520,30 @@ importers:
 
     packages/node-utils:
         dependencies:
+            '@snailicid3/utils':
+                specifier: workspace:*
+                version: link:../utils
             '@types/is-glob':
                 specifier: ^4.0.4
                 version: 4.0.4
+            '@types/micromatch':
+                specifier: ^4.0.10
+                version: 4.0.10
             glob:
                 specifier: ^13.0.6
                 version: 13.0.6
             is-glob:
                 specifier: ^4.0.3
                 version: 4.0.3
+            micromatch:
+                specifier: ^4.0.8
+                version: 4.0.8
             ramda-adjunct:
                 specifier: ^6.1.0
                 version: 6.1.0(ramda@0.32.0)
+            ts-deepmerge:
+                specifier: ^8.0.0
+                version: 8.0.0
             type-fest:
                 specifier: ^5.7.0
                 version: 5.8.0
@@ -688,6 +694,9 @@ importers:
             '@snailicid3/node-utils':
                 specifier: workspace:*
                 version: link:../node-utils
+            '@snailicid3/utils':
+                specifier: workspace:*
+                version: link:../utils
             cosmiconfig:
                 specifier: ^9.0.2
                 version: 9.0.2(typescript@6.0.3)

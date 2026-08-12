@@ -88,10 +88,14 @@
         "directory": "packages/node-utils"
     },
     "dependencies": {
+        "@snailicid3/utils": "workspace:*",
         "@types/is-glob": "^4.0.4",
+        "@types/micromatch": "^4.0.10",
         "glob": "^13.0.6",
         "is-glob": "^4.0.3",
+        "micromatch": "^4.0.8",
         "ramda-adjunct": "^6.1.0",
+        "ts-deepmerge": "^8.0.0",
         "type-fest": "^5.7.0",
         "yargs": "^18.0.0",
         "zod": "^4.3.6"

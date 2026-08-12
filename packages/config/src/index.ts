@@ -171,11 +171,7 @@ export type {
     AllowedExtensions,
     FileExtensionHint,
 } from './utilities/extensions.js'
-export {
-    //GlobFileFilter,
-    isPlainObject,
-    json,
-} from './utilities/json.js'
+export { isPlainObject, json } from './utilities/json.js'
 export type {
     Json,
     JSONExportConfig,

@@ -3,7 +3,6 @@ import { z } from 'zod'
 import {
     type InferJsonSchemaInput,
     type InferStringifiedOutput,
-    jsonLooseCodec,
     jsonStringified,
 } from './json-stringified.js'
 
@@ -105,23 +104,5 @@ describe('jsonStringified<T>()', () => {
         expect(JsonUser.inputValue(_in)).toBe(_in)
         // @ts-expect-error age is missing
         const _out2: InferStringifiedOutput<typeof JsonUser> = { id: 'sdsdssd' }
-
-        const testCodec = jsonLooseCodec(
-            z.object({
-                a: z.number(),
-                b: z.string(),
-                date: z.date().optional(),
-            }),
-        )
-        const testCodec2 = jsonLooseCodec(z.string())
-
-        const testyParse = z.array(z.string())
-        const ttttt: z.input<typeof testCodec> = { a: 1, b: 'sdsd' }
-
-        const ex2 = { a: 2, b: 'sdsd' }
-        const ex2str = JSON.stringify(ex2)
-        const _encoded = testCodec.decode(ex2str)
-        const mystr: z.input<typeof testCodec> = { a: 'ss', b: 'sdsd' }
-        //Console.log("THE PARSABLE VALUE IS ", testCodec.encode(mystr)  )
     })
 })

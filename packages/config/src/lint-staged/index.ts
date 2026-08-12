@@ -1,4 +1,4 @@
-import { filterFileArrByGlob } from './../shared.js'
+import { filterFileArrByGlob } from '@snailicid3/node-utils'
 import {
     buildFunctionLintStaged,
     defineLintStagedConfig,

@@ -1,6 +1,6 @@
+import { filterFileArrByGlob } from '@snailicid3/node-utils'
 import { type Configuration as LintStagedConfig } from 'lint-staged'
 import {
-    filterFileArrByGlob,
     JSLIKE_FILE_EXTENSIONS,
     PRETTIER_FILE_EXTENSIONS,
 } from './../shared.js'

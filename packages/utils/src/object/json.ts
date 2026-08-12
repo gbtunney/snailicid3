@@ -1,12 +1,13 @@
 import { type Jsonifiable, type Tagged } from 'type-fest'
-import { type z } from 'zod'
+import { compact, normalize, pretty } from './json-value.js'
 import { isJsonifiable, isJsonValue } from '../typeguard/json.typeguards.js'
 import { type Json } from '../types/utility.js'
 
-//TODO: integrate with stringified stuff
-type THeValue = z.infer<ReturnType<typeof z.json>>
 /**
- * PrettyPrint a JSON object.
+ * PrettyPrint a JSON value.
+ *
+ * Normalizes the input first (parsing already-serialized JSON strings) so a value that is already a JSON string is not
+ * double-serialized into escaped garbage.
  *
  * @category Json
  */
@@ -14,11 +15,11 @@ export const prettyPrintJSON = <Type extends Jsonifiable>(
     value: Type,
     indentSpaces = 4,
 ): string => {
-    return JSON.stringify(
-        JSON.parse(JSON.stringify(value)),
-        undefined,
-        indentSpaces,
-    )
+    const normalized = normalize(value) ?? null
+
+    return indentSpaces > 0
+        ? pretty(normalized, indentSpaces)
+        : compact(normalized)
 }
 
 /**
