@@ -15,10 +15,18 @@
         "buildStrategy": "none"
     },
     "nx": {
+        "implicitDependencies": [
+            "!@snailicid3/config"
+        ],
         "targets": {
             "dev": {},
             "dev:ts": {},
             "build:ts": {
+                "inputs": [
+                    "production",
+                    "^production",
+                    "{workspaceRoot}/packages/config/typescript-config/**/*"
+                ],
                 "outputs": [
                     "{projectRoot}/dist",
                     "{projectRoot}/types"

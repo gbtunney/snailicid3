@@ -1,5 +1,5 @@
+import { type CommandResult } from '@snailicid3/node-utils'
 import { describe, expect, test } from 'vitest'
-import { type CommandResult } from './../utilities/command.js'
 import { runPackageBinary } from './../utilities/package-manager.js'
 import { getRepoRoot } from './../workspace/git.js'
 import { Commitlint } from './index.js'

@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 
+/**
+ * Pnpm commit:feat → build required binaries → stage the complete working tree → calculate scopes → run git commit with
+ * live terminal output → Husky runs lint-staged once using .lintstagedrc.mts → commitlint validates the message
+ */
+import { runCliIfEntrypointAsync, runCommand } from '@snailicid3/node-utils'
 import path from 'node:path'
 import { splitNonEmptyLines, uniqueSorted } from './../utilities/array.js'
-import { runCommand } from './../utilities/command.js'
-import { runCliIfEntrypointAsync } from './../utilities/entrypoint.js'
 import { readConfigEnvironment } from './../utilities/environment.js'
 import { runPackageBinary } from './../utilities/package-manager.js'
 import { getRepoRoot } from './../workspace/git.js'
@@ -97,12 +100,11 @@ export async function main(
 
         const result = runCommand('git', ['commit', '-m', message], {
             cwd: repoRoot,
+            stdio: 'inherit',
         })
 
         if (result.status !== 0) {
-            throw new Error(
-                result.stderr || result.stdout || 'git commit failed',
-            )
+            throw new Error('git commit failed')
         }
 
         process.stdout.write(result.stdout)
@@ -263,16 +265,10 @@ function parseArgs(args: Array<string>): ParsedArgs {
 }
 
 function prepareCheckedCommit(repoRoot: string): void {
-    const stagedDiff = runCommand('git', ['diff', '--cached', '--quiet'], {
-        cwd: repoRoot,
-    })
+    const addResult = runCommand('git', ['add', '-A'], { cwd: repoRoot })
 
-    if (stagedDiff.status === 0) {
-        const addResult = runCommand('git', ['add', '-A'], { cwd: repoRoot })
-
-        if (addResult.status !== 0) {
-            throw new Error(addResult.stderr || 'git add -A failed')
-        }
+    if (addResult.status !== 0) {
+        throw new Error(addResult.stderr || 'git add -A failed')
     }
 }
 

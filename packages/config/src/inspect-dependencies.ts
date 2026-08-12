@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 
+import { runCliIfEntrypoint, runCommand } from '@snailicid3/node-utils'
 import micromatch from 'micromatch'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { runCommand } from './utilities/command.js'
-import { runCliIfEntrypoint } from './utilities/entrypoint.js'
 import { getRepoRoot } from './workspace/git.js'
 import {
     findNearestPackageJson,

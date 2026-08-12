@@ -84,3 +84,23 @@ option values remain strings; use schemas such as `z.coerce.number()` to control
 
 Both functions support field-level and root-object transforms because they pass the parsed argument
 object directly to Zod without inspecting the schema.
+
+## Repository maintenance: shared config and the Nx graph
+
+`node-utils` and `build-config` extend TypeScript configuration files published by
+`@snailicid3/config`. That is a static tooling relationship, not a runtime or build-order dependency
+on the config package. Their `package.json` files therefore remove Nx's inferred config edge with:
+
+```json
+{
+  "nx": {
+    "implicitDependencies": ["!@snailicid3/config"]
+  }
+}
+```
+
+Without that exception, Nx infers the false cycle `config -> node-utils -> build-config -> config`.
+The relevant build and typecheck targets still list
+`{workspaceRoot}/packages/config/typescript-config/**/*` as an input, so changes to the shared
+TypeScript configuration invalidate their Nx cache entries. The workspace root does not need this
+exception because Nx does not infer a root-to-config project dependency.

@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 
+import { runCliIfEntrypointAsync, runCommand } from '@snailicid3/node-utils'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { splitNonEmptyLines, uniqueSorted } from './../utilities/array.js'
-import { runCommand } from './../utilities/command.js'
-import { runCliIfEntrypointAsync } from './../utilities/entrypoint.js'
 import { runPackageBinary } from './../utilities/package-manager.js'
 import { getRepoRoot } from './../workspace/git.js'
 import { normalizeRepoPath } from './../workspace/paths.js'

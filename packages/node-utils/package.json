@@ -21,12 +21,27 @@
         "api:report:nx": "nx run $npm_package_name:api:report"
     },
     "nx": {
+        "implicitDependencies": [
+            "!@snailicid3/config"
+        ],
         "targets": {
             "dev": {},
             "dev:ts": {},
             "dev:tsdown": {},
-            "check:ts": {},
-            "build:ts": {},
+            "check:ts": {
+                "inputs": [
+                    "default",
+                    "^production",
+                    "{workspaceRoot}/packages/config/typescript-config/**/*"
+                ]
+            },
+            "build:ts": {
+                "inputs": [
+                    "production",
+                    "^production",
+                    "{workspaceRoot}/packages/config/typescript-config/**/*"
+                ]
+            },
             "build:tsdown": {},
             "build": {
                 "dependsOn": [
@@ -73,8 +88,6 @@
         "directory": "packages/node-utils"
     },
     "dependencies": {
-        "@snailicid3/types": "workspace:*",
-        "@snailicid3/utils": "workspace:*",
         "@types/is-glob": "^4.0.4",
         "glob": "^13.0.6",
         "is-glob": "^4.0.3",

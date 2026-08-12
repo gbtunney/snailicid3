@@ -165,9 +165,6 @@ export type {
     TypedocPluginRegistryEntry,
     TypedocTool,
 } from './typedoc/index.js'
-export * from './utilities/command.js'
-export * from './utilities/entrypoint.js'
-
 export * from './utilities/environment-report.js'
 
 export * from './utilities/environment.js'

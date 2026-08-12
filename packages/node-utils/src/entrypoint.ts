@@ -1,19 +1,5 @@
-/**
- * Future Structure for this (or cli-app maybe ?)
- *
- * ```txt
- * entrypoint.ts          generic “am I being run directly?”
- * cli.ts                 generic CLI runner + error handling
- * argv.ts                generic argv → object parsing
- * zod-argv.ts            Zod schema parsing/coercion
- * scope/commit.ts        actual scope-commit command
- * scope/affected.ts      actual scope-affected command
- * ```
- */
-
 import { realpathSync } from 'node:fs'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 /**
  * RunIfEntrypoint helper is the TypeScript/ESM equivalent of this shell script pattern:
@@ -25,6 +11,10 @@ import { fileURLToPath } from 'node:url'
  * ```
  */
 
+export type EntrypointOptions = {
+    log?: boolean
+}
+
 export type ImportMetaWithUrl = Pick<ImportMeta, 'url'>
 
 type AsyncFunction<Args extends ReadonlyArray<unknown>, Result> = (
@@ -35,42 +25,30 @@ type SyncFunction<Args extends ReadonlyArray<unknown>, Result> = (
     ...args: Args
 ) => Result
 
-/** Resolve a path through symlinks when it exists and lexically otherwise. */
-const toRealPath = (filePath: string): string => {
-    try {
-        return realpathSync(path.resolve(filePath))
-    } catch {
-        return path.resolve(filePath)
-    }
-}
-
-/** Check whether a caller module resolves to the executable path in process.argv. */
+/** Check whether a caller module is the executable path in process.argv. */
 export function isCallerEntrypoint(
     callerMeta: ImportMetaWithUrl,
-    options: { log?: boolean } = {},
+    options: EntrypointOptions = {},
 ): boolean {
     const { log: logEnabled = false } = options
-
     const log = (...args: Array<unknown>): undefined => {
         if (!logEnabled) return undefined
-
         console.log('[runIfEntrypoint]', ...args)
-
         return undefined
     }
 
-    const entryPath = process.argv[1]
-
-    const entryRealPath = toRealPath(entryPath)
-    const callerRealPath = toRealPath(fileURLToPath(callerMeta.url))
-    const isEntrypoint = entryRealPath === callerRealPath
+    const entryPath: string | undefined = process.argv.at(1)
+    const entryUrl =
+        entryPath === undefined ? undefined : toRealFileUrl(entryPath)
+    const callerUrl = toRealFileUrl(fileURLToPath(callerMeta.url))
+    const isEntrypoint = entryUrl !== undefined && callerUrl === entryUrl
 
     log('argv =', process.argv)
     log('argv[0] =', process.argv[0])
     log('argv[1] =', entryPath)
-    log('entryRealPath =', entryRealPath)
+    log('entryUrl =', entryUrl)
     log('callerMeta.url =', callerMeta.url)
-    log('callerRealPath =', callerRealPath)
+    log('callerUrl =', callerUrl)
     log('isEntrypoint =', isEntrypoint)
 
     return isEntrypoint
@@ -149,4 +127,12 @@ export async function runIfEntrypointAsync<
     if (!isCallerEntrypoint(callerMeta)) return undefined
 
     return await mainFn(...args)
+}
+
+function toRealFileUrl(filePath: string): string {
+    try {
+        return pathToFileURL(realpathSync(filePath)).href
+    } catch {
+        return pathToFileURL(filePath).href
+    }
 }

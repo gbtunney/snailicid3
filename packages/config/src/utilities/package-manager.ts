@@ -1,10 +1,10 @@
-import { readFileSync } from 'node:fs'
-import path from 'node:path'
 import {
     type CommandResult,
     runCommand,
     type RunCommandOptions,
-} from './command.js'
+} from '@snailicid3/node-utils'
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
 import { type PackageManager, readConfigEnvironment } from './environment.js'
 
 export type PackageCommand = {

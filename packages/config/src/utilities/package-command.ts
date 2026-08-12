@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { runCliIfEntrypoint } from './entrypoint.js'
+import { runCliIfEntrypoint } from '@snailicid3/node-utils'
 import {
     formatEnvironmentReport,
     resolveEnvironmentVariable,

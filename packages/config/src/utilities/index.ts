@@ -1,6 +1,4 @@
 export * from './array.js'
-export * from './command.js'
-export * from './entrypoint.js'
 export * from './environment-report.js'
 export * from './environment.js'
 export * from './extensions.js'

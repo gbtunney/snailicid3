@@ -54,7 +54,10 @@ check_staged_filenames() {
 }
 
 run_lint_staged_if_needed() {
-    skip_lint_staged="$(get_workflow_environment SKIP_LINT_STAGED)" || return $? --verbose
+    if ! skip_lint_staged="$(get_workflow_environment SKIP_LINT_STAGED)"; then
+        printf 'Unable to read SKIP_LINT_STAGED from the workflow environment.\n' >&2
+        return 1
+    fi
 
     if [ "$skip_lint_staged" = 'true' ]; then
         printf 'lint-staged skipped (SKIP_LINT_STAGED=true).\n'
