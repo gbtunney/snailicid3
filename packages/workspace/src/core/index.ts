@@ -1,4 +1,5 @@
 export * from './array.js'
+export * from './branch-state.js'
 export * from './git.js'
 export * from './hooks.js'
 export * from './packages.js'
