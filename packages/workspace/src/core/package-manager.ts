@@ -5,12 +5,14 @@ import {
 } from '@snailicid3/node-utils'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
-import { type PackageManager, readConfigEnvironment } from './environment.js'
+import { readWorkspaceEnvironment } from './environment.js'
 
 export type PackageCommand = {
     args: Array<string>
     command: PackageManager
 }
+
+export type PackageManager = 'npm' | 'pnpm'
 
 export type PackageManagerResolution = {
     packageManager: PackageManager
@@ -55,7 +57,8 @@ export function resolvePackageManager(
     repoRoot: string,
     environment: NodeJS.ProcessEnv = process.env,
 ): PackageManagerResolution {
-    const configured = readConfigEnvironment(environment).packageManagerOverride
+    const configured =
+        readWorkspaceEnvironment(environment).packageManagerOverride
 
     if (configured) {
         return { packageManager: configured, source: 'environment' }

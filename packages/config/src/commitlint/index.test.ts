@@ -1,7 +1,6 @@
 import { type CommandResult } from '@snailicid3/node-utils'
+import { getRepoRoot, runPackageBinary } from '@snailicid3/workspace'
 import { describe, expect, test } from 'vitest'
-import { runPackageBinary } from './../utilities/package-manager.js'
-import { getRepoRoot } from './../workspace/git.js'
 import { Commitlint } from './index.js'
 
 const cwd = import.meta

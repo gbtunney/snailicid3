@@ -1,4 +1,6 @@
+export * from './array.js'
 export * from './git.js'
+export * from './hooks.js'
 export * from './packages.js'
 export * from './paths.js'
 export * from './scope-matcher-config.js'

@@ -4,7 +4,12 @@
     "exclude": ["**/*.test.ts", "**/*.test.mts", "**/*.test.cts"],
     "compilerOptions": {
         "types": ["node"],
-        "noEmit": true,
-        "isolatedDeclarations": true
+        "declaration": true,
+        "declarationMap": true,
+        "noEmit": false,
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "sourceMap": true,
+        "isolatedDeclarations": false
     }
 }

@@ -28,6 +28,7 @@ export * from './command.js'
 /* * TYPES * */
 export type { ImageMimeType } from './encode-base64.js'
 export * from './entrypoint.js'
+export * from './environment.js'
 export type { JSONExportConfig, JSONExportEntry } from './export.json.file.js'
 export * as filePath from './file.path.array.js'
 export type { FilePath, FileType } from './file.path.array.js'

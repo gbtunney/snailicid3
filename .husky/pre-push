@@ -1,10 +1,2 @@
-#!/usr/bin/env bash
-set -eu
-
-REPO_ROOT="$(git rev-parse --show-toplevel)"
-. "$REPO_ROOT/.husky/functions.sh"
-
-printf "\n===\n>> Running in shell:: %s\n" "${SHELL:-unknown}"
-printf ">> Pre-push Hook:: Checking BRANCH: %s\n===\n\n" "$(get_current_branch)"
-
-check_protected_branch push
+#!/usr/bin/env sh
+pnpm exec workspace-hook pre-push

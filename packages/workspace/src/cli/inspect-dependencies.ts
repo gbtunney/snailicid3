@@ -4,14 +4,14 @@ import { runCliIfEntrypoint, runCommand } from '@snailicid3/node-utils'
 import micromatch from 'micromatch'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { getRepoRoot } from './workspace/git.js'
+import { getRepoRoot } from './../core/git.js'
 import {
     findNearestPackageJson,
     getWorkspacePackagesList,
     readPackageName,
     type WorkspacePackage,
-} from './workspace/packages.js'
-import { normalizeRepoPath } from './workspace/paths.js'
+} from './../core/packages.js'
+import { normalizeRepoPath } from './../core/paths.js'
 
 /** TODO: #187 figure out how to add the filters via arg w the default like the last one */
 

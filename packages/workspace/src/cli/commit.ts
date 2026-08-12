@@ -10,26 +10,23 @@
  */
 import { runCliIfEntrypointAsync, runCommand } from '@snailicid3/node-utils'
 import path from 'node:path'
-import { splitNonEmptyLines, uniqueSorted } from './../utilities/array.js'
-import { readConfigEnvironment } from './../utilities/environment.js'
-import { runPackageBinary } from './../utilities/package-manager.js'
-import { getRepoRoot } from './../workspace/git.js'
-import {
-    findNearestPackageJson,
-    readPackageName,
-} from './../workspace/packages.js'
-import { normalizeRepoPath } from './../workspace/paths.js'
-import { loadScopePathMatchers } from './../workspace/scope-matcher-config.js'
+import { splitNonEmptyLines, uniqueSorted } from './../core/array.js'
+import { readWorkspaceEnvironment } from './../core/environment.js'
+import { getRepoRoot } from './../core/git.js'
+import { runPackageBinary } from './../core/package-manager.js'
+import { findNearestPackageJson, readPackageName } from './../core/packages.js'
+import { normalizeRepoPath } from './../core/paths.js'
+import { loadScopePathMatchers } from './../core/scope-matcher-config.js'
 import {
     matchScopesForPath,
     type ScopePathMatchers,
-} from './../workspace/scope-matchers.js'
+} from './../core/scope-matchers.js'
 import {
     formatScopes,
     isRootPackageName,
     type ScopeFormat,
     shortenScopeName,
-} from './../workspace/scopes.js'
+} from './../core/scopes.js'
 
 type ChangeMode = 'all' | 'staged'
 type OutputMode = 'commit' | 'message' | 'scope'
@@ -349,7 +346,7 @@ function splitExplicitScope(scopeValue: string): Array<string> {
 }
 
 function validateCommitMessage(repoRoot: string, message: string): void {
-    if (readConfigEnvironment().skipCommitlint) return
+    if (readWorkspaceEnvironment(process.env).skipCommitlint) return
 
     const result = runPackageBinary(
         repoRoot,

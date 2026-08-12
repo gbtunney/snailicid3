@@ -1,14 +1,12 @@
-import { uniqueSorted } from './../utilities/array.js'
-import { getWorkspacePackagesList } from './../workspace/packages.js'
-import {
-    resolveScopePathMatchers,
-    type ScopePathMatcherOverrides,
-} from './../workspace/scope-matchers.js'
 import {
     formatScopes,
+    getWorkspacePackagesList,
     isRootPackageName,
+    resolveScopePathMatchers,
+    type ScopePathMatcherOverrides,
     shortenScopeName,
-} from './../workspace/scopes.js'
+    uniqueSorted,
+} from '@snailicid3/workspace'
 
 export type WorkspaceScopesOptions = {
     format?: 'array' | 'csv'

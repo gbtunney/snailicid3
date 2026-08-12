@@ -3,21 +3,21 @@
 import { runCliIfEntrypointAsync, runCommand } from '@snailicid3/node-utils'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import { splitNonEmptyLines, uniqueSorted } from './../utilities/array.js'
-import { runPackageBinary } from './../utilities/package-manager.js'
-import { getRepoRoot } from './../workspace/git.js'
-import { normalizeRepoPath } from './../workspace/paths.js'
-import { loadScopePathMatchers } from './../workspace/scope-matcher-config.js'
+import { splitNonEmptyLines, uniqueSorted } from './../core/array.js'
+import { getRepoRoot } from './../core/git.js'
+import { runPackageBinary } from './../core/package-manager.js'
+import { normalizeRepoPath } from './../core/paths.js'
+import { loadScopePathMatchers } from './../core/scope-matcher-config.js'
 import {
     matchScopesForPath,
     type ScopePathMatchers,
-} from './../workspace/scope-matchers.js'
+} from './../core/scope-matchers.js'
 import {
     formatScopes,
     isRootPackageName,
     type ScopeFormat,
     shortenScopeName,
-} from './../workspace/scopes.js'
+} from './../core/scopes.js'
 
 type ParsedArgs = {
     changesetFiles: Array<string>

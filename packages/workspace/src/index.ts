@@ -1,8 +1,3 @@
-/* * JSON TYPES and UTILS * */
-
-export type HelloWorld = number | string
-
-/** Returns the input value unchanged. */
-export function echoHelloWorld(value: HelloWorld): HelloWorld {
-    return value
-}
+export * from './core/environment.js'
+export * from './core/index.js'
+export * from './core/package-manager.js'

@@ -1,48 +1,40 @@
-# @snailicid3/example-package 🐌
+# @snailicid3/workspace 🐌
 
-> _Workspace package — example template for new monorepo packages_
+Workspace discovery, repository operations, scope resolution, and repository-aware CLI commands.
 
-![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
-![Vitest](https://img.shields.io/badge/vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)
+## Commands
 
-### Repository
+- `scope-commit` and `scope-affected` resolve changed paths to workspace scopes.
+- `workspace-hook` dispatches the Husky pre-commit, commit-msg, and pre-push workflows.
+- `gbt-changeset`, `gbt-exec`, `gbt-setup`, `gbt-uninstall`, and `gbt-patch` retain the existing
+  repository bootstrap behavior.
+- `inspect-dependencies` and its `inspect-deps` alias are transitional; their reporting will
+  ultimately move to doctor.
 
-- **Github:**
-  [`@snailicid3/example-package`](https://github.com/gbtunney/snailicid3/tree/main/packages/example-package)
-  • [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
+`snail-package` was removed before publication. Package-manager selection and execution are exposed
+as ordinary workspace functions, and Husky calls `workspace-hook` directly.
 
-### Author
+## Environment
 
-👤 **Gillian Tunney**
+`workspaceEnvironment` is defined with node-utils' source-agnostic `defineEnv()` helper. Defaults
+and validation live in its Zod schema, and callers explicitly supply `process.env`,
+`import.meta.env`, or another record:
 
-- [github](https://github.com/gbtunney)
-- [email](mailto:gbtunney@mac.com)
+```ts
+import { workspaceEnvironment } from '@snailicid3/workspace'
 
-## @snailicid3/example-package 🐌
-
----
-
-This is an example/template package demonstrating the canonical structure for a new snailicid3
-monorepo package. It shows the standard tsdown config, tsconfig, package.json layout, and vitest
-test setup.
-
-### Structure
-
-```sh
-packages/example-package/
-├── src/
-│ ├── index.ts       # Public exports
-│ └── index.test.ts  # Vitest tests
-├── tsdown.config.ts # tsdown build config
-├── tsconfig.json    # TypeScript config
-└── package.json     # Package manifest
+const environment = workspaceEnvironment.parse(process.env)
 ```
 
-## Usage
+## Logging migration note
 
-Copy this package as a starting point for new packages:
+The existing `snail-sh` presentation is intentionally retained for now because its colorful rules,
+sections, status messages, and key/value output are useful and pleasant to read. Its long-term owner
+is `@snailicid3/logger`. When it moves, preserve the current visual character and command behavior;
+do not replace it with unformatted output while deduplicating the shell and TypeScript logger paths.
 
-```sh
-cp -r packages/example-package packages/my-new-package
-# Update name, description, and dependencies in package.json
-```
+## Build and Nx
+
+Workspace is emitted with `tsc`; it does not use tsdown. It extends config's shared TypeScript files
+for tooling only, so its Nx configuration removes the inferred `workspace -> config` project edge
+and lists `packages/config/typescript-config/**/*` as a build/typecheck cache input.

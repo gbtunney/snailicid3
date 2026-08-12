@@ -1,8 +1,2 @@
-#!/usr/bin/env bash
-set -eu
-
-REPO_ROOT="$(git rev-parse --show-toplevel)"
-. "$REPO_ROOT/.husky/functions.sh"
-
-printf '>> Running commitlint message hook.\n'
-run_package_binary commitlint --edit "$1"
+#!/usr/bin/env sh
+pnpm exec workspace-hook commit-msg "$1"

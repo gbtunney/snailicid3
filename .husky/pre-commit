@@ -1,14 +1,2 @@
-#!/usr/bin/env bash
-set -eu
-(set -o pipefail 2> /dev/null) || true
-
-REPO_ROOT="$(git rev-parse --show-toplevel)"
-. "$REPO_ROOT/.husky/functions.sh"
-
-printf "\n===\n>> Running in shell:: %s\n" "${SHELL:-unknown}"
-printf ">> Pre-commit Hook:: Checking BRANCH: %s\n===\n\n" "$(get_current_branch)"
-
-check_protected_branch commit
-validate_branch_name
-check_staged_filenames
-run_lint_staged_if_needed
+#!/usr/bin/env sh
+pnpm exec workspace-hook pre-commit

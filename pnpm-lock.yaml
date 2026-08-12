@@ -311,6 +311,9 @@ importers:
             '@snailicid3/node-utils':
                 specifier: workspace:*
                 version: link:../node-utils
+            '@snailicid3/workspace':
+                specifier: workspace:*
+                version: link:../workspace
             '@types/json-schema':
                 specifier: ^7.0.15
                 version: 7.0.15
@@ -684,19 +687,35 @@ importers:
                 version: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.50.0)(tsx@4.23.12)(yaml@2.9.0))
 
     packages/workspace:
-        devDependencies:
-            '@snailicid3/build-config':
+        dependencies:
+            '@snailicid3/node-utils':
                 specifier: workspace:*
-                version: link:../build-config
+                version: link:../node-utils
+            cosmiconfig:
+                specifier: ^9.0.2
+                version: 9.0.2(typescript@6.0.3)
+            cosmiconfig-typescript-loader:
+                specifier: ^6.3.0
+                version: 6.3.0(@types/node@26.2.0)(cosmiconfig@9.0.2(typescript@6.0.3))(typescript@6.0.3)
+            knip:
+                specifier: ^6.18.0
+                version: 6.32.2
+            micromatch:
+                specifier: ^4.0.8
+                version: 4.0.8
+            zod:
+                specifier: ^4.4.3
+                version: 4.4.3
+        devDependencies:
             '@snailicid3/config':
                 specifier: workspace:*
                 version: link:../config
+            '@types/micromatch':
+                specifier: ^4.0.10
+                version: 4.0.10
             '@types/node':
                 specifier: ^26.2.0
                 version: 26.2.0
-            tsdown:
-                specifier: ^0.22.2
-                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.23)(tsx@4.23.12)(typescript@6.0.3)(unplugin-unused@0.6.0(esbuild@0.28.2)(rolldown@1.2.3)(rollup@4.62.4)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.50.0)(tsx@4.23.12)(yaml@2.9.0)))
             typescript:
                 specifier: ^6.0.3
                 version: 6.0.3

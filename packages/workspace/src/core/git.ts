@@ -1,6 +1,6 @@
 import { runCommand } from '@snailicid3/node-utils'
 import path from 'node:path'
-import { splitNonEmptyLines } from './../utilities/array.js'
+import { splitNonEmptyLines } from './array.js'
 import { getWorkspacePackagesList, type WorkspacePackage } from './packages.js'
 
 export type GitChangedFilesOptions = {
@@ -44,6 +44,18 @@ export function getChangedWorkspacePackagesFromGit(
     }
 
     return [...hits.values()]
+}
+
+export function getCurrentBranch(repoRoot: string): string {
+    const result = runCommand('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
+        cwd: repoRoot,
+    })
+
+    if (!result.success) {
+        throw new Error(result.stderr || 'Unable to determine current branch')
+    }
+
+    return result.stdout.trim()
 }
 
 /** List repository-relative files changed in the requested Git worktree areas or revision range. */

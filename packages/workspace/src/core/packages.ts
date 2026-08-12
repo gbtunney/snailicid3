@@ -1,10 +1,7 @@
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
+import { getPackageManager, runPackageManager } from './package-manager.js'
 import { normalizeRepoPath } from './paths.js'
-import {
-    getPackageManager,
-    runPackageManager,
-} from '../utilities/package-manager.js'
 
 export type WorkspacePackage = {
     name: string

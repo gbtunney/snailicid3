@@ -1,15 +1,15 @@
 {
     "name": "@snailicid3/workspace",
     "version": "0.0.0",
-    "private": true,
-    "description": "Example monorepo package",
+    "private": false,
+    "description": "Workspace discovery, repository operations, and Snailicid3 workspace commands",
     "keywords": [
         "typescript",
         "snailicid3",
         "monorepo",
-        "example",
-        "template",
-        "boilerplate"
+        "workspace",
+        "repository",
+        "cli"
     ],
     "scripts": {
         "build:nx": "nx run $npm_package_name:build",
@@ -19,23 +19,35 @@
         "test:coverage": "vitest run --coverage"
     },
     "buildConfig": {
-        "runtime": "universal",
+        "runtime": "node",
         "product": "library",
         "buildStrategy": "bundle"
     },
     "nx": {
+        "implicitDependencies": [
+            "!@snailicid3/config"
+        ],
         "targets": {
             "dev": {},
             "dev:ts": {},
-            "dev:tsdown": {},
             "dev:vite": {},
-            "build:ts": {},
-            "check:ts": {},
-            "build:tsdown": {},
+            "build:ts": {
+                "inputs": [
+                    "production",
+                    "^production",
+                    "{workspaceRoot}/packages/config/typescript-config/**/*"
+                ]
+            },
+            "check:ts": {
+                "inputs": [
+                    "default",
+                    "^production",
+                    "{workspaceRoot}/packages/config/typescript-config/**/*"
+                ]
+            },
             "build": {
                 "dependsOn": [
-                    "build:ts",
-                    "build:tsdown"
+                    "build:ts"
                 ]
             },
             "test": {},
@@ -48,21 +60,32 @@
         }
     },
     "type": "module",
-    "main": "./dist/index.cjs",
-    "types": "./dist/index.d.cts",
+    "bin": {
+        "snail-sh": "./bin/snail-sh-logger.sh",
+        "workspace-hook": "./dist/cli/hooks.js",
+        "scope-commit": "./dist/cli/commit.js",
+        "scope-affected": "./dist/cli/affected.js",
+        "gbt-changeset": "./bin/changeset-branch.sh",
+        "gbt-exec": "./bin/make-executable.sh",
+        "gbt-setup": "./bin/completions/install-pnpm.sh",
+        "gbt-uninstall": "./bin/uninstall.sh",
+        "gbt-patch": "./bin/esbuild-patch/patch.sh",
+        "inspect-dependencies": "./dist/cli/inspect-dependencies.js",
+        "inspect-deps": "./dist/cli/inspect-dependencies.js"
+    },
+    "main": "./dist/index.js",
+    "types": "./types/index.d.ts",
     "exports": {
         ".": {
             "import": "./dist/index.js",
-            "require": "./dist/index.cjs"
-        },
-        "./node": {
-            "import": "./dist/node.mjs",
-            "require": "./dist/node.cjs"
+            "types": "./types/index.d.ts"
         },
         "./package.json": "./package.json"
     },
     "files": [
         "CHANGELOG.md",
+        "bin/**/*.sh",
+        "bin/**/*.md",
         "dist",
         "types"
     ],
@@ -74,13 +97,20 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/gbtunney/snailicid3",
-        "directory": "packages/example-package"
+        "directory": "packages/workspace"
+    },
+    "dependencies": {
+        "@snailicid3/node-utils": "workspace:*",
+        "cosmiconfig": "^9.0.2",
+        "cosmiconfig-typescript-loader": "^6.3.0",
+        "knip": "^6.18.0",
+        "micromatch": "^4.0.8",
+        "zod": "^4.4.3"
     },
     "devDependencies": {
-        "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
+        "@types/micromatch": "^4.0.10",
         "@types/node": "^26.2.0",
-        "tsdown": "^0.22.2",
         "typescript": "^6.0.3",
         "vitest": "^4.1.9"
     },
