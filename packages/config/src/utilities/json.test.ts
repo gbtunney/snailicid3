@@ -1,4 +1,4 @@
-import { jsonValue } from '@snailicid3/node-utils'
+import { jsonValue } from '@snailicid3/utils'
 import { describe, expect, expectTypeOf, it, test } from 'vitest'
 import fs from 'node:fs'
 import os from 'node:os'

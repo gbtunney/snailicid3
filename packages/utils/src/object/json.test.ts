@@ -11,6 +11,16 @@ describe('JSON serialize', () => {
         const result = prettyPrintJSON(obj)
         expect(result).toBeTypeOf('string')
     })
+    test('prettyPrintJSON does not double-serialize an already-serialized JSON string', () => {
+        const obj = { age: 30, name: 'John' }
+        const alreadySerialized = JSON.stringify(obj)
+
+        const result = prettyPrintJSON(alreadySerialized)
+
+        // The input is a JSON string; it must be parsed first, not escaped into "{\"age\":30,...}".
+        expect(result).not.toContain('\\"')
+        expect(JSON.parse(result)).toEqual(obj)
+    })
     test('safeDeserializeJson should return a deserialized JSON object', () => {
         const json = `{"name":"John","age":30}`
         const expected = { age: 30, name: 'John' }
