@@ -861,40 +861,128 @@ explicitly promoted to a tracked follow-up; none is left as undocumented residue
 
 ---
 
-### Phase 7 — Branch-aware changeset and release-plan report (#201)
+### Phase 7 — Branch-aware changeset/release workflow + shared release engine (#201, #206)
 
-The closing phase of Part A. It is repository/workspace ownership work (not build-system work), so
-it belongs to this round rather than the deferred track, and it reuses the scope-resolution audit
-from Phase 6. Behavior is defined by [#201]; final package ownership is workspace.
+The closing phase of Part A: repository/workspace ownership work (not build-system), reusing the
+Phase 6 scope resolution. It expands the current rigid `changeset-branch.sh` into a smart,
+state-aware local command that **shares one release/scope engine with CI** — exactly the way
+`scope-affected` is shared today. Behavior is anchored by [#201] and [#206]; final ownership is
+`@snailicid3/workspace`.
 
-**Priority / stakes.** Low external stakes — this workflow is primarily for the maintainer and the
-consumer repos, not a broadly depended-on public contract. Keep it small and pragmatic; do not let
-it grow beyond [#201]. Its one hard compatibility constraint is that existing public `gbt-changeset`
+[#206]: https://github.com/gbtunney/snailicid3/issues/206
+
+**Cross-repo reality.** The release-state detector and the reusable release workflows live in the
+separate `gbtunney/snailicid3-actions` repo; the `dispatch-*.yml` files here only call them. "Share
+the logic" therefore means **extracting the release-state/plan engine into `@snailicid3/workspace`**
+(this repo) and having both the local command and the Actions consume it. The engine lands here; the
+workflow re-wiring is a coordinated change in the actions repo. That repo must be attached to work
+on the detector itself.
+
+**Stakes / phasing.** Still primarily maintainer + consumer-repo tooling, not a broad public
+contract — but the vision is larger than the original [#201], so it is phased. **7.1–7.3 are the
+core** (smart branch flow + shared plan). **7.4–7.6 are additive** and partly cross-repo; land them
+only after the core is solid. The one hard compatibility constraint stays: existing `gbt-changeset`
 usage keeps working.
 
-**Parsing constraint.** Any environment reading or non-trivial argument parsing in this phase MUST
-use the new argv-schema primitives — `defineEnv` for environment shape and
-`parseArgv`/`safeParseArgv`/`parseArgvPositionals` (Zod-backed, in node-utils) for commands. Do not
-add manual or excessive hand-rolled flag/env parsing.
+**Parsing constraint.** All env reading and non-trivial arg parsing here MUST use the argv-schema
+primitives (`defineEnv`; `parseArgv`/`safeParseArgv`/`parseArgvPositionals`) — no hand-rolled
+parsing.
 
-- [ ] Add a generic branch-generation helper (type/prefix + adjective–noun slug + optional
-      description); branch names carry durable state and **do not** encode commit scope
-      (`changeset/wacky-walker`, `release/wacky-walker`).
-- [ ] Derive commit type from the `changeset/` or `release/` branch prefix, the subject slug from
-      the branch name, and scope through the existing scope mechanism (audit `scope-commit` vs
-      `scope-affected` vs their shared matcher logic — the matcher already lives in workspace).
-- [ ] Keep starting the workflow side-effect free: no commit or push merely from creating a branch
-      or adding a changeset; an explicit command commits, and push/PR is limited to the `changeset/`
-      flow with the derived title and changeset body.
-- [ ] Extract the reusable-Actions release-state/report logic into shared repo tooling and add a
-      read-only `gbt-changeset plan` command that reports checked ref, phase, `should_version`,
-      `should_publish`, `should_skip`, changeset count/slugs, primary slug, and publish candidates —
-      local and Actions calling the same implementation. The plan command mutates nothing.
-- [ ] Cover human-readable and machine-readable report output with tests; preserve current public
-      `gbt-changeset` consumers or provide an intentional migration path.
+#### 7.1 Shared release engine (the spine, in workspace)
 
-**Done when:** the branch/commit/plan workflow behaves as [#201] specifies, local and CI report
-identically from one implementation, and existing `gbt-changeset` usage stays compatible.
+Split the model along the two axes [#206] demands, and expose one report both surfaces consume.
+
+- [ ] **Inventory (read-only facts):** pending changesets + slugs, public/private packages, new vs
+      new-version vs already-published, unpublished candidates, registry lookup failures. Must
+      handle `private: true` **local-only** packages as versionable/taggable inventory without
+      treating them as publishable.
+- [ ] **Intent/policy (decision):** an explicit axis — `observe | prepare | publish` (naming open) —
+      supplied by caller/CI, never inferred from registry absence.
+      `should_publish = intent allows     publish AND no pending changesets AND publish candidates exist`.
+      This is [#206]'s core: a `private:false` flip must not silently select the release-candidate
+      PR phase.
+- [ ] **Plan report:** the read-only surface (checked ref, phase, `should_version`/`should_publish`/
+      `should_skip`, changeset count/slugs, primary slug, publish candidates + versions) in both
+      human- and machine-readable form, with tests. `gbt-changeset plan` and the CI summary call the
+      same function — this lets the Actions "dry-run" reporting be retired in favor of the shared
+      one.
+- [ ] **API-report policy** ([#206]/#205): make it stop erroring for a package that is public but
+      still at `0.0.0` — require a baseline only once a version is bumped above `0.0.0` (or another
+      explicit gate), with a targeted "how to generate it" message. Confirm the current trigger
+      (`private:false` + `publishConfig.access:public`?) against the detector once the actions repo
+      is attached.
+
+#### 7.2 Smart branch state machine (replace flat denial)
+
+The current script flatly dies if not on base, out of sync, or dirty. Replace with an assessment +
+decision table:
+
+- [ ] **Assess:** working tree clean/dirty; ahead/behind/up-to-date vs base; current prefix (`base`
+      / `changeset/*` / `release/*` / other); and whether a matching `changeset/<slug>` or
+      `release/<slug>` branch **already exists locally or on origin** (relink target).
+- [ ] **Decide, don't deny:** if clean and a matching prefixed branch exists → **switch/relink**; if
+      none → **create** from base; offer to **update the branch with base** when behind. Dirty is
+      allowed to proceed into an existing/new prefixed branch (carry the changes), instead of a hard
+      stop — keep an explicit override only where a stop is genuinely required.
+- [ ] **Publish candidates are the exception:** a publish operation must be on the base branch; keep
+      that guard.
+
+#### 7.3 Command surface (the flow)
+
+Prefix-aware, so `changeset/*` vs `release/*` drives commit type, PR subject, and PR label
+uniformly.
+
+- [ ] **Naming:** decide whether to rename the umbrella command (currently `gbt-changeset` →
+      `changeset-branch.sh`). Keep the old bin working regardless.
+- [ ] **Base flow (side-effect free):** create/switch to the right branch, run the changeset CLI
+      (`add`/`create`|`version`) to produce the `.md`, then stop. No commit/push from merely
+      starting.
+- [ ] `--commit "optional msg"`: commit with prefix-derived **type** + the durable adj–noun **slug**
+      subject + optional appended message + **resolved scope** (audit which scope command/shared
+      matcher is authoritative — the matcher lives in workspace).
+- [ ] `--pr`: open/update the PR with the derived title + changeset body, limited to the intended
+      prefixed flow. **Open question:** auto-apply scope labels from resolved scopes.
+- [ ] **Release continuation:** switch to the most recent matching **open `release/*` (or
+      `changeset/*`) branch** to add an additional commit — including branches generated by CI or
+      someone else, not just locally created ones.
+- [ ] **Post-version hook:** after a `version` bump generates/updates a `release/*` branch, re-run
+      install + build so the lockfile/artifacts aren't forgotten.
+
+#### 7.4 Publish trigger (additive)
+
+- [ ] Let the same utility trigger `pnpm publish` (or a custom/pluggable publish), and push the
+      resulting public tags back — cohesively, and customizable for publishing elsewhere or
+      recovering a broken publish. Tags are added/pushed only for packages that actually publish
+      successfully.
+
+#### 7.5 Local-only versioning (additive, ties to 7.1)
+
+- [ ] Support versioning and tagging `private: true` local-only packages (inventory tracks them;
+      intent never marks them publishable). Verify current CI behavior once the actions repo is
+      attached.
+
+#### 7.6 Monorepo version record (open question, additive)
+
+- [ ] Evaluate bumping the **root/monorepo version** whenever any workspace package increments, as a
+      record — not necessarily via a changeset. Consider letting GitHub Releases represent the whole
+      monorepo at its version (since that is what ships), rather than per-package releases. Open:
+      how the publish-candidate version is derived this way (root version vs per-package tags),
+      given tags are only pushed on successful individual publishes.
+
+**Open decisions (carry until answered):**
+
+1. Intent signal: workflow input, repo-level release policy, or an approved release operation?
+2. Should `call-detect-release-state.yml` emit only facts and move all `should_*` to the plan layer?
+3. Command naming and whether commit/push/PR are one command or separate flags.
+4. Which scope command/shared function is authoritative for the derived commit scope.
+5. Adjective–noun slug source: `human-id` public exports vs a small first-party list.
+6. Auto scope-labeling of PRs — desirable, or noise?
+7. Root-monorepo-version record — adopt, and how it interacts with per-package tags/releases.
+8. API-report gate: exact condition (`0.0.0` until first bump vs another marker).
+
+**Done when (core, 7.1–7.3):** the smart branch flow behaves per [#201], local and CI report
+identically from one workspace engine, [#206]'s intent/inventory split holds, and existing
+`gbt-changeset` usage stays compatible. 7.4–7.6 land incrementally after the core.
 
 ---
 
