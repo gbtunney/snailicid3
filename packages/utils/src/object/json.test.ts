@@ -1,10 +1,7 @@
 import { describe, expect, expectTypeOf, test } from 'vitest'
 import { z } from 'zod'
 import { prettyPrintJSON, safeDeserializeJson } from './json.js'
-import {
-    jsonParser,
-    makeJsonStringifiedSchema,
-} from '../zod_helpers/json-stringified.js'
+import { makeJsonStringifiedSchema } from '../zod_helpers/json-stringified.js'
 describe('JSON serialize', () => {
     test('prettyPrintJSON should return a pretty-printed JSON string', () => {
         const obj = { age: 30, name: 'John' }
@@ -33,7 +30,7 @@ describe('JSON serialize', () => {
         type TestJson = { age: number; name: string }
         const testjson: TestJson = { age: 30, name: 'John' }
 
-        const _schemaresult = jsonParser()
+        const _schemaresult = makeJsonStringifiedSchema(z.json())
         const serialized_result = _schemaresult.serialize(testjson)
         expect(serialized_result).toBeTypeOf('string')
 
@@ -61,13 +58,17 @@ describe('JSON serialize', () => {
         const result =
             makeJsonStringifiedSchema<typeof _schemaa>(_schemaa).serialize(obj)
         expect(result).toMatch(new RegExp(/age/, 'gm'))
-        const result2 = jsonParser().serialize(obj)
+        const result2 = makeJsonStringifiedSchema(z.json()).serialize(obj)
 
         const invalidObj = { age: 'thirty', name: 'John' }
-        const errorResult = jsonParser().serialize(invalidObj)
+        const errorResult = makeJsonStringifiedSchema(z.json()).serialize(
+            invalidObj,
+        )
         expect(errorResult).toEqual(JSON.stringify(invalidObj))
         expectTypeOf(obj).not.toMatchObjectType()
-        const _errorResult = jsonParser().deserialize(errorResult)
+        const _errorResult = makeJsonStringifiedSchema(z.json()).deserialize(
+            errorResult,
+        )
         console.log('_errorResult', _errorResult)
         if (errorResult !== 'ERROR') {
             //  Const errorResultLat4est = demoDeserializeJSON(errorResult)

@@ -106,18 +106,6 @@ export const makeJsonStringifiedSchema = <TSchema extends z.ZodType>(
     return _result
 }
 
-/** Uses z.json() (JSONSchema) if no schema argument is provided */
-export const jsonParser = <TSchema extends z.ZodType = z.ZodJSONSchema>(
-    schema?: TSchema,
-): JsonStringifiedSchema<TSchema> => {
-    const _schema: TSchema =
-        schema === undefined ? (z.json() as unknown as TSchema) : schema
-    return makeJsonStringifiedSchema<TSchema>(_schema)
-}
 export const jsonStringified = <TSchema extends z.ZodType>(
-    schema: TSchema,
-): JsonStringifiedSchema<TSchema> => makeJsonStringifiedSchema(schema)
-
-export const jsonSchema = <TSchema extends z.ZodType>(
     schema: TSchema,
 ): JsonStringifiedSchema<TSchema> => makeJsonStringifiedSchema(schema)
