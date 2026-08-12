@@ -1,13 +1,14 @@
 # Snailicid3 Architecture and Refactor Plan
 
 **Status:** in progress · **Date:** 2026-08-12 · **Implementation:** Phases 0–5 largely landed.
-Phase 6 (config-ownership cleanup) is nearly done — the JSON file-IO/glob/path moves (config →
+Phase 6 (config-ownership cleanup) is **complete** — the JSON file-IO/glob/path moves (config →
 node-utils), the pure JSON value layer (`json-value` → `@snailicid3/utils`, double-serialize bug
-fixed), and the node-utils→utils value delegation are all complete, so the **JSON domain now has one
-value implementation**; cli-app re-exports from node-utils. Remaining in Phase 6: only the
-shared-formatting regroup (low-value tidy); `build-exporter.ts` stays because its generated JSON
-files are a published config export. Phase 7 (branch-aware changeset/release workflow, [#201]) is
-the closing phase of this round and is not started.
+fixed), the node-utils→utils value delegation (the **JSON domain now has one value
+implementation**), `exportFile` tightened to require a JSON document, config depending on node-utils
+only, and the `shared/` formatting regroup are all done. cli-app re-exports from node-utils.
+`build-exporter.ts` stays because its generated JSON files are a published config export. Phase 7
+(branch-aware changeset/release workflow, [#201]) is the closing phase of this round and is not
+started.
 
 This document replaces the earlier architecture draft. It preserves the useful diagnosis from that
 draft, but removes its rejected assumptions about private consumer bins, the parser package, build
@@ -791,8 +792,11 @@ Steps:
       its own naive `getFullPath` (string concat) wired into the `zod.node.ts` fs schemas; unifying
       it with the robust `path.ts` version is semantics-sensitive and deferred, not done in this
       pass.
-- [ ] Regroup the surviving formatting policy (extensions, widths, `SHARED_FORMATTING_RULES`) into a
-      clean config `shared/` module, separate from anything that moved.
+- [x] Regroup the surviving formatting policy into a clean config `shared/` module. Done: split
+      `shared.ts` into `shared/extensions.ts` (file-extension constants/types) and
+      `shared/formatting.ts` (widths, `SHARED_FORMATTING_RULES`, `getScaledWidth`) with a
+      `shared/index.ts` barrel; `shared.ts` is now a one-line compat re-export so the ~14 existing
+      `./shared.js` importers are unchanged.
 - [ ] Update imports, package dependencies, tests, and compatibility exports after every caller has
       moved.
 
