@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 
 /**
- * Pnpm commit:feat → build required binaries → stage the complete working tree → calculate scopes → run git commit with
- * live terminal output → Husky runs lint-staged once using .lintstagedrc.mts → commitlint validates the message
+ * - Pnpm commit:feat
+ * - build required binaries
+ * - stage the complete working tree
+ * - calculate scopes
+ * - run git commit with
+ * - live terminal output → Husky runs lint-staged once using .lintstagedrc.mts → commitlint validates the message
  */
 import { runCliIfEntrypointAsync, runCommand } from '@snailicid3/node-utils'
 import path from 'node:path'
