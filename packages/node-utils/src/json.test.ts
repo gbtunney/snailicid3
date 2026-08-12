@@ -58,4 +58,40 @@ describe('node-utils json', () => {
             fs.rmSync(dir, { force: true, recursive: true })
         }
     })
+
+    it('rejects a bare primitive even though it is valid JSON', () => {
+        const dir = makeTemporaryDirectory()
+
+        try {
+            // A plain string is a valid JSON value, but writing it is not exporting a JSON
+            // document — exportFile requires an object or array.
+            expect(() =>
+                json.exportFile([{ data: 'hello', filename: 'str' }], dir),
+            ).toThrow('must be a JSON object or array')
+            expect(fs.existsSync(path.join(dir, 'str.json'))).toBe(false)
+        } finally {
+            fs.rmSync(dir, { force: true, recursive: true })
+        }
+    })
+
+    it('still accepts an already-serialized JSON object string (no double-encoding)', () => {
+        const dir = makeTemporaryDirectory()
+        const filename = path.join(dir, 'obj.json')
+
+        try {
+            // Passing the serialized form of an object must normalize back to the object and be
+            // written once — never double-stringified into escaped garbage.
+            expect(
+                json.exportFile(
+                    [{ data: JSON.stringify(sample), filename: 'obj' }],
+                    dir,
+                ),
+            ).toBe(true)
+            const written = fs.readFileSync(filename, 'utf8')
+            expect(written).not.toContain('\\"')
+            expect(JSON.parse(written)).toEqual(sample)
+        } finally {
+            fs.rmSync(dir, { force: true, recursive: true })
+        }
+    })
 })

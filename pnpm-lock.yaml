@@ -435,9 +435,6 @@ importers:
             '@microsoft/api-extractor':
                 specifier: ^7.58.8
                 version: 7.58.12(@types/node@26.2.0)
-            '@snailicid3/utils':
-                specifier: workspace:*
-                version: link:../utils
             '@types/node':
                 specifier: 26.2.0
                 version: 26.2.0

@@ -248,6 +248,13 @@ const exportJSONFile = (
                 return `FILE WRITE ERROR: ${file_path}, data is not JSON serializable`
             }
 
+            // Require a JSON document (object or array). A bare primitive — even a valid JSON
+            // value like a plain string — is not a JSON file; writing one would just be a raw
+            // file write, so reject it here.
+            if (!isJsonObject(parsedData) && !isJsonArray(parsedData)) {
+                return `FILE WRITE ERROR: ${file_path}, data must be a JSON object or array, not a primitive`
+            }
+
             fs.mkdirSync(path.dirname(filePath), { recursive: true })
             fs.writeFileSync(
                 filePath,
