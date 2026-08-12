@@ -1,6 +1,7 @@
 # Snailicid3 Architecture and Refactor Plan
 
-**Status:** official planning baseline · **Date:** 2026-08-12 · **Implementation:** not started
+**Status:** in progress · **Date:** 2026-08-12 · **Implementation:** Phases 0–5 largely landed;
+Phase 6 (config-ownership cleanup + changeset/release workflow) is the closing phase of this round.
 
 This document replaces the earlier architecture draft. It preserves the useful diagnosis from that
 draft, but removes its rejected assumptions about private consumer bins, the parser package, build
@@ -12,6 +13,23 @@ The plan is intentionally decision-led:
 - compatibility-sensitive work is audited before it moves
 - unresolved choices remain visibly unresolved
 - architecture changes are separated from build-system experiments
+
+## Scope boundary — this round pauses after Phase 6
+
+The refactor is deliberately split into two tracks so the ownership work can land and be released
+without waiting on a build-system rewrite.
+
+- **Part A — foundational ownership refactor (this round).** Phases 0–6. It ends when package
+  ownership is correct, config is non-operational, the public bins remain compatible, the config
+  utility cleanup is finished, and the branch-aware changeset/release workflow ([#201]) is in place.
+  **This round stops at Phase 6.**
+- **Part B — build-system & tooling initiative (separate, deferred).** The former Phases 6–9 —
+  reframing build configuration, the Storybook package, and doctor/validate — move into their own
+  effort with their own plan. None of it is required to complete Part A, and none of it blocks a
+  release of the Part A ownership boundaries. It is retained at the end of this document for
+  continuity but is **not** in scope for this round.
+
+[#201]: https://github.com/gbtunney/snailicid3/issues/201
 
 ---
 
@@ -275,7 +293,7 @@ rejected.
 | snail-sh             | @snailicid3/logger                               | Deduplicate the shell and TypeScript logger; retain a config wrapper temporarily |
 | scope-commit         | @snailicid3/workspace                            | Preserve name, flags, and behavior through a config wrapper                      |
 | scope-affected       | @snailicid3/workspace                            | Preserve; it is also used by gbt-changeset                                       |
-| snail-package        | @snailicid3/workspace                            | Preserve while auditing its package-manager abstraction                          |
+| snail-package        | Removed                                          | Removed in Phase 5 before it became a supported contract; never shipped as a bin |
 | gbt-changeset        | @snailicid3/workspace                            | Treat the user's current revised implementation as authoritative                 |
 | inspect-dependencies | Removed                                          | Defer dependency reporting and Knip integration until Doctor                     |
 | inspect-deps         | Removed                                          | Remove the alias with the temporary implementation                               |
@@ -360,6 +378,8 @@ GitHub Release assets are not part of the selected design.
 
 ## 8. Build configuration
 
+> _Part B (deferred). Design reference for Phase B1; not worked in this round._
+
 ### 8.1 Build helpers join the existing config API family
 
 The current build-plan, tsdown, Vite, and Vitest transformations are primarily configuration
@@ -414,6 +434,8 @@ intentional versioned migration.
 
 ## 9. Storybook configuration
 
+> _Part B (deferred). Design reference for Phase B2; not worked in this round._
+
 Storybook follows the same API style but stays in a separate public package because its dependency
 stack is unusually large.
 
@@ -440,6 +462,8 @@ The static Storybook target is an auxiliary build, not the package's primary bui
 ---
 
 ## 10. Doctor and validate
+
+> _Part B (deferred). Design reference for Phase B3; not worked in this round._
 
 ### 10.1 Doctor does not require BuildPlan or Nx
 
@@ -544,6 +568,9 @@ documented migration is complete.
 Each phase has a checkpoint. Do not begin the next structural phase while its compatibility tests
 are red.
 
+**Part A (this round): Phases 0–6.** **Part B (deferred): Phases B1–B4.** Sections 8–10 below are the
+design reference for Part B and are not worked in this round.
+
 ### Phase 0 — Freeze and audit the current contract
 
 - Inventory every config import and all 11 bin names across Snailicid3 and consumers.
@@ -587,13 +614,12 @@ are red.
 - [ ] Revisit `@snailicid3/parser` only when another package needs a genuinely runtime-neutral
       parser abstraction; do not create it merely to satisfy the original package diagram.
 - [x] Keep functional APIs, explicit argv inputs, local ESM `.js` imports, and focused tests.
-- [ ] Finish the config utility ownership cleanup. The known remaining candidates are
-      `packages/config/src/utilities/path.ts`, `packages/config/src/utilities/json.ts`, and their
-      tests; also review `json-value.ts` separately so its runtime-neutral JSON value/serialization
-      types land with the package that actually owns them. Move generic filesystem, file-path, and
-      JSON read/write/save mechanics to node-utils; move repository-aware path behavior to
-      workspace; and leave config with policy and configuration composition only. Update imports,
-      dependencies, tests, and compatibility exports after every caller has moved.
+- [ ] Finish the config utility ownership cleanup. This is now scheduled and detailed as **Phase 6**
+      below (the closing phase of this round). Summary: move generic JSON file IO, JSON value
+      helpers, glob filtering, and generic path primitives out of `@snailicid3/config` into
+      `@snailicid3/node-utils` (and runtime-neutral JSON *types* into `@snailicid3/types`), leaving
+      config with policy and configuration composition only. The 2026-08-12 audit that scopes this
+      work is recorded in Phase 6.
 
 The schema cleanup completed during the workspace move applies to environment input rather than
 command-line input. `workspaceEnvironment` now validates and defaults these values through
@@ -680,7 +706,95 @@ consumer check remains.
 **Current checkpoint:** the repository command migration is committed and passes the monorepo
 checks. Final packed compatibility verification is coupled to Phase 3's logger move.
 
-### Phase 6 — Reframe build configuration
+### Phase 6 — Config ownership cleanup and changeset/release workflow (#201)
+
+This is the closing phase of Part A. It has two independent workstreams that share a checkpoint.
+
+#### 6A — Config utility ownership cleanup
+
+**Audit (2026-08-12).** What is still in `@snailicid3/config` that should not be, and where it goes.
+`@snailicid3/config` already declares `@snailicid3/node-utils`, `@snailicid3/workspace`, and
+`@snailicid3/logger` as dependencies, so the destination edges already exist.
+
+| Config surface                                              | Verdict                                | Destination                                                                                       |
+| ----------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `utilities/json.ts` — `json.exportFile/importFile/importObject` | Move (generic JSON file IO)            | node-utils; **consolidate with the existing `export.json.file.ts`** rather than shipping two APIs  |
+| `utilities/json.ts` — `serialize/deserialize/isValue/isObject/prettyPrint`, `isPlainObject`, `deepMerge` | Move (generic JSON/object primitives)  | node-utils                                                                                         |
+| `utilities/json-value.ts` — runtime-neutral value types + guards | Move (pure, "does not read/write files") | `@snailicid3/types` (value types), with guards to node-utils; consolidate its overlap with `json.ts` |
+| `utilities/path.ts` — `getDirname/normalizePath/getFullPath/resolveCwd/doesFileExist/paths` | Move (generic path/fs primitives)      | node-utils; reconcile overlap with existing `path.typed.ts` / `file.path.array.ts`                 |
+| `shared.ts` — `filterFileArrByGlob` (micromatch)            | Move (generic glob file filter)        | node-utils (used by lint-staged; the barrel already has a commented `//GlobFileFilter` slot)       |
+| `shared.ts` — extension constants + `SHARED_FORMATTING_RULES` + `getScaledWidth` | Keep, but relocate                     | Stays in config as shared formatting **policy**; split into a clean `shared/` module, separated from the glob util that leaves |
+| commitlint scope matcher / resolver                          | **Already correct — no action**        | `resolveScopePathMatchers`, `matchScopesForPath`, `scopeMatchersFromCommitlintConfig`, `loadScopePathMatchers` already live in `workspace/src/core/scope-matchers.ts`; config's commitlint only composes them |
+
+Notes that fell out of the audit:
+
+- `json.ts` and `json-value.ts` **duplicate** each other (both define JSON array/value guards and
+  branded serialized-string types). Consolidate to one value layer during the move instead of
+  copying both into node-utils.
+- node-utils already exports `node.exportJSONFile` plus `JSONExportConfig`/`JSONExportEntry` from
+  `export.json.file.ts`. Config's `json.exportFile` is a richer, differently-typed second copy with
+  duplicate `JSONExportConfig`/`JSONExportEntry` names. Pick one contract; keep a config
+  compatibility re-export until callers move.
+- The **matcher-resolver that crosses the workspace↔commitlint barrier already landed** in workspace
+  and is composed by config through the public API. This item from the original brief is effectively
+  done; the only generic glob helper still misplaced in config is `filterFileArrByGlob`.
+- `build-exporter.ts` (which consumes `json.object`/`json.exportFile`) is already marked TEMPORARY in
+  its own header; do not preserve it as a contract — retarget it at node-utils and let it be retired.
+
+Steps:
+
+- [ ] Move `filterFileArrByGlob` to node-utils; update `shared.ts`, lint-staged, and the barrel;
+      keep a config re-export during migration.
+- [ ] Consolidate JSON file IO into node-utils (one `exportFile`/`importFile` contract, one
+      `JSONExportConfig`/`JSONExportEntry`); retarget `build-exporter.ts`, api-extractor, and other
+      callers; keep config compatibility re-exports.
+- [ ] Land the runtime-neutral JSON value types/guards in their owner (`@snailicid3/types` +
+      node-utils) and remove the `json.ts`/`json-value.ts` duplication.
+- [ ] Move generic path primitives to node-utils, reconciling overlap with `path.typed.ts`; leave
+      repository-aware path behavior in workspace and config-relative path reads composing node-utils.
+- [ ] Regroup the surviving formatting policy (extensions, widths, `SHARED_FORMATTING_RULES`) into a
+      clean config `shared/` module, separate from anything that moved.
+- [ ] Update imports, package dependencies, tests, and compatibility exports after every caller has
+      moved.
+
+**Done when:** config contains only policy and configuration composition; node-utils owns one JSON
+file-IO / glob / path primitive layer with no duplicate types; and existing config imports still
+resolve through compatibility re-exports.
+
+#### 6B — Branch-aware changeset and release-plan report ([#201])
+
+Folded into this round because it is repository/workspace ownership work, not build-system work, and
+it reuses the scope-resolution audit above. Behavior is defined by [#201]; final package ownership is
+workspace.
+
+- [ ] Add a generic branch-generation helper (type/prefix + adjective–noun slug + optional
+      description); branch names carry durable state and **do not** encode commit scope
+      (`changeset/wacky-walker`, `release/wacky-walker`).
+- [ ] Derive commit type from the `changeset/` or `release/` branch prefix, the subject slug from the
+      branch name, and scope through the existing scope mechanism (audit `scope-commit` vs
+      `scope-affected` vs their shared matcher logic — the matcher already lives in workspace).
+- [ ] Keep starting the workflow side-effect free: no commit or push merely from creating a branch or
+      adding a changeset; an explicit command commits, and push/PR is limited to the `changeset/`
+      flow with the derived title and changeset body.
+- [ ] Extract the reusable-Actions release-state/report logic into shared repo tooling and add a
+      read-only `gbt-changeset plan` command that reports checked ref, phase, `should_version`,
+      `should_publish`, `should_skip`, changeset count/slugs, primary slug, and publish candidates —
+      local and Actions calling the same implementation. The plan command mutates nothing.
+- [ ] Cover human-readable and machine-readable report output with tests; preserve current public
+      `gbt-changeset` consumers or provide an intentional migration path.
+
+**Done when:** the branch/commit/plan workflow behaves as [#201] specifies, local and CI report
+identically from one implementation, and existing `gbt-changeset` usage stays compatible.
+
+---
+
+## Part B — Build-system & tooling initiative (deferred, separate track)
+
+**Not in scope for this round.** The phases below are retained for continuity and become their own
+initiative once Part A is released. They are renumbered as `B1`–`B4`; none of them is a prerequisite
+for completing Part A.
+
+### Phase B1 — Reframe build configuration
 
 - Move pure Build, tsdown, Vite, Vitest, and export-plan helpers into the config API family.
 - Remove build execution and manifest mutation.
@@ -690,7 +804,7 @@ checks. Final packed compatibility verification is coupled to Phase 3's logger m
 **Done when:** config returns configuration only, Nx/workspace executes it, and active build-config
 consumers pass.
 
-### Phase 7 — Add Storybook configuration
+### Phase B2 — Add Storybook configuration
 
 - Create the separate Storybook config package.
 - Resolve framework/addon packages internally.
@@ -700,7 +814,7 @@ consumers pass.
 **Done when:** a component consumer installs one Snailicid3 Storybook dev dependency and builds
 Storybook successfully.
 
-### Phase 8 — Implement doctor, then validate
+### Phase B3 — Implement doctor, then validate
 
 - Build package-first collectors.
 - Add the optional Nx collector.
@@ -711,7 +825,7 @@ Storybook successfully.
 **Done when:** the npm single-package consumer receives useful diagnostics and Nx repositories
 receive additional resolved graph analysis.
 
-### Phase 9 — Full packed-consumer checkpoint
+### Phase B4 — Full packed-consumer checkpoint
 
 - Pack every public package.
 - Run npm and pnpm fixtures.
@@ -744,9 +858,11 @@ Do not silently revive these in implementation:
 
 ## 14. Open questions
 
-These remain open deliberately:
+These remain open deliberately (items 6, 7, 10 belong to the deferred Part B track):
 
-1. What are the user's final gbt-changeset changes?
+1. The gbt-changeset direction is now captured by [#201] and Phase 6B; the remaining open sub-choices
+   are which scope command is authoritative, whether push/PR need separate confirmations, and the
+   adjective–noun slug source.
 2. Should --skip-lint-staged be restored, translated to the current environment-variable behavior,
    or formally migrated?
 3. Does gbt-exec have an unobserved consumer, or can it enter a deprecation window?
@@ -766,17 +882,24 @@ No open question permits breaking an existing consumer while it is being answere
 
 ## 15. Completion criteria
 
-The refactor is complete when:
+**Part A (this round) is complete when:**
 
 - each reusable capability has one clear owner
-- config APIs remain cohesive and non-operational
+- config APIs remain cohesive and non-operational (no JSON file IO, glob, or generic path primitives
+  left in config; matcher resolution owned by workspace)
 - workspace supports Nx and non-Nx repositories
-- parser is reusable by workspace, logger, and cli-app
 - snail-sh has one normal implementation
 - every proven public bin remains available through a tested migration
 - no prebuilt esbuild payload ships
+- the branch-aware changeset/release workflow and read-only release-plan report ([#201]) work from a
+  single implementation shared by local and CI
+- no runtime, Nx-task, or bootstrap cycle has been introduced
+
+**Part B (deferred track) is complete when:**
+
+- parser is reusable by workspace, logger, and cli-app (only if a runtime-neutral parser is actually
+  needed)
 - build configuration is pure and package exports are not mutated
 - Storybook has an isolated dependency boundary
 - doctor reports reality without mutation
 - validate, packed fixtures, and real consumers pass
-- no runtime, Nx-task, or bootstrap cycle has been introduced
