@@ -1,7 +1,8 @@
 # Snailicid3 Architecture and Refactor Plan
 
 **Status:** in progress · **Date:** 2026-08-12 · **Implementation:** Phases 0–5 largely landed;
-Phase 6 (config-ownership cleanup + changeset/release workflow) is the closing phase of this round.
+Phase 6 (config-ownership cleanup + changeset/release workflow) is the closing phase of this round —
+its audit and housekeeping are done; the code moves (6A) and #201 workflow (6B) are pending.
 
 This document replaces the earlier architecture draft. It preserves the useful diagnosis from that
 draft, but removes its rejected assumptions about private consumer bins, the parser package, build
@@ -786,13 +787,50 @@ workspace.
 **Done when:** the branch/commit/plan workflow behaves as [#201] specifies, local and CI report
 identically from one implementation, and existing `gbt-changeset` usage stays compatible.
 
+#### 6C — Housekeeping (done) and wonky-items backlog
+
+Completed housekeeping (2026-08-12):
+
+- [x] Removed `packages/config/src/prettier/base.ts` (0-byte, unreferenced).
+- [x] Removed `packages/workspace/src/random/randomfile.ts` (unreferenced scratch stubs) and its now
+      empty `random/` directory.
+- [x] Confirmed `@snailicid3/example-package` is a deliberate doctor fixture (intentionally busted
+      exports) and stays `private: true`; retained its `node2.ts` / `random/randomfile.ts` because
+      they are wired into the fixture's `tsdown.config.ts`.
+
+Wonky items to resolve while doing the 6A moves (do not defer these into Part B):
+
+- **Duplicate JSON layers.** `config/src/utilities/json.ts` and `config/src/utilities/json-value.ts`
+  each define JSON array/value guards and branded serialized-string types. Collapse to one value
+  layer during the move.
+- **Duplicate JSON file-IO contracts.** `config`'s `json.exportFile` and node-utils'
+  `export.json.file.ts` `exportJSONFile` are two APIs with duplicate `JSONExportConfig` /
+  `JSONExportEntry` type names. Keep exactly one; config re-exports it during migration.
+- **`build-exporter.ts` is TEMPORARY and wired in.** It is self-flagged for removal but still has a
+  `build:exporter` package script and an nx target (`packages/config/package.json`) and depends on
+  `json.exportFile`. Retire it together with the JSON-IO consolidation — script, nx target, and file
+  in one step — rather than leaving it as a stray output generator.
+- **`micromatch` becomes a config-only leftover.** config's sole `micromatch` use is
+  `filterFileArrByGlob` in `shared.ts`. After that helper moves to node-utils, drop `micromatch` and
+  `@types/micromatch` from `@snailicid3/config` dependencies.
+- **Stale barrel placeholder.** `config/src/index.ts` carries a commented `//GlobFileFilter,` export
+  slot; remove or wire it up when the glob helper lands in node-utils.
+- **`@snailicid3/workspace` is still `private: true`.** Expected mid-refactor (it is not published
+  yet), but it must be flipped to public with a packed test before any consumer depends on it. Track
+  this as a release-gate item, not silent state.
+
+**Done when:** each wonky item above is either resolved as part of a 6A/6B step or explicitly
+promoted to a tracked follow-up; none is left as undocumented residue.
+
 ---
 
-## Part B — Build-system & tooling initiative (deferred, separate track)
+## Part B — the next refactor: build-system, doctor & tooling (deferred, separate track)
 
-**Not in scope for this round.** The phases below are retained for continuity and become their own
-initiative once Part A is released. They are renumbered as `B1`–`B4`; none of them is a prerequisite
-for completing Part A.
+**Not in scope for this round — this is the next refactor.** The phases below are retained for
+continuity and become their own initiative (with its own plan doc) once Part A is released. They are
+renumbered as `B1`–`B4`; none of them is a prerequisite for completing Part A. The **doctor/validate
+work (Phase B3) belongs entirely to this next refactor**, and the `example-package` busted-exports
+fixture is preserved specifically as its input.
 
 ### Phase B1 — Reframe build configuration
 
