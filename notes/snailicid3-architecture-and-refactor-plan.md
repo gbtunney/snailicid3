@@ -2,10 +2,12 @@
 
 **Status:** in progress · **Date:** 2026-08-12 · **Implementation:** Phases 0–5 largely landed.
 Phase 6 (config-ownership cleanup) is underway — audit, housekeeping, and the JSON file-IO, glob,
-and path moves are done. Remaining in Phase 6: the `json-value.ts` → types de-dup (test-only) and
-the shared-formatting regroup; `build-exporter.ts` stays because its generated JSON files are a
-published config export. Phase 7 (branch-aware changeset/release workflow, [#201]) is the closing
-phase of this round and is not started.
+path, and json-value moves are done (config's generic JSON/path/glob utilities now live in
+node-utils; cli-app re-exports from node-utils). Remaining in Phase 6: collapse the two node-utils
+JSON value layers (`json.ts` + `json-value.ts`) into one, and the shared-formatting regroup;
+`build-exporter.ts` stays because its generated JSON files are a published config export. Phase 7
+(branch-aware changeset/release workflow, [#201]) is the closing phase of this round and is not
+started.
 
 This document replaces the earlier architecture draft. It preserves the useful diagnosis from that
 draft, but removes its rejected assumptions about private consumer bins, the parser package, build
@@ -764,11 +766,13 @@ Steps:
       `node-utils/export.json.file.ts`, added a config re-export shim, added `ts-deepmerge` to
       node-utils, added a node-utils json test. `build-exporter.ts` and api-extractor resolve
       through the shim. Full `check:ts` and both test suites pass.
-- [ ] Land the runtime-neutral JSON value types/guards in their owner (`@snailicid3/types` +
-      node-utils) and remove the `json.ts`/`json-value.ts` duplication. Still pending:
-      `config/src/utilities/json-value.ts` (the parallel `jsonValue` namespace) is currently
-      test-only and remains in config; move it to `@snailicid3/types` and de-duplicate against the
-      moved `json.ts`.
+- [x] Move the runtime-neutral JSON value layer out of config. Done (option a): `json-value.ts` (the
+      `jsonValue` namespace — parse/normalize/serialize + typed guards) and its test moved to
+      node-utils beside `json.ts`; it was test-only and not in config's public barrel, so no config
+      API change; config's `json.test.ts` now imports `jsonValue` from `@snailicid3/node-utils`.
+      **Follow-up still open:** `json.ts` and `json-value.ts` are two overlapping JSON value layers
+      in node-utils; collapse them into one (and optionally re-home the pure value _types_ to
+      `@snailicid3/types`).
 - [x] Move generic path primitives to node-utils; leave config-relative path reads composing
       node-utils. Done: moved `config/src/utilities/path.ts` → `node-utils/src/path.ts` (getDirname,
       resolveCwd, getFullPath, getFilePath, getFilename, getExt, normalizePath, doesFileExist,
@@ -797,19 +801,21 @@ Completed housekeeping (2026-08-12):
       exports) and stays `private: true`; retained its `node2.ts` / `random/randomfile.ts` because
       they are wired into the fixture's `tsdown.config.ts`.
 - [x] Repointed `@snailicid3/cli-app` to re-export the moved JSON/path utilities from
-      `@snailicid3/node-utils` (their real owner) instead of `@snailicid3/config`. These were
-      phantom imports — `@snailicid3/config` was never a declared cli-app dependency — so this also
-      removed an undeclared-dependency edge. Audit result: no other internal package imports the
-      moved symbols from config; the config json/path shims exist only for external-consumer compat,
-      and no package declares `@snailicid3/config` as a runtime dependency (it is dev/build-time
-      tooling only).
+      `@snailicid3/node-utils` (their real owner) instead of `@snailicid3/config`.
+      `@snailicid3/config` is only a **devDependency** of cli-app, not a runtime dependency, so
+      cli-app's published `src/index.ts` was importing node-utils-owned symbols from a package
+      consumers would not install at runtime — a real latent break, now fixed by routing to
+      node-utils (a declared runtime dep). Audit result: no other internal package imports the moved
+      symbols from config; the config json/path shims exist only for external-consumer compat, and
+      no package declares `@snailicid3/config` as a runtime dependency (it is dev/build-time tooling
+      only).
 
 Wonky items to resolve while doing the Phase 6 moves (do not defer these into Part B):
 
-- **Duplicate JSON layers.** _Partly resolved._ `json.ts` moved to node-utils; `json-value.ts` (the
-  parallel `jsonValue` namespace, now test-only) still lives in config. Move it to
-  `@snailicid3/types` and collapse the remaining guard/branded-string duplication against the moved
-  `json.ts`.
+- **Duplicate JSON layers.** _Both moved; de-dup still open._ `json.ts` and `json-value.ts` now both
+  live in node-utils. They remain two overlapping value layers (JSON guards + branded serialized
+  strings). Collapse them into one within node-utils; optionally re-home the pure value _types_ to
+  `@snailicid3/types`.
 - **Duplicate JSON file-IO contracts.** _Resolved (2026-08-12)._ One contract now lives in
   node-utils (`json.exportFile`); the duplicate `export.json.file.ts` was removed and config
   re-exports the node-utils API.
