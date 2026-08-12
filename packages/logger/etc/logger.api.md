@@ -6,7 +6,6 @@
 
 import { AnsiColors } from 'ansis';
 import { Ansis } from 'ansis';
-import { fmt } from '@snailicid3/utils';
 import { Options } from 'ora';
 import { parseColorJS } from '@snailicid3/color';
 import { parseColorToHexStrict as parseHexColor } from '@snailicid3/color';
@@ -20,6 +19,15 @@ export const ansiPresetToColorJS: (color: AnsiColorPreset) => ReturnType<typeof 
 // @public (undocumented)
 export const ansiPresetToHex: (color: AnsiColorPreset) => string;
 
+// @public
+export const block: (content: string, options?: BlockOptions) => string;
+
+// @public (undocumented)
+export type BlockOptions = {
+    after?: number;
+    before?: number;
+};
+
 // @public (undocumented)
 export const buildLoggerDemo: (options?: LoggerDemoOptions) => string;
 
@@ -32,7 +40,8 @@ export const createProgressBar: typeof createSpinner;
 // @public (undocumented)
 export const createSpinner: (text?: string, options?: SpinnerOptions) => Spinner;
 
-export { fmt }
+// @public
+export const fmt: (strings: TemplateStringsArray, ...values: Array<unknown>) => string;
 
 // @public
 export const formatArgs: (prefix: string, ...args: Array<unknown>) => string;
@@ -141,6 +150,7 @@ export { logger }
 
 // @public (undocumented)
 export type LoggerApi = {
+    block: typeof block;
     buildRule: typeof buildRule;
     create: typeof createLogger;
     createProgressBar: typeof createProgressBar;
@@ -171,6 +181,7 @@ export type LoggerApi = {
     stripAnsi: typeof stripAnsi;
     styleText: typeof styleText;
     subheader: typeof subheader;
+    table: typeof table;
     visibleLength: typeof visibleLength;
     wrapAnsiText: typeof wrapColorAnsiText;
 };
@@ -180,6 +191,7 @@ export type LoggerColor = string;
 
 // @public (undocumented)
 export type LoggerDemoOptions = {
+    spinnerDurationMs?: number;
     terminalWidth?: number;
 };
 
@@ -225,8 +237,11 @@ export type RuleOptions = {
     width?: WidthSpec;
 };
 
+// @public
+export const runLevelLoggerDemo: () => void;
+
 // @public (undocumented)
-export const runLoggerDemo: (options?: LoggerDemoOptions) => void;
+export const runLoggerDemo: (options?: LoggerDemoOptions) => Promise<void>;
 
 // @public (undocumented)
 export const section: (title: string, options?: KabobOptions) => string;
@@ -282,6 +297,24 @@ export const styleText: (value: string, style: TerminalStyle | undefined) => str
 // @public (undocumented)
 export const subheader: (message: string, style?: TerminalStyle) => string;
 
+// @public
+export const table: (rows: ReadonlyArray<TableRow>, options?: TableOptions) => string;
+
+// @public (undocumented)
+export type TableOptions = {
+    border?: boolean;
+    head?: ReadonlyArray<string>;
+    padding?: number;
+    preset?: TablePreset;
+    widths?: ReadonlyArray<null | number>;
+};
+
+// @public (undocumented)
+export type TableRow = ReadonlyArray<bigint | boolean | null | number | string | undefined>;
+
+// @public
+export const terminalLink: (label: string, url: string) => string;
+
 // @public (undocumented)
 export type TerminalStyle = string;
 
@@ -296,11 +329,12 @@ export const wrapColorAnsiText: (value: string, color: LoggerColor, theme?: "bg"
 
 // Warnings were encountered during analysis:
 //
-// src/index.ts:38:5 - (ae-forgotten-export) The symbol "createLogger" needs to be exported by the entry point index.d.ts
-// src/index.ts:51:5 - (ae-forgotten-export) The symbol "LEVEL_COLORS" needs to be exported by the entry point index.d.ts
-// src/index.ts:52:5 - (ae-forgotten-export) The symbol "LEVEL_NAMES" needs to be exported by the entry point index.d.ts
-// src/index.ts:56:5 - (ae-forgotten-export) The symbol "resetLogger" needs to be exported by the entry point index.d.ts
-// src/index.ts:60:5 - (ae-forgotten-export) The symbol "setLogger" needs to be exported by the entry point index.d.ts
+// src/index.ts:41:5 - (ae-forgotten-export) The symbol "createLogger" needs to be exported by the entry point index.d.ts
+// src/index.ts:54:5 - (ae-forgotten-export) The symbol "LEVEL_COLORS" needs to be exported by the entry point index.d.ts
+// src/index.ts:55:5 - (ae-forgotten-export) The symbol "LEVEL_NAMES" needs to be exported by the entry point index.d.ts
+// src/index.ts:59:5 - (ae-forgotten-export) The symbol "resetLogger" needs to be exported by the entry point index.d.ts
+// src/index.ts:63:5 - (ae-forgotten-export) The symbol "setLogger" needs to be exported by the entry point index.d.ts
+// src/table.ts:8:5 - (ae-forgotten-export) The symbol "TablePreset" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

@@ -4,12 +4,52 @@
 
 ```ts
 
-import { Json } from '@snailicid3/utils';
-import { Jsonifiable } from '@snailicid3/utils';
+import { Jsonifiable } from 'type-fest';
 import { z } from 'zod';
 
 // @public (undocumented)
+export type Argv = ReadonlyArray<string>;
+
+// @public (undocumented)
+export type ArgvObject = Record<string, unknown>;
+
+// @public (undocumented)
+export type CommandResult = {
+    status: number;
+    stderr: string;
+    stdout: string;
+    success: boolean;
+};
+
+// Warning: (ae-forgotten-export) The symbol "EnvironmentShape" needs to be exported by the entry point index.d.ts
+//
+// @public
+export const defineEnv: <const Shape extends EnvironmentShape>(shape: Shape) => EnvironmentDefinition<Shape>;
+
+// @public (undocumented)
 const doesFileExist: (path: string) => boolean;
+
+// @public
+export type EntrypointOptions = {
+    log?: boolean;
+};
+
+// @public (undocumented)
+export type EnvironmentDefinition<Shape extends EnvironmentShape> = {
+    readonly keys: EnvironmentKeys<Shape>;
+    readonly parse: (environment: EnvironmentSource) => z.output<z.ZodObject<Shape>>;
+    readonly schema: z.ZodObject<Shape>;
+};
+
+// @public (undocumented)
+export type EnvironmentReportRow = {
+    readonly source: 'default' | 'environment';
+    readonly value: unknown;
+    readonly variable: string;
+};
+
+// @public (undocumented)
+export type EnvironmentSource = Readonly<Record<string, unknown>>;
 
 // @public (undocumented)
 export const FILE_PATH_TYPES: readonly ["directory", "file", "glob", "symlink", "unknown"];
@@ -82,11 +122,11 @@ export type FsTypedPathOptions<Negate extends boolean = boolean> = PathTypeSelec
     exists?: boolean;
 };
 
-// @public
-export const getArgsObject: (value?: string[]) => Promise<Record<string, unknown>> | Record<string, unknown>;
-
 // @public (undocumented)
 const getDirectoryArr: (_path: string) => Array<string>;
+
+// @public
+export const getEnvironmentReportRows: <const Shape extends EnvironmentShape>(definition: EnvironmentDefinition<Shape>, environment: EnvironmentSource) => Array<EnvironmentReportRow>;
 
 // @public (undocumented)
 const getExistingPathType: (value: string) => FileType;
@@ -115,11 +155,14 @@ export const getPathOfType: <Selector extends PathTypeSelector, Negate extends b
 // @public
 export const getPathType: (value: string | undefined) => PathTypeResult;
 
-// @public
-export const getYArgs: <Type extends z.ZodObject>(schema: Type, debug?: boolean, _yargs?: string[]) => undefined | z.infer<Type>;
-
 // @public (undocumented)
 export type ImageMimeType = 'bmp' | 'gif' | 'jpeg' | 'png' | 'svg';
+
+// @public (undocumented)
+export type ImportMetaWithUrl = Pick<ImportMeta, 'url'>;
+
+// @public
+export function isCallerEntrypoint(callerMeta: ImportMetaWithUrl, options?: EntrypointOptions): boolean;
 
 // @public
 const isDirectory: (value: string) => boolean;
@@ -141,8 +184,10 @@ export const isPathType: <Selector extends PathTypeSelector, Negate extends bool
 // @public (undocumented)
 export type JSONExportConfig = Array<JSONExportEntry>;
 
+// Warning: (ae-forgotten-export) The symbol "JsonValue" needs to be exported by the entry point index.d.ts
+//
 // @public (undocumented)
-export type JSONExportEntry<Type = Json.Value, DataType = Type extends Jsonifiable ? Type : never> = {
+export type JSONExportEntry<Type = JsonValue, DataType = Type extends Jsonifiable ? Type : never> = {
     data: DataType;
     filename: string;
 };
@@ -180,9 +225,7 @@ const node: {
     filePathDoesNotExist: () => ReturnType<typeof zod_fs_schema.fsPathExists>;
     filePath: () => ReturnType<typeof zod_fs_schema.fsPath>;
     exportJSONFile: (config: JSONExportConfig, outdir?: string, overwrite?: "ERROR" | "ON" | "WARN") => void;
-    getArgsObject: (value?: string[]) => Promise<Record<string, unknown>> | Record<string, unknown>;
     getImageBase64: (file_path: string, mime_type?: ImageMimeType) => string;
-    getYArgs: <Type extends z.ZodObject>(schema: Type, debug?: boolean, _yargs?: string[]) => undefined | z.infer<Type>;
 };
 export default node;
 export { node }
@@ -191,7 +234,19 @@ export { node }
 const normalizePath: (value: string) => string;
 
 // @public
-export const parseArgv: <Schema extends z.ZodType>(schema: Schema, argv: ReadonlyArray<string>) => z.output<Schema>;
+export const parseArgv: <Schema extends ZodObjectLike, PositionalSchema extends undefined | ZodArrayLike = undefined>(schema: Schema, argv: Argv, positionalSchema?: PositionalSchema) => ParsedArgv<Schema, PositionalSchema>;
+
+// @public
+export const parseArgvObject: (argv: Argv) => ArgvObject;
+
+// @public
+export const parseArgvPositionals: (argv: Argv) => Array<string>;
+
+// @public (undocumented)
+export type ParsedArgv<Schema extends ZodObjectLike, PositionalSchema extends undefined | ZodArrayLike = undefined> = PositionalSchema extends ZodArrayLike ? {
+    readonly options: z.output<Schema>;
+    readonly positionals: z.output<PositionalSchema>;
+} : z.output<Schema>;
 
 // @public (undocumented)
 export type PathTypeResult = {
@@ -213,10 +268,51 @@ export type PathTypeSelector = 'any' | ReadonlyArray<RecognizedFilePathType> | R
 export type RecognizedFilePathType = Exclude<FilePathType, 'unknown'>;
 
 // @public
-export const requirePathOfType: <Selector extends PathTypeSelector, Negate extends boolean = false>(value: string | undefined, selector: Selector, options?: PathTypeSelectionOptions<Negate>) => TypedPath<SelectedFilePathType<Selector, Negate>>;
+export const reportEnvironment: <const Shape extends EnvironmentShape>(definition: EnvironmentDefinition<Shape>, environment?: EnvironmentSource) => void;
 
 // @public
-export const safeParseArgv: <Schema extends z.ZodType>(schema: Schema, argv: ReadonlyArray<string>) => z.ZodSafeParseResult<z.output<Schema>>;
+export const requirePathOfType: <Selector extends PathTypeSelector, Negate extends boolean = false>(value: string | undefined, selector: Selector, options?: PathTypeSelectionOptions<Negate>) => TypedPath<SelectedFilePathType<Selector, Negate>>;
+
+// Warning: (ae-forgotten-export) The symbol "SyncFunction" needs to be exported by the entry point index.d.ts
+//
+// @public
+export function runCliIfEntrypoint<Args extends ReadonlyArray<unknown>>(callerMeta: ImportMetaWithUrl, mainFn: SyncFunction<Args, void>, ...args: Args): void;
+
+// Warning: (ae-forgotten-export) The symbol "AsyncFunction" needs to be exported by the entry point index.d.ts
+//
+// @public
+export function runCliIfEntrypointAsync<Args extends ReadonlyArray<unknown>>(callerMeta: ImportMetaWithUrl, mainFn: AsyncFunction<Args, void>, ...args: Args): Promise<void>;
+
+// @public
+export function runCommand(command: string, args?: ReadonlyArray<string>, options?: RunCommandOptions): CommandResult;
+
+// @public (undocumented)
+export type RunCommandOptions = {
+    cwd?: string;
+    input?: string;
+    stdio?: 'inherit' | 'pipe';
+};
+
+// @public
+export function runCommandOrThrow(command: string, args?: ReadonlyArray<string>, options?: RunCommandOptions): string;
+
+// @public
+export function runIfEntrypoint<Args extends ReadonlyArray<unknown>, Result>(callerMeta: ImportMetaWithUrl, mainFn: SyncFunction<Args, Result>, ...args: Args): Result | undefined;
+
+// @public
+export function runIfEntrypointAsync<Args extends ReadonlyArray<unknown>, Result>(callerMeta: ImportMetaWithUrl, mainFn: AsyncFunction<Args, Result>, ...args: Args): Promise<Result | undefined>;
+
+// @public
+export const safeParseArgv: <Schema extends ZodObjectLike, PositionalSchema extends undefined | ZodArrayLike = undefined>(schema: Schema, argv: Argv, positionalSchema?: PositionalSchema) => SafeParsedArgv<Schema, PositionalSchema>;
+
+// @public (undocumented)
+export type SafeParsedArgv<Schema extends ZodObjectLike, PositionalSchema extends undefined | ZodArrayLike = undefined> = {
+    readonly data: ParsedArgv<Schema, PositionalSchema>;
+    readonly success: true;
+} | {
+    readonly error: z.ZodError;
+    readonly success: false;
+};
 
 // Warning: (ae-forgotten-export) The symbol "SelectorFilePathType" needs to be exported by the entry point index.d.ts
 //
@@ -253,11 +349,18 @@ export type TypedPathSelector = PathTypeSelector;
 // @internal (undocumented)
 export const zod: typeof z & typeof zod_fs_schema;
 
+// @public
+export type ZodArrayLike = z.ZodArray | z.ZodTuple;
+
+// @public
+export type ZodObjectLike = z.ZodDiscriminatedUnion | z.ZodObject | z.ZodRecord;
+
 // Warnings were encountered during analysis:
 //
-// src/index.ts:18:18 - (ae-forgotten-export) The symbol "typedPath_2" needs to be exported by the entry point index.d.ts
-// src/index.ts:39:22 - (ae-forgotten-export) The symbol "zod_fs_schema" needs to be exported by the entry point index.d.ts
-// src/index.ts:68:2713 - (ae-forgotten-export) The symbol "filePath_3" needs to be exported by the entry point index.d.ts
+// src/environment.ts:4:5 - (ae-forgotten-export) The symbol "EnvironmentKeys" needs to be exported by the entry point index.d.ts
+// src/index.ts:17:18 - (ae-forgotten-export) The symbol "typedPath_2" needs to be exported by the entry point index.d.ts
+// src/index.ts:39:23 - (ae-forgotten-export) The symbol "zod_fs_schema" needs to be exported by the entry point index.d.ts
+// src/index.ts:63:2785 - (ae-forgotten-export) The symbol "filePath_3" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
