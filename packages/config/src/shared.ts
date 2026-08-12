@@ -1,4 +1,3 @@
-import micromatch from 'micromatch'
 import type { Config, Options as PrettierOptions } from 'prettier'
 import type { ArrayValues, Merge, Spread } from 'type-fest'
 
@@ -61,12 +60,3 @@ export const getScaledWidth = (
 ): number => {
     return Math.floor(scaleMap[scaleKey] * baseWidth)
 }
-
-/** Removes a file from list if it matches a glob pattern. Only supports simple globs like *.md */
-
-export const filterFileArrByGlob = (
-    files: ReadonlyArray<string>,
-    globs: ReadonlyArray<string>,
-    negate: boolean = false,
-): Array<string> =>
-    negate ? micromatch.not([...files], globs) : micromatch([...files], globs)
