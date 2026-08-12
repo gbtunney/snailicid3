@@ -25,26 +25,25 @@ export const table = (
         (options.preset === 'header' || options.preset === 'plain'
             ? false
             : true)
-    const chars =
-        !border
-            ? {
-                  'bottom': '',
-                  'bottom-left': '',
-                  'bottom-mid': '',
-                  'bottom-right': '',
-                  'left': '',
-                  'left-mid': '',
-                  'mid': '',
-                  'mid-mid': '',
-                  'middle': '',
-                  'right': '',
-                  'right-mid': '',
-                  'top': '',
-                  'top-left': '',
-                  'top-mid': '',
-                  'top-right': '',
-              }
-            : undefined
+    const chars = !border
+        ? {
+              'bottom': '',
+              'bottom-left': '',
+              'bottom-mid': '',
+              'bottom-right': '',
+              'left': '',
+              'left-mid': '',
+              'mid': '',
+              'mid-mid': '',
+              'middle': '',
+              'right': '',
+              'right-mid': '',
+              'top': '',
+              'top-left': '',
+              'top-mid': '',
+              'top-right': '',
+          }
+        : undefined
     const padding = Math.max(
         0,
         options.padding ?? (options.preset === 'plain' ? 0 : 1),
