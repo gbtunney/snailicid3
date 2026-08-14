@@ -33,6 +33,10 @@
                     "production",
                     "^production",
                     "{workspaceRoot}/packages/config/typescript-config/**/*"
+                ],
+                "outputs": [
+                    "{projectRoot}/dist",
+                    "{projectRoot}/types"
                 ]
             },
             "build:bin": {
