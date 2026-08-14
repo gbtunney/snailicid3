@@ -27,7 +27,7 @@ export const node = {
 }
 export default node
 export * from './argv.js'
-
+export * from './classify.js'
 export * from './command.js'
 /* * TYPES * */
 export type { ImageMimeType } from './encode-base64.js'
