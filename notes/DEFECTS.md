@@ -246,6 +246,36 @@ gates C3.
 
 ---
 
+### C1/C7 — workspace and doctor go public later
+
+Noted 2026-08-14: `workspace` and `doctor` are `private: true` as a **release gate**, not
+permanently; both flip to `private: false` when they are ready to publish. That changes two things
+and leaves one unchanged.
+
+**Changed — the rule 2.7 argument is temporary.** Config importing workspace stops being a
+publishability blocker once workspace is published. But it blocks **today**, and for as long as the
+gate stays shut, so C1's inversion is still what unblocks a config release now rather than
+eventually.
+
+**Unchanged — the C7 placement.** Even with workspace public, the identity schema belongs in
+node-utils, for reasons that survive the flip:
+
+- **Weight.** workspace pulls `cosmiconfig`, `cosmiconfig-typescript-loader`, `micromatch`, git
+  handling and package discovery. Routing cli-app's banner through it drags all of that into every
+  consumer of a public CLI framework, to read a name and a version. node-utils is far lighter.
+- **Release coupling.** cli-app is public at `0.1.0` today; workspace publishes later. Depending on
+  it would tie cli-app's release train to workspace's gate.
+- **Ownership.** Plan §3.3's line does not move: one manifest's identity is
+  `readPackageJson`-shaped; repository-wide discovery is workspace-shaped.
+
+**Prerequisite for the flip.** Workspace is private specifically because the release tooling
+otherwise treats it as a publish candidate before it is ready. Flipping `private: false` without an
+explicit intent axis re-creates exactly that problem — which is [#206]'s
+`observe | prepare | publish` split, currently deferred. Land the intent signal **before** the flip,
+or the flip reintroduces the thing the privacy flag is working around.
+
+[#206]: https://github.com/gbtunney/snailicid3/issues/206
+
 ### C7 — why two schemas, not one
 
 Sharpened 2026-08-14. The base schema is **not** a completeness check; it is a _reader's_ schema —
