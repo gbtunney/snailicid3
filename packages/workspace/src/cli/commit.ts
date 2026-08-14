@@ -9,24 +9,15 @@
  * - live terminal output → Husky runs lint-staged once using .lintstagedrc.mts → commitlint validates the message
  */
 import { runCliIfEntrypointAsync, runCommand } from '@snailicid3/node-utils'
-import path from 'node:path'
-import { splitNonEmptyLines, uniqueSorted } from './../core/array.js'
 import { readWorkspaceEnvironment } from './../core/environment.js'
-import { getRepoRoot } from './../core/git.js'
+import { getGitChangedFiles, getRepoRoot } from './../core/git.js'
 import { runPackageBinary } from './../core/package-manager.js'
-import { findNearestPackageJson, readPackageName } from './../core/packages.js'
-import { normalizeRepoPath } from './../core/paths.js'
+import {
+    createRepositoryScopeClassifiers,
+    resolveRepositoryScopes,
+} from './../core/repository-scopes.js'
 import { loadScopePathMatchers } from './../core/scope-matcher-config.js'
-import {
-    matchScopesForPath,
-    type ScopePathMatchers,
-} from './../core/scope-matchers.js'
-import {
-    formatScopes,
-    isRootPackageName,
-    type ScopeFormat,
-    shortenScopeName,
-} from './../core/scopes.js'
+import { formatScopes, type ScopeFormat } from './../core/scopes.js'
 
 type ChangeMode = 'all' | 'staged'
 type OutputMode = 'commit' | 'message' | 'scope'
@@ -81,12 +72,7 @@ export async function main(
 
     const scopes = parsed.explicitScope
         ? splitExplicitScope(parsed.explicitScope)
-        : collectScopesForInput(
-              repoRoot,
-              inputPaths,
-              parsed,
-              await loadScopePathMatchers(repoRoot),
-          )
+        : await collectScopesForInput(repoRoot, inputPaths, parsed)
     const scopeValue = formatScopes(scopes, 'csv')
 
     if (parsed.outputMode === 'message' || parsed.outputMode === 'commit') {
@@ -115,62 +101,30 @@ export async function main(
     console.log(formatScopes(scopes, parsed.scopeFormat))
 }
 
-function collectChangedPaths(
-    repoRoot: string,
-    mode: ChangeMode,
-): Array<string> {
-    if (mode === 'staged') {
-        return splitNonEmptyLines(
-            runCommand('git', ['diff', '--cached', '--name-only'], {
-                cwd: repoRoot,
-            }).stdout,
-        )
-    }
-
-    const staged = runCommand('git', ['diff', '--cached', '--name-only'], {
-        cwd: repoRoot,
-    }).stdout
-
-    const unstaged = runCommand('git', ['diff', '--name-only'], {
-        cwd: repoRoot,
-    }).stdout
-
-    const untracked = runCommand(
-        'git',
-        ['ls-files', '--others', '--exclude-standard'],
-        { cwd: repoRoot },
-    ).stdout
-
-    return splitNonEmptyLines(`${staged}\n${unstaged}\n${untracked}`)
-}
-
-function collectScopes(
-    repoRoot: string,
-    paths: ReadonlyArray<string>,
-    keepPrefix: boolean,
-    matchers: ScopePathMatchers,
-): Array<string> {
-    return uniqueSorted(
-        paths.flatMap((filePath) =>
-            scopesForPath(repoRoot, filePath, keepPrefix, matchers),
-        ),
-    )
-}
-
-function collectScopesForInput(
+async function collectScopesForInput(
     repoRoot: string,
     inputPaths: ReadonlyArray<string>,
     parsed: ParsedArgs,
-    matchers: ScopePathMatchers,
-): Array<string> {
-    const paths =
+): Promise<Array<string>> {
+    const files =
         inputPaths.length > 0
-            ? inputPaths
-            : collectChangedPaths(repoRoot, parsed.mode)
+            ? [...inputPaths]
+            : getGitChangedFiles({
+                  includeStaged: true,
+                  includeUnstaged: parsed.mode === 'all',
+                  includeUntracked: parsed.mode === 'all',
+              })
 
-    return paths.length > 0
-        ? collectScopes(repoRoot, paths, parsed.keepPrefix, matchers)
-        : ['root']
+    if (files.length === 0) return ['root']
+
+    const customClassifiers = await loadScopePathMatchers(repoRoot)
+    const classifiers = createRepositoryScopeClassifiers(
+        repoRoot,
+        customClassifiers,
+        parsed.keepPrefix,
+    )
+
+    return resolveRepositoryScopes(files, classifiers).scopes
 }
 
 function makeMessage(
@@ -205,12 +159,10 @@ function parseArgs(args: Array<string>): ParsedArgs {
             case '--commit':
                 parsed.outputMode = 'commit'
                 break
-
             case '--cached':
             case '--staged':
                 parsed.mode = 'staged'
                 break
-
             case '--check-type':
             case '--validate':
             case '--validate-type':
@@ -221,7 +173,6 @@ function parseArgs(args: Array<string>): ParsedArgs {
                 parsed.outputMode = 'commit'
                 parsed.runCommitBefore = true
                 break
-
             case '--csv':
                 parsed.scopeFormat = 'csv'
                 break
@@ -242,16 +193,13 @@ function parseArgs(args: Array<string>): ParsedArgs {
             case '--list':
                 parsed.scopeFormat = 'list'
                 break
-
             case '--m':
             case '--message':
                 parsed.outputMode = 'message'
                 break
-
             case '--scope':
                 parsed.explicitScope = readNextValue(args, ++index, arg)
                 break
-
             default:
                 if (arg.startsWith('--')) {
                     throw new Error(`Unknown argument: ${arg}`)
@@ -314,29 +262,6 @@ function readNextValue(
 
     return value
 }
-function scopesForPath(
-    repoRoot: string,
-    inputPath: string,
-    keepPrefix: boolean,
-    matchers: ScopePathMatchers,
-): Array<string> {
-    const relativePath = normalizeRepoPath(repoRoot, inputPath)
-    const matchedScopes = matchScopesForPath(relativePath, matchers)
-
-    if (matchedScopes.length > 0) return matchedScopes
-
-    const packageJsonPath = findNearestPackageJson(repoRoot, relativePath)
-
-    if (!packageJsonPath) return ['root']
-    if (path.dirname(packageJsonPath) === repoRoot) return ['root']
-
-    const packageName = readPackageName(packageJsonPath)
-
-    if (!packageName) return ['root']
-    if (isRootPackageName(packageName)) return ['root']
-
-    return [shortenScopeName(packageName, keepPrefix)]
-}
 
 function splitExplicitScope(scopeValue: string): Array<string> {
     return scopeValue
@@ -374,10 +299,4 @@ function validateCommitMessage(repoRoot: string, message: string): void {
 
 export default main
 
-/*
-Console.log({
-    argv: process.argv,
-    isEntrypoint: isCallerEntrypoint(import.meta, { log: true }),
-})
-*/
 await runCliIfEntrypointAsync(import.meta, main, process.argv.slice(2))
