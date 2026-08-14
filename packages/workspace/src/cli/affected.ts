@@ -62,10 +62,10 @@ function collectChangesetScopes(
     keepPrefix: boolean,
 ): Array<string> {
     return changesetFiles.flatMap((filePath) => {
-        const relativePath = normalizeRepoPath(repoRoot, filePath)
-        const absolutePath = path.isAbsolute(filePath)
-            ? filePath
-            : path.join(repoRoot, relativePath)
+        // An explicitly supplied changeset file may legitimately sit outside the repository, and
+        // its scopes come from the file's contents rather than its path, so no containment check
+        // applies here.
+        const absolutePath = path.resolve(repoRoot, filePath)
 
         if (!existsSync(absolutePath)) return []
 

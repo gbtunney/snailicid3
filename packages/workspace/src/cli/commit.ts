@@ -12,6 +12,7 @@ import { runCliIfEntrypointAsync, runCommand } from '@snailicid3/node-utils'
 import { readWorkspaceEnvironment } from './../core/environment.js'
 import { getGitChangedFiles, getRepoRoot } from './../core/git.js'
 import { runPackageBinary } from './../core/package-manager.js'
+import { getWorkspaceSnapshot } from './../core/packages.js'
 import {
     createRepositoryScopeClassifiers,
     type RepositoryScopeResolution,
@@ -340,7 +341,7 @@ async function resolveScopesForFiles(
 
     const customClassifiers = await loadScopePathMatchers(repoRoot)
     const classifiers = createRepositoryScopeClassifiers(
-        repoRoot,
+        getWorkspaceSnapshot(repoRoot),
         customClassifiers,
         keepPrefix,
     )

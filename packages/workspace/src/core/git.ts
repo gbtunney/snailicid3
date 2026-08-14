@@ -1,7 +1,5 @@
 import { runCommand } from '@snailicid3/node-utils'
-import path from 'node:path'
 import { splitNonEmptyLines } from './array.js'
-import { getWorkspacePackagesList, type WorkspacePackage } from './packages.js'
 
 /** Which part of the worktree a changed file was observed in. */
 export type GitChangeArea = 'range' | 'staged' | 'unstaged' | 'untracked'
@@ -28,41 +26,6 @@ const AREA_ORDER: ReadonlyArray<GitChangeArea> = [
     'unstaged',
     'untracked',
 ]
-
-/** Return workspace packages containing files selected by the requested Git changes. */
-export function getChangedWorkspacePackagesFromGit(
-    options: GitChangedFilesOptions = {},
-): Array<WorkspacePackage> {
-    const repoRoot = getRepoRoot()
-    const packages = getWorkspacePackagesList()
-    const changedFiles = getGitChangedFiles({ cwd: repoRoot, ...options })
-
-    const packageDirs = packages
-        .map((pkg) => ({
-            absDir: path.resolve(repoRoot, pkg.path),
-            pkg,
-        }))
-        // Longer paths first so nested packages win if that ever happens.
-        .toSorted(
-            (leftPackage, rightPackage) =>
-                rightPackage.absDir.length - leftPackage.absDir.length,
-        )
-
-    const hits = new Map<string, WorkspacePackage>()
-
-    for (const repoRelativeFile of changedFiles) {
-        const absFile = path.resolve(repoRoot, repoRelativeFile)
-
-        for (const { absDir, pkg } of packageDirs) {
-            if (isInsideDir(absFile, absDir)) {
-                hits.set(pkg.name, pkg)
-                break
-            }
-        }
-    }
-
-    return [...hits.values()]
-}
 
 export function getCurrentBranch(repoRoot: string): string {
     const result = runCommand('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
@@ -169,15 +132,5 @@ export function getRepoRoot(options: { fallbackToCwd?: boolean } = {}): string {
         ]
             .filter(Boolean)
             .join('\n'),
-    )
-}
-
-/** Test whether a path is the supplied directory or one of its descendants. */
-function isInsideDir(absChildPath: string, absParentDir: string): boolean {
-    const relativePath = path.relative(absParentDir, absChildPath)
-
-    return (
-        relativePath === '' ||
-        (!relativePath.startsWith('..') && !path.isAbsolute(relativePath))
     )
 }

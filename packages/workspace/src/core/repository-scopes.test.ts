@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { getRepoRoot } from './git.js'
+import { getWorkspaceSnapshot } from './packages.js'
 import {
     createRepositoryScopeClassifiers,
     resolveRepositoryScopes,
@@ -42,10 +43,10 @@ describe('resolveRepositoryScopes', () => {
 })
 
 describe('createRepositoryScopeClassifiers', () => {
-    const repoRoot = getRepoRoot({ fallbackToCwd: true })
+    const snapshot = getWorkspaceSnapshot(getRepoRoot({ fallbackToCwd: true }))
 
     it('keeps a package classifier when a custom key collides with it', () => {
-        const generated = createRepositoryScopeClassifiers(repoRoot)
+        const generated = createRepositoryScopeClassifiers(snapshot)
         const packagePatterns = generated['config']
 
         // 'config' is also a shortened workspace package name. Overwriting instead of merging would
@@ -53,7 +54,7 @@ describe('createRepositoryScopeClassifiers', () => {
         // hides that because a Set dedupes the name away.
         expect(packagePatterns).toBeDefined()
 
-        const merged = createRepositoryScopeClassifiers(repoRoot, {
+        const merged = createRepositoryScopeClassifiers(snapshot, {
             config: ['tools/config/**'],
         })
 
@@ -65,7 +66,7 @@ describe('createRepositoryScopeClassifiers', () => {
     })
 
     it('adds a custom classifier that does not collide', () => {
-        const merged = createRepositoryScopeClassifiers(repoRoot, {
+        const merged = createRepositoryScopeClassifiers(snapshot, {
             'custom-area': ['tools/area/**'],
         })
 
