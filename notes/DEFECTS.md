@@ -178,31 +178,52 @@ report's data model rather than a nicety behind a verbose flag.
 Each of these has code waiting on your answer. Roughly in dependency order — C1 gates C2, which
 gates C3.
 
-- [ ] **C1** 🔴 **How is the config→workspace edge cut?** Plan §3.1 says no config _policy_ API may
-      use that edge, but the commitlint factory imports 8 symbols from workspace, and config
-      re-exports ~15 more publicly. Since workspace is `private: true`, **`@snailicid3/config@0.2.0`
-      cannot be published at all** — rule 2.7. Options: publish workspace (opens the Phase 4 gate
-      early), or invert so the factory receives resolved scopes from its caller (what plan §4
-      already prescribes). → §4.7
+- [x] **C1** 🔴 **DECIDED 2026-08-14 — invert the dependency; do not publish workspace.**
+      `workspace` is `private: true` _deliberately_: making it public makes the release tooling
+      treat it as a publish candidate before it is ready. So "publish workspace to fix the edge" is
+      off the table, and the remaining route is the one plan §4 already prescribes — config's
+      commitlint factory must **receive** resolved scopes from its caller instead of importing them
+      from workspace. Until that lands, `@snailicid3/config@0.2.0` remains unpublishable (rule 2.7).
+      This is also #206's intent-vs-inventory split showing up in practice: privacy is being used as
+      a release-phase signal because there is no explicit intent axis. → §4.7
 - [ ] **C2** 🟠 **Are config's workspace re-exports a supported contract?** They're published today.
       If unintentional, withdrawing them is a breaking change needing its own version step — and it
       has to happen before C3. → §4.7
-- [ ] **C3** 🟠 **Which scope engine survives?** Two live: `resolveRepositoryScopes` (classifier,
-      #212's direction, used by `scope-commit` only) and `matchScopesForPath` (micromatch, used by
-      `scope-affected` **and commitlint**). They agree today by coincidence; no test asserts it.
-      This is #212's never-written "removable old code" summary. → §2.3, plan §5.1
-- [ ] **C4** 🟠 **`cli/changeset.ts` — promote or delete?** 164 lines, no bin, no test, no export,
-      no reference. It drives the Phase 7.2 state machine, which is implemented, tested, and wired
-      to nothing while `gbt-changeset` runs the ported flat-denial logic. → §4.1
-- [ ] **C5** 🟠 **Does `gbt-changeset` stop committing when 7.2/7.3 land?** 7.3 specifies a
-      side-effect-free base flow; the shipped bin commits. That's a behavior break on a
-      maintainer-facing bin — needs an explicit call, not a silent flip. → §2.4
+- [x] **C3** 🔴 **DECIDED 2026-08-14 — the #212 classifier engine survives; finish it properly.**
+      Migrate `scope-affected` (`cli/affected.ts:129`) and config's commitlint scope-enum
+      (`api-functions.ts:51`, `workspace.scopes.ts:38`) onto `resolveRepositoryScopes`, then delete
+      `matchScopesForPath` and fold `DEFAULT_SCOPE_PATH_MATCHERS` into the classifier layer. Add a
+      cross-engine agreement test **before** deleting anything, so the migration is proven rather
+      than assumed. Two constraints: the old matcher surface is re-exported from config's _public_
+      barrel, so removing it is a breaking change to `@snailicid3/config` and needs its own version
+      step (C2); and folding the defaults in also retires B7's latent `scripts`/`actions`/`notes`
+      collision. → §2.3, plan §5.1
+- [x] **C4** 🟠 **DECIDED 2026-08-14 — keep it, revisit soon.** `cli/changeset.ts` and the
+      `decideBranchAction` state machine stay in the tree unwired. Not dead code by accident —
+      parked deliberately. → §4.1
+- [x] **C5** 🟠 **DECIDED 2026-08-14 — keep the current flow, minus the commit.** `gbt-changeset`
+      keeps working the old way for now; the only change is that it **stops after creating the
+      changeset** instead of staging and committing it. That is `changesetv2.ts:196-205`
+      (`git add` + the `scope-commit --checked-commit` call). Branch creation, scope resolution, and
+      the reporting stay. This is 7.3's side-effect-free base flow arriving early and narrowly,
+      without the state machine. → §2.4
 - [ ] **C6** 🟡 **Scope collapse target and threshold** for `header-max-length`. A 12-package header
       measured 159 vs the limit of 150, and the scope list alone is ~115. Raising the number only
       defers it. Collapse to `root` past _N_? What's _N_? → §2.5, plan §5.2
-- [ ] **C7** 🟡 **Who owns the package Zod schema?** It exists in **build-config**
-      (`src/build/schemas/package.ts`), which B1 wants deleted; doctor hand-rolls its own JSON
-      walking; cli-app has a third `//TODO make into zod schema`. → §6, §4.16
+- [x] **C7** 🟡 **DECIDED 2026-08-14 — doctor owns the _diagnostic_ schema. But it cannot own the
+      small one.** Splitting into two schemas, because they have different consumers and different
+      constraints: **(a) Diagnostic schema → `@snailicid3/doctor`.** Full manifest validation:
+      exports, bin, files, engines, privacy. Matches §B1's decision that the export-plan helper
+      belongs to doctor. **(b) Package-identity schema → shared, and _not_ in doctor.** `name`,
+      `version`, `description`, `author`, `license`, `repository` — needed by build-config's banner
+      and by cli-app for its `--version`/header. Doctor is `private: true`, and cli-app is public,
+      so cli-app depending on doctor would violate rule 2.7. **The placement trap:** build-config is
+      imported by 8 packages' `tsdown.config.ts` (including node-utils, utils, types) and is itself
+      tsc-only. If build-config imported node-utils for the shared schema,
+      `node-utils:build → build-config:build → node-utils:build` — a bootstrap cycle, the same one
+      §B1 flags. So the identity schema goes in **`@snailicid3/node-utils`** for cli-app and doctor,
+      and build-config keeps its own copy until B1 folds it into config (tsc-only, no cycle), at
+      which point the two converge. One deliberate, small, time-boxed duplication. → §6, §4.16
 - [ ] **C8** 🟡 **Where does `runtime` live for Nx dependency-boundary enforcement?** Narrowed
       2026-08-14: this is _not_ a `buildConfig`-vs-tag question, since `buildConfig` is dead (B5).
       The live declaration is the per-entry `runtime` in each `tsdown.config.ts`, which Nx cannot
