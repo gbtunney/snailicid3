@@ -10,11 +10,6 @@
         "dev:nx": "nx run $npm_package_name:dev",
         "api:report:nx": "nx run $npm_package_name:api:report"
     },
-    "buildConfig": {
-        "runtime": "node",
-        "product": "library",
-        "buildStrategy": "bundle"
-    },
     "nx": {
         "implicitDependencies": [
             "!@snailicid3/config"

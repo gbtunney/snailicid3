@@ -51,6 +51,108 @@ describe('collectDeclaredExportTargets', () => {
     })
 })
 
+describe('repository package export maps', () => {
+    it('B1 exposes node-utils declarations, ESM, and CJS in condition order', () => {
+        const manifest = readRepositoryManifest(
+            'packages/node-utils/package.json',
+        )
+
+        expect(collectRootExportTargets(manifest)).toEqual([
+            {
+                conditions: ['types'],
+                exportKey: '.',
+                target: './dist/index.d.cts',
+            },
+            {
+                conditions: ['import'],
+                exportKey: '.',
+                target: './dist/index.mjs',
+            },
+            {
+                conditions: ['require'],
+                exportKey: '.',
+                target: './dist/index.cjs',
+            },
+        ])
+    })
+
+    it('B2 keeps utils module exports and publishes its IIFE for CDNs', () => {
+        const manifest = readRepositoryManifest('packages/utils/package.json')
+
+        expect(manifest).toMatchObject({
+            jsdelivr: './dist/index.iife.js',
+            unpkg: './dist/index.iife.js',
+        })
+        expect(collectRootExportTargets(manifest)).toEqual([
+            {
+                conditions: ['types'],
+                exportKey: '.',
+                target: './dist/index.d.cts',
+            },
+            {
+                conditions: ['import'],
+                exportKey: '.',
+                target: './dist/index.js',
+            },
+            {
+                conditions: ['require'],
+                exportKey: '.',
+                target: './dist/index.cjs',
+            },
+        ])
+    })
+
+    it('B3 puts config and workspace declarations before imports', () => {
+        for (const relativePath of [
+            'packages/config/package.json',
+            'packages/workspace/package.json',
+        ]) {
+            const manifest = readRepositoryManifest(relativePath)
+
+            expect(collectRootExportTargets(manifest)).toEqual([
+                {
+                    conditions: ['types'],
+                    exportKey: '.',
+                    target: './types/index.d.ts',
+                },
+                {
+                    conditions: ['import'],
+                    exportKey: '.',
+                    target: './dist/index.js',
+                },
+            ])
+        }
+    })
+
+    it('B4 exposes cli-app declarations before its ESM entry', () => {
+        const manifest = readRepositoryManifest('packages/cli-app/package.json')
+
+        expect(collectRootExportTargets(manifest)).toEqual([
+            {
+                conditions: ['types'],
+                exportKey: '.',
+                target: './dist/index.d.mts',
+            },
+            {
+                conditions: ['import'],
+                exportKey: '.',
+                target: './dist/index.mjs',
+            },
+        ])
+    })
+
+    it('B13 keeps the cli-app example importable without a public bin', () => {
+        const manifest = readRepositoryManifest('packages/cli-app/package.json')
+
+        expect(manifest.bin).toBeUndefined()
+        expect(collectDeclaredExportTargets(manifest.exports)).toContainEqual({
+            conditions: [],
+            exportKey: './example',
+            target: './dist/example.mjs',
+        })
+    })
+})
+
 describe('analyzePackage', () => {
     it('reports no findings for aligned exports, declarations, and bins', () => {
         withTempPackage(
@@ -169,6 +271,15 @@ function getOnlyBinTarget(manifest: PackageManifest): string {
     if (typeof target !== 'string')
         throw new TypeError('Expected one bin target')
     return target
+}
+
+/** Return only the root export targets so package-level routing assertions stay focused. */
+function collectRootExportTargets(
+    manifest: PackageManifest,
+): ReturnType<typeof collectDeclaredExportTargets> {
+    return collectDeclaredExportTargets(manifest.exports).filter(
+        ({ exportKey }) => exportKey === '.',
+    )
 }
 
 function readRepositoryManifest(relativePath: string): PackageManifest {

@@ -21,11 +21,6 @@
         "docs:serve:nx": "nx run $npm_package_name:docs:serve",
         "api:report:nx": "nx run $npm_package_name:api:report"
     },
-    "buildConfig": {
-        "runtime": "universal",
-        "product": "library",
-        "buildStrategy": "bundle"
-    },
     "nx": {
         "implicitDependencies": [
             "!@snailicid3/config"
@@ -64,8 +59,11 @@
     "type": "module",
     "main": "./dist/index.cjs",
     "types": "./dist/index.d.cts",
+    "unpkg": "./dist/index.iife.js",
+    "jsdelivr": "./dist/index.iife.js",
     "exports": {
         ".": {
+            "types": "./dist/index.d.cts",
             "import": "./dist/index.js",
             "require": "./dist/index.cjs"
         },

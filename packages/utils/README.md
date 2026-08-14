@@ -71,3 +71,9 @@ import { mapRange, roundToDecimals } from '@snailicid3/utils'
 mapRange(0.5, [0, 1], [0, 100]) // 50
 roundToDecimals(3.14159, 2) // 3.14
 ```
+
+## TODO
+
+- [ ] **B2:** Keep testing the bundled `dist/index.iife.js` CDN build and decide later whether it
+      should remain a supported distribution target. It is currently selected by the `unpkg` and
+      `jsdelivr` package fields.

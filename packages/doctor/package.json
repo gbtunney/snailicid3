@@ -21,11 +21,6 @@
         "test:cli": "pnpm run build:nx && pnpm exec node ./dist/cli.js --help",
         "dev:cli": "pnpm run build:nx && pnpm exec tsx ./dist/cli.js"
     },
-    "buildConfig": {
-        "runtime": "node",
-        "product": "cli",
-        "buildStrategy": "transpile"
-    },
     "nx": {
         "implicitDependencies": [
             "!@snailicid3/config"
@@ -84,7 +79,7 @@
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
-            "import": "./dist/indklex.js"
+            "import": "./dist/index.js"
         },
         "./package.json": "./package.json"
     },

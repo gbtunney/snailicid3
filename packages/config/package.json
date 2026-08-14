@@ -21,7 +21,6 @@
         "clean:nx": "nx run $npm_package_name:clean",
         "dev:nx": "nx run $npm_package_name:dev",
         "api:report:nx": "nx run $npm_package_name:api:report",
-        "demo:logger": "pnpm --filter=@snailicid3/workspace exec ./bin/snail-sh-test.sh",
         "demo:2": "pnpm exec snail-sh header '🐌 SNAIL BUILD' '50%'  '~'"
     },
     "bin": {
@@ -34,11 +33,6 @@
         "gbt-setup": "./bin/workspace/gbt-setup.sh",
         "gbt-uninstall": "./bin/workspace/gbt-uninstall.sh",
         "gbt-patch": "./bin/workspace/gbt-patch.sh"
-    },
-    "buildConfig": {
-        "runtime": "node",
-        "product": "config",
-        "buildStrategy": "none"
     },
     "nx": {
         "targets": {
@@ -97,8 +91,8 @@
     "types": "./types/index.d.ts",
     "exports": {
         ".": {
-            "import": "./dist/index.js",
-            "types": "./types/index.d.ts"
+            "types": "./types/index.d.ts",
+            "import": "./dist/index.js"
         },
         "./prettier": "./dist/.prettierrc.json",
         "./markdownlint": "./dist/.markdownlint.json",

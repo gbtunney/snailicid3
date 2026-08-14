@@ -9,11 +9,6 @@
         "clean:nx": "nx run $npm_package_name:clean",
         "api:report:nx": "nx run $npm_package_name:api:report"
     },
-    "buildConfig": {
-        "runtime": "node",
-        "product": "build_tool",
-        "buildStrategy": "none"
-    },
     "nx": {
         "implicitDependencies": [
             "!@snailicid3/config"

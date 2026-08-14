@@ -35,7 +35,6 @@
         "inspect:nx": "pnpm nx:graph",
         "inspect:lint": "pnpm exec eslint-config-inspector --no-open",
         "inspect:vitest": "pnpm exec vitest --ui",
-        "inspect:deps": "pnpm inspect:dependencies",
         "\n========== LIFECYCLE >> ==========": "",
         "start": "pnpm install && pnpm build",
         "uninstall": "pnpm exec gbt-uninstall",

@@ -61,12 +61,12 @@
         "typescript": "^6.0.3",
         "vitest": "^4.1.9"
     },
-    "bin": {
-        "cli-app-example": "./dist/example.mjs"
-    },
     "types": "./dist/index.d.mts",
     "exports": {
-        ".": "./dist/index.mjs",
+        ".": {
+            "types": "./dist/index.d.mts",
+            "import": "./dist/index.mjs"
+        },
         "./example": "./dist/example.mjs",
         "./package.json": "./package.json"
     },

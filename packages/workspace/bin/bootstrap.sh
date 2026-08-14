@@ -4,7 +4,7 @@ set -euo pipefail
 
 # Variable overview:
 # - SCRIPT_DIR: absolute directory containing this script file.
-# - PACKAGE_DIR: nearest package directory containing package.json and bin/snail-sh-logger.sh.
+# - PACKAGE_DIR: nearest package directory containing package.json and bin/bootstrap.sh.
 # - REPO_DIR: repository root resolved from PACKAGE_DIR via git.
 # - LOGGER_PATH: absolute path to bin/snail-sh-logger.sh within PACKAGE_DIR.
 # - Test shell with `echo "SHELL=$SHELL  argv0=$0  pid=$$  proc=$(ps -p $$ -o comm=)" && LOGGING=true <script> && echo "SHELL=$SHELL  argv0=$0  pid=$$  proc=$(ps -p $$ -o comm=)" `
@@ -17,7 +17,7 @@ resolve_package_dir() {
     local current_dir="${1:-$SCRIPT_DIR}"
 
     while [[ "$current_dir" != "/" ]]; do
-        if [[ -f "$current_dir/package.json" && -f "$current_dir/bin/snail-sh-logger.sh" ]]; then
+        if [[ -f "$current_dir/package.json" && -f "$current_dir/bin/bootstrap.sh" ]]; then
             printf '%s\n' "$current_dir"
             return 0
         fi
