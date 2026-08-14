@@ -326,6 +326,40 @@ node-utils   identity: name, version, description, author, license, repository
     +-- doctor      extends: exports, bin, files    (private)
 ```
 
+## Core audit (external, 2026-08-14) — verification
+
+A function-by-function audit of `packages/workspace/src/core` was reviewed against #218's head.
+Verdicts checked here rather than taken on trust.
+
+**Confirmed.** All six "no production call site" claims hold — zero non-test, non-declaration
+references for `getChangedWorkspacePackagesFromGit`, `getWorkspaceNodeModulesRoot`,
+`getWorkspacePackagesLookup`, `getWorkspacePackagesObject`, `workspacePackagesToArray` and
+`readPackageName`. `findNearestPackageJson` does use `searchDir.startsWith(repoRoot)`
+(`packages.ts:27`), which prefix-matches a sibling such as `/repo-other`. `scope-affected` does
+still call `matchScopesForPath`.
+
+**More precise than §2.3.** Commitlint does not literally call `matchScopesForPath`; it consumes the
+same legacy _definitions_ via `resolveScopePathMatchers`. That is why the two engines agree today
+without sharing a classification contract — a sharper statement of the same defect.
+
+**One real gap — instruction 14 is not standalone.** "Remove `isRootPackageName()` and identify root
+by normalized workspace path" works at only one of its two call sites.
+`config/commitlint/workspace.scopes.ts:53` iterates package records that carry `path`, so the
+replacement applies. `workspace/cli/affected.ts:145` normalizes **Nx project names** from
+`nx show projects --affected` — bare strings with no path attached — so the replacement cannot apply
+until those names are resolved back to package records through the snapshot. Instruction 14
+therefore depends on 7 (`WorkspaceSnapshot`) and 9 (rewire `scope-affected`), and also assumes Nx
+project names equal package names, which holds here only because they are inferred from
+`package.json`.
+
+**Simplification the audit lacks.** It says to remove config's workspace re-exports "eventually,
+after consumers import `@snailicid3/workspace` directly." Per C2 those re-exports have never been
+published, so there are no consumers and they can be deleted immediately.
+
+**Newly surfaced.** Plan §5's override contract (`readonly string[] | true | false | undefined`) was
+written as settled but never implemented — `resolveScopePathMatchers`' null/empty-array deletion
+directly contradicts it. Neither the plan's own status nor this checklist had flagged that.
+
 ## Sequencing note
 
 If you want the shortest path to something shippable: **A1–A4, then B1–B6** (all export/manifest
