@@ -2,6 +2,36 @@
 
 [![npm](https://img.shields.io/npm/v/@snailicid3/node-utils)](https://www.npmjs.com/package/@snailicid3/node-utils)
 [![license](https://img.shields.io/npm/l/@snailicid3/node-utils)](../../LICENSE)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://prettier.io/)
+
+_Node.js filesystem, path, JSON, environment, process, and lightweight argv utilities._
+
+---
+
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Zod](https://img.shields.io/badge/Zod-3068B7?style=for-the-badge&logo=zod&logoColor=white)](https://zod.dev/)
+
+### Repository
+
+- **GitHub:**
+  [`@snailicid3/node-utils`](https://github.com/gbtunney/snailicid3/tree/main/packages/node-utils) •
+  [`snailicid3`](https://github.com/gbtunney/snailicid3)
+
+### Author
+
+👤 **Gillian Tunney**
+
+- [GitHub](https://github.com/gbtunney)
+- [Email](mailto:gbtunney@mac.com)
+
+> Recommended package manager: [pnpm](https://pnpm.io/)
+>
+> [![pnpm](https://img.shields.io/badge/pnpm-4A4A4A?style=for-the-badge&logo=pnpm&logoColor=F69220)](https://pnpm.io/)
+
+## @snailicid3/node-utils 🐌
+
+---
 
 Node-specific filesystem, path, JSON-file, environment, command, and lightweight argv utilities.
 

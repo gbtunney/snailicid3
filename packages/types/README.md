@@ -1,32 +1,31 @@
 # @snailicid3/types 🐌
 
-[![NPM](https://img.shields.io/npm/v/@snailicid3/types)](http://www.npmjs.com/package/@snailicid3/types)
-![License: MIT](https://img.shields.io/npm/l/@snailicid3/types)
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+[![npm](https://img.shields.io/npm/v/@snailicid3/types)](https://www.npmjs.com/package/@snailicid3/types)
+[![license](https://img.shields.io/npm/l/@snailicid3/types)](../../LICENSE)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://prettier.io/)
 
 _Pure TypeScript types, utility types, and typeguard functions._
 
 ---
 
-![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
-![NPM](https://img.shields.io/badge/NPM-%23CB3837.svg?style=for-the-badge&logo=npm&logoColor=white)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
 ### Repository
 
-- **Github:** [`@snailicid3/types`](https://github.com/gbtunney/snailicid3/tree/main/packages/types)
-  • [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
-- **CDN**: [jsdeliver](https://cdn.jsdelivr.net/npm/@snailicid3/types/dist/index.min.js)
+- **GitHub:** [`@snailicid3/types`](https://github.com/gbtunney/snailicid3/tree/main/packages/types)
+  • [`snailicid3`](https://github.com/gbtunney/snailicid3)
+- **CDN:** [jsDelivr](https://cdn.jsdelivr.net/npm/@snailicid3/types/dist/index.min.js)
 
 ### Author
 
 👤 **Gillian Tunney**
 
-- [github](https://github.com/gbtunney)
-- [email](mailto:gbtunney@mac.com)
+- [GitHub](https://github.com/gbtunney)
+- [Email](mailto:gbtunney@mac.com)
 
-> Recommended package manager is [pnpm](http://pnpm.io)
+> Recommended package manager: [pnpm](https://pnpm.io/)
 >
-> [![PNPM](https://img.shields.io/badge/pnpm-%234a4a4a.svg?style=for-the-badge&logo=pnpm&logoColor=f69220)](http://pnpm.io)
+> [![pnpm](https://img.shields.io/badge/pnpm-4A4A4A?style=for-the-badge&logo=pnpm&logoColor=F69220)](https://pnpm.io/)
 
 ## @snailicid3/types 🐌
 
@@ -47,14 +46,7 @@ environment.
 ## Installation
 
 ```sh
-#pnpm
-$ pnpm add @snailicid3/types
-
-#yarn
-$ yarn add @snailicid3/types
-
-#npm
-$ npm install @snailicid3/types
+pnpm add @snailicid3/types
 ```
 
 ## Examples

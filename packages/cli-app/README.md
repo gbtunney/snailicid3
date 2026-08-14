@@ -1,28 +1,42 @@
 # @snailicid3/cli-app 🐌
 
-![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
-![Zod](https://img.shields.io/badge/zod-%233068b7.svg?style=for-the-badge&logo=zod&logoColor=white)
+[![npm](https://img.shields.io/npm/v/@snailicid3/cli-app)](https://www.npmjs.com/package/@snailicid3/cli-app)
+[![license](https://img.shields.io/npm/l/@snailicid3/cli-app)](../../LICENSE)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://prettier.io/)
+
+_Zod-backed CLI application framework for typed Node.js commands._
+
+---
+
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Zod](https://img.shields.io/badge/Zod-3068B7?style=for-the-badge&logo=zod&logoColor=white)](https://zod.dev/)
+[![Yargs](https://img.shields.io/badge/Yargs-000000?style=for-the-badge&logo=yargs&logoColor=white)](https://yargs.js.org/)
 
 ### Repository
 
-- **Github:**
+- **GitHub:**
   [`@snailicid3/cli-app`](https://github.com/gbtunney/snailicid3/tree/main/packages/cli-app) •
-  [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
+  [`snailicid3`](https://github.com/gbtunney/snailicid3)
 
 ### Author
 
 👤 **Gillian Tunney**
 
-- [github](https://github.com/gbtunney)
-- [email](mailto:gbtunney@mac.com)
+- [GitHub](https://github.com/gbtunney)
+- [Email](mailto:gbtunney@mac.com)
+
+> Recommended package manager: [pnpm](https://pnpm.io/)
+>
+> [![pnpm](https://img.shields.io/badge/pnpm-4A4A4A?style=for-the-badge&logo=pnpm&logoColor=F69220)](https://pnpm.io/)
 
 ## @snailicid3/cli-app 🐌
 
 ---
 
-This package provides a Zod-backed CLI application framework built on top of `yargs` and `yargs`. It
-integrates with `@snailicid3/logger` for structured output and `@snailicid3/color` for styled
-terminal text. Used internally by scaffold and other CLI tools in this monorepo.
+This package provides a Zod-backed CLI application framework built on top of `yargs`. It integrates
+with `@snailicid3/logger` for structured output and `@snailicid3/color` for styled terminal text.
+Used internally by scaffold and other CLI tools in this monorepo.
 
 ### `@snailicid3/cli-app` _contains:_
 
@@ -31,7 +45,7 @@ terminal text. Used internally by scaffold and other CLI tools in this monorepo.
 - **Logging** — integrated `@snailicid3/logger` support
 - **Types** — typed argument schemas via Zod
 
-## Usage
+## Installation
 
 ```sh
 pnpm add @snailicid3/cli-app

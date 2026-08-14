@@ -2,8 +2,39 @@
 
 [![npm](https://img.shields.io/npm/v/@snailicid3/config)](https://www.npmjs.com/package/@snailicid3/config)
 [![license](https://img.shields.io/npm/l/@snailicid3/config)](../../LICENSE)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://prettier.io/)
 
-Shared lint, formatting, documentation, TypeScript, Nx, and API-extractor policy for Snailicid3
+_Shared linting, formatting, documentation, TypeScript, Nx, and API Extractor policy._
+
+---
+
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![ESLint](https://img.shields.io/badge/ESLint-4B32C3?style=for-the-badge&logo=eslint&logoColor=white)](https://eslint.org/)
+[![Prettier](https://img.shields.io/badge/Prettier-F7B93E?style=for-the-badge&logo=prettier&logoColor=1A2B34)](https://prettier.io/)
+[![Nx](https://img.shields.io/badge/Nx-143055?style=for-the-badge&logo=nx&logoColor=white)](https://nx.dev/)
+
+### Repository
+
+- **GitHub:**
+  [`@snailicid3/config`](https://github.com/gbtunney/snailicid3/tree/main/packages/config) •
+  [`snailicid3`](https://github.com/gbtunney/snailicid3)
+
+### Author
+
+👤 **Gillian Tunney**
+
+- [GitHub](https://github.com/gbtunney)
+- [Email](mailto:gbtunney@mac.com)
+
+> Recommended package manager: [pnpm](https://pnpm.io/)
+>
+> [![pnpm](https://img.shields.io/badge/pnpm-4A4A4A?style=for-the-badge&logo=pnpm&logoColor=F69220)](https://pnpm.io/)
+
+## @snailicid3/config 🐌
+
+---
+
+Shared lint, formatting, documentation, TypeScript, Nx, and API Extractor policy for Snailicid3
 projects.
 
 > **Release status:** npm currently serves `@snailicid3/config@0.2.0`. The policy ownership and

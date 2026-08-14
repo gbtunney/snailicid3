@@ -1,6 +1,37 @@
 # @snailicid3/doctor 🐌
 
-Read-only package and artifact diagnostics for npm and pnpm workspaces.
+[![npm](https://img.shields.io/npm/v/@snailicid3/doctor)](https://www.npmjs.com/package/@snailicid3/doctor)
+[![license](https://img.shields.io/npm/l/@snailicid3/doctor)](../../LICENSE)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://prettier.io/)
+
+_Read-only package and artifact diagnostics for npm and pnpm workspaces._
+
+---
+
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![pnpm](https://img.shields.io/badge/pnpm-F69220?style=for-the-badge&logo=pnpm&logoColor=white)](https://pnpm.io/)
+
+### Repository
+
+- **GitHub:**
+  [`@snailicid3/doctor`](https://github.com/gbtunney/snailicid3/tree/main/packages/doctor) •
+  [`snailicid3`](https://github.com/gbtunney/snailicid3)
+
+### Author
+
+👤 **Gillian Tunney**
+
+- [GitHub](https://github.com/gbtunney)
+- [Email](mailto:gbtunney@mac.com)
+
+> Recommended package manager: [pnpm](https://pnpm.io/)
+>
+> [![pnpm](https://img.shields.io/badge/pnpm-4A4A4A?style=for-the-badge&logo=pnpm&logoColor=F69220)](https://pnpm.io/)
+
+## @snailicid3/doctor 🐌
+
+---
 
 > **MVP status:** this package is private at `0.0.0`. It is an implementation workspace, not a
 > release candidate. The first slice reports manifest/export/bin reality and labels the first two

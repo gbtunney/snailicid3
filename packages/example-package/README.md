@@ -1,22 +1,33 @@
 # @snailicid3/example-package 🐌
 
-> _Workspace package — example template for new monorepo packages_
+[![npm](https://img.shields.io/npm/v/@snailicid3/example-package)](https://www.npmjs.com/package/@snailicid3/example-package)
+[![license](https://img.shields.io/npm/l/@snailicid3/example-package)](../../LICENSE)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://prettier.io/)
 
-![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
-![Vitest](https://img.shields.io/badge/vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)
+_Workspace package and canonical template for new monorepo packages._
+
+---
+
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![tsdown](https://img.shields.io/badge/tsdown-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://tsdown.dev/)
+[![Vitest](https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
 
 ### Repository
 
-- **Github:**
+- **GitHub:**
   [`@snailicid3/example-package`](https://github.com/gbtunney/snailicid3/tree/main/packages/example-package)
-  • [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
+  • [`snailicid3`](https://github.com/gbtunney/snailicid3)
 
 ### Author
 
 👤 **Gillian Tunney**
 
-- [github](https://github.com/gbtunney)
-- [email](mailto:gbtunney@mac.com)
+- [GitHub](https://github.com/gbtunney)
+- [Email](mailto:gbtunney@mac.com)
+
+> Recommended package manager: [pnpm](https://pnpm.io/)
+>
+> [![pnpm](https://img.shields.io/badge/pnpm-4A4A4A?style=for-the-badge&logo=pnpm&logoColor=F69220)](https://pnpm.io/)
 
 ## @snailicid3/example-package 🐌
 
