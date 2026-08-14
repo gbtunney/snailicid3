@@ -129,19 +129,37 @@ top-level `types` condition.
 
 ### Scope resolution
 
-- [ ] **B7** 🟠 `repository-scopes.ts:41-47` — custom classifiers spread **after** package
+- [x] **B7** 🟠 `repository-scopes.ts:41-47` — custom classifiers spread **after** package
       classifiers, so a custom matcher key equal to a shortened package name silently replaces that
       package's own classifier. The enum hides it (Set dedupes), so only the file→scope mapping
       changes. Latent collision with the built-in `scripts`/`actions`/`notes` defaults. → §2.2
-- [ ] **B8** 🟠 `core/git.ts:75-83` — `getGitChangedFiles` calls git with **no `cwd`** and
+- [x] **B8** 🟠 `core/git.ts:75-83` — `getGitChangedFiles` calls git with **no `cwd`** and
       early-returns silently on failure. With `getRepoRoot({fallbackToCwd:true})` at `commit.ts:74`,
       running outside a repo gives you a confident `chore(root): …` having inspected nothing. →
       §4.14
-- [ ] **B9** 🟠 `cli/commit.ts:100` + `:119` — verbose evidence and the machine-readable scope value
+- [x] **B9** 🟠 `cli/commit.ts:100` + `:119` — verbose evidence and the machine-readable scope value
       both go to **stdout**, so `--csv --verbose` emits both on one stream. Capturing stdout from
       these bins is an established pattern (`changesetv2.ts:164` does it). → §4.15
-- [ ] **B10** 🟡 `cli/commit.ts:136-144` — `--scope` override returns `matches: {}`, so the evidence
+- [x] **B10** 🟡 `cli/commit.ts:136-144` — `--scope` override returns `matches: {}`, so the evidence
       report comes out **empty** whenever you pass an explicit scope. → §6 (report, step 4)
+
+Notes on the B7–B10 fixes:
+
+- **B7** now unions patterns on a key collision instead of overwriting, so a custom matcher key that
+  matches a shortened package name no longer drops that package's own classifier.
+- **B8** threads `cwd` through every git invocation and **throws** on a failed one rather than
+  returning an empty list. `getGitChangedFilesByArea()` is new and returns per-file areas
+  (`staged`/`unstaged`/`untracked`/`range`); `getGitChangedFiles()` is now a thin wrapper over it. A
+  file that is staged _and_ further modified carries both areas — the case the commit-scope report
+  most needs, and the one the old flattening destroyed.
+- **B9** verbose evidence moved to **stderr**, so stdout carries only the scope value callers
+  capture. `changesetv2.ts` captures `scope-affected` stdout the same way.
+- **B10** `--scope` no longer blanks the report. Detection still runs, and the evidence now prints
+  `detected:`, `override:`, and `dropped by override:` so an override that hides a real scope is
+  visible.
+
+This unblocks step 1 of the commit-scope report — per-file provenance is now available as the
+report's data model rather than a nicety behind a verbose flag.
 
 ### Shipped shell duplication
 

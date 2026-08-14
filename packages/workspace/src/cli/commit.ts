@@ -47,6 +47,7 @@ export function formatScopeEvidence(
     files: ReadonlyArray<string>,
     resolution: RepositoryScopeResolution,
     inputSource: FileInputSource,
+    overrideScopes?: ReadonlyArray<string>,
 ): string {
     const lines = [`${inputSource} files: ${files.length.toString()}`]
 
@@ -63,7 +64,20 @@ export function formatScopeEvidence(
         )
     }
 
-    lines.push('', `scopes: ${formatScopes(resolution.scopes, 'csv')}`)
+    lines.push('', `detected: ${formatScopes(resolution.scopes, 'csv')}`)
+
+    if (overrideScopes) {
+        lines.push(`override: ${formatScopes(overrideScopes, 'csv')}`)
+
+        const dropped = resolution.scopes.filter(
+            (scope) => !overrideScopes.includes(scope),
+        )
+
+        if (dropped.length > 0) {
+            lines.push(`dropped by override: ${formatScopes(dropped, 'csv')}`)
+        }
+    }
+
     return lines.join('\n')
 }
 
@@ -87,17 +101,33 @@ export async function main(
         prepareCheckedCommit(repoRoot)
     }
 
-    const files = parsed.explicitScope
-        ? [...request.inputPaths]
-        : resolveInputFiles(request.inputPaths, parsed.mode)
+    const files = resolveInputFiles(
+        request.inputPaths,
+        parsed.mode,
+        getGitChangedFiles,
+        repoRoot,
+    )
+    const detected = await resolveScopesForFiles(
+        repoRoot,
+        files,
+        parsed.keepPrefix,
+    )
+    // An explicit scope overrides which scopes are used, but detection still runs so the report can
+    // show what the files actually touch — including scopes the override leaves out.
     const resolution = parsed.explicitScope
-        ? explicitScopeResolution(parsed.explicitScope)
-        : await resolveScopesForFiles(repoRoot, files, parsed.keepPrefix)
+        ? {
+              ...detected,
+              scopes: splitExplicitScope(parsed.explicitScope),
+          }
+        : detected
 
     if (parsed.verbose) {
         const inputSource =
             request.inputPaths.length > 0 ? 'explicit' : parsed.mode
-        console.log(formatScopeEvidence(files, resolution, inputSource))
+        // Stderr: stdout carries the machine-readable scope value that callers capture.
+        process.stderr.write(
+            `${formatScopeEvidence(files, detected, inputSource, parsed.explicitScope ? resolution.scopes : undefined)}\n`,
+        )
     }
 
     const scopeValue = formatScopes(resolution.scopes, 'csv')
@@ -123,24 +153,16 @@ export function resolveInputFiles(
     inputPaths: ReadonlyArray<string>,
     mode: ChangeMode,
     getChangedFiles: typeof getGitChangedFiles = getGitChangedFiles,
+    cwd?: string,
 ): Array<string> {
     if (inputPaths.length > 0) return [...inputPaths]
 
     return getChangedFiles({
+        ...(cwd === undefined ? {} : { cwd }),
         includeStaged: true,
         includeUnstaged: mode === 'all',
         includeUntracked: mode === 'all',
     })
-}
-
-function explicitScopeResolution(
-    scopeValue: string,
-): RepositoryScopeResolution {
-    return {
-        matches: {},
-        scopes: splitExplicitScope(scopeValue),
-        unmatched: [],
-    }
 }
 
 function makeMessage(

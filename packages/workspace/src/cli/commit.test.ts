@@ -17,6 +17,25 @@ async function captureConsoleLog(fn: () => Promise<void>): Promise<string> {
     return lines.join('\n').trim()
 }
 
+async function captureStderr(fn: () => Promise<void>): Promise<string> {
+    const chunks: Array<string> = []
+
+    const spy = vi
+        .spyOn(process.stderr, 'write')
+        .mockImplementation((chunk: unknown) => {
+            chunks.push(String(chunk))
+            return true
+        })
+
+    try {
+        await fn()
+    } finally {
+        spy.mockRestore()
+    }
+
+    return chunks.join('').trim()
+}
+
 describe('scope-commit messages', () => {
     beforeEach(() => {
         process.env.SCOPE_COMMIT_SKIP_COMMITLINT = '1'
@@ -133,19 +152,43 @@ describe('scope-commit messages', () => {
         expect(output).toBe('config\nlogger')
     })
 
-    it('shows logger matches and unmatched root files in verbose output', async () => {
-        const output = await captureConsoleLog(async () => {
-            await main([
-                '--verbose',
-                'packages/logger/src/logger.ts',
-                'README.md',
-            ])
+    it('writes verbose evidence to stderr, keeping stdout parseable', async () => {
+        let stdout = ''
+
+        const stderr = await captureStderr(async () => {
+            stdout = await captureConsoleLog(async () => {
+                await main([
+                    '--verbose',
+                    'packages/logger/src/logger.ts',
+                    'README.md',
+                ])
+            })
         })
 
-        expect(output).toContain('explicit files: 2')
-        expect(output).toContain('logger\n  packages/logger/src/logger.ts')
-        expect(output).toContain('unmatched/root\n  README.md')
-        expect(output).toContain('scopes: logger')
+        expect(stderr).toContain('explicit files: 2')
+        expect(stderr).toContain('logger\n  packages/logger/src/logger.ts')
+        expect(stderr).toContain('unmatched/root\n  README.md')
+        expect(stderr).toContain('detected: logger')
+
+        // Stdout carries only the scope value callers capture.
+        expect(stdout).toBe('logger')
+    })
+
+    it('reports scopes the explicit override drops', async () => {
+        const stderr = await captureStderr(async () => {
+            await captureConsoleLog(async () => {
+                await main([
+                    '--verbose',
+                    '--scope',
+                    'config',
+                    'packages/logger/src/logger.ts',
+                ])
+            })
+        })
+
+        expect(stderr).toContain('detected: logger')
+        expect(stderr).toContain('override: config')
+        expect(stderr).toContain('dropped by override: logger')
     })
 
     it('rejects the removed skip-lint-staged flag', async () => {
@@ -226,7 +269,7 @@ describe('scope evidence formatting', () => {
                 'unmatched/root',
                 '  README.md',
                 '',
-                'scopes: config',
+                'detected: config',
             ].join('\n'),
         )
     })
