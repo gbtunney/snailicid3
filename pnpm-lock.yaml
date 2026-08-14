@@ -448,6 +448,31 @@ importers:
                 specifier: ^4.1.9
                 version: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.50.0)(tsx@4.23.12)(yaml@2.9.0))
 
+    packages/doctor:
+        dependencies:
+            '@snailicid3/node-utils':
+                specifier: workspace:*
+                version: link:../node-utils
+            '@snailicid3/workspace':
+                specifier: workspace:*
+                version: link:../workspace
+            zod:
+                specifier: ^4.4.3
+                version: 4.4.3
+        devDependencies:
+            '@snailicid3/config':
+                specifier: workspace:*
+                version: link:../config
+            '@types/node':
+                specifier: ^26.2.0
+                version: 26.2.0
+            typescript:
+                specifier: ^6.0.3
+                version: 6.0.3
+            vitest:
+                specifier: ^4.1.9
+                version: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.50.0)(tsx@4.23.12)(yaml@2.9.0))
+
     packages/example-package:
         devDependencies:
             '@snailicid3/build-config':
