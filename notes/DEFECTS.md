@@ -129,19 +129,37 @@ top-level `types` condition.
 
 ### Scope resolution
 
-- [ ] **B7** 🟠 `repository-scopes.ts:41-47` — custom classifiers spread **after** package
+- [x] **B7** 🟠 `repository-scopes.ts:41-47` — custom classifiers spread **after** package
       classifiers, so a custom matcher key equal to a shortened package name silently replaces that
       package's own classifier. The enum hides it (Set dedupes), so only the file→scope mapping
       changes. Latent collision with the built-in `scripts`/`actions`/`notes` defaults. → §2.2
-- [ ] **B8** 🟠 `core/git.ts:75-83` — `getGitChangedFiles` calls git with **no `cwd`** and
+- [x] **B8** 🟠 `core/git.ts:75-83` — `getGitChangedFiles` calls git with **no `cwd`** and
       early-returns silently on failure. With `getRepoRoot({fallbackToCwd:true})` at `commit.ts:74`,
       running outside a repo gives you a confident `chore(root): …` having inspected nothing. →
       §4.14
-- [ ] **B9** 🟠 `cli/commit.ts:100` + `:119` — verbose evidence and the machine-readable scope value
+- [x] **B9** 🟠 `cli/commit.ts:100` + `:119` — verbose evidence and the machine-readable scope value
       both go to **stdout**, so `--csv --verbose` emits both on one stream. Capturing stdout from
       these bins is an established pattern (`changesetv2.ts:164` does it). → §4.15
-- [ ] **B10** 🟡 `cli/commit.ts:136-144` — `--scope` override returns `matches: {}`, so the evidence
+- [x] **B10** 🟡 `cli/commit.ts:136-144` — `--scope` override returns `matches: {}`, so the evidence
       report comes out **empty** whenever you pass an explicit scope. → §6 (report, step 4)
+
+Notes on the B7–B10 fixes:
+
+- **B7** now unions patterns on a key collision instead of overwriting, so a custom matcher key that
+  matches a shortened package name no longer drops that package's own classifier.
+- **B8** threads `cwd` through every git invocation and **throws** on a failed one rather than
+  returning an empty list. `getGitChangedFilesByArea()` is new and returns per-file areas
+  (`staged`/`unstaged`/`untracked`/`range`); `getGitChangedFiles()` is now a thin wrapper over it. A
+  file that is staged _and_ further modified carries both areas — the case the commit-scope report
+  most needs, and the one the old flattening destroyed.
+- **B9** verbose evidence moved to **stderr**, so stdout carries only the scope value callers
+  capture. `changesetv2.ts` captures `scope-affected` stdout the same way.
+- **B10** `--scope` no longer blanks the report. Detection still runs, and the evidence now prints
+  `detected:`, `override:`, and `dropped by override:` so an override that hides a real scope is
+  visible.
+
+This unblocks step 1 of the commit-scope report — per-file provenance is now available as the
+report's data model rather than a nicety behind a verbose flag.
 
 ### Shipped shell duplication
 
@@ -160,31 +178,75 @@ top-level `types` condition.
 Each of these has code waiting on your answer. Roughly in dependency order — C1 gates C2, which
 gates C3.
 
-- [ ] **C1** 🔴 **How is the config→workspace edge cut?** Plan §3.1 says no config _policy_ API may
-      use that edge, but the commitlint factory imports 8 symbols from workspace, and config
-      re-exports ~15 more publicly. Since workspace is `private: true`, **`@snailicid3/config@0.2.0`
-      cannot be published at all** — rule 2.7. Options: publish workspace (opens the Phase 4 gate
-      early), or invert so the factory receives resolved scopes from its caller (what plan §4
-      already prescribes). → §4.7
-- [ ] **C2** 🟠 **Are config's workspace re-exports a supported contract?** They're published today.
-      If unintentional, withdrawing them is a breaking change needing its own version step — and it
-      has to happen before C3. → §4.7
-- [ ] **C3** 🟠 **Which scope engine survives?** Two live: `resolveRepositoryScopes` (classifier,
-      #212's direction, used by `scope-commit` only) and `matchScopesForPath` (micromatch, used by
-      `scope-affected` **and commitlint**). They agree today by coincidence; no test asserts it.
-      This is #212's never-written "removable old code" summary. → §2.3, plan §5.1
-- [ ] **C4** 🟠 **`cli/changeset.ts` — promote or delete?** 164 lines, no bin, no test, no export,
-      no reference. It drives the Phase 7.2 state machine, which is implemented, tested, and wired
-      to nothing while `gbt-changeset` runs the ported flat-denial logic. → §4.1
-- [ ] **C5** 🟠 **Does `gbt-changeset` stop committing when 7.2/7.3 land?** 7.3 specifies a
-      side-effect-free base flow; the shipped bin commits. That's a behavior break on a
-      maintainer-facing bin — needs an explicit call, not a silent flip. → §2.4
+- [x] **C1** 🔴 **DECIDED 2026-08-14 — invert the dependency; do not publish workspace.**
+      `workspace` is `private: true` _deliberately_: making it public makes the release tooling
+      treat it as a publish candidate before it is ready. So "publish workspace to fix the edge" is
+      off the table, and the remaining route is the one plan §4 already prescribes — config's
+      commitlint factory must **receive** resolved scopes from its caller instead of importing them
+      from workspace. Until that lands, `@snailicid3/config@0.2.0` remains unpublishable (rule 2.7).
+      **Smaller than it looked, after C2.** config touches workspace in three places. The ~15
+      re-exports in `src/index.ts` are unpublished and can simply be **deleted** rather than
+      inverted. Only the commitlint factory genuinely needs the inversion —
+      `commitlint/api-functions.ts` and `commitlint/workspace.scopes.ts`, eight symbols between
+      them. This is also #206's intent-vs-inventory split showing up in practice: privacy is being
+      used as a release-phase signal because there is no explicit intent axis. → §4.7
+- [x] **C2** 🟠 **DECIDED 2026-08-14 — not a contract; withdraw freely.** Established by dates, not
+      judgement: `config@0.2.0` published **2026-07-25**, and every workspace re-export first
+      appears in config's barrel on **2026-08-10** (`653d7a4`, scope matchers) or **2026-08-12**
+      (`7a8d7ff`, package-manager helpers). The published `0.2.0` tarball's `dist/index.js` contains
+      **zero** occurrences of `matchScopesForPath` or `runPackageBinary`. No consumer can depend on
+      them because they have never shipped. No deprecation window and no version step are required.
+      History note: the 08-10 exports were not a cross-package edge when written — they pointed at
+      config's own `./workspace/scope-matchers.js`, before `@snailicid3/workspace` existed. The
+      08-12 Phase 3 commit moved the implementation out and mechanically repointed them, which is
+      how an internal barrel export quietly became a cross-package one. → §4.7
+- [x] **C3** 🔴 **DECIDED 2026-08-14 — the #212 classifier engine survives; finish it properly.**
+      Migrate `scope-affected` (`cli/affected.ts:129`) and config's commitlint scope-enum
+      (`api-functions.ts:51`, `workspace.scopes.ts:38`) onto `resolveRepositoryScopes`, then delete
+      `matchScopesForPath` and fold `DEFAULT_SCOPE_PATH_MATCHERS` into the classifier layer. Add a
+      cross-engine agreement test **before** deleting anything, so the migration is proven rather
+      than assumed. Two constraints: the old matcher surface is re-exported from config's _public_
+      barrel, so removing it is a breaking change to `@snailicid3/config` and needs its own version
+      step (C2); and folding the defaults in also retires B7's latent `scripts`/`actions`/`notes`
+      collision. → §2.3, plan §5.1
+- [x] **C4** 🟠 **DECIDED 2026-08-14 — keep it, revisit soon.** `cli/changeset.ts` and the
+      `decideBranchAction` state machine stay in the tree unwired. Not dead code by accident —
+      parked deliberately. → §4.1
+- [x] **C5** 🟠 **DECIDED 2026-08-14 — keep the current flow, minus the commit.** `gbt-changeset`
+      keeps working the old way for now; the only change is that it **stops after creating the
+      changeset** instead of staging and committing it. That is `changesetv2.ts:196-205`
+      (`git add` + the `scope-commit --checked-commit` call). Branch creation, scope resolution, and
+      the reporting stay. This is 7.3's side-effect-free base flow arriving early and narrowly,
+      without the state machine. → §2.4
 - [ ] **C6** 🟡 **Scope collapse target and threshold** for `header-max-length`. A 12-package header
       measured 159 vs the limit of 150, and the scope list alone is ~115. Raising the number only
       defers it. Collapse to `root` past _N_? What's _N_? → §2.5, plan §5.2
-- [ ] **C7** 🟡 **Who owns the package Zod schema?** It exists in **build-config**
-      (`src/build/schemas/package.ts`), which B1 wants deleted; doctor hand-rolls its own JSON
-      walking; cli-app has a third `//TODO make into zod schema`. → §6, §4.16
+- [x] **C7** 🟡 **DECIDED 2026-08-14 — layered schemas, rooted in node-utils.** Doctor owns the
+      _diagnostic_ schema and extends a shared identity schema; config, cli-app and workspace
+      consume the same base. The proposed layering was right; only the base package moved down one
+      level. **Why not `workspace`:** it is `private: true` by the C1 decision, while `cli-app`
+      (`0.1.0`) and `config` (`0.2.0`) are public. A public package importing an unpublished one is
+      rule 2.7 — precisely what makes `config@0.2.0` unpublishable today — so rooting the schema
+      there would spread that defect from one public package to two, and would then have to be
+      undone by the very C1 inversion already agreed. **Why `node-utils`:** plan §3.3 already draws
+      this line with this exact example — _"readPackageJson(path) may be node-utils /
+      getWorkspacePackages() is workspace."_ Validating one manifest's identity is
+      `readPackageJson`-shaped; repository-wide discovery is workspace-shaped. node-utils is also
+      already a runtime dependency of cli-app, doctor and workspace. Layering is recorded below.
+      build-config keeps its own banner copy until B1 folds it into config — it is tsc-only and
+      imported by eight packages' `tsdown.config.ts`, so importing node-utils would close a
+      `node-utils:build → build-config:build` bootstrap cycle. → §6, §4.16
+- [x] **C9** 🟡 **DECIDED 2026-08-14 — doctor becomes a cli-app consumer.** Doctor is a CLI, so it
+      should use the CLI framework. The direction is legal (private → public) and adds no cycle:
+      cli-app depends on color, logger, node-utils and utils, none of which reach doctor. Not a
+      regression either — `src/cli.ts` already uses node-utils' `parseArgv`, so this is about what
+      it still hand-rolls: a maintained `HELP` string, manual `--help` interception, and no
+      `--version`. cli-app generates all three from the schema. **Caveat:** cli-app still carries
+      its own yargs bridge duplicating node-utils' `parseArgv` (§4.16), so doctor adopting it puts a
+      second consumer on the duplicated path. That raises the priority of collapsing cli-app onto
+      the argv primitives rather than lowering it — do that cleanup close behind, not much later. →
+      §6
+
 - [ ] **C8** 🟡 **Where does `runtime` live for Nx dependency-boundary enforcement?** Narrowed
       2026-08-14: this is _not_ a `buildConfig`-vs-tag question, since `buildConfig` is dead (B5).
       The live declaration is the per-entry `runtime` in each `tsdown.config.ts`, which Nx cannot
@@ -194,6 +256,180 @@ gates C3.
       Nx tags. → §4.9
 
 ---
+
+### C1/C7 — workspace and doctor go public later
+
+Noted 2026-08-14: `workspace` and `doctor` are `private: true` as a **release gate**, not
+permanently; both flip to `private: false` when they are ready to publish. That changes two things
+and leaves one unchanged.
+
+**Changed — the rule 2.7 argument is temporary.** Config importing workspace stops being a
+publishability blocker once workspace is published. But it blocks **today**, and for as long as the
+gate stays shut, so C1's inversion is still what unblocks a config release now rather than
+eventually.
+
+**Unchanged — the C7 placement.** Even with workspace public, the identity schema belongs in
+node-utils, for reasons that survive the flip:
+
+- **Weight.** workspace pulls `cosmiconfig`, `cosmiconfig-typescript-loader`, `micromatch`, git
+  handling and package discovery. Routing cli-app's banner through it drags all of that into every
+  consumer of a public CLI framework, to read a name and a version. node-utils is far lighter.
+- **Release coupling.** cli-app is public at `0.1.0` today; workspace publishes later. Depending on
+  it would tie cli-app's release train to workspace's gate.
+- **Ownership.** Plan §3.3's line does not move: one manifest's identity is
+  `readPackageJson`-shaped; repository-wide discovery is workspace-shaped.
+
+**Prerequisite for the flip.** Workspace is private specifically because the release tooling
+otherwise treats it as a publish candidate before it is ready. Flipping `private: false` without an
+explicit intent axis re-creates exactly that problem — which is [#206]'s
+`observe | prepare | publish` split, currently deferred. Land the intent signal **before** the flip,
+or the flip reintroduces the thing the privacy flag is working around.
+
+[#206]: https://github.com/gbtunney/snailicid3/issues/206
+
+### C7 — why two schemas, not one
+
+Sharpened 2026-08-14. The base schema is **not** a completeness check; it is a _reader's_ schema —
+"give me enough to render a banner or an app header." That distinction is the whole reason this kept
+feeling ambiguous, because `packageSchema` was doing two jobs under one name.
+
+|                      | identity (node-utils)                                               | diagnostic (doctor)                            |
+| -------------------- | ------------------------------------------------------------------- | ---------------------------------------------- |
+| Question             | "what is this package called?"                                      | "is this package correct?"                     |
+| Strictness           | lenient — `name` + `version` required, rest optional with fallbacks | strict, opinionated                            |
+| On a sparse manifest | degrades                                                            | reports a finding                              |
+| Failure mode         | must never throw                                                    | never throws either — findings, not exceptions |
+| Consumers            | cli-app, config, workspace, doctor                                  | doctor only                                    |
+
+**The current schema is the completeness one, mislabeled.** `schemaPackageMetaBanner` picks from
+`schemaBasePackage`, so it inherits required `author` (with a valid `email`), required
+`description`, and required `repository`, on top of a name regex, a license enum and a semver regex.
+That is house style, which is doctor's job — it is the wrong shape for a banner reader.
+
+Inside this repo only `@snailicid3/root` would throw on it (missing `author.email` and
+`description`), because every workspace package is house-styled. But **cli-app is public**: its
+banner reader will meet arbitrary consumer manifests, and plenty of valid ones carry no
+`author.email` and no `repository`. A banner should degrade, not crash someone's build.
+
+So: build a lenient identity schema in node-utils rather than re-exporting the existing one, and
+move `schemaBasePackage`'s strictness into doctor as diagnostics when build-config is folded into
+config (B1).
+
+### C7 schema layering
+
+```text
+node-utils   identity: name, version, description, author, license, repository
+    |
+    +-- cli-app     banner, --version, header       (public)
+    +-- config      policy needing manifest facts   (public)
+    +-- workspace   extends: path, deps, privacy    (private)
+    +-- doctor      extends: exports, bin, files    (private)
+```
+
+## Core migration progress
+
+**Step 1 — node-utils package schemas.** `packageNameSchema`, `packageVersionSchema`,
+`packageManagerFieldSchema`, `packageIdentitySchema`, `jsonTextSchema`, `readPackageManifest`.
+Identity validates _shape_, not presence: every field is optional, because doctor reports a missing
+name as `MANIFEST_NAME_MISSING` and could not do so if parsing rejected the manifest first, and
+`resolvePackageManager` reads one field from a root manifest without caring about identity.
+`readPackageName` and `resolvePackageManager` rewired onto it. (Audit instructions 2, 5.)
+
+**Step 2 — schema-parsed discovery and a snapshot.** `workspacePackageRecordSchema`,
+`workspacePackageManagerOutputSchema`, `getWorkspaceSnapshot` / `safeGetWorkspaceSnapshot`.
+`normalizeWorkspacePackage` is gone; a malformed record now fails the listing instead of vanishing
+from it. `normalizeRepoPath` decides containment with `path.relative` and emits POSIX
+repository-relative paths, with the root at `'.'`. (Audit instructions 3, 4, 7.)
+
+Three latent defects surfaced, each previously masked by absolute paths:
+
+- Root was excluded by comparing `path.resolve(pkg.path)` to the repo root. With relative paths,
+  `path.resolve('.')` resolves against the **process** directory, so root survived the filter and
+  its `./**` classifier matched every file.
+- Discovery defaulted `repoRoot` to `process.cwd()`, but a recursive package-manager listing is
+  repository-wide, so running from inside a package reported the root package as outside the root.
+- `collectChangesetScopes` normalized a changeset path and then discarded the result for absolute
+  inputs.
+
+Removing `getChangedWorkspacePackagesFromGit` and `isInsideDir` (no production call sites, per the
+audit) was required, not incidental: they were the only reason `git.ts` imported `packages.ts`, and
+defaulting discovery to the git root would otherwise have closed an import cycle.
+
+**Step 3 — one scope model.** `core/workspace-scopes.ts` implements plan §5's contract, which had
+been specified but never built: `ReadonlyArray<string> | true | false | undefined`, with `true` a
+manual scope, `false` a deletion, `undefined` inheritance, and an empty array rejected rather than
+silently meaning deletion the way `null` and `[]` did in `resolveScopePathMatchers`.
+`getWorkspaceScopes()` derives the Commitlint `scope-enum` names and the file classifiers from the
+**same** map, so the two can no longer drift, and records contributing sources per scope so a merged
+collision is inspectable. `STANDARD_WORKSPACE_SCOPES` moved here from the legacy matcher module.
+Root is excluded by path, and packages that shorten to the same scope are unioned. (Audit
+instructions 8, 10, 11 in part.)
+
+Still ahead: rewire `scope-affected` and config's commitlint enum onto this model, then delete
+`scope-matchers.ts` and `isRootPackageName` (audit 9, 12, 14), and the barrel reduction (15).
+
+**Step 4 — one engine.** `scope-affected`, `scope-commit` and Commitlint's `scope-enum` all resolve
+through `getWorkspaceScopes` + `resolveRepositoryScopes`. `scope-matchers.ts` deleted, along with
+`isRootPackageName`. `scope-affected` stops running its own `git diff` and takes the same
+changed-file input `scope-commit` uses. Nx project names are resolved back through the snapshot
+before root is decided — the gap flagged against audit instruction 14. Config's unpublished
+workspace re-exports deleted per C2. (Audit 9, 12, 14.)
+
+Two things surfaced. Publishing the _resolved classifiers_ as Commitlint metadata created a feedback
+loop: the CLI reads that metadata back as overrides, so shortened package names merged with the
+`--keep-prefix` names and `scope-commit --keep-prefix` emitted both spellings of one scope. Metadata
+is now the consumer's overrides only. Separately, moving discovery to the top of `scope-affected`
+made `--changeset-only` shell out to the package manager for nothing; discovery is lazy.
+
+**Step 5 — argv and the barrel.** `parseArgv` now declares boolean keys to yargs, derived from the
+schema. Without that, `--commit chore subject` parsed as `commit: 'chore'` and lost a positional, so
+no flag taking a following token could migrate. `scope-commit` and `scope-affected` are off their
+hand-rolled switches, preserving every alias and the `Unknown argument:` wording that package
+scripts match on. Note `--no-nx` and `--no-repo-scopes` arrive through yargs' boolean-negation as
+`nx: false` / `repoScopes: false`, which the schemas model explicitly.
+
+`core/index.ts` is now an explicit barrel rather than `export *`: while both engines existed it
+re-exported them side by side, making the obsolete one look equally canonical. `array.js` and
+`paths.js` are internal. The redundant representation adapters superseded by `WorkspaceSnapshot`
+(`getWorkspacePackagesLookup`, `getWorkspacePackagesObject`, `workspacePackagesToArray`,
+`getWorkspaceNodeModulesRoot`) and the duplicated `validPackageName` regex are deleted. (Audit 13,
+15.)
+
+**All fifteen audit instructions are now addressed.**
+
+## Core audit (external, 2026-08-14) — verification
+
+A function-by-function audit of `packages/workspace/src/core` was reviewed against #218's head.
+Verdicts checked here rather than taken on trust.
+
+**Confirmed.** All six "no production call site" claims hold — zero non-test, non-declaration
+references for `getChangedWorkspacePackagesFromGit`, `getWorkspaceNodeModulesRoot`,
+`getWorkspacePackagesLookup`, `getWorkspacePackagesObject`, `workspacePackagesToArray` and
+`readPackageName`. `findNearestPackageJson` does use `searchDir.startsWith(repoRoot)`
+(`packages.ts:27`), which prefix-matches a sibling such as `/repo-other`. `scope-affected` does
+still call `matchScopesForPath`.
+
+**More precise than §2.3.** Commitlint does not literally call `matchScopesForPath`; it consumes the
+same legacy _definitions_ via `resolveScopePathMatchers`. That is why the two engines agree today
+without sharing a classification contract — a sharper statement of the same defect.
+
+**One real gap — instruction 14 is not standalone.** "Remove `isRootPackageName()` and identify root
+by normalized workspace path" works at only one of its two call sites.
+`config/commitlint/workspace.scopes.ts:53` iterates package records that carry `path`, so the
+replacement applies. `workspace/cli/affected.ts:145` normalizes **Nx project names** from
+`nx show projects --affected` — bare strings with no path attached — so the replacement cannot apply
+until those names are resolved back to package records through the snapshot. Instruction 14
+therefore depends on 7 (`WorkspaceSnapshot`) and 9 (rewire `scope-affected`), and also assumes Nx
+project names equal package names, which holds here only because they are inferred from
+`package.json`.
+
+**Simplification the audit lacks.** It says to remove config's workspace re-exports "eventually,
+after consumers import `@snailicid3/workspace` directly." Per C2 those re-exports have never been
+published, so there are no consumers and they can be deleted immediately.
+
+**Newly surfaced.** Plan §5's override contract (`readonly string[] | true | false | undefined`) was
+written as settled but never implemented — `resolveScopePathMatchers`' null/empty-array deletion
+directly contradicts it. Neither the plan's own status nor this checklist had flagged that.
 
 ## Sequencing note
 

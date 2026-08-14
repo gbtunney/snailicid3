@@ -8,17 +8,23 @@
  * - run git commit with
  * - live terminal output → Husky runs lint-staged once using .lintstagedrc.mts → commitlint validates the message
  */
-import { runCliIfEntrypointAsync, runCommand } from '@snailicid3/node-utils'
+import {
+    runCliIfEntrypointAsync,
+    runCommand,
+    safeParseArgv,
+} from '@snailicid3/node-utils'
+import { z } from 'zod'
 import { readWorkspaceEnvironment } from './../core/environment.js'
 import { getGitChangedFiles, getRepoRoot } from './../core/git.js'
 import { runPackageBinary } from './../core/package-manager.js'
+import { getWorkspaceSnapshot } from './../core/packages.js'
 import {
-    createRepositoryScopeClassifiers,
     type RepositoryScopeResolution,
     resolveRepositoryScopes,
 } from './../core/repository-scopes.js'
 import { loadScopePathMatchers } from './../core/scope-matcher-config.js'
 import { formatScopes, type ScopeFormat } from './../core/scopes.js'
+import { getWorkspaceScopes } from './../core/workspace-scopes.js'
 
 export type ChangeMode = 'all' | 'staged'
 export type FileInputSource = 'explicit' | ChangeMode
@@ -47,6 +53,7 @@ export function formatScopeEvidence(
     files: ReadonlyArray<string>,
     resolution: RepositoryScopeResolution,
     inputSource: FileInputSource,
+    overrideScopes?: ReadonlyArray<string>,
 ): string {
     const lines = [`${inputSource} files: ${files.length.toString()}`]
 
@@ -63,7 +70,20 @@ export function formatScopeEvidence(
         )
     }
 
-    lines.push('', `scopes: ${formatScopes(resolution.scopes, 'csv')}`)
+    lines.push('', `detected: ${formatScopes(resolution.scopes, 'csv')}`)
+
+    if (overrideScopes) {
+        lines.push(`override: ${formatScopes(overrideScopes, 'csv')}`)
+
+        const dropped = resolution.scopes.filter(
+            (scope) => !overrideScopes.includes(scope),
+        )
+
+        if (dropped.length > 0) {
+            lines.push(`dropped by override: ${formatScopes(dropped, 'csv')}`)
+        }
+    }
+
     return lines.join('\n')
 }
 
@@ -87,17 +107,33 @@ export async function main(
         prepareCheckedCommit(repoRoot)
     }
 
-    const files = parsed.explicitScope
-        ? [...request.inputPaths]
-        : resolveInputFiles(request.inputPaths, parsed.mode)
+    const files = resolveInputFiles(
+        request.inputPaths,
+        parsed.mode,
+        getGitChangedFiles,
+        repoRoot,
+    )
+    const detected = await resolveScopesForFiles(
+        repoRoot,
+        files,
+        parsed.keepPrefix,
+    )
+    // An explicit scope overrides which scopes are used, but detection still runs so the report can
+    // show what the files actually touch — including scopes the override leaves out.
     const resolution = parsed.explicitScope
-        ? explicitScopeResolution(parsed.explicitScope)
-        : await resolveScopesForFiles(repoRoot, files, parsed.keepPrefix)
+        ? {
+              ...detected,
+              scopes: splitExplicitScope(parsed.explicitScope),
+          }
+        : detected
 
     if (parsed.verbose) {
         const inputSource =
             request.inputPaths.length > 0 ? 'explicit' : parsed.mode
-        console.log(formatScopeEvidence(files, resolution, inputSource))
+        // Stderr: stdout carries the machine-readable scope value that callers capture.
+        process.stderr.write(
+            `${formatScopeEvidence(files, detected, inputSource, parsed.explicitScope ? resolution.scopes : undefined)}\n`,
+        )
     }
 
     const scopeValue = formatScopes(resolution.scopes, 'csv')
@@ -123,24 +159,16 @@ export function resolveInputFiles(
     inputPaths: ReadonlyArray<string>,
     mode: ChangeMode,
     getChangedFiles: typeof getGitChangedFiles = getGitChangedFiles,
+    cwd?: string,
 ): Array<string> {
     if (inputPaths.length > 0) return [...inputPaths]
 
     return getChangedFiles({
+        ...(cwd === undefined ? {} : { cwd }),
         includeStaged: true,
         includeUnstaged: mode === 'all',
         includeUntracked: mode === 'all',
     })
-}
-
-function explicitScopeResolution(
-    scopeValue: string,
-): RepositoryScopeResolution {
-    return {
-        matches: {},
-        scopes: splitExplicitScope(scopeValue),
-        unmatched: [],
-    }
 }
 
 function makeMessage(
@@ -151,87 +179,104 @@ function makeMessage(
     return `${type}(${scopeValue}): ${subject}`
 }
 
+const optionsSchema = z.strictObject({
+    all: z.boolean().optional(),
+    c: z.boolean().optional(),
+    cached: z.boolean().optional(),
+    checkedCommit: z.boolean().optional(),
+    checkType: z.boolean().optional(),
+    commit: z.boolean().optional(),
+    commitChecked: z.boolean().optional(),
+    csv: z.boolean().optional(),
+    debug: z.boolean().optional(),
+    dry: z.boolean().optional(),
+    dryRun: z.boolean().optional(),
+    fullScope: z.boolean().optional(),
+    h: z.boolean().optional(),
+    help: z.boolean().optional(),
+    keepPrefix: z.boolean().optional(),
+    list: z.boolean().optional(),
+    m: z.boolean().optional(),
+    message: z.boolean().optional(),
+    n: z.boolean().optional(),
+    scope: z.string().optional(),
+    staged: z.boolean().optional(),
+    validate: z.boolean().optional(),
+    validateType: z.boolean().optional(),
+    verbose: z.boolean().optional(),
+})
+
+/**
+ * Translate argv into the command's typed shape.
+ *
+ * Every historical alias is preserved deliberately; the audit noted they should be reviewed, but dropping one silently
+ * is a behaviour change, so that is a separate decision.
+ */
 function parseArgs(args: Array<string>): ParsedArgs {
-    const parsed: ParsedArgs = {
-        dryRun: false,
-        explicitScope: '',
-        keepPrefix: false,
-        mode: 'staged',
-        outputMode: 'scope',
-        positionals: [],
-        runCommitBefore: false,
-        scopeFormat: 'csv',
-        validateOnly: false,
-        verbose: false,
-    }
+    const parsed = safeParseArgv(optionsSchema, args, z.array(z.string()))
 
-    for (let index = 0; index < args.length; index += 1) {
-        const arg = args[index]
+    if (!parsed.success) {
+        // Preserve the original wording: package scripts and consumers match on it.
+        const unknown = parsed.error.issues.find(
+            (issue) => issue.code === 'unrecognized_keys',
+        )
+        const unknownKey =
+            unknown && 'keys' in unknown
+                ? (unknown.keys as ReadonlyArray<string>)[0]
+                : undefined
 
-        switch (arg) {
-            case '--all':
-                parsed.mode = 'all'
-                break
-            case '--c':
-            case '--commit':
-                parsed.outputMode = 'commit'
-                break
-            case '--cached':
-            case '--staged':
-                parsed.mode = 'staged'
-                break
-            case '--check-type':
-            case '--validate':
-            case '--validate-type':
-                parsed.validateOnly = true
-                break
-            case '--checked-commit':
-            case '--commit-checked':
-                parsed.outputMode = 'commit'
-                parsed.runCommitBefore = true
-                break
-            case '--csv':
-                parsed.scopeFormat = 'csv'
-                break
-            case '--debug':
-            case '--verbose':
-                parsed.verbose = true
-                break
-            case '--dry':
-            case '--dry-run':
-            case '-n':
-                parsed.dryRun = true
-                break
-            case '--full-scope':
-            case '--keep-prefix':
-                parsed.keepPrefix = true
-                break
-            case '--help':
-            case '-h':
-                printHelp()
-                process.exit(0)
-                break
-            case '--list':
-                parsed.scopeFormat = 'list'
-                break
-            case '--m':
-            case '--message':
-                parsed.outputMode = 'message'
-                break
-            case '--scope':
-                parsed.explicitScope = readNextValue(args, ++index, arg)
-                break
-            default:
-                if (arg.startsWith('--')) {
-                    throw new Error(`Unknown argument: ${arg}`)
-                }
+        if (unknownKey !== undefined) {
+            const flag = args.find(
+                (arg) =>
+                    arg.startsWith('--') &&
+                    arg.replace(/^--/u, '').replace(/=.*$/u, '') ===
+                        unknownKey.replace(
+                            /[A-Z]/gu,
+                            (letter) => `-${letter.toLowerCase()}`,
+                        ),
+            )
 
-                parsed.positionals.push(arg)
-                break
+            throw new Error(`Unknown argument: ${flag ?? `--${unknownKey}`}`)
         }
+
+        throw new Error(`invalid arguments:\n${z.prettifyError(parsed.error)}`)
     }
 
-    return parsed
+    const options = parsed.data.options
+
+    if (options.help === true || options.h === true) {
+        printHelp()
+        process.exit(0)
+    }
+
+    const wantsCheckedCommit =
+        options.checkedCommit === true || options.commitChecked === true
+
+    return {
+        dryRun:
+            options.dryRun === true ||
+            options.dry === true ||
+            options.n === true,
+        explicitScope: options.scope ?? '',
+        keepPrefix: options.keepPrefix === true || options.fullScope === true,
+        mode: options.all === true ? 'all' : 'staged',
+        outputMode:
+            options.message === true || options.m === true
+                ? 'message'
+                : options.commit === true ||
+                    options.c === true ||
+                    wantsCheckedCommit
+                  ? 'commit'
+                  : 'scope',
+        positionals: parsed.data.positionals,
+        runCommitBefore: wantsCheckedCommit,
+        scopeFormat: options.list === true ? 'list' : 'csv',
+        validateOnly:
+            options.validate === true ||
+            options.validateType === true ||
+            options.checkType === true,
+        verbose: options.verbose === true || options.debug === true,
+    }
 }
 
 function performCommit(repoRoot: string, message: string): void {
@@ -281,20 +326,6 @@ Examples:
   scope-commit .github/workflows/call-pipeline.yml`)
 }
 
-function readNextValue(
-    args: ReadonlyArray<string>,
-    index: number,
-    flag: string,
-): string {
-    const value = args[index]
-
-    if (!value || value.startsWith('--')) {
-        throw new Error(`${flag} requires a value`)
-    }
-
-    return value
-}
-
 function resolveCommitRequest(parsed: ParsedArgs): CommitRequest {
     if (parsed.outputMode === 'scope') {
         return { inputPaths: parsed.positionals, subject: '', type: '' }
@@ -316,14 +347,13 @@ async function resolveScopesForFiles(
     if (files.length === 0)
         return { matches: {}, scopes: ['root'], unmatched: [] }
 
-    const customClassifiers = await loadScopePathMatchers(repoRoot)
-    const classifiers = createRepositoryScopeClassifiers(
-        repoRoot,
-        customClassifiers,
+    const resolved = getWorkspaceScopes({
         keepPrefix,
-    )
+        overrides: await loadScopePathMatchers(repoRoot),
+        snapshot: getWorkspaceSnapshot(repoRoot),
+    })
 
-    return resolveRepositoryScopes(files, classifiers)
+    return resolveRepositoryScopes(files, resolved.classifiers)
 }
 
 function splitExplicitScope(scopeValue: string): Array<string> {

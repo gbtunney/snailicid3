@@ -35,11 +35,18 @@ export type ZodArrayLike = z.ZodArray | z.ZodTuple
 export type ZodObjectLike = z.ZodDiscriminatedUnion | z.ZodObject | z.ZodRecord
 
 /** Parse argv tokens into the normalized object produced by Yargs. */
-export const parseArgvObject = (argv: Argv): ArgvObject =>
+export const parseArgvObject = (
+    argv: Argv,
+    booleanKeys: ReadonlyArray<string> = [],
+): ArgvObject =>
     yargs([...argv])
         .exitProcess(false)
         .help(false)
         .version(false)
+        // Flags must be declared boolean or yargs consumes the following token as their value, so
+        // `--commit chore subject` would parse as `commit: 'chore'` with one positional instead of a
+        // flag with two.
+        .boolean([...booleanKeys])
         .parserConfiguration({
             'camel-case-expansion': true,
             'parse-numbers': false,
@@ -47,6 +54,30 @@ export const parseArgvObject = (argv: Argv): ArgvObject =>
             'strip-dashed': true,
         })
         .parseSync()
+
+/** Collect the keys of a Zod object schema whose values are booleans, unwrapping optional/default. */
+export const booleanSchemaKeys = (schema: ZodObjectLike): Array<string> => {
+    const shape: unknown = (schema as { shape?: unknown }).shape
+
+    if (typeof shape !== 'object' || shape === null) return []
+
+    return Object.entries(shape as Record<string, unknown>)
+        .filter(([, value]) => unwrapsToBoolean(value))
+        .map(([key]) => key)
+}
+
+const unwrapsToBoolean = (schema: unknown, depth = 0): boolean => {
+    if (depth > 8 || typeof schema !== 'object' || schema === null) return false
+
+    const definition = (schema as { _zod?: { def?: unknown } })._zod?.def as
+        undefined | { innerType?: unknown; type?: string }
+
+    if (definition?.type === 'boolean') return true
+
+    return definition?.innerType === undefined
+        ? false
+        : unwrapsToBoolean(definition.innerType, depth + 1)
+}
 
 /** Return the raw positional tokens from argv. */
 export const parseArgvPositionals = (argv: Argv): Array<string> => {
@@ -67,7 +98,7 @@ export const parseArgv = <
     argv: Argv,
     positionalSchema?: PositionalSchema,
 ): ParsedArgv<Schema, PositionalSchema> => {
-    const parsed = parseArgvObject(argv)
+    const parsed = parseArgvObject(argv, booleanSchemaKeys(schema))
     const { $0: _command, _, ...namedOptions } = parsed
     const options = schema.parse(namedOptions)
 

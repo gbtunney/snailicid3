@@ -130,3 +130,45 @@ describe('positional argv', () => {
         expect(result.success).toBe(false)
     })
 })
+
+describe('boolean flag declaration', () => {
+    const schema = z.strictObject({
+        commit: z.boolean().optional(),
+        scope: z.string().optional(),
+        verbose: z.boolean().default(false),
+    })
+
+    test('does not swallow the token after a boolean flag', () => {
+        // Undeclared, yargs reads `chore` as the value of --commit and loses a positional.
+        const parsed = parseArgv(
+            schema,
+            ['--commit', 'chore', 'subject'],
+            z.array(z.string()),
+        )
+
+        expect(parsed.options.commit).toBe(true)
+        expect(parsed.positionals).toEqual(['chore', 'subject'])
+    })
+
+    test('still reads a value for a string option', () => {
+        const parsed = parseArgv(
+            schema,
+            ['--scope', 'config'],
+            z.array(z.string()),
+        )
+
+        expect(parsed.options.scope).toBe('config')
+        expect(parsed.positionals).toEqual([])
+    })
+
+    test('unwraps default() when deciding what is boolean', () => {
+        const parsed = parseArgv(
+            schema,
+            ['--verbose', 'tail'],
+            z.array(z.string()),
+        )
+
+        expect(parsed.options.verbose).toBe(true)
+        expect(parsed.positionals).toEqual(['tail'])
+    })
+})
