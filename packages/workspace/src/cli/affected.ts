@@ -1,23 +1,26 @@
 #!/usr/bin/env node
 
-import { runCliIfEntrypointAsync, runCommand } from '@snailicid3/node-utils'
+import { runCliIfEntrypointAsync } from '@snailicid3/node-utils'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { splitNonEmptyLines, uniqueSorted } from './../core/array.js'
-import { getRepoRoot } from './../core/git.js'
+import { getGitChangedFiles, getRepoRoot } from './../core/git.js'
 import { runPackageBinary } from './../core/package-manager.js'
-import { normalizeRepoPath } from './../core/paths.js'
+import {
+    getWorkspaceSnapshot,
+    type WorkspaceSnapshot,
+} from './../core/packages.js'
+import { resolveRepositoryScopes } from './../core/repository-scopes.js'
 import { loadScopePathMatchers } from './../core/scope-matcher-config.js'
 import {
-    matchScopesForPath,
-    type ScopePathMatchers,
-} from './../core/scope-matchers.js'
-import {
     formatScopes,
-    isRootPackageName,
     type ScopeFormat,
     shortenScopeName,
 } from './../core/scopes.js'
+import {
+    getWorkspaceScopes,
+    type ResolvedWorkspaceScopes,
+} from './../core/workspace-scopes.js'
 
 type ParsedArgs = {
     changesetFiles: Array<string>
@@ -34,22 +37,33 @@ export async function main(
 ): Promise<void> {
     const parsed = parseArgs(args)
     const repoRoot = getRepoRoot({ fallbackToCwd: true })
+    // Discovery shells out to the package manager, so it is resolved once and only when a selected
+    // mode actually needs it.
+    let cachedSnapshot: undefined | WorkspaceSnapshot
+    const snapshot = (): WorkspaceSnapshot =>
+        (cachedSnapshot ??= getWorkspaceSnapshot(repoRoot))
 
     const scopes = [
         ...(parsed.includeNxScopes
-            ? collectNxAffectedScopes(repoRoot, parsed)
+            ? collectNxAffectedScopes(repoRoot, parsed, snapshot())
             : []),
         ...(parsed.includeRepoScopes
             ? collectDirtyRepoScopes(
                   repoRoot,
                   parsed.keepPrefix,
-                  await loadScopePathMatchers(repoRoot),
+                  getWorkspaceScopes({
+                      keepPrefix: parsed.keepPrefix,
+                      overrides: await loadScopePathMatchers(repoRoot),
+                      snapshot: snapshot(),
+                  }),
+                  snapshot,
               )
             : []),
         ...collectChangesetScopes(
             repoRoot,
             parsed.changesetFiles,
             parsed.keepPrefix,
+            snapshot,
         ),
     ]
 
@@ -60,6 +74,7 @@ function collectChangesetScopes(
     repoRoot: string,
     changesetFiles: ReadonlyArray<string>,
     keepPrefix: boolean,
+    snapshot: () => WorkspaceSnapshot,
 ): Array<string> {
     return changesetFiles.flatMap((filePath) => {
         // An explicitly supplied changeset file may legitimately sit outside the repository, and
@@ -71,40 +86,48 @@ function collectChangesetScopes(
 
         return parseChangesetPackageNames(
             readFileSync(absolutePath, 'utf8'),
-        ).map((scope) => normalizeScopeName(scope, keepPrefix))
+        ).map((scope) => normalizeScopeName(scope, keepPrefix, snapshot()))
     })
 }
 
 function collectDirtyRepoScopes(
     repoRoot: string,
     keepPrefix: boolean,
-    matchers: ScopePathMatchers,
+    resolved: ResolvedWorkspaceScopes,
+    snapshot: () => WorkspaceSnapshot,
 ): Array<string> {
-    const staged = runCommand('git', ['diff', '--cached', '--name-only'], {
-        cwd: repoRoot,
-    }).stdout
-
-    const unstaged = runCommand('git', ['diff', '--name-only'], {
-        cwd: repoRoot,
-    }).stdout
-
-    const untracked = runCommand(
-        'git',
-        ['ls-files', '--others', '--exclude-standard'],
-        {
-            cwd: repoRoot,
-        },
-    ).stdout
-
-    return splitNonEmptyLines(`${staged}\n${unstaged}\n${untracked}`).flatMap(
-        (filePath) =>
-            collectRepoScopesForPath(repoRoot, filePath, keepPrefix, matchers),
+    // The same changed-file input scope-commit uses, rather than a second interpretation of it.
+    const changedFiles = getGitChangedFiles({ cwd: repoRoot })
+    const resolution = resolveRepositoryScopes(
+        changedFiles,
+        resolved.classifiers,
     )
+    const matched = new Set(Object.values(resolution.matches).flat())
+
+    // A changeset file names its own packages; unmatched ones fall back to reading it.
+    const changesetScopes = changedFiles
+        .filter(
+            (file) =>
+                !matched.has(file) &&
+                file.startsWith('.changeset/') &&
+                file.endsWith('.md'),
+        )
+        .flatMap((file) =>
+            collectChangesetScopes(repoRoot, [file], keepPrefix, snapshot),
+        )
+
+    return [
+        ...Object.entries(resolution.matches)
+            .filter(([, files]) => files.length > 0)
+            .map(([scope]) => scope),
+        ...changesetScopes,
+    ]
 }
 
 function collectNxAffectedScopes(
     repoRoot: string,
     parsed: ParsedArgs,
+    snapshot: WorkspaceSnapshot,
 ): Array<string> {
     const nxArgs = ['show', 'projects', '--affected', '--base', parsed.nxBase]
 
@@ -114,37 +137,30 @@ function collectNxAffectedScopes(
 
     if (result.status !== 0) return []
 
-    return splitNonEmptyLines(result.stdout).map((scope) =>
-        normalizeScopeName(scope, parsed.keepPrefix),
+    return splitNonEmptyLines(result.stdout).map((projectName) =>
+        normalizeScopeName(projectName, parsed.keepPrefix, snapshot),
     )
 }
 
-function collectRepoScopesForPath(
-    repoRoot: string,
-    inputPath: string,
+/**
+ * Map an Nx project name to a commit scope.
+ *
+ * Root is decided by the package's normalized path, not by its name: a nested package may legitimately be called
+ * `@scope/root`. Nx reports bare project names with no path attached, so the name is resolved back to a package record
+ * through the snapshot first.
+ */
+function normalizeScopeName(
+    projectName: string,
     keepPrefix: boolean,
-    matchers: ScopePathMatchers,
-): Array<string> {
-    const relativePath = normalizeRepoPath(repoRoot, inputPath)
-    const matchedScopes = matchScopesForPath(relativePath, matchers)
+    snapshot: WorkspaceSnapshot,
+): string {
+    if (projectName === '.') return 'root'
 
-    if (matchedScopes.length > 0) return matchedScopes
+    const workspacePackage = snapshot.lookup.get(projectName)
 
-    if (
-        relativePath.startsWith('.changeset/') &&
-        relativePath.endsWith('.md')
-    ) {
-        return collectChangesetScopes(repoRoot, [relativePath], keepPrefix)
-    }
+    if (workspacePackage?.path === '.') return 'root'
 
-    return []
-}
-
-function normalizeScopeName(scopeName: string, keepPrefix: boolean): string {
-    if (scopeName === '.') return 'root'
-    if (isRootPackageName(scopeName)) return 'root'
-
-    return shortenScopeName(scopeName, keepPrefix)
+    return shortenScopeName(projectName, keepPrefix)
 }
 
 function parseArgs(args: Array<string>): ParsedArgs {

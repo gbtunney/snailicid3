@@ -14,11 +14,6 @@ export function formatScopes(
     return values.join(',')
 }
 
-/** Check whether a package name identifies an unscoped or scoped workspace root. */
-export function isRootPackageName(packageName: string): boolean {
-    return packageName === 'root' || /^@[^/]+\/root$/.test(packageName)
-}
-
 /** Remove an npm organization prefix from a scope unless the prefix should be retained. */
 export function shortenScopeName(
     scopeName: string,

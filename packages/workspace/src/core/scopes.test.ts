@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isRootPackageName, shortenScopeName } from './scopes.js'
+import { shortenScopeName } from './scopes.js'
 
 describe('shortenScopeName', () => {
     it('strips arbitrary npm scopes without cutting trailing characters', () => {
@@ -23,26 +23,9 @@ describe('shortenScopeName', () => {
     })
 })
 
-describe('isRootPackageName', () => {
-    it('detects root packages', () => {
-        expect(isRootPackageName('root')).toBe(true)
-        expect(isRootPackageName('@snailicid3/root')).toBe(true)
-        expect(isRootPackageName('@gbt/root')).toBe(true)
-    })
-
-    it('does not treat non-root packages as root', () => {
-        expect(isRootPackageName('@gbt/not-root')).toBe(false)
-    })
-})
-
 describe('edge cases', () => {
     it('leaves malformed scoped-looking names unchanged', () => {
         expect(shortenScopeName('@snailicid3')).toBe('@snailicid3')
         expect(shortenScopeName('@')).toBe('@')
-    })
-
-    it('does not treat similar names as root packages', () => {
-        expect(isRootPackageName('@gbt/rooted')).toBe(false)
-        expect(isRootPackageName('@gbt/root-extra')).toBe(false)
     })
 })

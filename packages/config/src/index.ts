@@ -202,31 +202,4 @@ export type {
     Writable,
     WritableDeep,
 } from './utilities/types.js'
-export {
-    getPackageBinaryCommand,
-    getPackageManager,
-    getPackageScriptCommand,
-    resolvePackageManager,
-    runPackageBinary,
-    runPackageManager,
-    runPackageScript,
-} from '@snailicid3/workspace'
-export type {
-    PackageCommand,
-    PackageManager,
-    PackageManagerResolution,
-} from '@snailicid3/workspace'
-export { loadScopePathMatchers } from '@snailicid3/workspace'
-export {
-    DEFAULT_SCOPE_PATH_MATCHERS,
-    matchScopesForPath,
-    resolveScopePathMatchers,
-    scopeMatchersFromCommitlintConfig,
-} from '@snailicid3/workspace'
-export type {
-    ScopePathMatcherOverrides,
-    ScopePathMatchers,
-    Snailicid3CommitlintSettings,
-} from '@snailicid3/workspace'
-
 export { merge } from 'ts-deepmerge'

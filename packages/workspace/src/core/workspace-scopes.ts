@@ -54,6 +54,9 @@ export const STANDARD_WORKSPACE_SCOPES = {
     scripts: ['scripts/**'],
 } as const satisfies Record<string, ReadonlyArray<string>>
 
+/** Key under which resolved scope metadata is published on a generated Commitlint config. */
+export const SNAILICID3_COMMITLINT_CONFIG_KEY = 'snailicid3' as const
+
 /** `root` is always a valid scope even though nothing classifies into it automatically. */
 export const BASE_WORKSPACE_SCOPES = ['root'] as const
 

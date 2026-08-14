@@ -14,12 +14,12 @@ import { getGitChangedFiles, getRepoRoot } from './../core/git.js'
 import { runPackageBinary } from './../core/package-manager.js'
 import { getWorkspaceSnapshot } from './../core/packages.js'
 import {
-    createRepositoryScopeClassifiers,
     type RepositoryScopeResolution,
     resolveRepositoryScopes,
 } from './../core/repository-scopes.js'
 import { loadScopePathMatchers } from './../core/scope-matcher-config.js'
 import { formatScopes, type ScopeFormat } from './../core/scopes.js'
+import { getWorkspaceScopes } from './../core/workspace-scopes.js'
 
 export type ChangeMode = 'all' | 'staged'
 export type FileInputSource = 'explicit' | ChangeMode
@@ -339,14 +339,13 @@ async function resolveScopesForFiles(
     if (files.length === 0)
         return { matches: {}, scopes: ['root'], unmatched: [] }
 
-    const customClassifiers = await loadScopePathMatchers(repoRoot)
-    const classifiers = createRepositoryScopeClassifiers(
-        getWorkspaceSnapshot(repoRoot),
-        customClassifiers,
+    const resolved = getWorkspaceScopes({
         keepPrefix,
-    )
+        overrides: await loadScopePathMatchers(repoRoot),
+        snapshot: getWorkspaceSnapshot(repoRoot),
+    })
 
-    return resolveRepositoryScopes(files, classifiers)
+    return resolveRepositoryScopes(files, resolved.classifiers)
 }
 
 function splitExplicitScope(scopeValue: string): Array<string> {

@@ -94,7 +94,8 @@ describe('Commitlint config merge behavior', () => {
             cwd,
             scopeOptions: {
                 matchers: {
-                    actions: null,
+                    // `false` disables a scope; `null` used to and is now rejected outright.
+                    actions: false,
                     docs: ['docs/**'],
                 },
             },
@@ -104,10 +105,12 @@ describe('Commitlint config merge behavior', () => {
 
         expect(scopeEnumRule?.[2]).toContain('docs')
         expect(scopeEnumRule?.[2]).not.toContain('actions')
+        // Metadata carries the consumer's overrides only; packages and standard scopes are
+        // derived, and republishing them fed back into the CLI as overrides.
         expect(config.snailicid3).toMatchObject({
             scopeMatchers: {
+                actions: false,
                 docs: ['docs/**'],
-                scripts: ['scripts/**'],
             },
         })
     })

@@ -1,62 +1,43 @@
 import {
     formatScopes,
-    getWorkspacePackagesList,
-    isRootPackageName,
-    resolveScopePathMatchers,
-    type ScopePathMatcherOverrides,
-    shortenScopeName,
-    uniqueSorted,
+    getWorkspaceScopes,
+    getWorkspaceSnapshot,
+    type WorkspaceScopeOverrides,
 } from '@snailicid3/workspace'
 
 export type WorkspaceScopesOptions = {
     format?: 'array' | 'csv'
     includeBaseScopes?: boolean
     keepPrefix?: boolean
-    matchers?: ScopePathMatcherOverrides
+    matchers?: WorkspaceScopeOverrides
     mergeScopes?: ReadonlyArray<string>
 }
 
-const BASE_COMMITLINT_SCOPES = ['root'] as const
-
+/**
+ * Commitlint's valid scope names.
+ *
+ * Derived from the same resolved model that produces the file classifiers, so the enum and the classification can no
+ * longer disagree. This function used to walk workspace packages itself and enumerate matcher keys separately, which is
+ * why the two agreed only by coincidence.
+ */
 export const workspaceScopes = (
     options: WorkspaceScopesOptions = {},
 ): Array<string> => {
-    const {
-        includeBaseScopes = true,
-        keepPrefix = false,
-        matchers = {},
-        mergeScopes = [],
-    } = options
+    const { keepPrefix = false, matchers = {}, mergeScopes = [] } = options
 
-    const scopes = new Set<string>()
+    const resolved = getWorkspaceScopes({
+        keepPrefix,
+        overrides: {
+            ...matchers,
+            // Manual scopes: valid to write, nothing classifies into them automatically.
+            ...Object.fromEntries(
+                mergeScopes.map((scope) => [scope, true] as const),
+            ),
+        },
+        snapshot: getWorkspaceSnapshot(),
+    })
 
-    if (includeBaseScopes) {
-        for (const scope of BASE_COMMITLINT_SCOPES) {
-            scopes.add(scope)
-        }
-
-        for (const scope of Object.keys(resolveScopePathMatchers(matchers))) {
-            scopes.add(scope)
-        }
-    } else {
-        for (const [scope, patterns] of Object.entries(matchers)) {
-            if (patterns && patterns.length > 0) scopes.add(scope)
-        }
-    }
-
-    for (const scope of mergeScopes) {
-        scopes.add(scope)
-    }
-
-    for (const pkg of getWorkspacePackagesList()) {
-        scopes.add(
-            isRootPackageName(pkg.name)
-                ? 'root'
-                : shortenScopeName(pkg.name, keepPrefix),
-        )
-    }
-
-    return uniqueSorted([...scopes])
+    return resolved.names
 }
 
 export const workspaceScopesCsv = (
