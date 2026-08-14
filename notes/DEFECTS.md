@@ -326,6 +326,48 @@ node-utils   identity: name, version, description, author, license, repository
     +-- doctor      extends: exports, bin, files    (private)
 ```
 
+## Core migration progress
+
+**Step 1 — node-utils package schemas.** `packageNameSchema`, `packageVersionSchema`,
+`packageManagerFieldSchema`, `packageIdentitySchema`, `jsonTextSchema`, `readPackageManifest`.
+Identity validates _shape_, not presence: every field is optional, because doctor reports a missing
+name as `MANIFEST_NAME_MISSING` and could not do so if parsing rejected the manifest first, and
+`resolvePackageManager` reads one field from a root manifest without caring about identity.
+`readPackageName` and `resolvePackageManager` rewired onto it. (Audit instructions 2, 5.)
+
+**Step 2 — schema-parsed discovery and a snapshot.** `workspacePackageRecordSchema`,
+`workspacePackageManagerOutputSchema`, `getWorkspaceSnapshot` / `safeGetWorkspaceSnapshot`.
+`normalizeWorkspacePackage` is gone; a malformed record now fails the listing instead of vanishing
+from it. `normalizeRepoPath` decides containment with `path.relative` and emits POSIX
+repository-relative paths, with the root at `'.'`. (Audit instructions 3, 4, 7.)
+
+Three latent defects surfaced, each previously masked by absolute paths:
+
+- Root was excluded by comparing `path.resolve(pkg.path)` to the repo root. With relative paths,
+  `path.resolve('.')` resolves against the **process** directory, so root survived the filter and
+  its `./**` classifier matched every file.
+- Discovery defaulted `repoRoot` to `process.cwd()`, but a recursive package-manager listing is
+  repository-wide, so running from inside a package reported the root package as outside the root.
+- `collectChangesetScopes` normalized a changeset path and then discarded the result for absolute
+  inputs.
+
+Removing `getChangedWorkspacePackagesFromGit` and `isInsideDir` (no production call sites, per the
+audit) was required, not incidental: they were the only reason `git.ts` imported `packages.ts`, and
+defaulting discovery to the git root would otherwise have closed an import cycle.
+
+**Step 3 — one scope model.** `core/workspace-scopes.ts` implements plan §5's contract, which had
+been specified but never built: `ReadonlyArray<string> | true | false | undefined`, with `true` a
+manual scope, `false` a deletion, `undefined` inheritance, and an empty array rejected rather than
+silently meaning deletion the way `null` and `[]` did in `resolveScopePathMatchers`.
+`getWorkspaceScopes()` derives the Commitlint `scope-enum` names and the file classifiers from the
+**same** map, so the two can no longer drift, and records contributing sources per scope so a merged
+collision is inspectable. `STANDARD_WORKSPACE_SCOPES` moved here from the legacy matcher module.
+Root is excluded by path, and packages that shorten to the same scope are unioned. (Audit
+instructions 8, 10, 11 in part.)
+
+Still ahead: rewire `scope-affected` and config's commitlint enum onto this model, then delete
+`scope-matchers.ts` and `isRootPackageName` (audit 9, 12, 14), and the barrel reduction (15).
+
 ## Core audit (external, 2026-08-14) — verification
 
 A function-by-function audit of `packages/workspace/src/core` was reviewed against #218's head.
