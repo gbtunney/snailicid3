@@ -19,7 +19,8 @@ const currentBranch = (repoRoot: string): string =>
 
 const makeRepo = (): string => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'snail-branch-actions-'))
-    git(dir, ['init', '--initial-branch=main'])
+    git(dir, ['init'])
+    git(dir, ['checkout', '-b', 'main'])
     git(dir, ['config', 'user.email', 'test@example.com'])
     git(dir, ['config', 'user.name', 'Test'])
     fs.writeFileSync(path.join(dir, 'README.md'), '# test\n')
@@ -52,14 +53,14 @@ const decision = (overrides: Partial<BranchDecision> = {}): BranchDecision => ({
 })
 
 describe('executeBranchAction (temp git repo)', () => {
-    let repo: string
+    let repo = ''
 
     beforeEach(() => {
         repo = makeRepo()
     })
 
     afterEach(() => {
-        fs.rmSync(repo, { force: true, recursive: true })
+        if (repo) fs.rmSync(repo, { force: true, recursive: true })
     })
 
     it('creates the target branch from base', () => {

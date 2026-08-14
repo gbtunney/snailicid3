@@ -18,11 +18,6 @@
         "dev:nx": "nx run $npm_package_name:dev",
         "test:coverage": "vitest run --coverage"
     },
-    "buildConfig": {
-        "runtime": "node",
-        "product": "library",
-        "buildStrategy": "bundle"
-    },
     "nx": {
         "implicitDependencies": [
             "!@snailicid3/config"
@@ -64,7 +59,7 @@
         "workspace-hook": "./dist/cli/hooks.js",
         "scope-commit": "./dist/cli/commit.js",
         "scope-affected": "./dist/cli/affected.js",
-        "gbt-changeset": "./bin/changeset-branch.sh",
+        "gbt-changeset": "./dist/cli/changesetv2.js",
         "gbt-exec": "./bin/make-executable.sh",
         "gbt-setup": "./bin/completions/install-pnpm.sh",
         "gbt-uninstall": "./bin/uninstall.sh",
@@ -97,6 +92,7 @@
         "directory": "packages/workspace"
     },
     "dependencies": {
+        "@snailicid3/logger": "workspace:*",
         "@snailicid3/node-utils": "workspace:*",
         "@snailicid3/utils": "workspace:*",
         "cosmiconfig": "^9.0.2",

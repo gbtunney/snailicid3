@@ -67,8 +67,7 @@
     "main": "./dist/index.cjs",
     "exports": {
         ".": {
-            "import": "./dist/index.mjs",
-            "require": "./dist/index.cjs"
+            "import": "./dist/index.mjs"
         },
         "./package.json": "./package.json"
     },
