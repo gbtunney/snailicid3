@@ -1,32 +1,32 @@
 # @snailicid3/color 🐌
 
-[![NPM](https://img.shields.io/npm/v/@snailicid3/color)](http://www.npmjs.com/package/@snailicid3/color)
-![License: MIT](https://img.shields.io/npm/l/@snailicid3/color)
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+[![npm](https://img.shields.io/npm/v/@snailicid3/color)](https://www.npmjs.com/package/@snailicid3/color)
+[![license](https://img.shields.io/npm/l/@snailicid3/color)](../../LICENSE)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://prettier.io/)
 
 _Color math, parsing, conversion, and hex utilities powered by chroma.ts and colorjs.io._
 
 ---
 
-![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
-![NPM](https://img.shields.io/badge/NPM-%23CB3837.svg?style=for-the-badge&logo=npm&logoColor=white)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![CSS](https://img.shields.io/badge/CSS_Color-663399?style=for-the-badge&logo=css&logoColor=white)](https://www.w3.org/TR/css-color-4/)
 
 ### Repository
 
-- **Github:** [`@snailicid3/color`](https://github.com/gbtunney/snailicid3/tree/main/packages/color)
-  • [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
-- **CDN**: [jsdeliver](https://cdn.jsdelivr.net/npm/@snailicid3/color/dist/index.min.js)
+- **GitHub:** [`@snailicid3/color`](https://github.com/gbtunney/snailicid3/tree/main/packages/color)
+  • [`snailicid3`](https://github.com/gbtunney/snailicid3)
+- **CDN:** [jsDelivr](https://cdn.jsdelivr.net/npm/@snailicid3/color/dist/index.min.js)
 
 ### Author
 
 👤 **Gillian Tunney**
 
-- [github](https://github.com/gbtunney)
-- [email](mailto:gbtunney@mac.com)
+- [GitHub](https://github.com/gbtunney)
+- [Email](mailto:gbtunney@mac.com)
 
-> Recommended package manager is [pnpm](http://pnpm.io)
+> Recommended package manager: [pnpm](https://pnpm.io/)
 >
-> [![PNPM](https://img.shields.io/badge/pnpm-%234a4a4a.svg?style=for-the-badge&logo=pnpm&logoColor=f69220)](http://pnpm.io)
+> [![pnpm](https://img.shields.io/badge/pnpm-4A4A4A?style=for-the-badge&logo=pnpm&logoColor=F69220)](https://pnpm.io/)
 
 ## @snailicid3/color 🐌
 
@@ -48,14 +48,7 @@ chroma utilities. It wraps [chroma.ts](https://github.com/nicholasgasior/chroma.
 ## Installation
 
 ```sh
-#pnpm
-$ pnpm add @snailicid3/color
-
-#yarn
-$ yarn add @snailicid3/color
-
-#npm
-$ npm install @snailicid3/color
+pnpm add @snailicid3/color
 ```
 
 ## Examples
