@@ -59,17 +59,22 @@ describe('repository package export maps', () => {
 
         expect(collectRootExportTargets(manifest)).toEqual([
             {
-                conditions: ['types'],
+                conditions: ['import', 'types'],
                 exportKey: '.',
-                target: './dist/index.d.cts',
+                target: './dist/index.d.mts',
             },
             {
-                conditions: ['import'],
+                conditions: ['import', 'default'],
                 exportKey: '.',
                 target: './dist/index.mjs',
             },
             {
-                conditions: ['require'],
+                conditions: ['require', 'types'],
+                exportKey: '.',
+                target: './dist/index.d.cts',
+            },
+            {
+                conditions: ['require', 'default'],
                 exportKey: '.',
                 target: './dist/index.cjs',
             },
@@ -85,21 +90,66 @@ describe('repository package export maps', () => {
         })
         expect(collectRootExportTargets(manifest)).toEqual([
             {
-                conditions: ['types'],
+                conditions: ['import', 'types'],
                 exportKey: '.',
-                target: './dist/index.d.cts',
+                target: './dist/index.d.ts',
             },
             {
-                conditions: ['import'],
+                conditions: ['import', 'default'],
                 exportKey: '.',
                 target: './dist/index.js',
             },
             {
-                conditions: ['require'],
+                conditions: ['require', 'types'],
+                exportKey: '.',
+                target: './dist/index.d.cts',
+            },
+            {
+                conditions: ['require', 'default'],
                 exportKey: '.',
                 target: './dist/index.cjs',
             },
         ])
+    })
+
+    it('B14/B15 routes every dual-format package declaration per resolution mode', () => {
+        const dualFormatPackages = {
+            'packages/color/package.json': './dist/index.d.ts',
+            'packages/node-utils/package.json': './dist/index.d.mts',
+            'packages/storybook-config/package.json': './dist/index.d.ts',
+            'packages/types/package.json': './dist/index.d.ts',
+            'packages/utils/package.json': './dist/index.d.ts',
+        } as const
+
+        for (const [relativePath, esmDeclaration] of Object.entries(
+            dualFormatPackages,
+        )) {
+            const targets = collectRootExportTargets(
+                readRepositoryManifest(relativePath),
+            )
+
+            // A bare top-level `types` would resolve first for both modes and
+            // hand ESM consumers the CommonJS declaration (EXP-LOGGER-001).
+            expect(
+                targets.filter(
+                    (target) =>
+                        target.conditions.length === 1 &&
+                        target.conditions[0] === 'types',
+                ),
+            ).toEqual([])
+
+            expect(
+                targets.find(
+                    (target) => target.conditions.join('/') === 'import/types',
+                )?.target,
+            ).toBe(esmDeclaration)
+
+            expect(
+                targets.find(
+                    (target) => target.conditions.join('/') === 'require/types',
+                )?.target,
+            ).toBe('./dist/index.d.cts')
+        }
     })
 
     it('B3 puts config and workspace declarations before imports', () => {

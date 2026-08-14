@@ -100,10 +100,9 @@ or it will eventually be "fixed" by someone reading this checklist. Only five ro
       **inline per entry** in each `tsdown.config.ts`, and `buildStrategy` is not in the plan schema
       at all. Leaving stale values around is worse than absence — the wrong ones actively mislead. →
       §4.6
-
-      ~~**B6** buildConfig missing on cli-app/logger/node-utils/workspace~~ — **withdrawn.** Absence
-          is the correct state; the four packages that omit it are right and the nine that declare it
-          are the outliers. See §4.6.
+- [x] ~~**B6** buildConfig missing on cli-app/logger/node-utils/workspace~~ — **withdrawn.** Absence
+      is the correct state; the four packages that omit it are right and the nine that declare it
+      are the outliers. See §4.6.
 
 ### Scope resolution
 

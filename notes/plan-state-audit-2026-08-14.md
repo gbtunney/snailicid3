@@ -549,51 +549,7 @@ Ordered within each group by whether it unblocks something else.
 - [ ] **Commit-scope report — local `scope-commit` output showing changed/staged files bucketed by
       resolved scope.** Corrected 2026-08-14 after clarification: this is terminal output from the
       local bin, **not** related to the CI repo report in the actions repo. Nothing here needs that
-      repo attached.
-
-      Half of it already ships. `formatScopeEvidence()` (`cli/commit.ts:46-68`) prints file count,
-          each scope with its matched files indented beneath, an `unmatched/root` bucket, and the final
-          csv scope line — behind `--verbose`/`--debug`. What is missing, in dependency order:
-
-          1. **Git provenance (the enabling change, §4.14).** `getGitChangedFiles` flattens staged,
-             unstaged, and untracked into one deduped `Set<string>`, so *there is currently no way to
-             bucket by area* — the information is destroyed before the CLI sees it. Return per-file
-             areas (or a `Record<area, string[]>`), keeping the flat array as a thin wrapper for the two
-             existing callers. Until this lands, the report can only show one undifferentiated list.
-          2. **Cross-tabulate area × scope.** The scope axis already exists in
-             `RepositoryScopeResolution.matches`/`.unmatched`; the area axis comes from (1).
-          3. **Render with logger instead of `console.log`.** `table.ts`, `kabob`, `kvPair`, `section`,
-             `line`, and `spacer` are already used exactly this way by `cli/changesetv2.ts`.
-          4. **Fix the `--scope` blind spot.** `explicitScopeResolution()` (`commit.ts:136-144`) returns
-             `matches: {}`, so an explicit scope produces an *empty* report. It should still classify for
-             display and show the override alongside — surfacing "you passed `config`, but staged files
-             also touch `logger`" is the most useful thing this report can say.
-          5. **Move it off stdout (§4.15).** It currently interleaves with the machine-readable scope
-             value on the same stream.
-
-          **Direction settled 2026-08-14: build it locally first, let CI consume it later.** This is the
-          same arrangement as plan §7.1's shared release engine ("`gbt-changeset plan` and the CI summary
-          call the same function") and the same as `scope-affected`, which CI already consumes today. It
-          changes three things about how the above is built:
-
-          - **The report model belongs in workspace `core/`, not `cli/`.** `formatScopeEvidence()`
-            currently lives in `cli/commit.ts`, but #212's own boundary table puts "orchestration and
-            presentation only" in the CLI. The buckets, counts, and area×scope cross-tab are repository
-            knowledge; only the terminal rendering is CLI. Putting the model in core is what makes a
-            second consumer possible without the CLI becoming a dependency of CI.
-          - **Machine output is a day-one requirement, not a retrofit.** §7.1 already requires the release
-            plan report "in both human- and machine-readable form, with tests" — hold this report to the
-            same bar. That also makes §4.15 non-negotiable rather than cosmetic: JSON on stdout, human
-            report on stderr, so a CI step can capture one while a human reads the other.
-          - **Expect three renderers, not one.** Terminal (logger), JSON (CI capture), and **markdown**
-            — a job summary written to `$GITHUB_STEP_SUMMARY` is what makes this "cute" in a PR, and
-            retrofitting markdown onto a renderer designed only for ANSI is the usual way this goes
-            wrong. Design the renderer set up front; implement terminal first.
-
-          This also strengthens the case for doing §4.14 properly: with two consumers, per-file
-          provenance stops being a nicety for one verbose flag and becomes the report's actual data
-          model.
-
+      repo attached. Detail in "Commit-scope report — design notes" below.
 - [ ] PR auto-labeling from scopes/types: `notes/LABEL_TAXONOMY.md` already defines `type:*` and
       `scope:*` and marks `changeset`/`release` as tool-generated. The vocabulary is ready; the
       trigger is not. Blocked behind the same actions-repo attach.
@@ -720,6 +676,50 @@ building the collector once rather than as seven scripts.
       wiring, not new logger work.
 
 ---
+
+#### Commit-scope report — design notes
+
+Half of it already ships. `formatScopeEvidence()` (`cli/commit.ts:46-68`) prints file count, each
+scope with its matched files indented beneath, an `unmatched/root` bucket, and the final csv scope
+line — behind `--verbose`/`--debug`. What is missing, in dependency order:
+
+1. **Git provenance (the enabling change, §4.14).** `getGitChangedFiles` flattens staged, unstaged,
+   and untracked into one deduped `Set<string>`, so _there is currently no way to bucket by area_ —
+   the information is destroyed before the CLI sees it. Return per-file areas (or a
+   `Record<area, string[]>`), keeping the flat array as a thin wrapper for the two existing callers.
+   Until this lands, the report can only show one undifferentiated list.
+2. **Cross-tabulate area × scope.** The scope axis already exists in
+   `RepositoryScopeResolution.matches`/`.unmatched`; the area axis comes from (1).
+3. **Render with logger instead of `console.log`.** `table.ts`, `kabob`, `kvPair`, `section`,
+   `line`, and `spacer` are already used exactly this way by `cli/changesetv2.ts`.
+4. **Fix the `--scope` blind spot.** `explicitScopeResolution()` (`commit.ts:136-144`) returns
+   `matches: {}`, so an explicit scope produces an _empty_ report. It should still classify for
+   display and show the override alongside — surfacing "you passed `config`, but staged files also
+   touch `logger`" is the most useful thing this report can say.
+5. **Move it off stdout (§4.15).** It currently interleaves with the machine-readable scope value on
+   the same stream.
+
+**Direction settled 2026-08-14: build it locally first, let CI consume it later.** This is the same
+arrangement as plan §7.1's shared release engine ("`gbt-changeset plan` and the CI summary call the
+same function") and the same as `scope-affected`, which CI already consumes today. It changes three
+things about how the above is built:
+
+- **The report model belongs in workspace `core/`, not `cli/`.** `formatScopeEvidence()` currently
+  lives in `cli/commit.ts`, but #212's own boundary table puts "orchestration and presentation only"
+  in the CLI. The buckets, counts, and area×scope cross-tab are repository knowledge; only the
+  terminal rendering is CLI. Putting the model in core is what makes a second consumer possible
+  without the CLI becoming a dependency of CI.
+- **Machine output is a day-one requirement, not a retrofit.** §7.1 already requires the release
+  plan report "in both human- and machine-readable form, with tests" — hold this report to the same
+  bar. That also makes §4.15 non-negotiable rather than cosmetic: JSON on stdout, human report on
+  stderr, so a CI step can capture one while a human reads the other.
+- **Expect three renderers, not one.** Terminal (logger), JSON (CI capture), and **markdown** — a
+  job summary written to `$GITHUB_STEP_SUMMARY` is what makes this "cute" in a PR, and retrofitting
+  markdown onto a renderer designed only for ANSI is the usual way this goes wrong. Design the
+  renderer set up front; implement terminal first.
+
+This also strengthens the case for doing §4.14 properly: with two consumers, per-file provenance
+stops being a nicety for one verbose flag and becomes the report's actual data model.
 
 ## 6b. Wishlist coverage index
 
