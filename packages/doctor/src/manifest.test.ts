@@ -51,6 +51,158 @@ describe('collectDeclaredExportTargets', () => {
     })
 })
 
+describe('repository package export maps', () => {
+    it('B1 exposes node-utils declarations, ESM, and CJS in condition order', () => {
+        const manifest = readRepositoryManifest(
+            'packages/node-utils/package.json',
+        )
+
+        expect(collectRootExportTargets(manifest)).toEqual([
+            {
+                conditions: ['import', 'types'],
+                exportKey: '.',
+                target: './dist/index.d.mts',
+            },
+            {
+                conditions: ['import', 'default'],
+                exportKey: '.',
+                target: './dist/index.mjs',
+            },
+            {
+                conditions: ['require', 'types'],
+                exportKey: '.',
+                target: './dist/index.d.cts',
+            },
+            {
+                conditions: ['require', 'default'],
+                exportKey: '.',
+                target: './dist/index.cjs',
+            },
+        ])
+    })
+
+    it('B2 keeps utils module exports and publishes its IIFE for CDNs', () => {
+        const manifest = readRepositoryManifest('packages/utils/package.json')
+
+        expect(manifest).toMatchObject({
+            jsdelivr: './dist/index.iife.js',
+            unpkg: './dist/index.iife.js',
+        })
+        expect(collectRootExportTargets(manifest)).toEqual([
+            {
+                conditions: ['import', 'types'],
+                exportKey: '.',
+                target: './dist/index.d.ts',
+            },
+            {
+                conditions: ['import', 'default'],
+                exportKey: '.',
+                target: './dist/index.js',
+            },
+            {
+                conditions: ['require', 'types'],
+                exportKey: '.',
+                target: './dist/index.d.cts',
+            },
+            {
+                conditions: ['require', 'default'],
+                exportKey: '.',
+                target: './dist/index.cjs',
+            },
+        ])
+    })
+
+    it('B14/B15 routes every dual-format package declaration per resolution mode', () => {
+        const dualFormatPackages = {
+            'packages/color/package.json': './dist/index.d.ts',
+            'packages/node-utils/package.json': './dist/index.d.mts',
+            'packages/storybook-config/package.json': './dist/index.d.ts',
+            'packages/types/package.json': './dist/index.d.ts',
+            'packages/utils/package.json': './dist/index.d.ts',
+        } as const
+
+        for (const [relativePath, esmDeclaration] of Object.entries(
+            dualFormatPackages,
+        )) {
+            const targets = collectRootExportTargets(
+                readRepositoryManifest(relativePath),
+            )
+
+            // A bare top-level `types` would resolve first for both modes and
+            // hand ESM consumers the CommonJS declaration (EXP-LOGGER-001).
+            expect(
+                targets.filter(
+                    (target) =>
+                        target.conditions.length === 1 &&
+                        target.conditions[0] === 'types',
+                ),
+            ).toEqual([])
+
+            expect(
+                targets.find(
+                    (target) => target.conditions.join('/') === 'import/types',
+                )?.target,
+            ).toBe(esmDeclaration)
+
+            expect(
+                targets.find(
+                    (target) => target.conditions.join('/') === 'require/types',
+                )?.target,
+            ).toBe('./dist/index.d.cts')
+        }
+    })
+
+    it('B3 puts config and workspace declarations before imports', () => {
+        for (const relativePath of [
+            'packages/config/package.json',
+            'packages/workspace/package.json',
+        ]) {
+            const manifest = readRepositoryManifest(relativePath)
+
+            expect(collectRootExportTargets(manifest)).toEqual([
+                {
+                    conditions: ['types'],
+                    exportKey: '.',
+                    target: './types/index.d.ts',
+                },
+                {
+                    conditions: ['import'],
+                    exportKey: '.',
+                    target: './dist/index.js',
+                },
+            ])
+        }
+    })
+
+    it('B4 exposes cli-app declarations before its ESM entry', () => {
+        const manifest = readRepositoryManifest('packages/cli-app/package.json')
+
+        expect(collectRootExportTargets(manifest)).toEqual([
+            {
+                conditions: ['types'],
+                exportKey: '.',
+                target: './dist/index.d.mts',
+            },
+            {
+                conditions: ['import'],
+                exportKey: '.',
+                target: './dist/index.mjs',
+            },
+        ])
+    })
+
+    it('B13 keeps the cli-app example importable without a public bin', () => {
+        const manifest = readRepositoryManifest('packages/cli-app/package.json')
+
+        expect(manifest.bin).toBeUndefined()
+        expect(collectDeclaredExportTargets(manifest.exports)).toContainEqual({
+            conditions: [],
+            exportKey: './example',
+            target: './dist/example.mjs',
+        })
+    })
+})
+
 describe('analyzePackage', () => {
     it('reports no findings for aligned exports, declarations, and bins', () => {
         withTempPackage(
@@ -157,6 +309,15 @@ describe('analyzePackage', () => {
         )
     })
 })
+
+/** Return only the root export targets so package-level routing assertions stay focused. */
+function collectRootExportTargets(
+    manifest: PackageManifest,
+): ReturnType<typeof collectDeclaredExportTargets> {
+    return collectDeclaredExportTargets(manifest.exports).filter(
+        ({ exportKey }) => exportKey === '.',
+    )
+}
 
 function getOnlyBinTarget(manifest: PackageManifest): string {
     const bin: unknown = manifest.bin

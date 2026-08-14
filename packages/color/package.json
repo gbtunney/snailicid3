@@ -10,11 +10,6 @@
         "dev:nx": "nx run $npm_package_name:dev",
         "api:report:nx": "nx run $npm_package_name:api:report"
     },
-    "buildConfig": {
-        "runtime": "universal",
-        "product": "library",
-        "buildStrategy": "bundle"
-    },
     "nx": {
         "implicitDependencies": [
             "!@snailicid3/config"
@@ -63,8 +58,14 @@
     "types": "./dist/index.d.cts",
     "exports": {
         ".": {
-            "import": "./dist/index.js",
-            "require": "./dist/index.cjs"
+            "import": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.js"
+            },
+            "require": {
+                "types": "./dist/index.d.cts",
+                "default": "./dist/index.cjs"
+            }
         },
         "./package.json": "./package.json"
     },

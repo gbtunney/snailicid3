@@ -3,7 +3,6 @@ import { Markdownlint } from './markdownlint/index.js'
 import { Nx } from './nx/index.js'
 import { json } from './utilities/json.js'
 import { Prettier } from './index.js'
-/* TODO: outputs a json dump of markdownlint and prettier. this is TEMPORARY till the configs are correct. ideally this should be gotten rid of */
 
 const cwd = process.cwd()
 

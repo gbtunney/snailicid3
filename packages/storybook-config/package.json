@@ -2,18 +2,13 @@
     "name": "@snailicid3/storybook-config",
     "version": "0.0.0",
     "private": true,
-    "description": "Shared Storybook config wrapper — framework and addons pre-wired, thin consumer entries",
+    "description": "Shared Storybook config wrapper \u2014 framework and addons pre-wired, thin consumer entries",
     "scripts": {
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
         "clean:nx": "nx run $npm_package_name:clean",
         "dev:nx": "nx run $npm_package_name:dev",
         "api:report:nx": "nx run $npm_package_name:api:report"
-    },
-    "buildConfig": {
-        "runtime": "node",
-        "product": "library",
-        "buildStrategy": "bundle"
     },
     "nx": {
         "implicitDependencies": [
@@ -58,8 +53,14 @@
     "types": "./dist/index.d.cts",
     "exports": {
         ".": {
-            "import": "./dist/index.js",
-            "require": "./dist/index.cjs"
+            "import": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.js"
+            },
+            "require": {
+                "types": "./dist/index.d.cts",
+                "default": "./dist/index.cjs"
+            }
         },
         "./package.json": "./package.json"
     },

@@ -69,7 +69,6 @@
     },
     "files": [
         "CHANGELOG.md",
-        "bin",
         "dist",
         "types"
     ],

@@ -18,11 +18,6 @@
         "dev:nx": "nx run $npm_package_name:dev",
         "test:coverage": "vitest run --coverage"
     },
-    "buildConfig": {
-        "runtime": "universal",
-        "product": "library",
-        "buildStrategy": "bundle"
-    },
     "nx": {
         "targets": {
             "dev": {},
