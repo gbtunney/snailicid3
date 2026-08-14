@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { main } from './commit.js'
+import { formatScopeEvidence, main, resolveInputFiles } from './commit.js'
 
 async function captureConsoleLog(fn: () => Promise<void>): Promise<string> {
     const lines: Array<string> = []
@@ -113,6 +113,41 @@ describe('scope-commit messages', () => {
         expect(output).toBe('chore(config): test scope message')
     })
 
+    it('uses root when an explicit path is unmatched', async () => {
+        const output = await captureConsoleLog(async () => {
+            await main(['README.md'])
+        })
+
+        expect(output).toBe('root')
+    })
+
+    it('prints scopes as a list', async () => {
+        const output = await captureConsoleLog(async () => {
+            await main([
+                '--list',
+                'packages/config/package.json',
+                'packages/logger/package.json',
+            ])
+        })
+
+        expect(output).toBe('config\nlogger')
+    })
+
+    it('shows logger matches and unmatched root files in verbose output', async () => {
+        const output = await captureConsoleLog(async () => {
+            await main([
+                '--verbose',
+                'packages/logger/src/logger.ts',
+                'README.md',
+            ])
+        })
+
+        expect(output).toContain('explicit files: 2')
+        expect(output).toContain('logger\n  packages/logger/src/logger.ts')
+        expect(output).toContain('unmatched/root\n  README.md')
+        expect(output).toContain('scopes: logger')
+    })
+
     it('rejects the removed skip-lint-staged flag', async () => {
         await expect(
             main([
@@ -123,5 +158,76 @@ describe('scope-commit messages', () => {
                 'packages/config/package.json',
             ]),
         ).rejects.toThrow('Unknown argument: --skip-lint-staged')
+    })
+})
+
+describe('scope-commit file input', () => {
+    it('uses explicit paths without reading Git state', () => {
+        const getChangedFiles = vi.fn(() => ['from-git.ts'])
+
+        expect(
+            resolveInputFiles(['explicit.ts'], 'all', getChangedFiles),
+        ).toEqual(['explicit.ts'])
+        expect(getChangedFiles).not.toHaveBeenCalled()
+    })
+
+    it('requests staged files by default', () => {
+        const getChangedFiles = vi.fn(() => ['staged.ts'])
+
+        expect(resolveInputFiles([], 'staged', getChangedFiles)).toEqual([
+            'staged.ts',
+        ])
+        expect(getChangedFiles).toHaveBeenCalledWith({
+            includeStaged: true,
+            includeUnstaged: false,
+            includeUntracked: false,
+        })
+    })
+
+    it('requests all current changes in all mode', () => {
+        const getChangedFiles = vi.fn(() => [
+            'staged.ts',
+            'unstaged.ts',
+            'untracked.ts',
+        ])
+
+        expect(resolveInputFiles([], 'all', getChangedFiles)).toEqual([
+            'staged.ts',
+            'unstaged.ts',
+            'untracked.ts',
+        ])
+        expect(getChangedFiles).toHaveBeenCalledWith({
+            includeStaged: true,
+            includeUnstaged: true,
+            includeUntracked: true,
+        })
+    })
+})
+
+describe('scope evidence formatting', () => {
+    it('formats classification evidence without rerunning matching', () => {
+        expect(
+            formatScopeEvidence(
+                ['packages/config/a.ts', 'README.md'],
+                {
+                    matches: { config: ['packages/config/a.ts'] },
+                    scopes: ['config'],
+                    unmatched: ['README.md'],
+                },
+                'all',
+            ),
+        ).toBe(
+            [
+                'all files: 2',
+                '',
+                'config',
+                '  packages/config/a.ts',
+                '',
+                'unmatched/root',
+                '  README.md',
+                '',
+                'scopes: config',
+            ].join('\n'),
+        )
     })
 })
