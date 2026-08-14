@@ -246,6 +246,34 @@ gates C3.
 
 ---
 
+### C7 — why two schemas, not one
+
+Sharpened 2026-08-14. The base schema is **not** a completeness check; it is a _reader's_ schema —
+"give me enough to render a banner or an app header." That distinction is the whole reason this kept
+feeling ambiguous, because `packageSchema` was doing two jobs under one name.
+
+|                      | identity (node-utils)                                               | diagnostic (doctor)                            |
+| -------------------- | ------------------------------------------------------------------- | ---------------------------------------------- |
+| Question             | "what is this package called?"                                      | "is this package correct?"                     |
+| Strictness           | lenient — `name` + `version` required, rest optional with fallbacks | strict, opinionated                            |
+| On a sparse manifest | degrades                                                            | reports a finding                              |
+| Failure mode         | must never throw                                                    | never throws either — findings, not exceptions |
+| Consumers            | cli-app, config, workspace, doctor                                  | doctor only                                    |
+
+**The current schema is the completeness one, mislabeled.** `schemaPackageMetaBanner` picks from
+`schemaBasePackage`, so it inherits required `author` (with a valid `email`), required
+`description`, and required `repository`, on top of a name regex, a license enum and a semver regex.
+That is house style, which is doctor's job — it is the wrong shape for a banner reader.
+
+Inside this repo only `@snailicid3/root` would throw on it (missing `author.email` and
+`description`), because every workspace package is house-styled. But **cli-app is public**: its
+banner reader will meet arbitrary consumer manifests, and plenty of valid ones carry no
+`author.email` and no `repository`. A banner should degrade, not crash someone's build.
+
+So: build a lenient identity schema in node-utils rather than re-exporting the existing one, and
+move `schemaBasePackage`'s strictness into doctor as diagnostics when build-config is folded into
+config (B1).
+
 ### C7 schema layering
 
 ```text
