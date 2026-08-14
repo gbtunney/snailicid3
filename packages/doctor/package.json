@@ -1,0 +1,114 @@
+{
+    "name": "@snailicid3/doctor",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Read-only package and artifact diagnostics for npm and pnpm workspaces",
+    "keywords": [
+        "typescript",
+        "snailicid3",
+        "doctor",
+        "package",
+        "exports",
+        "workspace",
+        "cli"
+    ],
+    "scripts": {
+        "build:nx": "nx run $npm_package_name:build",
+        "test:nx": "nx run $npm_package_name:test",
+        "clean:nx": "nx run $npm_package_name:clean",
+        "dev:nx": "nx run $npm_package_name:dev",
+        "test:coverage": "vitest run --coverage"
+    },
+    "buildConfig": {
+        "runtime": "node",
+        "product": "cli",
+        "buildStrategy": "transpile"
+    },
+    "nx": {
+        "implicitDependencies": [
+            "!@snailicid3/config"
+        ],
+        "targets": {
+            "dev": {},
+            "dev:ts": {},
+            "build:ts": {
+                "inputs": [
+                    "production",
+                    "^production",
+                    "{workspaceRoot}/packages/config/typescript-config/**/*"
+                ]
+            },
+            "build:bin": {
+                "cache": true,
+                "command": "chmod +x ./dist/cli.js",
+                "dependsOn": [
+                    "build:ts"
+                ],
+                "options": {
+                    "cwd": "{projectRoot}"
+                },
+                "outputs": [
+                    "{projectRoot}/dist/cli.js"
+                ]
+            },
+            "check:ts": {
+                "inputs": [
+                    "default",
+                    "^production",
+                    "{workspaceRoot}/packages/config/typescript-config/**/*"
+                ]
+            },
+            "build": {
+                "dependsOn": [
+                    "build:ts",
+                    "build:bin"
+                ]
+            },
+            "test": {},
+            "test:watch": {},
+            "lint": {},
+            "fix": {},
+            "clean": {},
+            "clean:ts": {},
+            "clean:build": {}
+        }
+    },
+    "type": "module",
+    "bin": {
+        "snail-doctor": "./dist/cli.js"
+    },
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        },
+        "./package.json": "./package.json"
+    },
+    "files": [
+        "dist"
+    ],
+    "author": {
+        "name": "Gillian Tunney",
+        "email": "gbtunney@mac.com"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/gbtunney/snailicid3",
+        "directory": "packages/doctor"
+    },
+    "dependencies": {
+        "@snailicid3/node-utils": "workspace:*",
+        "@snailicid3/workspace": "workspace:*",
+        "zod": "^4.4.3"
+    },
+    "devDependencies": {
+        "@snailicid3/config": "workspace:*",
+        "@types/node": "^26.2.0",
+        "typescript": "^6.0.3",
+        "vitest": "^4.1.9"
+    }
+}

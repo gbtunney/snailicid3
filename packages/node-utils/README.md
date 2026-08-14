@@ -1,106 +1,116 @@
 # @snailicid3/node-utils 🐌
 
-[![NPM](https://img.shields.io/npm/v/@snailicid3/node-utils)](http://www.npmjs.com/package/@snailicid3/node-utils)
-![License: MIT](https://img.shields.io/npm/l/@snailicid3/node-utils)
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+[![npm](https://img.shields.io/npm/v/@snailicid3/node-utils)](https://www.npmjs.com/package/@snailicid3/node-utils)
+[![license](https://img.shields.io/npm/l/@snailicid3/node-utils)](../../LICENSE)
 
-_Node.js filesystem, path, glob, and package.json utilities._
+Node-specific filesystem, path, JSON-file, environment, command, and lightweight argv utilities.
 
----
-
-![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
-![NPM](https://img.shields.io/badge/NPM-%23CB3837.svg?style=for-the-badge&logo=npm&logoColor=white)
-
-### Repository
-
-- **Github:**
-  [`@snailicid3/node-utils`](https://github.com/gbtunney/snailicid3/tree/main/packages/node-utils) •
-  [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
-
-### Author
-
-👤 **Gillian Tunney**
-
-- [github](https://github.com/gbtunney)
-- [email](mailto:gbtunney@mac.com)
-
-> Recommended package manager is [pnpm](http://pnpm.io)
->
-> [![PNPM](https://img.shields.io/badge/pnpm-%234a4a4a.svg?style=for-the-badge&logo=pnpm&logoColor=f69220)](http://pnpm.io)
-
-## @snailicid3/node-utils 🐌
-
----
-
-This package provides Node.js-specific utilities for filesystem operations, path resolution, glob
-pattern matching, and reading/validating `package.json` files. It targets Node.js runtime only.
-
-### `@snailicid3/node-utils` _contains:_
-
-- **Filesystem utilities** — file existence checks, directory traversal, reading files
-- **Path utilities** — path resolution, normalization, relative/absolute conversions
-- **Glob utilities** — pattern matching via `glob` and `is-glob`
-- **Package.json utilities** — reading and validating workspace `package.json` files
-- **CLI argument parsing** — via `yargs` integration
+> **Release status:** npm currently serves `@snailicid3/node-utils@0.1.0`. The ownership changes in
+> this checkout have not been released yet and are part of the four-package release rehearsal.
 
 ## Installation
 
 ```sh
-#pnpm
-$ pnpm add @snailicid3/node-utils
-
-#yarn
-$ yarn add @snailicid3/node-utils
-
-#npm
-$ npm install @snailicid3/node-utils
+pnpm add @snailicid3/node-utils
 ```
 
-## Lightweight typed argument parsing
+The package exposes one ESM/CommonJS root entry and `./package.json`.
 
-Use `parseArgv` when a script needs typed command-line arguments without the application, generated
-help, or interactive behavior provided by `@snailicid3/cli-app`:
+## Ownership boundary
+
+Node-utils owns reusable Node primitives: file IO, path classification, glob filtering, process
+execution, environment parsing, entrypoint detection, and small argv normalization. It does not own
+repository policy, Git state, package scopes, or release workflows; those belong to
+`@snailicid3/workspace`. Runtime-neutral JSON value behavior belongs to `@snailicid3/utils`, while
+presentation belongs to `@snailicid3/logger`.
+
+## API groups
+
+| Area                | Representative exports                                                                           |
+| ------------------- | ------------------------------------------------------------------------------------------------ |
+| Argument parsing    | `parseArgv`, `safeParseArgv`, `parseArgvObject`, `parseArgvPositionals`                          |
+| Environment         | `defineEnv`, `getEnvironmentReportRows`, `reportEnvironment`                                     |
+| Commands            | `runCommand`, `runCommandOrThrow`                                                                |
+| CLI entrypoints     | `isCallerEntrypoint`, `runCliIfEntrypoint`, `runCliIfEntrypointAsync`                            |
+| JSON and objects    | `json`, `deepMerge`, `isPlainObject`, JSON guards and branded serialization                      |
+| Filesystem and path | `paths`, `filePath`, `typedPath`, `fsPath`, `fsTypedPath`, path classifiers and existence checks |
+| Globs and media     | `filterFileArrByGlob`, `getImageBase64`                                                          |
+
+## Typed argument parsing
+
+Use separate Zod schemas when a command has named options and positional arguments:
 
 ```ts
 import { parseArgv } from '@snailicid3/node-utils'
 import { hideBin } from 'yargs/helpers'
 import { z } from 'zod'
 
-const schema = z.object({
-  count: z.coerce.number().int().default(1),
+const options = z.object({
   dryRun: z.boolean().default(false),
-  tags: z.array(z.string()).default([]),
+  tag: z.array(z.string()).default([]),
+})
+const positionals = z.tuple([z.string()])
+
+const args = parseArgv(options, hideBin(process.argv), positionals)
+
+console.log(args.options.dryRun, args.positionals[0])
+```
+
+Yargs performs token normalization without numeric coercion; the Zod schema controls coercion and
+transforms. Repeated options become arrays. `safeParseArgv()` returns a discriminated result instead
+of throwing a `ZodError`.
+
+## Typed environments
+
+Environment definitions do not read `process.env` implicitly. Pass a source to `parse()` so library
+code and tests stay deterministic:
+
+```ts
+import { defineEnv, getEnvironmentReportRows } from '@snailicid3/node-utils'
+import { z } from 'zod'
+
+const environment = defineEnv({
+  logLevel: z.enum(['debug', 'info']).default('info'),
+  token: z.string().meta({ sensitive: true }),
 })
 
-const args = parseArgv(schema, hideBin(process.argv))
+const values = environment.parse(process.env)
+const safeRows = getEnvironmentReportRows(environment, process.env)
 ```
 
-Repeated options become arrays, so `-z gbt -z gbt2` can be validated with `z.array(z.string())`. Raw
-option values remain strings; use schemas such as `z.coerce.number()` to control conversion.
+Property names become uppercase underscore-separated environment keys unless a schema supplies
+`meta({ environmentKey: '...' })`. Values marked sensitive—and names that look credential-like—are
+redacted in reports.
 
-- `parseArgv(schema, argv)` returns the schema's typed and transformed output, or throws a
-  `ZodError`.
-- `safeParseArgv(schema, argv)` returns Zod's discriminated success/error result.
+## Compatibility notes
 
-Both functions support field-level and root-object transforms because they pass the parsed argument
-object directly to Zod without inspecting the schema.
+- `node.exportJSONFile` is a deprecated alias for `json.exportFile`.
+- Config retains compatibility re-exports for JSON-file and path helpers whose implementation now
+  lives here.
+- `file.path.array.ts#getFullPath` and `path.ts#getFullPath` still have different semantics. Their
+  consolidation is deliberately deferred until callers and filesystem-schema behavior are proved.
 
-## Repository maintenance: shared config and the Nx graph
+## Release rehearsal
 
-`node-utils` and `build-config` extend TypeScript configuration files published by
-`@snailicid3/config`. That is a static tooling relationship, not a runtime or build-order dependency
-on the config package. Their `package.json` files therefore remove Nx's inferred config edge with:
+The shared candidate baseline is `68ab0564b2dc0f23b3ce3424beeb12225941c13d`. Node-utils is first in
+the release-test dependency order. Pack the candidate, load its installed root through ESM and
+CommonJS, verify declaration routing, and exercise the argv, path, JSON-file, and environment
+surfaces from clean npm and pnpm consumers. The residual `getFullPath` duplication is a
+semantics-sensitive follow-up, not a registered Doctor fixture.
 
-```json
-{
-  "nx": {
-    "implicitDependencies": ["!@snailicid3/config"]
-  }
-}
+The Doctor MVP currently reports the root export map's missing explicit `types` condition as an
+**unregistered** finding. Unlike the deliberately retained example/logger fixtures, that is a
+release-gate defect to resolve or explicitly reclassify before rehearsing node-utils.
+
+## Repository maintenance
+
+Node-utils extends TypeScript configuration published by `@snailicid3/config`. That is a static
+tooling relationship rather than a runtime dependency, so the package removes Nx's inferred config
+edge with `implicitDependencies: ["!@snailicid3/config"]`. Its build and typecheck targets still
+include the shared TypeScript-config directory as a cache input.
+
+```sh
+pnpm --filter=@snailicid3/node-utils build:nx
+pnpm --filter=@snailicid3/node-utils test:nx
+pnpm --filter=@snailicid3/node-utils api:report:nx
 ```
-
-Without that exception, Nx infers the false cycle `config -> node-utils -> build-config -> config`.
-The relevant build and typecheck targets still list
-`{workspaceRoot}/packages/config/typescript-config/**/*` as an input, so changes to the shared
-TypeScript configuration invalidate their Nx cache entries. The workspace root does not need this
-exception because Nx does not infer a root-to-config project dependency.

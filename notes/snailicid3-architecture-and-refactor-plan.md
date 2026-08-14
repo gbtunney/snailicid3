@@ -1,14 +1,27 @@
 # Snailicid3 Architecture and Refactor Plan
 
-**Status:** in progress · **Date:** 2026-08-12 · **Implementation:** Phases 0–5 largely landed.
+**Status:** in progress · **Date:** 2026-08-13 · **Implementation:** Phases 0–5 largely landed.
 Phase 6 (config-ownership cleanup) is **complete** — the JSON file-IO/glob/path moves (config →
 node-utils), the pure JSON value layer (`json-value` → `@snailicid3/utils`, double-serialize bug
 fixed), the node-utils→utils value delegation (the **JSON domain now has one value
 implementation**), `exportFile` tightened to require a JSON document, config depending on node-utils
 only, and the `shared/` formatting regroup are all done. cli-app re-exports from node-utils.
-`build-exporter.ts` stays because its generated JSON files are a published config export. Phase 7
-(branch-aware changeset/release workflow, [#201]) is the closing phase of this round and is not
-started.
+`build-exporter.ts` stays because its generated JSON files are a published config export. Logger's
+implementation and ownership migration are complete: it owns the compiled `snail-sh` dispatcher,
+builds and packs, and passes its ESM/CommonJS runtime checks. npm already serves version `0.0.6`,
+but the completed refactor in this checkout has not been released. Its changeset/version decision
+and clean external-consumer proof are release gates, not unfinished logger implementation. Phase 7
+(branch-aware changeset/release workflow, [#201]) is the closing phase of this round and is
+**underway**: the read-only assessment, decision, commit-derivation, and opt-in branch-action core
+have landed, while changeset creation, commit/PR continuation, and the shared CI release plan
+remain.
+
+Doctor has now started as a non-release-gating Part B spike. The private `@snailicid3/doctor@0.0.0`
+MVP performs read-only npm/pnpm package discovery with a filesystem fallback, checks
+manifest/export/legacy-entry/bin reality, emits text or JSON, and labels the first example/logger
+export fixtures. Section 10.3 still registers the complete deliberately retained export,
+declaration, packed-content, and runtime-intent drift; the remaining collectors and all validate
+enforcement stay in Part B.
 
 This document replaces the earlier architecture draft. It preserves the useful diagnosis from that
 draft, but removes its rejected assumptions about private consumer bins, the parser package, build
@@ -31,11 +44,11 @@ without waiting on a build-system rewrite.
   utility cleanup is finished (Phase 6), and the branch-aware changeset/release workflow ([#201],
   Phase 7) is in place. **This round stops after Phase 7; it does not begin the build-system
   track.**
-- **Part B — build-system & tooling initiative (separate, deferred).** The former Phases 6–9 —
-  reframing build configuration, the Storybook package, and doctor/validate — move into their own
-  effort with their own plan. None of it is required to complete Part A, and none of it blocks a
-  release of the Part A ownership boundaries. It is retained at the end of this document for
-  continuity but is **not** in scope for this round.
+- **Part B — build-system & tooling initiative (separate).** The former Phases 6–9 — reframing build
+  configuration, the Storybook package, and doctor/validate — remain their own effort. A bounded
+  Doctor MVP has been pulled forward as a read-only spike; none of Part B is required to complete
+  Part A, and it does not block a release of the Part A ownership boundaries. Build-system,
+  Storybook, full Doctor integration, and validate remain outside the Part A release scope.
 
 [#201]: https://github.com/gbtunney/snailicid3/issues/201
 
@@ -108,6 +121,10 @@ Nx targets and workspace commands own execution.
 Doctor is read-only and initially exits successfully after reporting findings. Validate may later
 invoke the same collectors and fail CI according to explicit severity policy.
 
+A known bad package state becomes a Doctor fixture only when Section 10.3 records its location,
+expected finding, and retirement gate. Registered fixtures are preserved; unregistered drift is a
+normal defect. Doctor must never infer that a known fixture authorizes an automatic repair.
+
 ### 2.6 Nx enriches the model but is never required
 
 A single-package, non-Nx repository is treated as a one-package workspace. Package, artifact, and
@@ -139,6 +156,7 @@ tests are complete. A tsc-only experiment may happen later on one simple package
 | @snailicid3/workspace        | Workspace discovery, package facts, git and affected logic, scope definitions, repo-aware operations, useful repo CLI commands | Lint/build policy                                          |
 | @snailicid3/config           | Existing tool-policy APIs, shared formatting policy, tsconfig/docs config, pure build-tool adapters and export planning        | Repository discovery, operational commands, tool execution |
 | @snailicid3/cli-app          | Commands, help, versions, formatted errors, prompts, logging integration, and exit handling                                    | Low-level argv tokenization                                |
+| @snailicid3/doctor           | Read-only package/artifact collectors, fixture classification, and deterministic reports                                       | Mutation, validation policy, or requiring Nx               |
 | @snailicid3/storybook-config | Storybook defaults, framework/addon resolution, and the Storybook config API                                                   | General config policy or repository execution              |
 | @snailicid3/build-config     | Temporary compatibility re-exports during migration                                                                            | New permanent responsibilities                             |
 
@@ -157,6 +175,8 @@ flowchart TD
     CliApp["@snailicid3/cli-app"] --> Parser
     CliApp --> Logger
     CliApp --> NodeUtils
+    Doctor["@snailicid3/doctor"] --> Workspace
+    Doctor --> NodeUtils
     Storybook["@snailicid3/storybook-config"] --> Config["@snailicid3/config"]
 ```
 
@@ -298,7 +318,7 @@ rejected.
 
 | Existing bin         | Long-term public owner                           | Migration decision                                                               |
 | -------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------- |
-| snail-sh             | @snailicid3/logger                               | Deduplicate the shell and TypeScript logger; retain a config wrapper temporarily |
+| snail-sh             | @snailicid3/logger                               | Ownership moved; retain the config wrapper and bootstrap floor temporarily       |
 | scope-commit         | @snailicid3/workspace                            | Preserve name, flags, and behavior through a config wrapper                      |
 | scope-affected       | @snailicid3/workspace                            | Preserve; it is also used by gbt-changeset                                       |
 | snail-package        | Removed                                          | Removed in Phase 5 before it became a supported contract; never shipped as a bin |
@@ -471,7 +491,8 @@ The static Storybook target is an auxiliary build, not the package's primary bui
 
 ## 10. Doctor and validate
 
-> _Part B (deferred). Design reference for Phase B3; not worked in this round._
+> _Part B. The read-only Doctor MVP started on 2026-08-13; validate and the remaining collectors are
+> still deferred. This section is both the design reference and the fixture contract._
 
 ### 10.1 Doctor does not require BuildPlan or Nx
 
@@ -499,7 +520,41 @@ type BuildStrategy = 'bundle' | 'transpile' | 'none'
 
 Bundling already implies transpilation, so separate bundled and transpiled booleans are rejected.
 
-### 10.3 Nx enrichment
+### 10.3 Intentional Doctor fixture registry
+
+Doctor needs reproducible, reviewable bad states; it does not need mystery breakage. The following
+findings are deliberately retained in the current tree. This list is exhaustive: a discrepancy not
+registered here is not protected from an ordinary fix.
+
+`packages/doctor/src/fixtures.ts` mirrors all five IDs and reserves their stable diagnostic codes.
+The current regression suite produces `EXP-EXAMPLE-001` from missing observed export/legacy targets
+and `EXP-LOGGER-001` from logger's missing root `types` route. Merely reserving the other three
+codes does not count as collector coverage.
+
+| Fixture ID           | Location                      | Expected read-only finding                                                                                                                                               | Retirement gate                                                                                             |
+| -------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `EXP-EXAMPLE-001`    | `@snailicid3/example-package` | Declared root/`./node` exports and the multi-format build plan do not agree with emitted and packed reality                                                              | Doctor compares declared, expected, emitted, and packed entry points in a fixture test                      |
+| `EXP-LOGGER-001`     | `@snailicid3/logger` manifest | Root `exports` has `import` and `require` branches but no explicit `types` condition; top-level `types` selects the CJS declaration while an ESM declaration also exists | Doctor reports declaration routing per resolution mode and a regression test snapshots this package         |
+| `API-LOGGER-001`     | logger entry/API report       | Public types refer to supporting symbols not exported from the root, including `LoggerRecord` and `TablePreset`; `LoggerApi` also references internal logger controls    | Doctor reports forgotten exports separately from runtime-load failures                                      |
+| `PACK-LOGGER-001`    | logger tarball                | Both bundled declarations under `dist/` and the tsc-emitted `types/` tree are packed                                                                                     | Doctor identifies duplicate or competing declaration surfaces from the tarball, not only the workspace tree |
+| `RUNTIME-LOGGER-001` | logger build intent           | The root build is classified `universal` while its current implementation reaches `node:util`                                                                            | Doctor compares declared runtime intent with the emitted dependency graph                                   |
+
+These fixtures freeze the **finding**, not a preferred future fix. In particular, logger's ESM and
+CommonJS root imports currently load the same named runtime surface; Doctor must not misreport
+`EXP-LOGGER-001` or `API-LOGGER-001` as a failed runtime import. Likewise, the private
+example-package must never be published merely to exercise a packed test.
+
+Fixture rules:
+
+- Doctor reports fixture IDs alongside the observed evidence and performs no mutation.
+- Validate may later decide whether known fixtures warn, pass as expected findings, or fail under an
+  explicit strict mode.
+- A fixture is removed only in the same change that lands the named diagnostic regression test or
+  intentionally replaces that diagnostic.
+- New intentional breakage requires a new registry row; prose such as "wonky" or "temporary" is not
+  enough.
+
+### 10.4 Nx enrichment
 
 When Nx is detected, doctor may add:
 
@@ -513,7 +568,7 @@ When Nx is detected, doctor may add:
 
 Without Nx, script/config inference is clearly labeled inferred rather than resolved.
 
-### 10.4 Target categories
+### 10.5 Target categories
 
 | Category         | Meaning                                              | Examples                                   |
 | ---------------- | ---------------------------------------------------- | ------------------------------------------ |
@@ -524,7 +579,7 @@ Without Nx, script/config inference is clearly labeled inferred rather than reso
 
 An auxiliary target is not residual merely because canonical build does not depend on it.
 
-### 10.5 Tags versus metadata
+### 10.6 Tags versus metadata
 
 - Use runtime:node, runtime:browser, or runtime:universal Nx tags when dependency rules can enforce
   them.
@@ -533,7 +588,7 @@ An auxiliary target is not residual merely because canonical build does not depe
 - Use custom project or target metadata only as an override for genuinely ambiguous intent.
 - Do not record the same fact in both tags and custom metadata.
 
-### 10.6 Report before enforcement
+### 10.7 Report before enforcement
 
 Doctor initially:
 
@@ -569,6 +624,42 @@ insufficient because they can hide files, exports, dependency, and bin failures.
 No config wrapper or legacy flag is removed until the consumer audit proves it unused or a
 documented migration is complete.
 
+### 11.3 Four-package release rehearsal baseline
+
+**Source baseline:** `main` at `68ab0564b2dc0f23b3ce3424beeb12225941c13d`. At the time of this
+audit, the four release-cohort package sources match that commit. The working tree now also contains
+the documentation updates and the new private Doctor MVP; it does not change node-utils, workspace,
+logger, or config implementation source. Record a new exact candidate SHA after choosing which of
+those changes belongs in the release branch.
+
+The release cohort is dependency ordered: **node-utils first; workspace and logger next; config
+last**. Config cannot be treated as a valid release candidate until its workspace and logger
+delegates resolve from a clean install rather than monorepo links.
+
+| Package                  | Manifest | Registry latest | Baseline state                                                                                      | Fix or prove before release rehearsal                                                                                                                                                 |
+| ------------------------ | -------- | --------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@snailicid3/node-utils` | `0.1.0`  | `0.1.0`         | JSON, glob, path, environment, command, and argv ownership changed after the published baseline     | Resolve the Doctor's unregistered missing root `types` condition; reconcile the residual path-helper duplication; test ESM/CJS, declarations, JSON/file IO, argv, and packed contents |
+| `@snailicid3/workspace`  | `0.0.0`  | none            | Private first-release candidate; public bins still include compatibility shell assets               | Align `buildConfig` with the tsc-only build; choose version/privacy state; test every bin in clean non-Nx npm and pnpm consumers                                                      |
+| `@snailicid3/logger`     | `0.0.6`  | `0.0.6`         | Implementation/ownership refactor complete in the checkout but unreleased                           | Record a changeset/version decision; test ESM/CJS, declarations, `snail-sh`, packed contents, and the registered Doctor findings                                                      |
+| `@snailicid3/config`     | `0.2.0`  | `0.2.0`         | Ownership shims, generated JSON exports, and package-bin delegates changed after the registry build | Prove generated exports and every wrapper from a clean install; ship only after workspace/logger dependencies are registry-valid                                                      |
+
+Release-rehearsal rules:
+
+1. Commit or otherwise record the exact candidate SHA before packing; never describe a dirty, moving
+   working tree as the baseline above.
+2. Add explicit changesets/version decisions for the three already-published packages and choose
+   workspace's first publishable version. No package in this cohort currently has a pending
+   changeset file.
+3. Publish candidates to an isolated local registry first, then install them into clean npm and pnpm
+   fixtures in dependency order. Tarball-only tests remain useful but do not prove registry
+   dependency rewriting.
+4. Run package/API tests and public bins from the installed fixtures, not from workspace links.
+5. Preserve the Section 10.3 Doctor fixtures as expected findings; any other failure is a release
+   blocker.
+6. Do not use the new TypeScript changeset flow for the real cohort until its read-only plan and
+   opt-in branch action have been manually rehearsed in a disposable branch/repository. Automated
+   tests exist, but the maintainer has not run the new flow yet.
+
 ---
 
 ## 12. Implementation sequence
@@ -576,8 +667,9 @@ documented migration is complete.
 Each phase has a checkpoint. Do not begin the next structural phase while its compatibility tests
 are red.
 
-**Part A (this round): Phases 0–7.** **Part B (deferred): Phases B1–B4.** Sections 8–10 below are
-the design reference for Part B and are not worked in this round.
+**Part A (this round): Phases 0–7.** **Part B (separate): Phases B1–B4.** Sections 8–10 are the
+design reference for Part B. Only the bounded, non-gating Doctor MVP in Phase B3 has started early;
+the other Part B work remains deferred.
 
 ### Phase 0 — Freeze and audit the current contract
 
@@ -614,23 +706,21 @@ the design reference for Part B and are not worked in this round.
       Zod object/record/discriminated-union option schemas and array/tuple positional schemas. Tests
       cover plain options, safe and throwing failures, fixed tuples, variadic tuple tails, records,
       and discriminated unions.
-- [ ] Migrate real command parsers to the argv schema primitive. No repository CLI has been migrated
-      yet: `scope-commit`, `scope-affected`, and `workspace-hook` still parse their arguments
-      manually. Prioritize `scope-commit` and `scope-affected`, whose aliases, modes, and positional
-      arguments currently produce the longest parsing branches; preserve every existing flag and
-      error message while doing so. **Standing rule:** any environment reading or non-trivial
-      argument parsing added or touched from here on uses the argv-schema primitives (`defineEnv`
-      for env shape; `parseArgv`/`safeParseArgv`/`parseArgvPositionals` for commands) — no new
-      manual or excessive hand-rolled flag/env parsing.
-- [ ] Revisit `@snailicid3/parser` only when another package needs a genuinely runtime-neutral
-      parser abstraction; do not create it merely to satisfy the original package diagram.
+- [ ] Finish migrating real command parsers to the argv-schema primitive. `snail-sh` and the
+      in-progress TypeScript changeset command use the schema helpers; the public `scope-commit`,
+      `scope-affected`, and `workspace-hook` commands still parse arguments manually. Prioritize
+      `scope-commit` and `scope-affected`, whose aliases, modes, and positionals produce the longest
+      branches; preserve every existing flag and error message. **Standing rule:** any environment
+      reading or non-trivial argument parsing added or touched from here on uses the argv-schema
+      primitives (`defineEnv`; `parseArgv`/`safeParseArgv`/`parseArgvPositionals`) — no new
+      excessive hand-rolled parsing.
+- [x] Defer `@snailicid3/parser` until another package needs a genuinely runtime-neutral parser
+      abstraction; do not create it merely to satisfy the original package diagram.
 - [x] Keep functional APIs, explicit argv inputs, local ESM `.js` imports, and focused tests.
-- [ ] Finish the config utility ownership cleanup. This is now scheduled and detailed as **Phase 6**
-      below (the closing phase of this round). Summary: move generic JSON file IO, JSON value
-      helpers, glob filtering, and generic path primitives out of `@snailicid3/config` into
-      `@snailicid3/node-utils` (and runtime-neutral JSON _types_ into `@snailicid3/types`), leaving
-      config with policy and configuration composition only. The 2026-08-12 audit that scopes this
-      work is recorded in Phase 6.
+- [x] Finish the config utility ownership cleanup detailed in **Phase 6**. Generic JSON file IO,
+      glob filtering, and path primitives moved from config to node-utils; runtime-neutral JSON
+      value behavior moved to utils, with the base types retained in types. Config now owns policy
+      and compatibility re-exports rather than the implementations.
 
 The schema cleanup completed during the workspace move applies to environment input rather than
 command-line input. `workspaceEnvironment` now validates and defaults these values through
@@ -638,8 +728,9 @@ command-line input. `workspaceEnvironment` now validates and defaults these valu
 `GBT_PATCH_CWD`, `PREFIX`, `PREFIX_OVERRIDE`, `PROTECTED_BRANCHES`, `SCOPE_COMMIT_SKIP_COMMITLINT`,
 and `SKIP_LINT_STAGED`.
 
-**Current checkpoint:** the Node runtime ownership cleanup is complete. A separate parser is
-intentionally deferred, and node-utils contains no workspace-aware policy.
+**Current checkpoint:** the Node runtime and config-utility ownership cleanup is complete. A
+separate parser is intentionally deferred, node-utils contains no workspace-aware policy, and the
+remaining parser work is limited to migrating the public hand-rolled command parsers.
 
 ### Phase 3 — Consolidate logger and snail-sh
 
@@ -653,51 +744,60 @@ intentionally deferred, and node-utils contains no workspace-aware policy.
       cli-app's `createProgressBar` API as a compatibility re-export.
 - [x] Remove logger's duplicate tagged-template formatter and direct `prettyPrint()` side effect;
       reuse utils' `fmt` while retaining logger-specific value-to-terminal formatting.
-- [ ] Inventory the current logger public API, the workspace `snail-sh` shell commands, formatting,
-      exit behavior, environment switches, and every repository/consumer call site.
-- [ ] Add typed logger functions for the behavior hooks currently need: section/start messages,
+- [x] Inventory the current logger public API, the `snail-sh` command/action schema, formatting,
+      exit behavior, and repository call sites.
+- [x] Add typed logger functions for the behavior hooks currently need: section/start messages,
       success, warning, critical/failure, plain information, and aligned status pairs.
-- [ ] Preserve the existing snail styling and readable failure messages; formatting changes are not
+- [x] Preserve the existing snail styling and readable failure messages; formatting changes are not
       part of this ownership move.
-- [ ] Give `@snailicid3/logger` ownership of the `snail-sh` binary and its argv adapter. Reuse the
+- [x] Give `@snailicid3/logger` ownership of the `snail-sh` binary and its argv adapter. Reuse the
       existing argv/schema utility only where it simplifies the contract; do not introduce a
       separate parser package for this phase.
-- [ ] Make `snail-sh` the first production command migrated to the Yargs/Zod argv primitive, and
+- [x] Make `snail-sh` the first production command migrated to the Yargs/Zod argv primitive, and
       record its command/action schema and positional tail explicitly before removing the shell
       parser.
-- [ ] Change workspace hook functions to import the logger API directly instead of spawning
-      `pnpm exec snail-sh` for normal logging.
-- [ ] Keep only the minimal shell fallback needed before compiled JavaScript is available during
-      bootstrap. Document exactly which bootstrap path requires it.
-- [ ] Add a temporary config compatibility wrapper that resolves the logger package correctly from
+- [x] Keep workspace hooks on the logger-owned `snail-sh` binary boundary for now. A future
+      direct-library optimization belongs to workspace and does not hold logger implementation open.
+- [x] Keep only the minimal shell fallback needed before compiled JavaScript is available during
+      bootstrap. It is documented as the setup/install floor and is not a workspace package bin.
+- [x] Add a temporary config compatibility wrapper that resolves the logger package correctly from
       both workspace links and packed npm installs.
-- [ ] Remove `snail-sh` ownership, copied logger assets, and obsolete subprocess helpers from
+- [x] Remove `snail-sh` ownership, copied logger assets, and obsolete subprocess helpers from
       workspace after direct logger calls and compatibility wrappers pass.
-- [ ] Declare the resulting package dependencies explicitly and verify that no new Nx project or
+- [x] Declare the resulting package dependencies explicitly and verify that no new Nx project or
       task cycle is introduced. Use negative `implicitDependencies` only for proven static-config
       edges, never to hide a runtime dependency.
-- [ ] Add focused tests for formatting, argument dispatch, non-zero exits, hook-phase failures,
-      fallback output when logging itself fails, and paths containing spaces.
-- [ ] From the monorepo root, run filtered typechecks, tests, and builds for logger, workspace, and
-      config; then pack logger and config and smoke-test `snail-sh` through both the new binary and
-      the compatibility wrapper under npm and pnpm fixtures.
+- [x] Add focused logger tests for formatting, argument dispatch, spinners, tables, and terminal
+      helpers. Hook-phase failures, fallback output, and paths containing spaces stay in the packed
+      compatibility checkpoint.
+- [x] Complete logger implementation verification. The 2026-08-12 audit built and packed logger and
+      workspace, ran the logger test suite, and confirmed matching named runtime exports through
+      logger's ESM and CommonJS roots. The config-wrapper smoke test under clean npm and pnpm
+      fixtures and the external consumer matrix remain publication/release gates.
 
-**Done when:** logger contains the one normal logging implementation, workspace hooks call it
-directly, `snail-sh` remains compatible, bootstrap still reports actionable failures, and packed
-consumer tests pass.
+**Current checkpoint:** Phase 3 is complete. Logger owns the one compiled `snail-sh` dispatcher,
+config delegates to it, workspace no longer exports it, and the package builds, packs, and tests.
+npm currently serves `@snailicid3/logger@0.0.6`; the completed checkout state is unreleased, and no
+pending logger changeset exists. The version decision and clean external-consumer checks remain
+release checkpoints rather than logger implementation work.
 
-### Phase 4 — Create the public workspace package
+### Phase 4 — Establish the workspace package
 
-- [x] Create the public, Node-runtime `@snailicid3/workspace` package with a tsc-only build.
+- [x] Create the Node-runtime `@snailicid3/workspace` package with a tsc-only build, staged as
+      `private: true` at `0.0.0` while the contract is under construction.
 - [x] Move repo roots, package discovery, paths, git, affected logic, environment policy, ownership,
       and scope matching.
 - [x] Migrate commitlint composition without changing its established API.
 - [x] Model the static config tsconfig input without treating it as a runtime dependency in the Nx
       graph.
-- [ ] Complete the packed single-package, non-Nx fixture before declaring this phase closed.
+- [ ] Reconcile workspace's declared `buildConfig.buildStrategy` (`bundle`) with its actual tsc-only
+      Nx build. This is unregistered build-contract drift, not an intentional Doctor fixture.
+- [ ] Complete the packed single-package, non-Nx fixture, then set a publishable version and
+      `private: false` only when the release gate is intentionally opened.
 
-**Current checkpoint:** the monorepo implementation and tests are committed; the packed non-Nx
-consumer check remains.
+**Current checkpoint:** the monorepo implementation and tests are committed. Workspace remains
+private by design; its build-contract metadata, packed non-Nx consumer check, and deliberate
+publication gate remain.
 
 ### Phase 5 — Move repo commands and preserve config bins
 
@@ -711,47 +811,46 @@ consumer check remains.
 - [x] Preserve staged-only commit behavior and visible failure logging for lint-staged and hooks.
 - [x] Resolve compatibility binaries by package metadata so workspace links and paths containing
       spaces work correctly.
-- [ ] Run the full packed consumer matrix after logger ownership is settled, since `snail-sh` is the
-      one intentionally temporary workspace-owned binary.
+- [ ] Run the full packed consumer matrix for the config compatibility wrapper and workspace
+      commands before the first publish. Logger ownership is settled; this is now a shared release
+      gate rather than a logger implementation blocker.
 
 **Current checkpoint:** the repository command migration is committed and passes the monorepo
-checks. Final packed compatibility verification is coupled to Phase 3's logger move.
+checks. Logger owns `snail-sh`; final packed compatibility verification belongs to the release
+checkpoint shared with Phase 7 and Phase B4.
 
 ### Phase 6 — Config ownership cleanup
 
-Move the remaining generic utilities out of `@snailicid3/config` so config holds only policy and
-configuration composition. The branch-aware changeset/release workflow that used to share this phase
-is now its own **Phase 7**.
+**Complete.** The generic utilities moved out of `@snailicid3/config`, leaving config with policy,
+configuration composition, generated public config artifacts, and compatibility re-exports. The
+branch-aware changeset/release workflow that used to share this phase is now its own **Phase 7**.
 
-**Audit (2026-08-12).** What is still in `@snailicid3/config` that should not be, and where it goes.
-`@snailicid3/config` already declares `@snailicid3/node-utils`, `@snailicid3/workspace`, and
-`@snailicid3/logger` as dependencies, so the destination edges already exist.
+**Audit and outcome (2026-08-12).** This table records the original surface and the owner that now
+holds its implementation.
 
-| Config surface                                                                                           | Verdict                                  | Destination                                                                                                                                                                                                   |
-| -------------------------------------------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `utilities/json.ts` — `json.exportFile/importFile/importObject`                                          | Move (generic JSON file IO)              | node-utils; **consolidate with the existing `export.json.file.ts`** rather than shipping two APIs                                                                                                             |
-| `utilities/json.ts` — `serialize/deserialize/isValue/isObject/prettyPrint`, `isPlainObject`, `deepMerge` | Move (generic JSON/object primitives)    | node-utils                                                                                                                                                                                                    |
-| `utilities/json-value.ts` — runtime-neutral value types + guards                                         | Move (pure, "does not read/write files") | `@snailicid3/types` (value types), with guards to node-utils; consolidate its overlap with `json.ts`                                                                                                          |
-| `utilities/path.ts` — `getDirname/normalizePath/getFullPath/resolveCwd/doesFileExist/paths`              | Move (generic path/fs primitives)        | node-utils; reconcile overlap with existing `path.typed.ts` / `file.path.array.ts`                                                                                                                            |
-| `shared.ts` — `filterFileArrByGlob` (micromatch)                                                         | Move (generic glob file filter)          | node-utils (used by lint-staged; the barrel already has a commented `//GlobFileFilter` slot)                                                                                                                  |
-| `shared.ts` — extension constants + `SHARED_FORMATTING_RULES` + `getScaledWidth`                         | Keep, but relocate                       | Stays in config as shared formatting **policy**; split into a clean `shared/` module, separated from the glob util that leaves                                                                                |
-| commitlint scope matcher / resolver                                                                      | **Already correct — no action**          | `resolveScopePathMatchers`, `matchScopesForPath`, `scopeMatchersFromCommitlintConfig`, `loadScopePathMatchers` already live in `workspace/src/core/scope-matchers.ts`; config's commitlint only composes them |
+| Former config surface                                                              | Outcome            | Current owner                                                                                           |
+| ---------------------------------------------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------- |
+| `utilities/json.ts` file IO and branded JSON document helpers                      | Moved/consolidated | node-utils owns file IO and delegates value behavior to utils; config retains a compatibility re-export |
+| `utilities/json.ts` value behavior plus `utilities/json-value.ts`                  | Moved/consolidated | utils owns parse/normalize/serialize and guards; the base JSON value types remain in types              |
+| `utilities/json.ts` Node/object helpers such as `isPlainObject` and `deepMerge`    | Moved              | node-utils                                                                                              |
+| `utilities/path.ts` generic path/filesystem helpers                                | Moved              | node-utils, with a config compatibility re-export                                                       |
+| `shared.ts` — `filterFileArrByGlob`                                                | Moved              | node-utils; lint-staged consumes it there                                                               |
+| `shared.ts` — extension constants, `SHARED_FORMATTING_RULES`, and `getScaledWidth` | Kept/regrouped     | config's `shared/` policy module                                                                        |
+| commitlint scope matcher/resolver                                                  | Already correct    | workspace owns discovery and matching; config composes the public API                                   |
 
 Notes that fell out of the audit:
 
-- `json.ts` and `json-value.ts` **duplicate** each other (both define JSON array/value guards and
-  branded serialized-string types). Consolidate to one value layer during the move instead of
-  copying both into node-utils.
-- node-utils already exports `node.exportJSONFile` plus `JSONExportConfig`/`JSONExportEntry` from
-  `export.json.file.ts`. Config's `json.exportFile` is a richer, differently-typed second copy with
-  duplicate `JSONExportConfig`/`JSONExportEntry` names. Pick one contract; keep a config
-  compatibility re-export until callers move.
-- The **matcher-resolver that crosses the workspace↔commitlint barrier already landed** in workspace
-  and is composed by config through the public API. This item from the original brief is effectively
-  done; the only generic glob helper still misplaced in config is `filterFileArrByGlob`.
-- `build-exporter.ts` (which consumes `json.object`/`json.exportFile`) is already marked TEMPORARY
-  in its own header; do not preserve it as a contract — retarget it at node-utils and let it be
-  retired.
+- `json.ts` and `json-value.ts` duplicated JSON array/value guards and branded serialized-string
+  types. The move consolidated them into one utils-owned value layer instead of copying both into
+  node-utils.
+- node-utils' former `node.exportJSONFile` contract and config's richer `json.exportFile` contract
+  also duplicated `JSONExportConfig`/`JSONExportEntry`. The duplicate file was removed; node-utils
+  now owns one contract and config keeps a compatibility re-export.
+- The matcher/resolver across the workspace↔commitlint boundary lives in workspace and is composed
+  by config through the public API. `filterFileArrByGlob` has also moved to node-utils.
+- `build-exporter.ts` remains config-internal, but its generated JSON files are public package
+  exports. It now resolves file IO through the node-utils compatibility path and cannot be removed
+  until another mechanism produces those artifacts.
 
 Steps:
 
@@ -797,12 +896,12 @@ Steps:
       `shared/formatting.ts` (widths, `SHARED_FORMATTING_RULES`, `getScaledWidth`) with a
       `shared/index.ts` barrel; `shared.ts` is now a one-line compat re-export so the ~14 existing
       `./shared.js` importers are unchanged.
-- [ ] Update imports, package dependencies, tests, and compatibility exports after every caller has
-      moved.
+- [x] Update imports, package dependencies, tests, and compatibility exports after every internal
+      caller has moved. Config's JSON/path shims remain only for external-consumer compatibility.
 
-**Done when:** config contains only policy and configuration composition; node-utils owns one JSON
-file-IO / glob / path primitive layer with no duplicate types; and existing config imports still
-resolve through compatibility re-exports.
+**Result:** config contains policy and configuration composition; node-utils owns the Node file-IO,
+glob, and path layer; utils owns the runtime-neutral JSON value implementation; and existing config
+imports continue to resolve through compatibility re-exports.
 
 #### Housekeeping (done) and wonky-items backlog
 
@@ -811,9 +910,9 @@ Completed housekeeping (2026-08-12):
 - [x] Removed `packages/config/src/prettier/base.ts` (0-byte, unreferenced).
 - [x] Removed `packages/workspace/src/random/randomfile.ts` (unreferenced scratch stubs) and its now
       empty `random/` directory.
-- [x] Confirmed `@snailicid3/example-package` is a deliberate doctor fixture (intentionally busted
-      exports) and stays `private: true`; retained its `node2.ts` / `random/randomfile.ts` because
-      they are wired into the fixture's `tsdown.config.ts`.
+- [x] Confirmed `@snailicid3/example-package` is deliberate Doctor fixture `EXP-EXAMPLE-001`
+      (intentionally busted exports) and stays `private: true`; retained its `node2.ts` /
+      `random/randomfile.ts` because they are wired into the fixture's `tsdown.config.ts`.
 - [x] Repointed `@snailicid3/cli-app` to re-export the moved JSON/path utilities from
       `@snailicid3/node-utils` (their real owner) instead of `@snailicid3/config`.
       `@snailicid3/config` is only a **devDependency** of cli-app, not a runtime dependency, so
@@ -855,6 +954,14 @@ Wonky items to resolve while doing the Phase 6 moves (do not defer these into Pa
 - **`@snailicid3/workspace` is still `private: true`.** Expected mid-refactor (it is not published
   yet), but it must be flipped to public with a packed test before any consumer depends on it. Track
   this as a release-gate item, not silent state.
+- **The current `@snailicid3/logger` refactor is implementation-complete but unreleased.** npm
+  already serves `0.0.6`; the ownership/refactor phase is closed, while the next version and clean
+  external-consumer proof belong to the release gate.
+- **Logger export/package drift is preserved selectively.** The missing root `types` condition,
+  forgotten supporting exports, duplicate packed declaration trees, and universal-vs-Node runtime
+  mismatch are registered as `EXP-LOGGER-001`, `API-LOGGER-001`, `PACK-LOGGER-001`, and
+  `RUNTIME-LOGGER-001` in Section 10.3. They are Doctor inputs, not Phase 6 cleanup. Other logger
+  export failures are not protected by that decision.
 
 **Done when:** each wonky item above is either resolved as part of a Phase 6 or Phase 7 step or
 explicitly promoted to a tracked follow-up; none is left as undocumented residue.
@@ -903,8 +1010,10 @@ is picked up.
 `core/branch-state.ts` (`decideBranchAction` — create/switch/relink/proceed/block, replacing flat
 denial; `gatherBranchState` + git helpers), `core/branch-commit.ts` (`deriveCommitFromBranch` /
 `parseBranchName`), and `cli/changeset.ts` — a Node command on `safeParseArgv` that does the
-**read-only assessment/plan** (state → decision → derived commit). All unit-tested. The git-mutating
-execution (create/switch, changeset CLI, `--commit`, `--pr`) wires onto this next.
+**read-only assessment/plan** (state → decision → derived commit). The tested `--apply` path can
+create, switch, relink, or proceed with the selected branch action. This TypeScript command is not
+yet wired to the public `gbt-changeset` bin, which still runs the compatibility shell workflow.
+Changeset creation plus commit, push, and PR continuation remain next.
 
 #### 7.1 Shared release engine (the spine, in workspace)
 
@@ -932,8 +1041,8 @@ Split the model along the two axes [#206] demands, and expose one report both su
 
 #### 7.2 Smart branch state machine (replace flat denial)
 
-The current script flatly dies if not on base, out of sync, or dirty. Replace with an assessment +
-decision table:
+The current public shell script flatly dies if it is not on base, out of sync, or clean. Replace it
+with an assessment + decision table:
 
 - [x] **Assess:** `gatherBranchState` reports working tree clean/dirty; base ahead/behind/diverged
       vs its remote; current prefix (`base`/`changeset/*`/`release/*`/other); and whether the target
@@ -948,6 +1057,10 @@ decision table:
       integration test. The command's `--apply` flag runs it (mutation opt-in; default stays the
       read-only plan), with `--update-base` fetching `origin/<base>` first. Output uses `fmt` (which
       already formats booleans, so no `String()` noise). e2e-smoked.
+- [ ] **Maintainer rehearsal:** run the read-only plan and `--apply` in a disposable branch/repo;
+      verify dirty-tree, base-sync, and relink behavior by hand. Automated unit and temp-git
+      coverage exists, but the new TypeScript flow has not yet been run by the maintainer. Complete
+      this before wiring it to the public bin or using it for the four-package release cohort.
 - [ ] **Execute — remainder (next):** run the changeset CLI (`add`), then `--commit` (stage
       changeset + commit with the derived message and real resolved scope) and `--pr`.
 
@@ -1010,13 +1123,12 @@ identically from one workspace engine, [#206]'s intent/inventory split holds, an
 
 ---
 
-## Part B — the next refactor: build-system, doctor & tooling (deferred, separate track)
+## Part B — the next refactor: build-system, doctor & tooling (separate track)
 
-**Not in scope for this round — this is the next refactor.** The phases below are retained for
-continuity and become their own initiative (with its own plan doc) once Part A is released. They are
-renumbered as `B1`–`B4`; none of them is a prerequisite for completing Part A. The **doctor/validate
-work (Phase B3) belongs entirely to this next refactor**, and the `example-package` busted-exports
-fixture is preserved specifically as its input.
+Part B remains a separate initiative and is not a prerequisite for completing or releasing Part A.
+The user explicitly pulled forward the bounded Phase B3 Doctor MVP on 2026-08-13; that spike does
+not pull build-system work, Storybook, validate enforcement, or the packed-consumer checkpoint into
+Part A. The phases remain numbered `B1`–`B4`, and Section 10.3 is the Doctor fixture contract.
 
 ### Phase B1 — Reframe build configuration
 
@@ -1040,11 +1152,28 @@ Storybook successfully.
 
 ### Phase B3 — Implement doctor, then validate
 
-- Build package-first collectors.
-- Add the optional Nx collector.
-- Integrate Knip, export comparison, Publint, and ATTW without mutation.
-- Run doctor in report-only mode.
-- Add validate severity policy only after report output is trustworthy.
+- [x] Scaffold private `@snailicid3/doctor@0.0.0` with a tsc-only Node CLI/library build and an
+      explicit executable-bin step.
+- [x] Discover packages through the shared npm/pnpm workspace engine, with a bounded filesystem
+      fallback so a broken or incompatible package-manager command does not hide manifest facts.
+- [x] Add the first package-first collectors: manifest validity/name, declared concrete export
+      targets, root declaration routing, legacy `main`/`module`/`types`, and bin existence/mode.
+- [x] Mirror all Section 10.3 fixture IDs in an executable registry. Produce and regression-test the
+      initial `EXP-EXAMPLE-001` and `EXP-LOGGER-001` findings from observed evidence.
+- [x] Emit deterministic text and JSON reports, distinguish known-fixture from unregistered
+      findings, perform no mutation, and exit successfully for findings.
+- [ ] Compare build-plan expectations with emitted and packed entry points; this completes
+      `EXP-EXAMPLE-001` beyond the MVP's concrete-target evidence.
+- [ ] Add API-report, actual-tarball declaration-surface, and emitted runtime-graph collectors to
+      prove `API-LOGGER-001`, `PACK-LOGGER-001`, and `RUNTIME-LOGGER-001`.
+- [ ] Add the optional Nx collector.
+- [ ] Integrate Knip, Publint, and ATTW without mutation.
+- [ ] Add validate severity policy only after report output is trustworthy.
+
+**MVP verification (2026-08-13):** 12 tests pass across discovery, manifests, the fixture registry,
+and text/JSON formatting; TypeScript typecheck and the Nx build pass; a real read-only run against
+example-package + logger reports four known-fixture diagnostics and zero unregistered findings;
+Doctor reports zero findings against its own built package.
 
 **Done when:** the npm single-package consumer receives useful diagnostics and Nx repositories
 receive additional resolved graph analysis.
@@ -1094,10 +1223,10 @@ These remain open deliberately (items 6, 7, 10 belong to the deferred Part B tra
 5. Does the workspace bootstrap module eventually justify a separate public package?
 6. Which Storybook frameworks/presets require supported variants?
 7. Does BuildPlan keep its current name after its responsibility is reduced?
-8. Scaffold is gone (no scaffold directory remains). **Decision:** `@snailicid3/example-package` is
-   a deliberate **doctor test fixture** — its intentionally mismatched/"busted" exports are the
-   input for Phase B3 diagnostics. It stays `private: true` and must never be published in that
-   state.
+8. Scaffold is gone (no scaffold directory remains). **Decision:** the Doctor fixtures are the
+   exhaustive registry in Section 10.3. `@snailicid3/example-package` stays `private: true` and must
+   never be published in its busted state; the selected logger drift is preserved only until its
+   named diagnostics have regression coverage.
 9. After the main refactor, should types and color remain packages or become lighter
    subpaths/modules?
 10. Which custom doctor finding, if any, is not already covered by Knip, Publint, ATTW, packed
@@ -1129,4 +1258,5 @@ No open question permits breaking an existing consumer while it is being answere
 - build configuration is pure and package exports are not mutated
 - Storybook has an isolated dependency boundary
 - doctor reports reality without mutation
+- registered fixtures are reported by ID, and unregistered regressions are not silently accepted
 - validate, packed fixtures, and real consumers pass
