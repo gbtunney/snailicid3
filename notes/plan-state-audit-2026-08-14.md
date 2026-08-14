@@ -4,8 +4,9 @@
 `node_modules`, nothing built — all findings below are from source, manifests, and git state, not
 from a build or test run.
 
-**Purpose:** reconcile `snailicid3-architecture-and-refactor-plan.md` against what is actually in the
-tree, answer the open questions raised on 2026-08-14, and register the defects found while looking.
+**Purpose:** reconcile `snailicid3-architecture-and-refactor-plan.md` against what is actually in
+the tree, answer the open questions raised on 2026-08-14, and register the defects found while
+looking.
 
 **Method:** read every `packages/*/package.json`, the workspace `core/` + `cli/` sources, config's
 commitlint surface, doctor's collectors, cli-app's schema layer, the root scripts, and the workflow
@@ -15,16 +16,16 @@ callers. Cross-checked issue #212 (closed by #213) against the code that claims 
 
 ## 1. What moved since the plan was last written
 
-| Plan claim                                                              | Actual state at `fa0992b`                                                                | Verdict            |
-| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------ |
-| Phase B2 Storybook — DONE                                               | `@snailicid3/storybook-config` merged (#215), builds config-only, depends only on config  | ✅ accurate         |
-| Phase B1 build-config — deferred, untouched                             | Untouched; still owns `defineBuildPlan`/`toTsdown*`/`toVite*` and the package Zod schemas | ✅ accurate         |
-| Phase 7: "TypeScript command is not yet wired to the public bin"        | **Stale.** `gbt-changeset` → `./dist/cli/changesetv2.js`; the shell workflow is gone      | ❌ plan out of date |
-| Phase 7: `core/branch-state` + `branch-actions` + `cli/changeset.ts`    | Landed, but `cli/changeset.ts` is now **orphaned** (see §4.1)                             | ⚠️ diverged        |
-| Phase 4: "workspace declares `buildConfig.buildStrategy: bundle`"       | **Moot.** `buildConfig` is read by no code; workspace omitting it is correct (§4.6)       | ❌ plan out of date |
-| Phase 2: "`scope-commit` still parses arguments manually"               | Still true — #213 refactored classification, not argv                                     | ✅ accurate         |
-| §11.3: node-utils "unregistered missing root `types` condition"         | Still present, and it is worse than recorded (see §4.3)                                   | ✅ accurate         |
-| §10.6 runtime tags (`runtime:node`/`browser`/`universal`)               | **Zero implementation.** No `tags` key anywhere in `nx.json` or any project               | not started        |
+| Plan claim                                                           | Actual state at `fa0992b`                                                                 | Verdict             |
+| -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------- |
+| Phase B2 Storybook — DONE                                            | `@snailicid3/storybook-config` merged (#215), builds config-only, depends only on config  | ✅ accurate         |
+| Phase B1 build-config — deferred, untouched                          | Untouched; still owns `defineBuildPlan`/`toTsdown*`/`toVite*` and the package Zod schemas | ✅ accurate         |
+| Phase 7: "TypeScript command is not yet wired to the public bin"     | **Stale.** `gbt-changeset` → `./dist/cli/changesetv2.js`; the shell workflow is gone      | ❌ plan out of date |
+| Phase 7: `core/branch-state` + `branch-actions` + `cli/changeset.ts` | Landed, but `cli/changeset.ts` is now **orphaned** (see §4.1)                             | ⚠️ diverged         |
+| Phase 4: "workspace declares `buildConfig.buildStrategy: bundle`"    | **Moot.** `buildConfig` is read by no code; workspace omitting it is correct (§4.6)       | ❌ plan out of date |
+| Phase 2: "`scope-commit` still parses arguments manually"            | Still true — #213 refactored classification, not argv                                     | ✅ accurate         |
+| §11.3: node-utils "unregistered missing root `types` condition"      | Still present, and it is worse than recorded (see §4.3)                                   | ✅ accurate         |
+| §10.6 runtime tags (`runtime:node`/`browser`/`universal`)            | **Zero implementation.** No `tags` key anywhere in `nx.json` or any project               | not started         |
 
 ---
 
@@ -37,17 +38,18 @@ Yes, partially, and narrower than the issue's deliverable implies.
 **Landed.** `scope-commit` now resolves scopes through the shared model:
 
 - `packages/workspace/src/core/repository-scopes.ts` — `getWorkspaceScopeClassifiers()`,
-  `createRepositoryScopeClassifiers()`, `resolveRepositoryScopes()` over node-utils' `classifyFiles`.
+  `createRepositoryScopeClassifiers()`, `resolveRepositoryScopes()` over node-utils'
+  `classifyFiles`.
 - `packages/workspace/src/cli/commit.ts:311-327` is the single automatic scope-detection path.
-- Match evidence is real: `formatScopeEvidence()` (`commit.ts:46-68`) prints the per-scope file lists
-  and an `unmatched/root` bucket, exactly the verbose view #212 sketched.
+- Match evidence is real: `formatScopeEvidence()` (`commit.ts:46-68`) prints the per-scope file
+  lists and an `unmatched/root` bucket, exactly the verbose view #212 sketched.
 - `--scope` is a true override (`commit.ts:93-95`), not a second architecture.
 
 **Not landed.** The issue asked for the CLI to become "a sequence of small functional operations."
 `commit.ts` is still 365 lines and still carries a 65-line hand-rolled `parseArgs` switch
-(`commit.ts:154-235`) with ~10 undocumented aliases. This violates the **Phase 2 standing rule** that
-any non-trivial argument parsing touched from here on uses `parseArgv`/`safeParseArgv`. #212 was
-closed on the classification half only.
+(`commit.ts:154-235`) with ~10 undocumented aliases. This violates the **Phase 2 standing rule**
+that any non-trivial argument parsing touched from here on uses `parseArgv`/`safeParseArgv`. #212
+was closed on the classification half only.
 
 ### 2.2 Does the matcher/classifier shorten the scope keys?
 
@@ -65,9 +67,9 @@ Custom matcher keys (`DEFAULT_SCOPE_PATH_MATCHERS` plus any consumer `matchers` 
 `mergeScopes` entries go in verbatim on both sides — `workspace.scopes.ts:38` for the enum,
 `repository-scopes.ts:44` for the classifiers.
 
-**Corrected 2026-08-14.** An earlier draft of this section claimed a hand-added namespaced key
-"will fail `scope-enum`." That is wrong: because both sides use the key verbatim, a custom
-`'@snailicid3/tooling': ['tools/**']` lands in the enum *and* in the classifiers as the same string,
+**Corrected 2026-08-14.** An earlier draft of this section claimed a hand-added namespaced key "will
+fail `scope-enum`." That is wrong: because both sides use the key verbatim, a custom
+`'@snailicid3/tooling': ['tools/**']` lands in the enum _and_ in the classifiers as the same string,
 so the commit validates fine. The parse is fine too — the conventional header regex takes `.*` for
 scope, and multi-scope splitting is on `,`, not `/`. The only cosmetic effect is that such a key
 ignores `--keep-prefix` entirely, since that flag only reaches package-derived names.
@@ -76,10 +78,10 @@ The real hazard in this area is **key collision, and it is silent**:
 
 ```ts
 // repository-scopes.ts:41-47 — custom classifiers win
-({ ...getWorkspaceScopeClassifiers(repoRoot, keepPrefix), ...customClassifiers })
+;({ ...getWorkspaceScopeClassifiers(repoRoot, keepPrefix), ...customClassifiers })
 ```
 
-A custom matcher whose key equals a *shortened package name* **replaces that package's own
+A custom matcher whose key equals a _shortened package name_ **replaces that package's own
 classifier outright**, so the package's files stop matching their own scope. The enum side hides it
 (a `Set` dedupes the name away), so the scope stays valid and only the file→scope mapping silently
 changes.
@@ -94,14 +96,14 @@ through `shortenScopeName` on the way in so the two sources are in one namespace
 
 ### 2.3 Is commitlint using the new #212 functions?
 
-**No — commitlint is still on the *old* matcher system.** This is the most important structural
+**No — commitlint is still on the _old_ matcher system.** This is the most important structural
 finding in the commit-scope area. There are two parallel scope engines in `workspace/core`, both
 exported from the public barrel:
 
-| Engine                                   | File                    | Mechanism                             | Consumers                                         |
-| ---------------------------------------- | ----------------------- | ------------------------------------- | ------------------------------------------------- |
-| **New** (#211/#212)                      | `repository-scopes.ts`  | node-utils `classifyFiles` classifiers | `scope-commit` only                                |
-| **Old**                                  | `scope-matchers.ts`     | direct `micromatch.isMatch` per path   | `scope-affected`, config commitlint, `scope-matcher-config` |
+| Engine              | File                   | Mechanism                              | Consumers                                                   |
+| ------------------- | ---------------------- | -------------------------------------- | ----------------------------------------------------------- |
+| **New** (#211/#212) | `repository-scopes.ts` | node-utils `classifyFiles` classifiers | `scope-commit` only                                         |
+| **Old**             | `scope-matchers.ts`    | direct `micromatch.isMatch` per path   | `scope-affected`, config commitlint, `scope-matcher-config` |
 
 Specifically:
 
@@ -112,21 +114,21 @@ Specifically:
 - `core/scope-matcher-config.ts` (cosmiconfig round-trip) reads/writes the old shape.
 
 So `scope-commit` classifies files with one algorithm, `scope-affected` with another, and commitlint
-validates against an enum built from the second. They agree today because the built-in matcher set is
-tiny and package classifiers are generated identically — but nothing enforces that, and there is no
-test asserting the two engines produce the same scope for the same file.
+validates against an enum built from the second. They agree today because the built-in matcher set
+is tiny and package classifiers are generated identically — but nothing enforces that, and there is
+no test asserting the two engines produce the same scope for the same file.
 
 **This is the #212 deliverable line "old scope/Commitlint code that appears removable in a later
 cleanup," never written down.** Registering it here.
 
 ### 2.4 The changeset script
 
-`cli/changesetv2.ts` (214 lines) is what the user describes: a straight port of `changeset-branch.sh`
-to Node on `safeParseArgv` + a Zod `optionsSchema` (`allowDirty`/`base`/`prefix`), using
-`@snailicid3/logger` for output (`kabob`, `kvPair`, `line`, `section`, `spacer`). It shells out to
-`scope-affected --changeset-only` for scope and `scope-commit --checked-commit` for the commit. The
-old `changeset-branch.sh` is deleted. `gbt-changeset` points at it. This is a faithful, working
-conversion.
+`cli/changesetv2.ts` (214 lines) is what the user describes: a straight port of
+`changeset-branch.sh` to Node on `safeParseArgv` + a Zod `optionsSchema`
+(`allowDirty`/`base`/`prefix`), using `@snailicid3/logger` for output (`kabob`, `kvPair`, `line`,
+`section`, `spacer`). It shells out to `scope-affected --changeset-only` for scope and
+`scope-commit --checked-commit` for the commit. The old `changeset-branch.sh` is deleted.
+`gbt-changeset` points at it. This is a faithful, working conversion.
 
 It is also **flat-denial logic** — the exact behavior Phase 7.2 exists to replace:
 
@@ -135,8 +137,8 @@ It is also **flat-denial logic** — the exact behavior Phase 7.2 exists to repl
 - `changesetv2.ts:141-145` — dies if base is not up to date
 - `changesetv2.ts:179-192` — dies if the target branch exists locally or on origin
 
-Meanwhile the state machine that replaces all four of those (`decideBranchAction` → create / switch /
-relink / proceed / block) is fully implemented, unit-tested, and **wired to nothing** (§4.1).
+Meanwhile the state machine that replaces all four of those (`decideBranchAction` → create / switch
+/ relink / proceed / block) is fully implemented, unit-tested, and **wired to nothing** (§4.1).
 
 So the current state is: the state-machine work is done and unused; the bin runs the ported shell
 logic. That is a defensible holding position, but it should be recorded as such rather than read as
@@ -145,8 +147,8 @@ logic. That is a defensible holding position, but it should be recorded as such 
 **Effect on changesets:** none of the plan's changeset assumptions break, but Phase 7.3's "base flow
 is side-effect free (create branch, run `changeset add`, stop — no commit/push)" is contradicted by
 the shipped bin, which commits. When 7.2/7.3 land, `gbt-changeset`'s default behavior changes from
-"commits" to "stops before commit." That is a **behavior break on a maintainer-facing bin** and needs
-a deliberate call, not a silent flip.
+"commits" to "stops before commit." That is a **behavior break on a maintainer-facing bin** and
+needs a deliberate call, not a silent flip.
 
 ### 2.5 Commitlint header-max-length
 
@@ -157,15 +159,15 @@ alone only defers this; every new package adds ~10 chars and there is no ceiling
 
 Recommendation, in order:
 
-1. **Collapse rule in `formatScopes`/`scope-commit`:** when resolved scopes exceed *N* (or the
-   rendered header would exceed the limit), collapse to a single umbrella scope. `root` already means
-   "everything" in this taxonomy and is already in `BASE_COMMITLINT_SCOPES`, so it is the natural
-   collapse target. Make *N* configurable through the existing commitlint options.
-2. **Then** raise `header-max-length` to something that comfortably fits the collapsed form (e.g.
-   100) rather than the uncollapsed one.
+1. **Collapse rule in `formatScopes`/`scope-commit`:** when resolved scopes exceed _N_ (or the
+   rendered header would exceed the limit), collapse to a single umbrella scope. `root` already
+   means "everything" in this taxonomy and is already in `BASE_COMMITLINT_SCOPES`, so it is the
+   natural collapse target. Make _N_ configurable through the existing commitlint options.
+2. **Then** raise `header-max-length` to something that comfortably fits the collapsed form
+   (e.g. 100) rather than the uncollapsed one.
 
-The collapse belongs in workspace (scope presentation), not in config (policy) — config only supplies
-the limit the collapse targets.
+The collapse belongs in workspace (scope presentation), not in config (policy) — config only
+supplies the limit the collapse targets.
 
 ---
 
@@ -174,17 +176,17 @@ the limit the collapse targets.
 Phase 3 says: "Keep only the **minimal** shell fallback needed before compiled JavaScript is
 available during bootstrap." What is actually in the tree:
 
-| File                                          | Lines | Status                                                          |
-| --------------------------------------------- | ----- | --------------------------------------------------------------- |
-| `packages/logger/src/cli/snail-sh.ts`         | —     | ✅ the real owner (compiled dispatcher)                          |
-| `packages/config/bin/workspace/snail-sh.sh`   | 2     | ✅ correct — a 2-line `exec` delegate to the logger package      |
-| `packages/workspace/bin/bootstrap.sh`         | 153   | ⚠️ genuine bootstrap floor, but hard-requires the 796-line file |
-| `packages/workspace/bin/snail-sh-logger.sh`   | 796   | ❌ full second implementation of the logger, in bash            |
-| `packages/workspace/bin/snail-sh-test.sh`     | 298   | ❌ scratch/demo file, shipped                                   |
+| File                                        | Lines | Status                                                          |
+| ------------------------------------------- | ----- | --------------------------------------------------------------- |
+| `packages/logger/src/cli/snail-sh.ts`       | —     | ✅ the real owner (compiled dispatcher)                         |
+| `packages/config/bin/workspace/snail-sh.sh` | 2     | ✅ correct — a 2-line `exec` delegate to the logger package     |
+| `packages/workspace/bin/bootstrap.sh`       | 153   | ⚠️ genuine bootstrap floor, but hard-requires the 796-line file |
+| `packages/workspace/bin/snail-sh-logger.sh` | 796   | ❌ full second implementation of the logger, in bash            |
+| `packages/workspace/bin/snail-sh-test.sh`   | 298   | ❌ scratch/demo file, shipped                                   |
 
 `snail-sh-logger.sh` is a complete parallel logger — colour constants, style helpers, rules, and the
 higher-level logging functions — i.e. the thing Phase 3 was supposed to collapse. `bootstrap.sh`
-locates the package root *by looking for it* (`bootstrap.sh:20`), so it cannot currently be trimmed
+locates the package root _by looking for it_ (`bootstrap.sh:20`), so it cannot currently be trimmed
 without reworking that probe. `snail-sh-test.sh` still contains `#TODO`/`echo ${RED}----` scratch
 lines and is reachable as `packages/config` script `demo:logger`.
 
@@ -224,14 +226,14 @@ survived, which is evidence for the "run doctor on the whole workspace in CI" it
 
 Audited all 12 manifests against their `tsdown.config.ts` output formats:
 
-| Package                      | Emits         | Declares                                       | Problem                                                       |
-| ---------------------------- | ------------- | ---------------------------------------------- | ------------------------------------------------------------- |
-| `@snailicid3/node-utils`     | esm, cjs, ts  | `{"import": "./dist/index.mjs"}` only          | **CJS is emitted and unreachable; no `types` condition either** |
-| `@snailicid3/cli-app`        | esm, ts       | `"." : "./dist/index.mjs"` (bare string)       | no `types` condition                                          |
-| `@snailicid3/build-config`   | none          | `types`, `import`, `default`                   | no `require` (fine — nothing emitted)                         |
-| `@snailicid3/config`         | none          | `{"import": …, "types": …}`                    | **`types` listed after `import`** — condition order            |
-| `@snailicid3/workspace`      | tsc           | `{"import": …, "types": …}`                    | **`types` listed after `import`** — condition order            |
-| `@snailicid3/storybook-config` | esm, cjs, ts | `import` + `require`                          | ok                                                            |
+| Package                        | Emits        | Declares                                 | Problem                                                         |
+| ------------------------------ | ------------ | ---------------------------------------- | --------------------------------------------------------------- |
+| `@snailicid3/node-utils`       | esm, cjs, ts | `{"import": "./dist/index.mjs"}` only    | **CJS is emitted and unreachable; no `types` condition either** |
+| `@snailicid3/cli-app`          | esm, ts      | `"." : "./dist/index.mjs"` (bare string) | no `types` condition                                            |
+| `@snailicid3/build-config`     | none         | `types`, `import`, `default`             | no `require` (fine — nothing emitted)                           |
+| `@snailicid3/config`           | none         | `{"import": …, "types": …}`              | **`types` listed after `import`** — condition order             |
+| `@snailicid3/workspace`        | tsc          | `{"import": …, "types": …}`              | **`types` listed after `import`** — condition order             |
+| `@snailicid3/storybook-config` | esm, cjs, ts | `import` + `require`                     | ok                                                              |
 
 Two distinct classes here, both matching what was asked about:
 
@@ -243,7 +245,7 @@ Two distinct classes here, both matching what was asked about:
   build-config gets this right, which shows the ordering is incidental rather than deliberate.
 
 Neither class is currently detectable by doctor: `analyzeExportTargets` checks that declared targets
-*exist*, never that emitted formats are *reachable* or that conditions are *ordered*.
+_exist_, never that emitted formats are _reachable_ or that conditions are _ordered_.
 
 ### 4.4 `@snailicid3/storybook-config` — private/public inconsistency
 
@@ -256,8 +258,8 @@ Full privacy matrix:
 
 - public: build-config `0.0.8`, cli-app `0.1.0`, color `0.0.6`, config `0.2.0`, logger `0.0.6`,
   node-utils `0.1.0`, types `0.0.3`, utils `0.0.6`
-- private: doctor `0.0.0`, example-package `0.0.0` (fixture), storybook-config `0.0.0` ⚠️,
-  workspace `0.0.0`
+- private: doctor `0.0.0`, example-package `0.0.0` (fixture), storybook-config `0.0.0` ⚠️, workspace
+  `0.0.0`
 
 ### 4.5 Root `inspect:deps` script is broken
 
@@ -287,9 +289,9 @@ The live mechanism is elsewhere:
   and artifacts**, not to read from a declaration.
 
 So the correct action is **deleting the stale key from all nine manifests**, not adding it to the
-four that omit it. This matches §10.6 directly: *"Infer product from bins, exports, targets, and
+four that omit it. This matches §10.6 directly: _"Infer product from bins, exports, targets, and
 configs when reliable. Infer BuildStrategy from resolved configuration and artifacts. Use custom
-project or target metadata only as an override for genuinely ambiguous intent."* Explicit
+project or target metadata only as an override for genuinely ambiguous intent."_ Explicit
 declaration is the escape hatch for something genuinely underivable — reintroduce it deliberately,
 with a reader, if Doctor ever finds such a case.
 
@@ -315,15 +317,15 @@ the key, the absence was correct and the declarations were the anomaly. Supersed
 ### 4.7 config's workspace edge is load-bearing for policy — and unpublishable
 
 **This is the most significant misalignment found.** Plan §3.1 permits config to declare workspace
-and logger as dependencies *"solely so its published compatibility wrappers can delegate to their new
-owners. **No config policy API may use that edge.** Remove the temporary dependency when the
-compatibility window ends."*
+and logger as dependencies _"solely so its published compatibility wrappers can delegate to their
+new owners. **No config policy API may use that edge.** Remove the temporary dependency when the
+compatibility window ends."_
 
 Both halves of that rule are now broken:
 
 1. **Policy APIs use the edge.** `config/src/commitlint/api-functions.ts:3-6` imports
-   `resolveScopePathMatchers` and `SNAILICID3_COMMITLINT_CONFIG_KEY` from `@snailicid3/workspace`, and
-   `config/src/commitlint/workspace.scopes.ts:1-9` imports six more (`formatScopes`,
+   `resolveScopePathMatchers` and `SNAILICID3_COMMITLINT_CONFIG_KEY` from `@snailicid3/workspace`,
+   and `config/src/commitlint/workspace.scopes.ts:1-9` imports six more (`formatScopes`,
    `getWorkspacePackagesList`, `isRootPackageName`, `resolveScopePathMatchers`, `shortenScopeName`,
    `uniqueSorted`). These are the commitlint config factory — policy, not a bin wrapper. The edge is
    what makes `Commitlint.config()` work at all, so it can never be "removed when the compatibility
@@ -341,20 +343,20 @@ And `@snailicid3/workspace` is `private: true` at `0.0.0`. So:
   structural gate that no amount of rehearsal fixes until workspace is published or the edge is cut.
 - **The §5.1 scope-engine cleanup just got more expensive.** Because config re-exports
   `matchScopesForPath` / `resolveScopePathMatchers` / `scopeMatchersFromCommitlintConfig` /
-  `DEFAULT_SCOPE_PATH_MATCHERS` from its *public* barrel, deleting the old engine is a **breaking
+  `DEFAULT_SCOPE_PATH_MATCHERS` from its _public_ barrel, deleting the old engine is a **breaking
   change to `@snailicid3/config`'s published API**, not an internal tidy-up. That needs a
   deprecation window, or the re-exports need to be withdrawn first as a separate versioned step.
 
-Decide which: publish workspace (opening the Phase 4 release gate early), or invert the dependency so
-config's commitlint factory receives resolved scopes from the caller instead of importing them
+Decide which: publish workspace (opening the Phase 4 release gate early), or invert the dependency
+so config's commitlint factory receives resolved scopes from the caller instead of importing them
 (§5's "the root or consumer configuration composes the two public APIs" — which is what §4 of the
 plan already prescribes and the code does not do).
 
 ### 4.8 node-utils' path duplication now blocks the doctor exports work
 
-Plan §6 recorded this as a residual follow-up: *"`node-utils/file.path.array.ts` has its own naive
+Plan §6 recorded this as a residual follow-up: _"`node-utils/file.path.array.ts` has its own naive
 `getFullPath` (string concat) wired into the `zod.node.ts` fs schemas; unifying it with the robust
-`path.ts` version is semantics-sensitive and deferred."*
+`path.ts` version is semantics-sensitive and deferred."_
 
 Still true, and it is no longer independent. `zod.node.ts:4-12` imports `getFullPath`,
 `doesFileExist`, and `normalizePath` from **`file.path.array.js`** — the naive implementations:
@@ -365,8 +367,9 @@ export const getFullPath = (_value, _root) => (_root !== undefined ? `${_root}/$
 
 // path.ts:59 — robust
 export const getFullPath = (value, root) =>
-    nodePath.isAbsolute(value) ? normalizePath(value)
-                               : normalizePath(nodePath.join(resolveCwd(root), value))
+  nodePath.isAbsolute(value)
+    ? normalizePath(value)
+    : normalizePath(nodePath.join(resolveCwd(root), value))
 ```
 
 The naive one ignores absolute inputs (`getFullPath('/abs/x', '/root')` → `/root//abs/x`), never
@@ -374,15 +377,15 @@ normalizes, and emits double slashes.
 
 **Why it matters now:** the plan for doctor's package-exports validation is to build on node-utils'
 file-exists Zod schema. That schema is backed by the wrong resolver. Any exports collector resolving
-`./dist/index.js` against a package root through `zod.node.ts` inherits the mangling. This moves from
-"deferred cleanup" to **prerequisite for the doctor exports collectors**.
+`./dist/index.js` against a package root through `zod.node.ts` inherits the mangling. This moves
+from "deferred cleanup" to **prerequisite for the doctor exports collectors**.
 
 ### 4.9 The runtime-tag question, narrowed
 
 > **Corrected 2026-08-14.** This section originally read "`buildConfig` is not just missing, it is
 > wrong where present," citing config and build-config declaring `"buildStrategy": "none"` while
 > emitting JS. The observation is accurate but the framing was not: since nothing reads the key
-> (§4.6), those values are not *wrong declarations*, they are **inert noise**. Both are deleted by
+> (§4.6), those values are not _wrong declarations_, they are **inert noise**. Both are deleted by
 > §4.6's fix rather than corrected.
 
 What survives is a narrower, genuine question. Nx `runtime:node` / `runtime:browser` /
@@ -398,8 +401,8 @@ see it. So the decision is:
    what §10.6 prefers ("infer... when reliable") and what `RUNTIME-LOGGER-001`'s retirement gate
    already describes.
 
-Note these are not equivalent: (1) *prevents* a browser package importing `node:util` at build time;
-(2) only *reports* it afterwards. That trade-off, not the metadata location, is the actual decision.
+Note these are not equivalent: (1) _prevents_ a browser package importing `node:util` at build time;
+(2) only _reports_ it afterwards. That trade-off, not the metadata location, is the actual decision.
 
 ### 4.10 More unreachable emitted artifacts
 
@@ -427,16 +430,18 @@ not specifically a CJS check.
 
 ### 4.12 A TODO that contradicts the plan, and one that is a wishlist item already half-built
 
-- **`config/src/build-exporter.ts:6`** — `TODO: ... this is TEMPORARY till the configs are correct.
-  ideally this should be gotten rid of`. Plan §6 explicitly **corrected** this belief: the exporter's
-  generated `dist/*.json` files are public exports (`./prettier`, `./markdownlint`,
-  `./nx-preset.json`, `./api-extractor/base.json`) and both `packages/types` and
-  `packages/build-config` `extends` the generated api-extractor base. Anyone acting on the in-file
-  comment breaks consumers. Update the comment to point at the plan's correction.
-- **`config/src/prettier/options.ts:79`** — a commented-out `packageSortOrder: ["name", "version",
-  "private", "description", "scripts", "main", …]`. **This is the package-key-reordering feature on
-  the wishlist, already half-written and disabled.** Whatever the README/manifest normalizer skill
-  ends up doing, it should start from this list rather than inventing a new ordering.
+- **`config/src/build-exporter.ts:6`** —
+  `TODO: ... this is TEMPORARY till the configs are correct. ideally this should be gotten rid of`.
+  Plan §6 explicitly **corrected** this belief: the exporter's generated `dist/*.json` files are
+  public exports (`./prettier`, `./markdownlint`, `./nx-preset.json`, `./api-extractor/base.json`)
+  and both `packages/types` and `packages/build-config` `extends` the generated api-extractor base.
+  Anyone acting on the in-file comment breaks consumers. Update the comment to point at the plan's
+  correction.
+- **`config/src/prettier/options.ts:79`** — a commented-out
+  `packageSortOrder: ["name", "version", "private", "description", "scripts", "main", …]`. **This is
+  the package-key-reordering feature on the wishlist, already half-written and disabled.** Whatever
+  the README/manifest normalizer skill ends up doing, it should start from this list rather than
+  inventing a new ordering.
 
 ### 4.14 `getGitChangedFiles` destroys file provenance
 
@@ -446,7 +451,9 @@ deduped `Set<string>`:
 
 ```ts
 const files = new Set<string>()
-const add = (args) => { for (const file of splitNonEmptyLines(output.stdout)) files.add(file) }
+const add = (args) => {
+  for (const file of splitNonEmptyLines(output.stdout)) files.add(file)
+}
 ```
 
 The caller receives a flat `Array<string>` with no record of which area each file came from.
@@ -455,17 +462,18 @@ Consequences:
 - **A staged/unstaged/untracked bucket report is not currently implementable** — the data is gone
   before `scope-commit` sees it. `resolveInputFiles()` only records a single whole-run label
   (`'staged' | 'all' | 'explicit'`).
-- **The most useful case is invisible.** A file that is staged *and* has further unstaged edits is
+- **The most useful case is invisible.** A file that is staged _and_ has further unstaged edits is
   extremely common and appears exactly once, indistinguishable from a fully-staged file. That is
   precisely the state a commit-time report should warn about, since the unstaged half will not be
   committed.
 
 Fix: return provenance (per-file areas, or a `Record<area, string[]>`) and keep the flat array as a
-thin wrapper — `getChangedWorkspacePackagesFromGit` and `resolveInputFiles` are the only two callers.
+thin wrapper — `getChangedWorkspacePackagesFromGit` and `resolveInputFiles` are the only two
+callers.
 
-**Related silent-failure bug in the same function:** `add()` calls `runCommand('git', args)` with **no
-`cwd`**, unlike every other git call in this package which passes `{ cwd: repoRoot }`. On failure it
-early-returns (`if (!output.success) return`) without surfacing anything. Combined with
+**Related silent-failure bug in the same function:** `add()` calls `runCommand('git', args)` with
+**no `cwd`**, unlike every other git call in this package which passes `{ cwd: repoRoot }`. On
+failure it early-returns (`if (!output.success) return`) without surfacing anything. Combined with
 `getRepoRoot({ fallbackToCwd: true })` in `cli/commit.ts:74`, running `scope-commit` outside a git
 repository yields: repoRoot = cwd → every git command fails silently → `files = []` →
 `resolveScopesForFiles` short-circuits to `['root']` → a clean, confident `chore(root): …` with no
@@ -474,31 +482,32 @@ warning that nothing was inspected. Thread `repoRoot` through and report a faile
 ### 4.15 Verbose evidence and machine-readable output share stdout
 
 `cli/commit.ts:100` writes the scope evidence with `console.log`, then `:119` writes the parseable
-scope value with `console.log`. Both go to stdout, so `scope-commit --csv --verbose` emits the
-human report and the csv on the same stream and anything capturing the value gets both.
+scope value with `console.log`. Both go to stdout, so `scope-commit --csv --verbose` emits the human
+report and the csv on the same stream and anything capturing the value gets both.
 
 This matters because capturing stdout from these bins is an established pattern —
-`cli/changesetv2.ts:164` does exactly that against `scope-affected` and uses the result as the commit
-scope. Send the report to stderr (or make it a distinct subcommand) before making it richer, or the
-prettier it gets the more it breaks.
+`cli/changesetv2.ts:164` does exactly that against `scope-affected` and uses the result as the
+commit scope. Send the report to stderr (or make it a distinct subcommand) before making it richer,
+or the prettier it gets the more it breaks.
 
 ### 4.16 Two zod→yargs bridges
 
 `packages/node-utils/src/argv.ts` (`parseArgv`/`safeParseArgv`, yargs + Zod) and
 `packages/cli-app/src/schema/to-yargs.ts` + `app/init.ts` (its own yargs instance, its own zod→yargs
-option converter). Both depend on `yargs` directly. cli-app predates the argv primitive and was never
-repointed.
+option converter). Both depend on `yargs` directly. cli-app predates the argv primitive and was
+never repointed.
 
-Related: `cli-app/src/app/config.ts:52` carries `//TODO make into zod schema` on its package-manifest
-handling — the same package-schema question as §6's ownership decision, from a third location.
+Related: `cli-app/src/app/config.ts:52` carries `//TODO make into zod schema` on its
+package-manifest handling — the same package-schema question as §6's ownership decision, from a
+third location.
 
 ---
 
 ## 5. Corrections to apply to the plan document
 
 1. **Phase 7 progress paragraph** — remove "This TypeScript command is not yet wired to the public
-   `gbt-changeset` bin, which still runs the compatibility shell workflow." Replace with: the bin now
-   runs `changesetv2.ts`, a direct Node port of the shell workflow retaining flat denial; the
+   `gbt-changeset` bin, which still runs the compatibility shell workflow." Replace with: the bin
+   now runs `changesetv2.ts`, a direct Node port of the shell workflow retaining flat denial; the
    `decideBranchAction` state machine is implemented and unwired.
 2. **Phase 4, item 5** — close as moot. The manifest `buildConfig` key is read by no code, so the
    recorded `bundle`-vs-tsc mismatch is inert; the follow-up is deleting the key from the nine
@@ -512,8 +521,8 @@ handling — the same package-schema question as §6's ownership decision, from 
 6. **New Part A item** — the dual scope engine (§2.3). #212 explicitly asked for the removable old
    code to be summarized; it was not.
 7. **§3.1's temporary-edge rule is already violated** — config's commitlint policy imports from
-   workspace, and config re-exports ~15 workspace symbols publicly (§4.7). The rule as written
-   ("no config policy API may use that edge; remove it when the window ends") no longer describes
+   workspace, and config re-exports ~15 workspace symbols publicly (§4.7). The rule as written ("no
+   config policy API may use that edge; remove it when the window ends") no longer describes
    something achievable without a design change. Restate it as a decision, not a constraint.
 8. **§6 residual path-helper follow-up** is now a doctor prerequisite rather than a deferred tidy-up
    (§4.8).
@@ -527,8 +536,8 @@ Ordered within each group by whether it unblocks something else.
 ### Commit scope / changesets
 
 - [ ] Register and resolve the dual scope engine: repoint `scope-affected` and config's commitlint
-      scope-enum at `resolveRepositoryScopes`, then delete `matchScopesForPath`. Add a test asserting
-      both surfaces agree on the same file set.
+      scope-enum at `resolveRepositoryScopes`, then delete `matchScopesForPath`. Add a test
+      asserting both surfaces agree on the same file set.
 - [ ] Scope-count collapse rule + raise `header-max-length` (§2.5).
 - [ ] Migrate `scope-commit` argv to `safeParseArgv` (Phase 2 standing rule); audit the ~10 aliases
       in the switch and drop the redundant ones in the same pass.
@@ -543,47 +552,48 @@ Ordered within each group by whether it unblocks something else.
       repo attached.
 
       Half of it already ships. `formatScopeEvidence()` (`cli/commit.ts:46-68`) prints file count,
-      each scope with its matched files indented beneath, an `unmatched/root` bucket, and the final
-      csv scope line — behind `--verbose`/`--debug`. What is missing, in dependency order:
+          each scope with its matched files indented beneath, an `unmatched/root` bucket, and the final
+          csv scope line — behind `--verbose`/`--debug`. What is missing, in dependency order:
 
-      1. **Git provenance (the enabling change, §4.14).** `getGitChangedFiles` flattens staged,
-         unstaged, and untracked into one deduped `Set<string>`, so *there is currently no way to
-         bucket by area* — the information is destroyed before the CLI sees it. Return per-file
-         areas (or a `Record<area, string[]>`), keeping the flat array as a thin wrapper for the two
-         existing callers. Until this lands, the report can only show one undifferentiated list.
-      2. **Cross-tabulate area × scope.** The scope axis already exists in
-         `RepositoryScopeResolution.matches`/`.unmatched`; the area axis comes from (1).
-      3. **Render with logger instead of `console.log`.** `table.ts`, `kabob`, `kvPair`, `section`,
-         `line`, and `spacer` are already used exactly this way by `cli/changesetv2.ts`.
-      4. **Fix the `--scope` blind spot.** `explicitScopeResolution()` (`commit.ts:136-144`) returns
-         `matches: {}`, so an explicit scope produces an *empty* report. It should still classify for
-         display and show the override alongside — surfacing "you passed `config`, but staged files
-         also touch `logger`" is the most useful thing this report can say.
-      5. **Move it off stdout (§4.15).** It currently interleaves with the machine-readable scope
-         value on the same stream.
+          1. **Git provenance (the enabling change, §4.14).** `getGitChangedFiles` flattens staged,
+             unstaged, and untracked into one deduped `Set<string>`, so *there is currently no way to
+             bucket by area* — the information is destroyed before the CLI sees it. Return per-file
+             areas (or a `Record<area, string[]>`), keeping the flat array as a thin wrapper for the two
+             existing callers. Until this lands, the report can only show one undifferentiated list.
+          2. **Cross-tabulate area × scope.** The scope axis already exists in
+             `RepositoryScopeResolution.matches`/`.unmatched`; the area axis comes from (1).
+          3. **Render with logger instead of `console.log`.** `table.ts`, `kabob`, `kvPair`, `section`,
+             `line`, and `spacer` are already used exactly this way by `cli/changesetv2.ts`.
+          4. **Fix the `--scope` blind spot.** `explicitScopeResolution()` (`commit.ts:136-144`) returns
+             `matches: {}`, so an explicit scope produces an *empty* report. It should still classify for
+             display and show the override alongside — surfacing "you passed `config`, but staged files
+             also touch `logger`" is the most useful thing this report can say.
+          5. **Move it off stdout (§4.15).** It currently interleaves with the machine-readable scope
+             value on the same stream.
 
-      **Direction settled 2026-08-14: build it locally first, let CI consume it later.** This is the
-      same arrangement as plan §7.1's shared release engine ("`gbt-changeset plan` and the CI summary
-      call the same function") and the same as `scope-affected`, which CI already consumes today. It
-      changes three things about how the above is built:
+          **Direction settled 2026-08-14: build it locally first, let CI consume it later.** This is the
+          same arrangement as plan §7.1's shared release engine ("`gbt-changeset plan` and the CI summary
+          call the same function") and the same as `scope-affected`, which CI already consumes today. It
+          changes three things about how the above is built:
 
-      - **The report model belongs in workspace `core/`, not `cli/`.** `formatScopeEvidence()`
-        currently lives in `cli/commit.ts`, but #212's own boundary table puts "orchestration and
-        presentation only" in the CLI. The buckets, counts, and area×scope cross-tab are repository
-        knowledge; only the terminal rendering is CLI. Putting the model in core is what makes a
-        second consumer possible without the CLI becoming a dependency of CI.
-      - **Machine output is a day-one requirement, not a retrofit.** §7.1 already requires the release
-        plan report "in both human- and machine-readable form, with tests" — hold this report to the
-        same bar. That also makes §4.15 non-negotiable rather than cosmetic: JSON on stdout, human
-        report on stderr, so a CI step can capture one while a human reads the other.
-      - **Expect three renderers, not one.** Terminal (logger), JSON (CI capture), and **markdown**
-        — a job summary written to `$GITHUB_STEP_SUMMARY` is what makes this "cute" in a PR, and
-        retrofitting markdown onto a renderer designed only for ANSI is the usual way this goes
-        wrong. Design the renderer set up front; implement terminal first.
+          - **The report model belongs in workspace `core/`, not `cli/`.** `formatScopeEvidence()`
+            currently lives in `cli/commit.ts`, but #212's own boundary table puts "orchestration and
+            presentation only" in the CLI. The buckets, counts, and area×scope cross-tab are repository
+            knowledge; only the terminal rendering is CLI. Putting the model in core is what makes a
+            second consumer possible without the CLI becoming a dependency of CI.
+          - **Machine output is a day-one requirement, not a retrofit.** §7.1 already requires the release
+            plan report "in both human- and machine-readable form, with tests" — hold this report to the
+            same bar. That also makes §4.15 non-negotiable rather than cosmetic: JSON on stdout, human
+            report on stderr, so a CI step can capture one while a human reads the other.
+          - **Expect three renderers, not one.** Terminal (logger), JSON (CI capture), and **markdown**
+            — a job summary written to `$GITHUB_STEP_SUMMARY` is what makes this "cute" in a PR, and
+            retrofitting markdown onto a renderer designed only for ANSI is the usual way this goes
+            wrong. Design the renderer set up front; implement terminal first.
 
-      This also strengthens the case for doing §4.14 properly: with two consumers, per-file
-      provenance stops being a nicety for one verbose flag and becomes the report's actual data
-      model.
+          This also strengthens the case for doing §4.14 properly: with two consumers, per-file
+          provenance stops being a nicety for one verbose flag and becomes the report's actual data
+          model.
+
 - [ ] PR auto-labeling from scopes/types: `notes/LABEL_TAXONOMY.md` already defines `type:*` and
       `scope:*` and marks `changeset`/`release` as tool-generated. The vocabulary is ready; the
       trigger is not. Blocked behind the same actions-repo attach.
@@ -592,12 +602,12 @@ Ordered within each group by whether it unblocks something else.
 
 - [ ] **Resolve the config→workspace edge (§4.7).** Blocks any config release and raises the cost of
       the §5.1 cleanup. Two routes: publish workspace (opens the Phase 4 gate early), or invert the
-      dependency so the commitlint factory *receives* resolved scopes from the caller — which is what
-      plan §4 already prescribes ("the root or consumer configuration composes the two public APIs")
-      and the code does not do. Withdrawing config's public re-exports of the workspace scope symbols
-      is a separate versioned step that should come first either way.
-- [ ] Unify `getFullPath`/`normalizePath`/`doesFileExist` in node-utils and repoint `zod.node.ts` off
-      `file.path.array.js` (§4.8). **Prerequisite for the doctor exports collectors**, not an
+      dependency so the commitlint factory _receives_ resolved scopes from the caller — which is
+      what plan §4 already prescribes ("the root or consumer configuration composes the two public
+      APIs") and the code does not do. Withdrawing config's public re-exports of the workspace scope
+      symbols is a separate versioned step that should come first either way.
+- [ ] Unify `getFullPath`/`normalizePath`/`doesFileExist` in node-utils and repoint `zod.node.ts`
+      off `file.path.array.js` (§4.8). **Prerequisite for the doctor exports collectors**, not an
       independent cleanup.
 - [ ] Remove `snail-sh-logger.sh` down to the bootstrap floor; delete or relocate `snail-sh-test.sh`
       (§3), and drop `config`'s `demo:logger` script that points at it.
@@ -608,47 +618,47 @@ Ordered within each group by whether it unblocks something else.
 
 ### Doctor
 
-Everything here is a *collector*, and the ordering matters — the manifest layer is hand-rolled JSON
+Everything here is a _collector_, and the ordering matters — the manifest layer is hand-rolled JSON
 walking today (`manifest.ts`), while a Zod package schema already exists in **build-config**
 (`src/build/schemas/package.ts` — `schemaBasePackage`, `parsePackage`, required-scripts schema).
-Those two should not both exist. Note B1 wants build-config deleted into config, and §B1 already says
-the export-plan helper belongs to **doctor** — so the package schema's destination needs the same
-call.
+Those two should not both exist. Note B1 wants build-config deleted into config, and §B1 already
+says the export-plan helper belongs to **doctor** — so the package schema's destination needs the
+same call.
 
 - [ ] Fix the `indklex.js` typo (§4.2) and run doctor over the whole workspace in CI so it cannot
       regress.
 - [ ] Decide the owner of the package Zod schema (doctor vs config), then have doctor validate
       manifests through it instead of `isJsonRecord` walking.
-- [ ] **Emitted-format vs declared-condition collector** — generalize past CJS to *every* emitted
+- [ ] **Emitted-format vs declared-condition collector** — generalize past CJS to _every_ emitted
       format having a reachable export condition. Needs the build plan's `output_formats`
       (build-config today) compared against the exports map. Catches §4.3 node-utils (CJS) and §4.10
       utils (browser `iife`). This is the same collector Phase B3 lists as "compare build-plan
       expectations with emitted and packed entry points," which also completes `EXP-EXAMPLE-001`.
       **Depends on §4.8** — it resolves target paths through node-utils' fs schemas.
-- [ ] **`buildStrategy` accuracy collector** — derive the observed strategy from resolved targets and
-      compare against the declared `buildConfig`. Catches §4.9 (config and build-config both claim
-      `none` while emitting JS) and the §4.6 absences. §10.2 already specifies deriving it; nothing
-      currently compares.
+- [ ] **`buildStrategy` accuracy collector** — derive the observed strategy from resolved targets
+      and compare against the declared `buildConfig`. Catches §4.9 (config and build-config both
+      claim `none` while emitting JS) and the §4.6 absences. §10.2 already specifies deriving it;
+      nothing currently compares.
 - [ ] **Condition-order collector** — `types` must precede `import`/`require`. Catches §4.3
       config/workspace.
-- [ ] **Multiple entry points:** already handled for *existence* —
-      `collectDeclaredExportTargets` walks all subpath keys and nested conditions
-      (`manifest.ts:105-124`), verified against example-package's `.` + `./node`. The two collectors
-      above must iterate the same way rather than only checking the root.
+- [ ] **Multiple entry points:** already handled for _existence_ — `collectDeclaredExportTargets`
+      walks all subpath keys and nested conditions (`manifest.ts:105-124`), verified against
+      example-package's `.` + `./node`. The two collectors above must iterate the same way rather
+      than only checking the root.
 - [ ] **Private/public consistency collector** — `private` vs `publishConfig.access` vs version
-      `0.0.0`. Catches §4.4. Ties directly to #206's "a `private:false` flip must not silently select
-      the release-candidate phase."
+      `0.0.0`. Catches §4.4. Ties directly to #206's "a `private:false` flip must not silently
+      select the release-candidate phase."
 - [ ] **Bin audit beyond existence.** Doctor already checks bin targets exist and are executable
       (`manifest.ts:126-179`). What is missing is liveness: cycle each bin's `--help` and report the
       screen, so abandoned/broken bins surface and the output can be diffed into the README. Note
       four of workspace's eight bins are `.sh` files, so the runner cannot assume Node.
-- [ ] **Exports drop-in code block** in the CLI output — emit the correct exports map as a paste-able
-      block rather than auto-mutating `package.json`. Auto-mutation is barred by rule 2.4 and §8.3;
-      a printed block is not. `cli-highlight` would be the syntax-highlighting option, but the
-      cheaper route is logger's existing terminal helpers — evaluate before adding a dependency.
-- [ ] Should doctor consume cli-app? Not yet. cli-app currently has its own yargs stack (§4.16) and no
-      prompt layer, so adopting it would import the duplication rather than resolve it. Sequence:
-      repoint cli-app onto node-utils' argv primitives → add the prompt/table layer → *then* make
+- [ ] **Exports drop-in code block** in the CLI output — emit the correct exports map as a
+      paste-able block rather than auto-mutating `package.json`. Auto-mutation is barred by rule 2.4
+      and §8.3; a printed block is not. `cli-highlight` would be the syntax-highlighting option, but
+      the cheaper route is logger's existing terminal helpers — evaluate before adding a dependency.
+- [ ] Should doctor consume cli-app? Not yet. cli-app currently has its own yargs stack (§4.16) and
+      no prompt layer, so adopting it would import the duplication rather than resolve it. Sequence:
+      repoint cli-app onto node-utils' argv primitives → add the prompt/table layer → _then_ make
       doctor a consumer. Doing it in that order means doctor gains flags + UI at once instead of
       inheriting a second parser.
 
@@ -658,12 +668,12 @@ call.
       delete the duplicate bridge (§4.16). Prerequisite for everything else in this group.
 - [ ] Add `@snailicid3/logger` table rendering to the cli-app surface. Logger already owns
       `table.ts`/`terminal.ts` and the plan already requires `cli-table3` to live there so workspace
-      and doctor can render tables *without* depending on cli-app — so this is cli-app consuming
+      and doctor can render tables _without_ depending on cli-app — so this is cli-app consuming
       logger, not logger moving.
 - [ ] Add the prompt layer (inquirer or equivalent — **nothing of the kind is in the tree today**,
       no `inquirer`/`prompts`/`@clack` in any manifest). Target: fill in required args and missing
-      flags interactively, with the file-path picker as the first useful widget. This is the
-      "UI mapping for required args" idea; the Zod schema is already the source of truth for what is
+      flags interactively, with the file-path picker as the first useful widget. This is the "UI
+      mapping for required args" idea; the Zod schema is already the source of truth for what is
       required, so the mapping is schema → prompt, not a new declaration.
 - [ ] Then: doctor as a cli-app consumer (see above).
 
@@ -671,8 +681,8 @@ call.
 
 - [ ] Delete the dead `buildConfig` key from all nine manifests that still declare it (§4.6).
 - [ ] Introduce `runtime:node` / `runtime:browser` / `runtime:universal` Nx tags — currently zero
-      tags exist anywhere. §10.6's rule is that tags are used *when dependency rules can enforce
-      them*, and that the same fact must not be recorded in both tags and metadata, so decide up
+      tags exist anywhere. §10.6's rule is that tags are used _when dependency rules can enforce
+      them_, and that the same fact must not be recorded in both tags and metadata, so decide up
       front whether Nx tags are generated from the per-entry tsdown `runtime`, or whether tag
       enforcement is skipped in favour of Doctor observing the emitted graph (§4.9).
 - [ ] Auxiliary builds: §10.5 already defines the category (Storybook static, docs, demo) and states
@@ -684,8 +694,8 @@ call.
 Grouped because they share one mechanism: a per-package status collector with a renderer. Worth
 building the collector once rather than as seven scripts.
 
-- [ ] Per-package `check` / `fix` / `md:fix` / api-extractor / coverage runner, driven from the
-      same package list.
+- [ ] Per-package `check` / `fix` / `md:fix` / api-extractor / coverage runner, driven from the same
+      package list.
 - [ ] Prepackage-adjacent enumeration: docs generated? Storybook? Chromatic? API report? — this is
       §10.5's target-category classification, so it should read resolved Nx targets, not guess.
 - [ ] `pnpm outdated` with a pin list — a way to freeze specific versions (lint-staged, typescript)
@@ -705,8 +715,9 @@ building the collector once rather than as seven scripts.
       (`name`, `version`, `private`, `description`, `scripts`, `main`, …) — the key order is already
       decided, just disabled (§4.12).
 - [ ] Pretty logging for doctor output specifically (distinct from the commit-scope report) — logger
-      already owns `table.ts`, `terminal.ts`, `spinner.ts`, and the `kabob`/`kvPair`/`section`/`line`
-      helpers that `changesetv2.ts` uses, so this is renderer wiring, not new logger work.
+      already owns `table.ts`, `terminal.ts`, `spinner.ts`, and the
+      `kabob`/`kvPair`/`section`/`line` helpers that `changesetv2.ts` uses, so this is renderer
+      wiring, not new logger work.
 
 ---
 
@@ -714,40 +725,40 @@ building the collector once rather than as seven scripts.
 
 Every item raised on 2026-08-14, and where it now lives. Nothing from that list was dropped.
 
-| Raised                                              | Tracked at        | State when audited                                              |
-| --------------------------------------------------- | ----------------- | ---------------------------------------------------------------- |
-| #212 commit-scope direction                         | §2.1, §5.1        | half-landed — classification yes, CLI shape no                   |
-| Changeset script (sh → Node + argv Zod)             | §2.4              | landed as `changesetv2.ts`, deliberately temporary               |
-| Matcher shortening scope keys                       | §2.2              | works; custom-matcher keys are the gap                           |
-| Commitlint using the #212 function                  | §2.3, §5.1        | **no** — still on the old micromatch engine                      |
-| Commitlint header max length                        | §2.5, plan §5.2   | `150`; collapse rule proposed                                    |
-| Cute commit-scope report (local buckets)            | §6 commit-scope, §4.14 | scope axis exists; **area axis destroyed by `getGitChangedFiles`** |
-| `scope-affected` sharing the engine                 | §6 commit-scope   | same change as the commitlint fix                                |
-| PR auto-labeling from scopes/types                  | §6 commit-scope   | vocabulary ready in `LABEL_TAXONOMY.md`; trigger blocked         |
-| Remove dup `snail-sh`                               | §3                | 796-line bash logger + 298-line scratch file still shipped       |
-| Pretty logging (doctor + scope reporting)           | §6 futures        | logger already owns the primitives                               |
-| cli-app cleanup onto the argv schema                | §6 cli-app, §4.16 | two competing yargs bridges                                      |
-| cli-app + logger CLI tables                         | §6 cli-app        | logger owns `table.ts` already                                   |
-| Inquirer / file-path picker / UI for missing flags  | §6 cli-app        | **nothing of the kind in the tree** — greenfield                 |
-| Doctor as a cli-app consumer                        | §6 doctor         | sequenced after the cli-app cleanup, deliberately                |
-| Package-field Zod validation                        | §6 doctor, §4.16  | exists in build-config; doctor hand-rolls; owner undecided       |
-| Exports field via node-utils fileExists Zod schema  | §6 doctor, §4.8   | **blocked** — that schema uses the naive path resolver           |
-| Private/public access inconsistency report          | §6 doctor, §4.4   | one live case (storybook-config)                                 |
-| `cli-highlight`                                     | §6 doctor         | evaluate against logger's existing helpers first                 |
-| Auto-updating exports / drop-in code block          | §6 doctor         | auto-mutation barred by rule 2.4; printed block is fine          |
-| Emits CJS but `require` missing from exports        | §4.3, §4.10, §6   | **confirmed live in node-utils**; generalized to all formats     |
-| Multiple entry points                               | §6 doctor         | existence covered; format/order not                              |
-| Auditing `bin` scripts for abandonment/breakage     | §6 doctor         | existence+mode covered; `--help` liveness not                    |
-| Auxiliary builds                                    | §6 build          | §10.5 defines it; discovery collector missing                    |
-| Nx `runtime:*` tags                                 | §6 build, §4.9    | **zero tags exist**; `buildConfig` too unreliable to derive from |
-| README skill / package key reorder / keywords       | §6 futures, §4.12 | ordering already written and disabled in prettier options        |
-| Per-package check/fix/md:fix, api-extractor, coverage | §6 futures      | not started                                                      |
-| Prepackage-adjacent enumeration (docs/SB/chromatic/API report) | §6 futures | should read resolved Nx targets, not guess                     |
-| `pnpm outdated` with pinned/frozen versions         | §6 futures        | no pin mechanism exists                                          |
-| Env variable reporting                              | §6 futures        | `defineEnv` already declares the full set — renderer only        |
-| `.gitignore` diff vs standard                       | §6 futures        | not started                                                      |
-| Published-versions list                             | §6 futures        | §11.3 maintains it by hand today                                 |
-| Cycle each bin's `--help`                           | §6 doctor         | four of workspace's eight bins are `.sh` — runner can't assume Node |
+| Raised                                                         | Tracked at             | State when audited                                                  |
+| -------------------------------------------------------------- | ---------------------- | ------------------------------------------------------------------- |
+| #212 commit-scope direction                                    | §2.1, §5.1             | half-landed — classification yes, CLI shape no                      |
+| Changeset script (sh → Node + argv Zod)                        | §2.4                   | landed as `changesetv2.ts`, deliberately temporary                  |
+| Matcher shortening scope keys                                  | §2.2                   | works; custom-matcher keys are the gap                              |
+| Commitlint using the #212 function                             | §2.3, §5.1             | **no** — still on the old micromatch engine                         |
+| Commitlint header max length                                   | §2.5, plan §5.2        | `150`; collapse rule proposed                                       |
+| Cute commit-scope report (local buckets)                       | §6 commit-scope, §4.14 | scope axis exists; **area axis destroyed by `getGitChangedFiles`**  |
+| `scope-affected` sharing the engine                            | §6 commit-scope        | same change as the commitlint fix                                   |
+| PR auto-labeling from scopes/types                             | §6 commit-scope        | vocabulary ready in `LABEL_TAXONOMY.md`; trigger blocked            |
+| Remove dup `snail-sh`                                          | §3                     | 796-line bash logger + 298-line scratch file still shipped          |
+| Pretty logging (doctor + scope reporting)                      | §6 futures             | logger already owns the primitives                                  |
+| cli-app cleanup onto the argv schema                           | §6 cli-app, §4.16      | two competing yargs bridges                                         |
+| cli-app + logger CLI tables                                    | §6 cli-app             | logger owns `table.ts` already                                      |
+| Inquirer / file-path picker / UI for missing flags             | §6 cli-app             | **nothing of the kind in the tree** — greenfield                    |
+| Doctor as a cli-app consumer                                   | §6 doctor              | sequenced after the cli-app cleanup, deliberately                   |
+| Package-field Zod validation                                   | §6 doctor, §4.16       | exists in build-config; doctor hand-rolls; owner undecided          |
+| Exports field via node-utils fileExists Zod schema             | §6 doctor, §4.8        | **blocked** — that schema uses the naive path resolver              |
+| Private/public access inconsistency report                     | §6 doctor, §4.4        | one live case (storybook-config)                                    |
+| `cli-highlight`                                                | §6 doctor              | evaluate against logger's existing helpers first                    |
+| Auto-updating exports / drop-in code block                     | §6 doctor              | auto-mutation barred by rule 2.4; printed block is fine             |
+| Emits CJS but `require` missing from exports                   | §4.3, §4.10, §6        | **confirmed live in node-utils**; generalized to all formats        |
+| Multiple entry points                                          | §6 doctor              | existence covered; format/order not                                 |
+| Auditing `bin` scripts for abandonment/breakage                | §6 doctor              | existence+mode covered; `--help` liveness not                       |
+| Auxiliary builds                                               | §6 build               | §10.5 defines it; discovery collector missing                       |
+| Nx `runtime:*` tags                                            | §6 build, §4.9         | **zero tags exist**; `buildConfig` too unreliable to derive from    |
+| README skill / package key reorder / keywords                  | §6 futures, §4.12      | ordering already written and disabled in prettier options           |
+| Per-package check/fix/md:fix, api-extractor, coverage          | §6 futures             | not started                                                         |
+| Prepackage-adjacent enumeration (docs/SB/chromatic/API report) | §6 futures             | should read resolved Nx targets, not guess                          |
+| `pnpm outdated` with pinned/frozen versions                    | §6 futures             | no pin mechanism exists                                             |
+| Env variable reporting                                         | §6 futures             | `defineEnv` already declares the full set — renderer only           |
+| `.gitignore` diff vs standard                                  | §6 futures             | not started                                                         |
+| Published-versions list                                        | §6 futures             | §11.3 maintains it by hand today                                    |
+| Cycle each bin's `--help`                                      | §6 doctor              | four of workspace's eight bins are `.sh` — runner can't assume Node |
 
 ## 7. Open decisions this audit adds
 
@@ -755,21 +766,22 @@ Numbered continuing from §14 of the plan.
 
 11. **Which scope engine survives** — `resolveRepositoryScopes` (classifier-based) or
     `matchScopesForPath` (micromatch-per-path)? The former is the #212 direction and already handles
-    evidence; the latter is what commitlint and `scope-affected` currently use. This is plan §14 item
-    1's "which scope command is authoritative" question, now answerable with the code in front of us.
+    evidence; the latter is what commitlint and `scope-affected` currently use. This is plan §14
+    item 1's "which scope command is authoritative" question, now answerable with the code in front
+    of us.
 12. **Scope collapse target and threshold** — `root`, or a new umbrella scope? At what count?
-13. **Owner of the package Zod schema** — doctor (alongside the export-plan helper, per B1) or config
-    (alongside policy)? It currently sits in the package B1 wants deleted.
+13. **Owner of the package Zod schema** — doctor (alongside the export-plan helper, per B1) or
+    config (alongside policy)? It currently sits in the package B1 wants deleted.
 14. **Nx `runtime:*` tags — generate them, or skip tag enforcement?** Narrowed: not a
-    `buildConfig`-vs-tag question, since that key is dead (§4.6). Tags *prevent* a boundary
-    violation at build time; Doctor observation only *reports* it. That trade-off is the decision
+    `buildConfig`-vs-tag question, since that key is dead (§4.6). Tags _prevent_ a boundary
+    violation at build time; Doctor observation only _reports_ it. That trade-off is the decision
     (§4.9).
 15. **`gbt-changeset` default behavior** when 7.2/7.3 land — keep committing, or adopt 7.3's
     side-effect-free base flow and break the current bin's behavior?
 16. **How the config→workspace edge is cut** (§4.7) — publish workspace early, or invert so the
     commitlint factory receives resolved scopes from the caller? This gates every config release and
     is a prerequisite for decision 11, because the old scope engine is currently part of config's
-    *public* API.
+    _public_ API.
 17. **Whether config's workspace re-exports are a supported contract.** They are published today. If
     they were unintentional, withdrawing them is a breaking change that needs its own version step
     before either 11 or 16 can proceed cleanly.

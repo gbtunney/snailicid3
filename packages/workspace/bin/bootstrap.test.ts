@@ -1,7 +1,7 @@
+import { describe, expect, it } from 'vitest'
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import { describe, expect, it } from 'vitest'
 
 const bootstrapScript = path.resolve(import.meta.dirname, 'bootstrap.sh')
 const loggerScript = path.resolve(import.meta.dirname, 'snail-sh-logger.sh')

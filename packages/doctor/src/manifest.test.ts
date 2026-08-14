@@ -260,6 +260,15 @@ describe('analyzePackage', () => {
     })
 })
 
+/** Return only the root export targets so package-level routing assertions stay focused. */
+function collectRootExportTargets(
+    manifest: PackageManifest,
+): ReturnType<typeof collectDeclaredExportTargets> {
+    return collectDeclaredExportTargets(manifest.exports).filter(
+        ({ exportKey }) => exportKey === '.',
+    )
+}
+
 function getOnlyBinTarget(manifest: PackageManifest): string {
     const bin: unknown = manifest.bin
 
@@ -271,15 +280,6 @@ function getOnlyBinTarget(manifest: PackageManifest): string {
     if (typeof target !== 'string')
         throw new TypeError('Expected one bin target')
     return target
-}
-
-/** Return only the root export targets so package-level routing assertions stay focused. */
-function collectRootExportTargets(
-    manifest: PackageManifest,
-): ReturnType<typeof collectDeclaredExportTargets> {
-    return collectDeclaredExportTargets(manifest.exports).filter(
-        ({ exportKey }) => exportKey === '.',
-    )
 }
 
 function readRepositoryManifest(relativePath: string): PackageManifest {
