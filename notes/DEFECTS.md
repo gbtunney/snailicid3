@@ -89,7 +89,30 @@ or it will eventually be "fixed" by someone reading this checklist. Only five ro
       Conditions are first-match-wins; `types` must come first. `build-config` gets it right, so
       this is incidental, not deliberate. → §4.3
 - [x] **B4** 🟡 `packages/cli-app/package.json` — bare-string root export, no `types` condition. →
-      §4.3
+      §4.3 Correct as landed: cli-app is ESM-only, so a single `types` is right.
+- [x] **B14** 🔴 A lone `types` condition ahead of both the `import` and `require` branches resolves
+      first for every consumer, so ESM importers were handed the **CommonJS** declaration. `utils`
+      and `node-utils` had that shape after the first B1/B2 pass; `color`, `types` and
+      `storybook-config` had no `types` condition at all and fell through to the top-level field,
+      which points at the CJS declaration for the same reason. Both are the `EXP-LOGGER-001`
+      finding. Fixed by putting `types` alongside `default` inside each branch. → §4.3
+- [x] **B15** 🟠 Same fix applied to `color`, `types` and `storybook-config`, which my original §4.3
+      table never listed. → §4.3
+
+Filenames for B14/B15 came from a real build, not convention — the two families differ, and guessing
+would have pointed at files that do not exist:
+
+| packages                                      | ESM entry   | ESM declaration | CJS entry   | CJS declaration |
+| --------------------------------------------- | ----------- | --------------- | ----------- | --------------- |
+| `utils`, `color`, `types`, `storybook-config` | `index.js`  | `index.d.ts`    | `index.cjs` | `index.d.cts`   |
+| `node-utils`                                  | `index.mjs` | `index.d.mts`   | `index.cjs` | `index.d.cts`   |
+
+An earlier draft of B14 claimed `.d.mts` for `utils`; that was wrong — only `node-utils` emits
+`.mjs`. The top-level `types` field is deliberately left on the CJS declaration, matching `main` for
+legacy node10 resolution. `logger` and `example-package` are untouched (registered fixtures), and
+`cli-app` already routed correctly. Locked in by the `B14/B15` test in
+`packages/doctor/src/manifest.test.ts`, which asserts per-mode routing and the absence of a bare
+top-level `types` condition.
 
 ### buildConfig
 
