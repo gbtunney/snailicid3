@@ -210,20 +210,32 @@ gates C3.
 - [ ] **C6** 🟡 **Scope collapse target and threshold** for `header-max-length`. A 12-package header
       measured 159 vs the limit of 150, and the scope list alone is ~115. Raising the number only
       defers it. Collapse to `root` past _N_? What's _N_? → §2.5, plan §5.2
-- [x] **C7** 🟡 **DECIDED 2026-08-14 — doctor owns the _diagnostic_ schema. But it cannot own the
-      small one.** Splitting into two schemas, because they have different consumers and different
-      constraints: **(a) Diagnostic schema → `@snailicid3/doctor`.** Full manifest validation:
-      exports, bin, files, engines, privacy. Matches §B1's decision that the export-plan helper
-      belongs to doctor. **(b) Package-identity schema → shared, and _not_ in doctor.** `name`,
-      `version`, `description`, `author`, `license`, `repository` — needed by build-config's banner
-      and by cli-app for its `--version`/header. Doctor is `private: true`, and cli-app is public,
-      so cli-app depending on doctor would violate rule 2.7. **The placement trap:** build-config is
-      imported by 8 packages' `tsdown.config.ts` (including node-utils, utils, types) and is itself
-      tsc-only. If build-config imported node-utils for the shared schema,
-      `node-utils:build → build-config:build → node-utils:build` — a bootstrap cycle, the same one
-      §B1 flags. So the identity schema goes in **`@snailicid3/node-utils`** for cli-app and doctor,
-      and build-config keeps its own copy until B1 folds it into config (tsc-only, no cycle), at
-      which point the two converge. One deliberate, small, time-boxed duplication. → §6, §4.16
+- [x] **C7** 🟡 **DECIDED 2026-08-14 — layered schemas, rooted in node-utils.** Doctor owns the
+      _diagnostic_ schema and extends a shared identity schema; config, cli-app and workspace
+      consume the same base. The proposed layering was right; only the base package moved down one
+      level. **Why not `workspace`:** it is `private: true` by the C1 decision, while `cli-app`
+      (`0.1.0`) and `config` (`0.2.0`) are public. A public package importing an unpublished one is
+      rule 2.7 — precisely what makes `config@0.2.0` unpublishable today — so rooting the schema
+      there would spread that defect from one public package to two, and would then have to be
+      undone by the very C1 inversion already agreed. **Why `node-utils`:** plan §3.3 already draws
+      this line with this exact example — _"readPackageJson(path) may be node-utils /
+      getWorkspacePackages() is workspace."_ Validating one manifest's identity is
+      `readPackageJson`-shaped; repository-wide discovery is workspace-shaped. node-utils is also
+      already a runtime dependency of cli-app, doctor and workspace. Layering is recorded below.
+      build-config keeps its own banner copy until B1 folds it into config — it is tsc-only and
+      imported by eight packages' `tsdown.config.ts`, so importing node-utils would close a
+      `node-utils:build → build-config:build` bootstrap cycle. → §6, §4.16
+- [x] **C9** 🟡 **DECIDED 2026-08-14 — doctor becomes a cli-app consumer.** Doctor is a CLI, so it
+      should use the CLI framework. The direction is legal (private → public) and adds no cycle:
+      cli-app depends on color, logger, node-utils and utils, none of which reach doctor. Not a
+      regression either — `src/cli.ts` already uses node-utils' `parseArgv`, so this is about what
+      it still hand-rolls: a maintained `HELP` string, manual `--help` interception, and no
+      `--version`. cli-app generates all three from the schema. **Caveat:** cli-app still carries
+      its own yargs bridge duplicating node-utils' `parseArgv` (§4.16), so doctor adopting it puts a
+      second consumer on the duplicated path. That raises the priority of collapsing cli-app onto
+      the argv primitives rather than lowering it — do that cleanup close behind, not much later. →
+      §6
+
 - [ ] **C8** 🟡 **Where does `runtime` live for Nx dependency-boundary enforcement?** Narrowed
       2026-08-14: this is _not_ a `buildConfig`-vs-tag question, since `buildConfig` is dead (B5).
       The live declaration is the per-entry `runtime` in each `tsdown.config.ts`, which Nx cannot
@@ -233,6 +245,17 @@ gates C3.
       Nx tags. → §4.9
 
 ---
+
+### C7 schema layering
+
+```text
+node-utils   identity: name, version, description, author, license, repository
+    |
+    +-- cli-app     banner, --version, header       (public)
+    +-- config      policy needing manifest facts   (public)
+    +-- workspace   extends: path, deps, privacy    (private)
+    +-- doctor      extends: exports, bin, files    (private)
+```
 
 ## Sequencing note
 
