@@ -368,6 +368,35 @@ instructions 8, 10, 11 in part.)
 Still ahead: rewire `scope-affected` and config's commitlint enum onto this model, then delete
 `scope-matchers.ts` and `isRootPackageName` (audit 9, 12, 14), and the barrel reduction (15).
 
+**Step 4 — one engine.** `scope-affected`, `scope-commit` and Commitlint's `scope-enum` all resolve
+through `getWorkspaceScopes` + `resolveRepositoryScopes`. `scope-matchers.ts` deleted, along with
+`isRootPackageName`. `scope-affected` stops running its own `git diff` and takes the same
+changed-file input `scope-commit` uses. Nx project names are resolved back through the snapshot
+before root is decided — the gap flagged against audit instruction 14. Config's unpublished
+workspace re-exports deleted per C2. (Audit 9, 12, 14.)
+
+Two things surfaced. Publishing the _resolved classifiers_ as Commitlint metadata created a feedback
+loop: the CLI reads that metadata back as overrides, so shortened package names merged with the
+`--keep-prefix` names and `scope-commit --keep-prefix` emitted both spellings of one scope. Metadata
+is now the consumer's overrides only. Separately, moving discovery to the top of `scope-affected`
+made `--changeset-only` shell out to the package manager for nothing; discovery is lazy.
+
+**Step 5 — argv and the barrel.** `parseArgv` now declares boolean keys to yargs, derived from the
+schema. Without that, `--commit chore subject` parsed as `commit: 'chore'` and lost a positional, so
+no flag taking a following token could migrate. `scope-commit` and `scope-affected` are off their
+hand-rolled switches, preserving every alias and the `Unknown argument:` wording that package
+scripts match on. Note `--no-nx` and `--no-repo-scopes` arrive through yargs' boolean-negation as
+`nx: false` / `repoScopes: false`, which the schemas model explicitly.
+
+`core/index.ts` is now an explicit barrel rather than `export *`: while both engines existed it
+re-exported them side by side, making the obsolete one look equally canonical. `array.js` and
+`paths.js` are internal. The redundant representation adapters superseded by `WorkspaceSnapshot`
+(`getWorkspacePackagesLookup`, `getWorkspacePackagesObject`, `workspacePackagesToArray`,
+`getWorkspaceNodeModulesRoot`) and the duplicated `validPackageName` regex are deleted. (Audit 13,
+15.)
+
+**All fifteen audit instructions are now addressed.**
+
 ## Core audit (external, 2026-08-14) — verification
 
 A function-by-function audit of `packages/workspace/src/core` was reviewed against #218's head.

@@ -17,10 +17,6 @@ export type WorkspacePackage = {
     private?: boolean
     version: string
 }
-/** @deprecated Use `packageNameSchema` from `@snailicid3/node-utils`. Retained only until external callers migrate. */
-export const validPackageName =
-    /^(@[\da-z~-][\d._a-z~-]*\/)?[\da-z~-][\d._a-z~-]*$/
-
 /**
  * One record from a package manager's workspace listing.
  *
@@ -112,17 +108,6 @@ export function findNearestPackageJson(
     return null
 }
 
-/** Ask the active package manager for node_modules, returning undefined on failure. */
-export function getWorkspaceNodeModulesRoot(
-    repoRoot: string = getRepoRoot({ fallbackToCwd: true }),
-): string | undefined {
-    const packageManager = getPackageManager(repoRoot)
-    const args = packageManager === 'pnpm' ? ['root', '-w'] : ['root']
-    const output = runPackageManager(repoRoot, args)
-
-    return output.success ? output.stdout.trim() : undefined
-}
-
 /** Read the active package manager's workspace listing and optionally filter it. */
 export function getWorkspacePackagesList(
     filter?: (pkg: WorkspacePackage) => boolean,
@@ -135,42 +120,6 @@ export function getWorkspacePackagesList(
     return filter ? list.filter(filter) : list
 }
 
-/** Index workspace packages by package name in a Map. */
-export function getWorkspacePackagesLookup(
-    ...args: Parameters<typeof getWorkspacePackagesList>
-): Map<string, WorkspacePackage> {
-    return new Map(
-        getWorkspacePackagesList(...args).map((pkg) => [pkg.name, pkg]),
-    )
-}
-
-/** Index workspace packages by name, optionally mapping each package to another value. */
-export function getWorkspacePackagesObject(
-    filter?: (pkg: WorkspacePackage) => boolean,
-): Record<string, WorkspacePackage>
-export function getWorkspacePackagesObject<Result>(
-    filter: ((pkg: WorkspacePackage) => boolean) | undefined,
-    mapValue: (pkg: WorkspacePackage, name: string, index: number) => Result,
-): Record<string, Result>
-export function getWorkspacePackagesObject<Result>(
-    filter?: (pkg: WorkspacePackage) => boolean,
-    mapValue?: (pkg: WorkspacePackage, name: string, index: number) => Result,
-): Record<string, Result> | Record<string, WorkspacePackage> {
-    const packages = getWorkspacePackagesList(filter)
-
-    if (!mapValue) {
-        return Object.fromEntries(
-            packages.map((pkg) => [pkg.name, pkg] as const),
-        )
-    }
-
-    return Object.fromEntries(
-        packages.map((pkg, index) => [
-            pkg.name,
-            mapValue(pkg, pkg.name, index),
-        ]),
-    )
-}
 /**
  * Discover workspace packages, throwing on command or schema failure.
  *
@@ -242,19 +191,6 @@ export function safeGetWorkspaceSnapshot(
         },
         success: true,
     }
-}
-
-/** Convert either supported workspace package collection into an array. */
-export function workspacePackagesToArray(
-    input:
-        | ReadonlyMap<string, WorkspacePackage>
-        | Record<string, WorkspacePackage>,
-): Array<WorkspacePackage> {
-    if (input instanceof Map) {
-        return [...(input as ReadonlyMap<string, WorkspacePackage>).values()]
-    }
-
-    return Object.values(input as Record<string, WorkspacePackage>)
 }
 
 /** Normalize npm and pnpm workspace records to the shared package shape. */

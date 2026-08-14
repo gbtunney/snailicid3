@@ -8,7 +8,12 @@
  * - run git commit with
  * - live terminal output → Husky runs lint-staged once using .lintstagedrc.mts → commitlint validates the message
  */
-import { runCliIfEntrypointAsync, runCommand } from '@snailicid3/node-utils'
+import {
+    runCliIfEntrypointAsync,
+    runCommand,
+    safeParseArgv,
+} from '@snailicid3/node-utils'
+import { z } from 'zod'
 import { readWorkspaceEnvironment } from './../core/environment.js'
 import { getGitChangedFiles, getRepoRoot } from './../core/git.js'
 import { runPackageBinary } from './../core/package-manager.js'
@@ -174,87 +179,104 @@ function makeMessage(
     return `${type}(${scopeValue}): ${subject}`
 }
 
+const optionsSchema = z.strictObject({
+    all: z.boolean().optional(),
+    c: z.boolean().optional(),
+    cached: z.boolean().optional(),
+    checkedCommit: z.boolean().optional(),
+    checkType: z.boolean().optional(),
+    commit: z.boolean().optional(),
+    commitChecked: z.boolean().optional(),
+    csv: z.boolean().optional(),
+    debug: z.boolean().optional(),
+    dry: z.boolean().optional(),
+    dryRun: z.boolean().optional(),
+    fullScope: z.boolean().optional(),
+    h: z.boolean().optional(),
+    help: z.boolean().optional(),
+    keepPrefix: z.boolean().optional(),
+    list: z.boolean().optional(),
+    m: z.boolean().optional(),
+    message: z.boolean().optional(),
+    n: z.boolean().optional(),
+    scope: z.string().optional(),
+    staged: z.boolean().optional(),
+    validate: z.boolean().optional(),
+    validateType: z.boolean().optional(),
+    verbose: z.boolean().optional(),
+})
+
+/**
+ * Translate argv into the command's typed shape.
+ *
+ * Every historical alias is preserved deliberately; the audit noted they should be reviewed, but dropping one silently
+ * is a behaviour change, so that is a separate decision.
+ */
 function parseArgs(args: Array<string>): ParsedArgs {
-    const parsed: ParsedArgs = {
-        dryRun: false,
-        explicitScope: '',
-        keepPrefix: false,
-        mode: 'staged',
-        outputMode: 'scope',
-        positionals: [],
-        runCommitBefore: false,
-        scopeFormat: 'csv',
-        validateOnly: false,
-        verbose: false,
-    }
+    const parsed = safeParseArgv(optionsSchema, args, z.array(z.string()))
 
-    for (let index = 0; index < args.length; index += 1) {
-        const arg = args[index]
+    if (!parsed.success) {
+        // Preserve the original wording: package scripts and consumers match on it.
+        const unknown = parsed.error.issues.find(
+            (issue) => issue.code === 'unrecognized_keys',
+        )
+        const unknownKey =
+            unknown && 'keys' in unknown
+                ? (unknown.keys as ReadonlyArray<string>)[0]
+                : undefined
 
-        switch (arg) {
-            case '--all':
-                parsed.mode = 'all'
-                break
-            case '--c':
-            case '--commit':
-                parsed.outputMode = 'commit'
-                break
-            case '--cached':
-            case '--staged':
-                parsed.mode = 'staged'
-                break
-            case '--check-type':
-            case '--validate':
-            case '--validate-type':
-                parsed.validateOnly = true
-                break
-            case '--checked-commit':
-            case '--commit-checked':
-                parsed.outputMode = 'commit'
-                parsed.runCommitBefore = true
-                break
-            case '--csv':
-                parsed.scopeFormat = 'csv'
-                break
-            case '--debug':
-            case '--verbose':
-                parsed.verbose = true
-                break
-            case '--dry':
-            case '--dry-run':
-            case '-n':
-                parsed.dryRun = true
-                break
-            case '--full-scope':
-            case '--keep-prefix':
-                parsed.keepPrefix = true
-                break
-            case '--help':
-            case '-h':
-                printHelp()
-                process.exit(0)
-                break
-            case '--list':
-                parsed.scopeFormat = 'list'
-                break
-            case '--m':
-            case '--message':
-                parsed.outputMode = 'message'
-                break
-            case '--scope':
-                parsed.explicitScope = readNextValue(args, ++index, arg)
-                break
-            default:
-                if (arg.startsWith('--')) {
-                    throw new Error(`Unknown argument: ${arg}`)
-                }
+        if (unknownKey !== undefined) {
+            const flag = args.find(
+                (arg) =>
+                    arg.startsWith('--') &&
+                    arg.replace(/^--/u, '').replace(/=.*$/u, '') ===
+                        unknownKey.replace(
+                            /[A-Z]/gu,
+                            (letter) => `-${letter.toLowerCase()}`,
+                        ),
+            )
 
-                parsed.positionals.push(arg)
-                break
+            throw new Error(`Unknown argument: ${flag ?? `--${unknownKey}`}`)
         }
+
+        throw new Error(`invalid arguments:\n${z.prettifyError(parsed.error)}`)
     }
 
-    return parsed
+    const options = parsed.data.options
+
+    if (options.help === true || options.h === true) {
+        printHelp()
+        process.exit(0)
+    }
+
+    const wantsCheckedCommit =
+        options.checkedCommit === true || options.commitChecked === true
+
+    return {
+        dryRun:
+            options.dryRun === true ||
+            options.dry === true ||
+            options.n === true,
+        explicitScope: options.scope ?? '',
+        keepPrefix: options.keepPrefix === true || options.fullScope === true,
+        mode: options.all === true ? 'all' : 'staged',
+        outputMode:
+            options.message === true || options.m === true
+                ? 'message'
+                : options.commit === true ||
+                    options.c === true ||
+                    wantsCheckedCommit
+                  ? 'commit'
+                  : 'scope',
+        positionals: parsed.data.positionals,
+        runCommitBefore: wantsCheckedCommit,
+        scopeFormat: options.list === true ? 'list' : 'csv',
+        validateOnly:
+            options.validate === true ||
+            options.validateType === true ||
+            options.checkType === true,
+        verbose: options.verbose === true || options.debug === true,
+    }
 }
 
 function performCommit(repoRoot: string, message: string): void {
@@ -302,20 +324,6 @@ Examples:
   scope-commit --message chore autofix --scope config
   scope-commit --checked-commit chore autofix
   scope-commit .github/workflows/call-pipeline.yml`)
-}
-
-function readNextValue(
-    args: ReadonlyArray<string>,
-    index: number,
-    flag: string,
-): string {
-    const value = args[index]
-
-    if (!value || value.startsWith('--')) {
-        throw new Error(`${flag} requires a value`)
-    }
-
-    return value
 }
 
 function resolveCommitRequest(parsed: ParsedArgs): CommitRequest {
