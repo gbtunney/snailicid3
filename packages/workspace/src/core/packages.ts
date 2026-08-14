@@ -1,4 +1,5 @@
-import { existsSync, readFileSync, statSync } from 'node:fs'
+import { readPackageManifest } from '@snailicid3/node-utils'
+import { existsSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { getPackageManager, runPackageManager } from './package-manager.js'
 import { normalizeRepoPath } from './paths.js'
@@ -111,18 +112,9 @@ export function getWorkspacePackagesObject<Result>(
 
 /** Read a trimmed package name from a manifest, returning null for missing or invalid data. */
 export function readPackageName(packageJsonPath: string): null | string {
-    if (!existsSync(packageJsonPath)) return null
+    const manifest = readPackageManifest(packageJsonPath)
 
-    try {
-        const raw = readFileSync(packageJsonPath, 'utf8')
-        const parsed = JSON.parse(raw) as { name?: unknown }
-
-        return typeof parsed.name === 'string' && parsed.name.trim()
-            ? parsed.name.trim()
-            : null
-    } catch {
-        return null
-    }
+    return manifest.success ? (manifest.data.name ?? null) : null
 }
 
 /** Convert either supported workspace package collection into an array. */

@@ -1,9 +1,9 @@
 import {
     type CommandResult,
+    readPackageManifest,
     runCommand,
     type RunCommandOptions,
 } from '@snailicid3/node-utils'
-import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { readWorkspaceEnvironment } from './environment.js'
 
@@ -64,27 +64,24 @@ export function resolvePackageManager(
         return { packageManager: configured, source: 'environment' }
     }
 
-    try {
-        const manifest = JSON.parse(
-            readFileSync(path.join(repoRoot, 'package.json'), 'utf8'),
-        ) as { packageManager?: unknown }
-        const value = manifest.packageManager
+    const manifest = readPackageManifest(path.join(repoRoot, 'package.json'))
 
-        if (typeof value === 'string') {
-            const name = value.split('@', 1)[0]
+    // A malformed manifest must not look like an absent packageManager field: silently falling
+    // through to the default hid real defects. Only 'missing' is a normal, quiet outcome.
+    if (!manifest.success && manifest.reason === 'invalid') {
+        throw new Error(
+            `Unable to read ${path.join(repoRoot, 'package.json')}:\n${manifest.error}`,
+        )
+    }
 
-            if (name === 'npm' || name === 'pnpm') {
-                return { packageManager: name, source: 'package.json' }
-            }
-            if (name) throw new Error(`Unsupported package manager: ${name}`)
+    if (manifest.success && manifest.data.packageManager) {
+        const name = manifest.data.packageManager.split('@', 1)[0]
+
+        if (name === 'npm' || name === 'pnpm') {
+            return { packageManager: name, source: 'package.json' }
         }
-    } catch (error) {
-        if (
-            error instanceof Error &&
-            error.message.startsWith('Unsupported package manager:')
-        ) {
-            throw error
-        }
+
+        throw new Error(`Unsupported package manager: ${name ?? ''}`)
     }
 
     return { packageManager: 'pnpm', source: 'default' }
