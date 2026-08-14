@@ -41,8 +41,10 @@ export const parseArgvObject = (argv: Argv): ArgvObject =>
         .help(false)
         .version(false)
         .parserConfiguration({
+            'camel-case-expansion': true,
             'parse-numbers': false,
             'parse-positional-numbers': false,
+            'strip-dashed': true,
         })
         .parseSync()
 

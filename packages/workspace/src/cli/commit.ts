@@ -14,12 +14,20 @@ import { getGitChangedFiles, getRepoRoot } from './../core/git.js'
 import { runPackageBinary } from './../core/package-manager.js'
 import {
     createRepositoryScopeClassifiers,
+    type RepositoryScopeResolution,
     resolveRepositoryScopes,
 } from './../core/repository-scopes.js'
 import { loadScopePathMatchers } from './../core/scope-matcher-config.js'
 import { formatScopes, type ScopeFormat } from './../core/scopes.js'
 
-type ChangeMode = 'all' | 'staged'
+export type ChangeMode = 'all' | 'staged'
+export type FileInputSource = 'explicit' | ChangeMode
+type CommitRequest = {
+    inputPaths: Array<string>
+    subject: string
+    type: string
+}
+
 type OutputMode = 'commit' | 'message' | 'scope'
 
 type ParsedArgs = {
@@ -32,6 +40,31 @@ type ParsedArgs = {
     runCommitBefore: boolean
     scopeFormat: ScopeFormat
     validateOnly: boolean
+    verbose: boolean
+}
+
+export function formatScopeEvidence(
+    files: ReadonlyArray<string>,
+    resolution: RepositoryScopeResolution,
+    inputSource: FileInputSource,
+): string {
+    const lines = [`${inputSource} files: ${files.length.toString()}`]
+
+    for (const [scope, matches] of Object.entries(resolution.matches)) {
+        if (matches.length === 0) continue
+        lines.push('', scope, ...matches.map((file) => `  ${file}`))
+    }
+
+    if (resolution.unmatched.length > 0) {
+        lines.push(
+            '',
+            'unmatched/root',
+            ...resolution.unmatched.map((file) => `  ${file}`),
+        )
+    }
+
+    lines.push('', `scopes: ${formatScopes(resolution.scopes, 'csv')}`)
+    return lines.join('\n')
 }
 
 export async function main(
@@ -48,35 +81,29 @@ export async function main(
         return
     }
 
-    let inputPaths = parsed.positionals
-    let commitType = ''
-    let commitSubject = ''
-
-    if (parsed.outputMode === 'message' || parsed.outputMode === 'commit') {
-        const [type, subject, ...rest] = parsed.positionals
-
-        if (!type || !subject) {
-            throw new Error(
-                `--${parsed.outputMode} requires <type> and <subject>`,
-            )
-        }
-
-        commitType = type
-        commitSubject = subject
-        inputPaths = rest
-    }
+    const request = resolveCommitRequest(parsed)
 
     if (parsed.runCommitBefore) {
         prepareCheckedCommit(repoRoot)
     }
 
-    const scopes = parsed.explicitScope
-        ? splitExplicitScope(parsed.explicitScope)
-        : await collectScopesForInput(repoRoot, inputPaths, parsed)
-    const scopeValue = formatScopes(scopes, 'csv')
+    const files = parsed.explicitScope
+        ? [...request.inputPaths]
+        : resolveInputFiles(request.inputPaths, parsed.mode)
+    const resolution = parsed.explicitScope
+        ? explicitScopeResolution(parsed.explicitScope)
+        : await resolveScopesForFiles(repoRoot, files, parsed.keepPrefix)
+
+    if (parsed.verbose) {
+        const inputSource =
+            request.inputPaths.length > 0 ? 'explicit' : parsed.mode
+        console.log(formatScopeEvidence(files, resolution, inputSource))
+    }
+
+    const scopeValue = formatScopes(resolution.scopes, 'csv')
 
     if (parsed.outputMode === 'message' || parsed.outputMode === 'commit') {
-        const message = makeMessage(commitType, scopeValue, commitSubject)
+        const message = makeMessage(request.type, scopeValue, request.subject)
 
         validateCommitMessage(repoRoot, message)
 
@@ -85,46 +112,35 @@ export async function main(
             return
         }
 
-        const result = runCommand('git', ['commit', '-m', message], {
-            cwd: repoRoot,
-            stdio: 'inherit',
-        })
-
-        if (result.status !== 0) {
-            throw new Error('git commit failed')
-        }
-
-        process.stdout.write(result.stdout)
+        performCommit(repoRoot, message)
         return
     }
 
-    console.log(formatScopes(scopes, parsed.scopeFormat))
+    console.log(formatScopes(resolution.scopes, parsed.scopeFormat))
 }
 
-async function collectScopesForInput(
-    repoRoot: string,
+export function resolveInputFiles(
     inputPaths: ReadonlyArray<string>,
-    parsed: ParsedArgs,
-): Promise<Array<string>> {
-    const files =
-        inputPaths.length > 0
-            ? [...inputPaths]
-            : getGitChangedFiles({
-                  includeStaged: true,
-                  includeUnstaged: parsed.mode === 'all',
-                  includeUntracked: parsed.mode === 'all',
-              })
+    mode: ChangeMode,
+    getChangedFiles: typeof getGitChangedFiles = getGitChangedFiles,
+): Array<string> {
+    if (inputPaths.length > 0) return [...inputPaths]
 
-    if (files.length === 0) return ['root']
+    return getChangedFiles({
+        includeStaged: true,
+        includeUnstaged: mode === 'all',
+        includeUntracked: mode === 'all',
+    })
+}
 
-    const customClassifiers = await loadScopePathMatchers(repoRoot)
-    const classifiers = createRepositoryScopeClassifiers(
-        repoRoot,
-        customClassifiers,
-        parsed.keepPrefix,
-    )
-
-    return resolveRepositoryScopes(files, classifiers).scopes
+function explicitScopeResolution(
+    scopeValue: string,
+): RepositoryScopeResolution {
+    return {
+        matches: {},
+        scopes: splitExplicitScope(scopeValue),
+        unmatched: [],
+    }
 }
 
 function makeMessage(
@@ -146,6 +162,7 @@ function parseArgs(args: Array<string>): ParsedArgs {
         runCommitBefore: false,
         scopeFormat: 'csv',
         validateOnly: false,
+        verbose: false,
     }
 
     for (let index = 0; index < args.length; index += 1) {
@@ -175,6 +192,10 @@ function parseArgs(args: Array<string>): ParsedArgs {
                 break
             case '--csv':
                 parsed.scopeFormat = 'csv'
+                break
+            case '--debug':
+            case '--verbose':
+                parsed.verbose = true
                 break
             case '--dry':
             case '--dry-run':
@@ -213,6 +234,17 @@ function parseArgs(args: Array<string>): ParsedArgs {
     return parsed
 }
 
+function performCommit(repoRoot: string, message: string): void {
+    const result = runCommand('git', ['commit', '-m', message], {
+        cwd: repoRoot,
+        stdio: 'inherit',
+    })
+
+    if (result.status !== 0) throw new Error('git commit failed')
+
+    process.stdout.write(result.stdout)
+}
+
 function prepareCheckedCommit(repoRoot: string): void {
     const stagedDiff = runCommand('git', ['diff', '--cached', '--quiet'], {
         cwd: repoRoot,
@@ -231,7 +263,7 @@ function prepareCheckedCommit(repoRoot: string): void {
 
 function printHelp(): void {
     console.log(`Usage:
-  scope-commit [--staged|--all] [--csv|--list] [--keep-prefix] [file ...]
+  scope-commit [--staged|--all] [--csv|--list] [--keep-prefix] [--verbose] [file ...]
   scope-commit --validate-type <type>
   scope-commit --message <type> <subject> [--staged|--all] [--keep-prefix] [file ...]
   scope-commit --commit <type> <subject> [--scope <scope>] [--staged|--all] [--keep-prefix] [--dry-run] [file ...]
@@ -261,6 +293,37 @@ function readNextValue(
     }
 
     return value
+}
+
+function resolveCommitRequest(parsed: ParsedArgs): CommitRequest {
+    if (parsed.outputMode === 'scope') {
+        return { inputPaths: parsed.positionals, subject: '', type: '' }
+    }
+
+    const [type, subject, ...inputPaths] = parsed.positionals
+    if (!type || !subject) {
+        throw new Error(`--${parsed.outputMode} requires <type> and <subject>`)
+    }
+
+    return { inputPaths, subject, type }
+}
+
+async function resolveScopesForFiles(
+    repoRoot: string,
+    files: ReadonlyArray<string>,
+    keepPrefix: boolean,
+): Promise<RepositoryScopeResolution> {
+    if (files.length === 0)
+        return { matches: {}, scopes: ['root'], unmatched: [] }
+
+    const customClassifiers = await loadScopePathMatchers(repoRoot)
+    const classifiers = createRepositoryScopeClassifiers(
+        repoRoot,
+        customClassifiers,
+        keepPrefix,
+    )
+
+    return resolveRepositoryScopes(files, classifiers)
 }
 
 function splitExplicitScope(scopeValue: string): Array<string> {

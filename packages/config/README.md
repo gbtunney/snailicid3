@@ -1,44 +1,25 @@
 # @snailicid3/config 🐌
 
-[![NPM](https://img.shields.io/npm/v/@snailicid3/config)](http://www.npmjs.com/package/@snailicid3/config)
-![License: MIT](https://img.shields.io/npm/l/@snailicid3/config)
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+[![npm](https://img.shields.io/npm/v/@snailicid3/config)](https://www.npmjs.com/package/@snailicid3/config)
+[![license](https://img.shields.io/npm/l/@snailicid3/config)](../../LICENSE)
 
-_Shared ESLint, Prettier, markdownlint, commitlint, and TypeScript base configurations for the
-snailicid3 monorepo._
+Shared lint, formatting, documentation, TypeScript, Nx, and API-extractor policy for Snailicid3
+projects.
 
----
+> **Release status:** npm currently serves `@snailicid3/config@0.2.0`. The policy ownership and
+> compatibility-wrapper changes in this checkout have not been released yet. Config is last in the
+> four-package release rehearsal because its runtime dependency graph reaches node-utils, workspace,
+> and logger.
 
-![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
-![ESLint](https://img.shields.io/badge/ESLint-4B3263?style=for-the-badge&logo=eslint&logoColor=white)
-![NPM](https://img.shields.io/badge/NPM-%23CB3837.svg?style=for-the-badge&logo=npm&logoColor=white)
+## Ownership boundary
 
-### Repository
+Config owns reusable policy and the generation of its published JSON configuration artifacts.
+Generic JSON-file, path, and glob implementations belong to `@snailicid3/node-utils`; repository
+facts and commands belong to `@snailicid3/workspace`; terminal output belongs to
+`@snailicid3/logger`. Compatibility re-exports and command wrappers remain where consumers still
+depend on the old config surface, but they delegate to the owning package.
 
-- **Github:**
-  [`@snailicid3/config`](https://github.com/gbtunney/snailicid3/tree/main/packages/config) •
-  [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
-
-### Author
-
-👤 **Gillian Tunney**
-
-- [github](https://github.com/gbtunney)
-- [email](mailto:gbtunney@mac.com)
-
-> Recommended package manager is [pnpm](http://pnpm.io)
->
-> [![PNPM](https://img.shields.io/badge/pnpm-%234a4a4a.svg?style=for-the-badge&logo=pnpm&logoColor=f69220)](http://pnpm.io)
-
-## @snailicid3/config 🐌
-
----
-
-This package provides shareable configuration files for common tooling used across the snailicid3
-monorepo. It includes ESLint flat configs, Prettier options, markdownlint rules, commitlint
-conventions, TypeScript base configs, and utility shell scripts.
-
-### `@snailicid3/config` _contains:_
+## Included tooling
 
 - [**eslint**](https://eslint.org/) • _Flat config with TypeScript, import, jsdoc, and sort rules_
 - [**prettier**](https://prettier.io/) • _Shared Prettier options_
@@ -53,17 +34,27 @@ conventions, TypeScript base configs, and utility shell scripts.
 - [**nx**](https://nx.dev/) • _Shared pipeline preset: `namedInputs` + `targetDefaults` consumed via
   `nx.json > extends`_
 
+## Published entry points
+
+| Entry                                        | Purpose                                         |
+| -------------------------------------------- | ----------------------------------------------- |
+| `@snailicid3/config`                         | JavaScript configuration builders and utilities |
+| `@snailicid3/config/prettier`                | Generated Prettier JSON                         |
+| `@snailicid3/config/markdownlint`            | Generated markdownlint JSON                     |
+| `@snailicid3/config/nx-preset.json`          | Generated Nx preset                             |
+| `@snailicid3/config/api-extractor/base.json` | Generated API Extractor base                    |
+| `@snailicid3/config/tsconfig/*`              | TypeScript presets                              |
+
+The package still exposes compatibility bins for `snail-sh`, workspace hooks, scoped commands,
+changesets, setup, uninstall, and patching. The wrappers delegate according to package metadata;
+logger owns `snail-sh` and workspace owns the repository-aware commands. A release must prove that
+those wrappers resolve cleanly from installed registry packages, without workspace links or an
+unpublished dependency.
+
 ## Installation
 
 ```sh
-#pnpm
-$ pnpm add @snailicid3/config -D
-
-#yarn
-$ yarn add @snailicid3/config -D
-
-#npm
-$ npm install @snailicid3/config --save-dev
+pnpm add --save-dev @snailicid3/config
 ```
 
 ## Examples
@@ -392,4 +383,27 @@ The shell completion install helper can be called through pnpm:
 
 ```sh
 pnpm exec gbt-setup
+```
+
+## Release rehearsal
+
+The shared candidate baseline is `68ab0564b2dc0f23b3ce3424beeb12225941c13d`. Release config after
+node-utils, workspace, and logger are resolvable from the isolated registry. The clean-consumer
+checks must verify:
+
+- every exported generated JSON file exists in the packed artifact and matches the source policy
+- every TypeScript-config subpath resolves from npm and pnpm installations
+- compatibility command wrappers reach the installed logger/workspace binaries
+- no `workspace:*` dependency is rewritten to an unavailable registry package
+- the root JavaScript entry loads without relying on monorepo symlinks
+
+The generated files are public API. `build-exporter.ts` may be replaced only together with another
+artifact-generation mechanism; deleting it as cleanup would break published entry points.
+
+## Development
+
+```sh
+pnpm --filter=@snailicid3/config build:nx
+pnpm --filter=@snailicid3/config test:nx
+pnpm --filter=@snailicid3/config api:report:nx
 ```
