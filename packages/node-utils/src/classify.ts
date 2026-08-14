@@ -1,8 +1,8 @@
 import micromatch from 'micromatch'
 
-export type StringClassifiers = Readonly<Record<string, ReadonlyArray<string>>>
-
 export type StringClassification = Readonly<Record<string, Array<string>>>
+
+export type StringClassifiers = Readonly<Record<string, ReadonlyArray<string>>>
 
 /** Classify strings into named glob buckets while preserving the matching values for each bucket. */
 export const classifyStrings = (

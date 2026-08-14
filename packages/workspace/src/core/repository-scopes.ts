@@ -20,9 +20,16 @@ export const getWorkspaceScopeClassifiers = (
 ): RepositoryScopeClassifiers =>
     Object.fromEntries(
         getWorkspacePackagesList(undefined, repoRoot)
-            .filter((workspacePackage) => path.resolve(workspacePackage.path) !== path.resolve(repoRoot))
+            .filter(
+                (workspacePackage) =>
+                    path.resolve(workspacePackage.path) !==
+                    path.resolve(repoRoot),
+            )
             .map((workspacePackage) => {
-                const relativePackagePath = normalizeRepoPath(repoRoot, workspacePackage.path)
+                const relativePackagePath = normalizeRepoPath(
+                    repoRoot,
+                    workspacePackage.path,
+                )
                 return [
                     shortenScopeName(workspacePackage.name, keepPrefix),
                     [`${relativePackagePath}/**`],
