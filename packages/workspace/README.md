@@ -1,5 +1,39 @@
 # @snailicid3/workspace 🐌
 
+[![npm](https://img.shields.io/npm/v/@snailicid3/workspace)](https://www.npmjs.com/package/@snailicid3/workspace)
+[![license](https://img.shields.io/npm/l/@snailicid3/workspace)](../../LICENSE)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://prettier.io/)
+
+_Repository discovery, Git facts, package scopes, hooks, and workspace-aware commands._
+
+---
+
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)](https://git-scm.com/)
+[![pnpm](https://img.shields.io/badge/pnpm-F69220?style=for-the-badge&logo=pnpm&logoColor=white)](https://pnpm.io/)
+
+### Repository
+
+- **GitHub:**
+  [`@snailicid3/workspace`](https://github.com/gbtunney/snailicid3/tree/main/packages/workspace) •
+  [`snailicid3`](https://github.com/gbtunney/snailicid3)
+
+### Author
+
+👤 **Gillian Tunney**
+
+- [GitHub](https://github.com/gbtunney)
+- [Email](mailto:gbtunney@mac.com)
+
+> Recommended package manager: [pnpm](https://pnpm.io/)
+>
+> [![pnpm](https://img.shields.io/badge/pnpm-4A4A4A?style=for-the-badge&logo=pnpm&logoColor=F69220)](https://pnpm.io/)
+
+## @snailicid3/workspace 🐌
+
+---
+
 Workspace discovery, Git and package facts, scope resolution, repository hooks, and Snailicid3's
 repository-aware commands.
 

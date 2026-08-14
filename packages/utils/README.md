@@ -1,33 +1,32 @@
 # @snailicid3/utils 🐌
 
-[![NPM](https://img.shields.io/npm/v/@snailicid3/utils)](http://www.npmjs.com/package/@snailicid3/utils)
-![License: MIT](https://img.shields.io/npm/l/@snailicid3/utils)
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+[![npm](https://img.shields.io/npm/v/@snailicid3/utils)](https://www.npmjs.com/package/@snailicid3/utils)
+[![license](https://img.shields.io/npm/l/@snailicid3/utils)](../../LICENSE)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://prettier.io/)
 
 _String, numeric, object, date, and formatting utility functions._
 
 ---
 
-![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
-![Zod](https://img.shields.io/badge/zod-%233068b7.svg?style=for-the-badge&logo=zod&logoColor=white)
-![NPM](https://img.shields.io/badge/NPM-%23CB3837.svg?style=for-the-badge&logo=npm&logoColor=white)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Zod](https://img.shields.io/badge/Zod-3068B7?style=for-the-badge&logo=zod&logoColor=white)](https://zod.dev/)
 
 ### Repository
 
-- **Github:** [`@snailicid3/utils`](https://github.com/gbtunney/snailicid3/tree/main/packages/utils)
-  • [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
-- **CDN**: [jsdeliver](https://cdn.jsdelivr.net/npm/@snailicid3/utils/dist/index.min.js)
+- **GitHub:** [`@snailicid3/utils`](https://github.com/gbtunney/snailicid3/tree/main/packages/utils)
+  • [`snailicid3`](https://github.com/gbtunney/snailicid3)
+- **CDN:** [jsDelivr](https://cdn.jsdelivr.net/npm/@snailicid3/utils/dist/index.min.js)
 
 ### Author
 
 👤 **Gillian Tunney**
 
-- [github](https://github.com/gbtunney)
-- [email](mailto:gbtunney@mac.com)
+- [GitHub](https://github.com/gbtunney)
+- [Email](mailto:gbtunney@mac.com)
 
-> Recommended package manager is [pnpm](http://pnpm.io)
+> Recommended package manager: [pnpm](https://pnpm.io/)
 >
-> [![PNPM](https://img.shields.io/badge/pnpm-%234a4a4a.svg?style=for-the-badge&logo=pnpm&logoColor=f69220)](http://pnpm.io)
+> [![pnpm](https://img.shields.io/badge/pnpm-4A4A4A?style=for-the-badge&logo=pnpm&logoColor=F69220)](https://pnpm.io/)
 
 ## @snailicid3/utils 🐌
 
@@ -50,14 +49,7 @@ JavaScript environment.
 ## Installation
 
 ```sh
-#pnpm
-$ pnpm add @snailicid3/utils
-
-#yarn
-$ yarn add @snailicid3/utils
-
-#npm
-$ npm install @snailicid3/utils
+pnpm add @snailicid3/utils
 ```
 
 ## Examples

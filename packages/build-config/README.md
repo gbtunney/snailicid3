@@ -1,36 +1,35 @@
 # @snailicid3/build-config 🐌
 
-[![NPM](https://img.shields.io/npm/v/@snailicid3/build-config)](http://www.npmjs.com/package/@snailicid3/build-config)
-![License: MIT](https://img.shields.io/npm/l/@snailicid3/build-config)
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+[![npm](https://img.shields.io/npm/v/@snailicid3/build-config)](https://www.npmjs.com/package/@snailicid3/build-config)
+[![license](https://img.shields.io/npm/l/@snailicid3/build-config)](../../LICENSE)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://prettier.io/)
 
 _Provides reusable build configurations and adapters for tsdown, vite, vitest, and typedoc._
 
 ---
 
-![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
-![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)
-![Vitest](https://img.shields.io/badge/vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)
-![Zod](https://img.shields.io/badge/zod-%233068b7.svg?style=for-the-badge&logo=zod&logoColor=white)
-![NPM](https://img.shields.io/badge/NPM-%23CB3837.svg?style=for-the-badge&logo=npm&logoColor=white)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![tsdown](https://img.shields.io/badge/tsdown-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://tsdown.dev/)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev/)
+[![Vitest](https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
 
 ### Repository
 
-- **Github:**
+- **GitHub:**
   [`@snailicid3/build-config`](https://github.com/gbtunney/snailicid3/tree/main/packages/build-config)
-  • [`snailicid3`](https://github.com/gbtunney/snailicid3.git)
+  • [`snailicid3`](https://github.com/gbtunney/snailicid3)
 - **Documentation**: [ARCHITECTURE.md](./ARCHITECTURE.md)
 
 ### Author
 
 👤 **Gillian Tunney**
 
-- [github](https://github.com/gbtunney)
-- [email](mailto:gbtunney@mac.com)
+- [GitHub](https://github.com/gbtunney)
+- [Email](mailto:gbtunney@mac.com)
 
-> Recommended package manager is [pnpm](http://pnpm.io)
+> Recommended package manager: [pnpm](https://pnpm.io/)
 >
-> [![PNPM](https://img.shields.io/badge/pnpm-%234a4a4a.svg?style=for-the-badge&logo=pnpm&logoColor=f69220)](http://pnpm.io)
+> [![pnpm](https://img.shields.io/badge/pnpm-4A4A4A?style=for-the-badge&logo=pnpm&logoColor=F69220)](https://pnpm.io/)
 
 ## @snailicid3/build-config 🐌
 
@@ -67,14 +66,7 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full design specification.
 ## Installation
 
 ```sh
-#pnpm
-$ pnpm add @snailicid3/build-config -D
-
-#yarn
-$ yarn add @snailicid3/build-config -D
-
-#npm
-$ npm install @snailicid3/build-config --save-dev
+pnpm add --save-dev @snailicid3/build-config
 ```
 
 ## Examples
