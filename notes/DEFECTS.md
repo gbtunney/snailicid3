@@ -184,11 +184,22 @@ gates C3.
       off the table, and the remaining route is the one plan §4 already prescribes — config's
       commitlint factory must **receive** resolved scopes from its caller instead of importing them
       from workspace. Until that lands, `@snailicid3/config@0.2.0` remains unpublishable (rule 2.7).
-      This is also #206's intent-vs-inventory split showing up in practice: privacy is being used as
-      a release-phase signal because there is no explicit intent axis. → §4.7
-- [ ] **C2** 🟠 **Are config's workspace re-exports a supported contract?** They're published today.
-      If unintentional, withdrawing them is a breaking change needing its own version step — and it
-      has to happen before C3. → §4.7
+      **Smaller than it looked, after C2.** config touches workspace in three places. The ~15
+      re-exports in `src/index.ts` are unpublished and can simply be **deleted** rather than
+      inverted. Only the commitlint factory genuinely needs the inversion —
+      `commitlint/api-functions.ts` and `commitlint/workspace.scopes.ts`, eight symbols between
+      them. This is also #206's intent-vs-inventory split showing up in practice: privacy is being
+      used as a release-phase signal because there is no explicit intent axis. → §4.7
+- [x] **C2** 🟠 **DECIDED 2026-08-14 — not a contract; withdraw freely.** Established by dates, not
+      judgement: `config@0.2.0` published **2026-07-25**, and every workspace re-export first
+      appears in config's barrel on **2026-08-10** (`653d7a4`, scope matchers) or **2026-08-12**
+      (`7a8d7ff`, package-manager helpers). The published `0.2.0` tarball's `dist/index.js` contains
+      **zero** occurrences of `matchScopesForPath` or `runPackageBinary`. No consumer can depend on
+      them because they have never shipped. No deprecation window and no version step are required.
+      History note: the 08-10 exports were not a cross-package edge when written — they pointed at
+      config's own `./workspace/scope-matchers.js`, before `@snailicid3/workspace` existed. The
+      08-12 Phase 3 commit moved the implementation out and mechanically repointed them, which is
+      how an internal barrel export quietly became a cross-package one. → §4.7
 - [x] **C3** 🔴 **DECIDED 2026-08-14 — the #212 classifier engine survives; finish it properly.**
       Migrate `scope-affected` (`cli/affected.ts:129`) and config's commitlint scope-enum
       (`api-functions.ts:51`, `workspace.scopes.ts:38`) onto `resolveRepositoryScopes`, then delete
