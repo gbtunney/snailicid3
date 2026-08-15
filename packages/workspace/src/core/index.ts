@@ -16,7 +16,6 @@ export {
 export {
     type CommitScopeOptions,
     getStagedFiles,
-    resolveScopesForFiles,
     resolveStagedScopes,
 } from './commit-scope.js'
 export {

@@ -15,10 +15,15 @@ import {
     requireStagedChanges,
     validateCommitMessage,
 } from './../core/commit-exec.js'
-import { resolveScopesForFiles } from './../core/commit-scope.js'
 import { getGitChangedFiles, getRepoRoot } from './../core/git.js'
-import { type RepositoryScopeResolution } from './../core/repository-scopes.js'
+import { getWorkspaceSnapshot } from './../core/packages.js'
+import {
+    type RepositoryScopeResolution,
+    resolveRepositoryScopes,
+} from './../core/repository-scopes.js'
+import { loadScopePathMatchers } from './../core/scope-matcher-config.js'
 import { formatScopes, type ScopeFormat } from './../core/scopes.js'
+import { getWorkspaceScopes } from './../core/workspace-scopes.js'
 
 export type ChangeMode = 'all' | 'staged'
 export type FileInputSource = 'explicit' | ChangeMode
@@ -107,9 +112,11 @@ export async function main(
         getGitChangedFiles,
         repoRoot,
     )
-    const detected = await resolveScopesForFiles(repoRoot, files, {
-        keepPrefix: parsed.keepPrefix,
-    })
+    const detected = await resolveScopesForFiles(
+        repoRoot,
+        files,
+        parsed.keepPrefix,
+    )
     // An explicit scope overrides which scopes are used, but detection still runs so the report can
     // show what the files actually touch — including scopes the override leaves out.
     const resolution = parsed.explicitScope
@@ -302,6 +309,23 @@ function resolveCommitRequest(parsed: ParsedArgs): CommitRequest {
     }
 
     return { inputPaths, subject, type }
+}
+
+async function resolveScopesForFiles(
+    repoRoot: string,
+    files: ReadonlyArray<string>,
+    keepPrefix: boolean,
+): Promise<RepositoryScopeResolution> {
+    if (files.length === 0)
+        return { matches: {}, scopes: ['root'], unmatched: [] }
+
+    const resolved = getWorkspaceScopes({
+        keepPrefix,
+        overrides: await loadScopePathMatchers(repoRoot),
+        snapshot: getWorkspaceSnapshot(repoRoot),
+    })
+
+    return resolveRepositoryScopes(files, resolved.classifiers)
 }
 
 function splitExplicitScope(scopeValue: string): Array<string> {

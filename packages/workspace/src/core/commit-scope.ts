@@ -33,10 +33,14 @@ export const getStagedFiles = (repoRoot: string): Array<string> =>
 /**
  * Resolve repository scopes for an explicit file list.
  *
+ * Internal to this module: `scope-commit` composes its own equivalent for its reporting flow, and that is deliberate —
+ * the two are CLI composition rather than competing engines. What is shared is the scope engine underneath
+ * (`getWorkspaceScopes` + `resolveRepositoryScopes`), which both call.
+ *
  * An empty list resolves to `root` rather than an empty scope: a commit message always needs a scope, and `root` is the
  * documented value for changes that match no package.
  */
-export const resolveScopesForFiles = async (
+const resolveScopesForFiles = async (
     repoRoot: string,
     files: ReadonlyArray<string>,
     options: CommitScopeOptions = {},
