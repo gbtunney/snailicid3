@@ -4,36 +4,65 @@
 
 ```ts
 
+import { AnsiColorPreset } from '@snailicid3/logger';
 import type { Argv } from 'yargs';
+import { block } from '@snailicid3/logger';
+import { BlockOptions } from '@snailicid3/logger';
 import { createProgressBar } from '@snailicid3/logger';
 import { createSpinner } from '@snailicid3/logger';
-import { doesFileExist } from '@snailicid3/config';
+import { doesFileExist } from '@snailicid3/node-utils';
 import { fsPath } from '@snailicid3/node-utils';
 import { fsPathArray } from '@snailicid3/node-utils';
 import { fsPathArrayHasFiles } from '@snailicid3/node-utils';
 import { fsPathExists } from '@snailicid3/node-utils';
 import { fsPathTypeExists } from '@snailicid3/node-utils';
 import { fsTypedPath } from '@snailicid3/node-utils';
-import { getDirname } from '@snailicid3/config';
-import { getExt } from '@snailicid3/config';
-import { getFilename } from '@snailicid3/config';
-import { getFilePath } from '@snailicid3/config';
-import { getFullPath } from '@snailicid3/config';
+import { getColorAnsiInstance } from '@snailicid3/logger';
+import { getDirname } from '@snailicid3/node-utils';
+import { getExt } from '@snailicid3/node-utils';
+import { getFilename } from '@snailicid3/node-utils';
+import { getFilePath } from '@snailicid3/node-utils';
+import { getFullPath } from '@snailicid3/node-utils';
+import { header } from '@snailicid3/logger';
 import { HexColor } from '@snailicid3/color';
-import { isPlainObject } from '@snailicid3/config';
-import { Json } from '@snailicid3/config';
-import { json } from '@snailicid3/config';
-import { JSONExportConfig } from '@snailicid3/config';
-import { JSONExportEntry } from '@snailicid3/config';
-import { Jsonifiable } from '@snailicid3/config';
-import { normalizePath } from '@snailicid3/config';
-import { paths } from '@snailicid3/config';
+import { isAnsiColorPreset } from '@snailicid3/logger';
+import { isPlainObject } from '@snailicid3/node-utils';
+import { Json } from '@snailicid3/node-utils';
+import { json } from '@snailicid3/node-utils';
+import { JSONExportConfig } from '@snailicid3/node-utils';
+import { JSONExportEntry } from '@snailicid3/node-utils';
+import { Jsonifiable } from '@snailicid3/node-utils';
+import { KeyValuePairOptions } from '@snailicid3/logger';
+import { kvPair } from '@snailicid3/logger';
+import { line } from '@snailicid3/logger';
+import { LoggerColor } from '@snailicid3/logger';
+import { normalizePath } from '@snailicid3/node-utils';
+import { paths } from '@snailicid3/node-utils';
 import { ProgressBar } from '@snailicid3/logger';
-import { resolveCwd } from '@snailicid3/config';
+import { resolveCwd } from '@snailicid3/node-utils';
+import { rule } from '@snailicid3/logger';
+import { RuleOptions } from '@snailicid3/logger';
+import { section } from '@snailicid3/logger';
+import { spacer } from '@snailicid3/logger';
 import { Spinner } from '@snailicid3/logger';
 import { SpinnerOptions } from '@snailicid3/logger';
 import { SpinnerStatus } from '@snailicid3/logger';
+import { statusPair } from '@snailicid3/logger';
+import { StatusPairOptions } from '@snailicid3/logger';
+import { step } from '@snailicid3/logger';
+import { stripAnsi } from '@snailicid3/logger';
+import { styleText } from '@snailicid3/logger';
+import { subheader } from '@snailicid3/logger';
+import { table } from '@snailicid3/logger';
+import { TableOptions } from '@snailicid3/logger';
+import { TableRow } from '@snailicid3/logger';
+import { terminalLink } from '@snailicid3/logger';
+import { TerminalStyle } from '@snailicid3/logger';
+import { visibleLength } from '@snailicid3/logger';
+import { wrapColorAnsiText } from '@snailicid3/logger';
 import { z } from 'zod';
+
+export { AnsiColorPreset }
 
 // @public (undocumented)
 export type AppConfig = AppConfigOut;
@@ -70,6 +99,10 @@ export const appConfigSchema: z.ZodObject<{
     version: z.ZodDefault<z.ZodString>;
 }, z.core.$strip>;
 
+export { block }
+
+export { BlockOptions }
+
 // @public (undocumented)
 export type CommonFlagsInput = z.input<typeof commonFlagsSchema>;
 
@@ -103,6 +136,8 @@ export { fsPathTypeExists }
 
 export { fsTypedPath }
 
+export { getColorAnsiInstance }
+
 export { getDirname }
 
 export { getExt }
@@ -113,6 +148,8 @@ export { getFilePath }
 
 export { getFullPath }
 
+export { header }
+
 // @public
 export const initApp: <AppOptionsSchema extends ZodObjectSchema>(optionsSchema: AppOptionsSchema, config: AppConfigIn, initFunction: InitSuccessCallback<AppOptionsSchema>, _yargs?: Array<string>) => Promise<Argv | undefined>;
 
@@ -122,6 +159,8 @@ export const initializeApp: <AppOptionsSchema extends ZodObjectSchema>(optionsSc
 // @public
 export type InitSuccessCallback<AppOptionsSchema extends ZodObjectSchema = z.ZodObject> = (args: z.infer<AppOptionsSchema>, config: AppConfig, // Or: z.infer<typeof appConfigSchema>
 help: string | undefined) => Promise<void> | void;
+
+export { isAnsiColorPreset }
 
 export { isPlainObject }
 
@@ -134,6 +173,14 @@ export { JSONExportConfig }
 export { JSONExportEntry }
 
 export { Jsonifiable }
+
+export { KeyValuePairOptions }
+
+export { kvPair }
+
+export { line }
+
+export { LoggerColor }
 
 export { normalizePath }
 
@@ -148,11 +195,45 @@ export { ProgressBar }
 
 export { resolveCwd }
 
+export { rule }
+
+export { RuleOptions }
+
+export { section }
+
+export { spacer }
+
 export { Spinner }
 
 export { SpinnerOptions }
 
 export { SpinnerStatus }
+
+export { statusPair }
+
+export { StatusPairOptions }
+
+export { step }
+
+export { stripAnsi }
+
+export { styleText }
+
+export { subheader }
+
+export { table }
+
+export { TableOptions }
+
+export { TableRow }
+
+export { terminalLink }
+
+export { TerminalStyle }
+
+export { visibleLength }
+
+export { wrapColorAnsiText }
 
 // @public (undocumented)
 export type WrappedSchema<Schema extends ZodObjectSchema> = Schema extends ZodObjectSchema ? Schema : never;

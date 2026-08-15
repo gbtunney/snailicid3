@@ -87,18 +87,23 @@ export const parseArgvPositionals = (argv: Argv): Array<string> => {
 }
 
 /**
- * Parse named options and, when supplied, positional arguments with separate Zod schemas. Throws a `ZodError` when
- * either schema rejects its input.
+ * Apply the schemas to a record Yargs has already produced.
+ *
+ * This is the seam that lets a caller own its own Yargs instance — with commands, positionals, aliases and help — and
+ * still share one validation contract. Tokenizing argv is Yargs' job and must happen exactly once; separating `_` and
+ * `$0` from the named options and applying Zod is this function's job. `parseArgv` is the same thing with a generic
+ * Yargs instance built for you.
+ *
+ * Throws a `ZodError` when either schema rejects its input.
  */
-export const parseArgv = <
+export const validateArgvRecord = <
     Schema extends ZodObjectLike,
     PositionalSchema extends undefined | ZodArrayLike = undefined,
 >(
     schema: Schema,
-    argv: Argv,
+    parsed: ArgvObject,
     positionalSchema?: PositionalSchema,
 ): ParsedArgv<Schema, PositionalSchema> => {
-    const parsed = parseArgvObject(argv, booleanSchemaKeys(schema))
     const { $0: _command, _, ...namedOptions } = parsed
     const options = schema.parse(namedOptions)
 
@@ -112,20 +117,47 @@ export const parseArgv = <
     } as ParsedArgv<Schema, PositionalSchema>
 }
 
-/** Parse argv without throwing, returning a Zod-style success result. */
-export const safeParseArgv = <
+/** Validate an already-parsed Yargs record without throwing, returning a Zod-style success result. */
+export const safeValidateArgvRecord = <
+    Schema extends ZodObjectLike,
+    PositionalSchema extends undefined | ZodArrayLike = undefined,
+>(
+    schema: Schema,
+    parsed: ArgvObject,
+    positionalSchema?: PositionalSchema,
+): SafeParsedArgv<Schema, PositionalSchema> =>
+    toSafeResult(() => validateArgvRecord(schema, parsed, positionalSchema))
+
+/**
+ * Parse named options and, when supplied, positional arguments with separate Zod schemas. Throws a `ZodError` when
+ * either schema rejects its input.
+ *
+ * The quick Node-oriented API: it builds a generic Yargs instance, then delegates to {@link validateArgvRecord} so both
+ * entry points share one implementation.
+ */
+export const parseArgv = <
     Schema extends ZodObjectLike,
     PositionalSchema extends undefined | ZodArrayLike = undefined,
 >(
     schema: Schema,
     argv: Argv,
     positionalSchema?: PositionalSchema,
+): ParsedArgv<Schema, PositionalSchema> =>
+    validateArgvRecord(
+        schema,
+        parseArgvObject(argv, booleanSchemaKeys(schema)),
+        positionalSchema,
+    )
+
+/** Run a parse, converting a `ZodError` into a failure result and letting anything else propagate. */
+const toSafeResult = <
+    Schema extends ZodObjectLike,
+    PositionalSchema extends undefined | ZodArrayLike = undefined,
+>(
+    parse: () => ParsedArgv<Schema, PositionalSchema>,
 ): SafeParsedArgv<Schema, PositionalSchema> => {
     try {
-        return {
-            data: parseArgv(schema, argv, positionalSchema),
-            success: true,
-        }
+        return { data: parse(), success: true }
     } catch (error) {
         if (error instanceof z.ZodError) {
             return { error, success: false }
@@ -134,3 +166,14 @@ export const safeParseArgv = <
         throw error
     }
 }
+
+/** Parse argv without throwing, returning a Zod-style success result. */
+export const safeParseArgv = <
+    Schema extends ZodObjectLike,
+    PositionalSchema extends undefined | ZodArrayLike = undefined,
+>(
+    schema: Schema,
+    argv: Argv,
+    positionalSchema?: PositionalSchema,
+): SafeParsedArgv<Schema, PositionalSchema> =>
+    toSafeResult(() => parseArgv(schema, argv, positionalSchema))

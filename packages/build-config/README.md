@@ -35,12 +35,35 @@ _Provides reusable build configurations and adapters for tsdown, vite, vitest, a
 
 ---
 
-This package provides a tool-agnostic build planning system with adapter implementations for tsdown,
-vite, esbuild, rollup, and tsc. It defines a `BuildPlan` abstraction so package build identity
-(runtime, product, build strategy) is declared once in `package.json` and consumed by all build
-configs.
+This package is a small config factory. You describe a package or its entry points once, and the
+factories return ordinary tsdown, Vite and Vitest configuration objects that each tool accepts
+directly. Native options remain available as overrides, so the wrappers add typing and shared
+defaults rather than hiding the tools behind an exhaustive schema.
+
+The factories return configuration and nothing else. They do not run builds, start servers, rewrite
+`package.json`, or make network calls — tool CLIs and Nx targets perform execution.
+
+**Building does not validate the package.** Publint, ATTW and unused-dependency scanning are package
+validation and belong to Doctor, which runs them explicitly against source or packed artifacts. A
+build that emits correct artifacts should not fail for a reason the build did not cause.
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full design specification.
+
+### Focused subpaths
+
+Import one adapter without loading the others:
+
+```ts
+import { defineTsdownConfig, toTsdownConfigs } from '@snailicid3/build-config/tsdown'
+import { toViteConfig } from '@snailicid3/build-config/vite'
+import { vitest } from '@snailicid3/build-config/vitest'
+import { defineBuildPlan } from '@snailicid3/build-config/plan'
+import { createBanner } from '@snailicid3/build-config/banner'
+```
+
+The root entry still re-exports the common factories for existing consumers.
+
+`vitest` is an optional peer dependency: it is only needed when you import the Vitest subpath.
 
 ### `@snailicid3/build-config` _contains:_
 
@@ -48,20 +71,14 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full design specification.
 
 - [**tsdown**](https://tsdown.dev/) • _Primary bundler for TypeScript libraries (ESM + CJS)_
 - [**vite**](https://vitejs.dev/) • _Web app and browser library bundler_
-- [**esbuild**](https://esbuild.github.io/) • _Single-file script bundler_
-- [**rollup**](https://rollupjs.org/) • _Available as an adapter for multi-format builds_
-- [**tsc**](https://www.typescriptlang.org/) • _Transpile-only adapter_
 
 #### Vitest Configuration
 
 - [**vitest**](https://vitest.dev/) • _Shared vitest configuration with coverage_
 
-#### TypeDoc Configuration
+#### Banner and plan helpers
 
-- [**typedoc**](https://typedoc.org/) • _Documentation generator for TypeScript_
-- [**typedoc-plugin-markdown**](https://typedoc-plugin-markdown.org/) • _Generate docs as markdown_
-- [**typedoc-material-theme**](https://github.com/nicholasgasior/typedoc-material-theme) • _Material
-  theme for TypeDoc_
+- _Banner generation from `packageIdentitySchema`, and pure build-plan/export-plan derivation_
 
 ## Installation
 

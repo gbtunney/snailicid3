@@ -64,6 +64,7 @@
         "scope-commit": "./dist/cli/commit.js",
         "scope-affected": "./dist/cli/affected.js",
         "gbt-changeset": "./dist/cli/changesetv2.js",
+        "gbt-workflow": "./dist/cli/workflow.js",
         "gbt-exec": "./bin/make-executable.sh",
         "gbt-setup": "./bin/completions/install-pnpm.sh",
         "gbt-uninstall": "./bin/uninstall.sh",

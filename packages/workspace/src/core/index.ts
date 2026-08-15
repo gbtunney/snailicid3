@@ -9,6 +9,7 @@ export * from './branch-actions.js'
 export * from './branch-commit.js'
 export * from './branch-state.js'
 export {
+    detectDefaultBranch,
     getCurrentBranch,
     getGitChangedFiles,
     getGitChangedFilesByArea,
@@ -16,6 +17,7 @@ export {
     type GitChangeArea,
     type GitChangedFile,
     type GitChangedFilesOptions,
+    resolveBaseBranch,
 } from './git.js'
 export * from './hooks.js'
 export {
@@ -39,4 +41,5 @@ export {
 } from './repository-scopes.js'
 export { loadScopePathMatchers } from './scope-matcher-config.js'
 export { formatScopes, type ScopeFormat, shortenScopeName } from './scopes.js'
+export * from './workflow-plan.js'
 export * from './workspace-scopes.js'

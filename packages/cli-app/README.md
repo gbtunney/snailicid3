@@ -45,6 +45,33 @@ Used internally by scaffold and other CLI tools in this monorepo.
 - **Logging** — integrated `@snailicid3/logger` support
 - **Types** — typed argument schemas via Zod
 
+### Argv is tokenized once
+
+Yargs owns argv token semantics — options, aliases, arrays, help, version, usage — and Zod owns
+validation, defaults and transforms. They meet at one seam:
+
+```text
+string[] argv
+  -> cli-app configures Yargs from the schema plus CLI metadata
+  -> Yargs parses once (options, aliases, positionals)
+  -> node-utils' shared validator separates "_"/"$0" and applies Zod
+  -> typed result
+```
+
+`initApp` hands the record from its own configured Yargs instance to node-utils'
+`safeValidateArgvRecord`. It does not call `parseArgv`, which would build a second Yargs instance
+and tokenize the same argv again. Because the shared validator strips Yargs' `_` and `$0`
+bookkeeping keys, an options schema may be a `z.strictObject`.
+
+Lightweight callers keep using `parseArgv`/`safeParseArgv` from `@snailicid3/node-utils`; those now
+delegate to the same validator, so there is one implementation rather than two.
+
+### Curated re-exports
+
+cli-app re-exports the logger's terminal and colour helpers plus the node-utils filesystem schemas
+(including `fsTypedPath`), so a CLI does not need to reach past cli-app for ordinary output and path
+options. Raw Ansis is deliberately not re-exported.
+
 ## Installation
 
 ```sh
@@ -214,11 +241,21 @@ const run: InitSuccessCallback<typeof optionsSchema> = async (args) => {
 }
 ```
 
-## Future improvement: interactive schema prompts
+## Deferred: interactive schema prompts
 
 Invalid arguments currently produce a formatted Zod error and return without invoking the success
-callback. Generating interactive prompts from schema fields is intentionally deferred until it can
-be implemented as a complete, schema-driven feature.
+callback. An Inquirer-style prompt layer that fills missing required options and positionals from
+the same schema is **explicitly deferred**. When it lands it must be an adapter over the same
+command definition — not a second declaration or a second parser — and the first useful widget is
+expected to be a filesystem-path picker built on the existing path schemas. It does not block
+Doctor's initial CLI.
+
+## Deferred: schema-driven commands and positionals
+
+Explicit command definitions backed by Yargs child commands — inferring a command-discriminated
+union callback result, with command-specific help — are not implemented yet. Doctor should not
+commit to a subcommand interface until they land, so it receives command-specific help without
+another CLI rewrite.
 
 ## Future improvement: end-to-end example test
 

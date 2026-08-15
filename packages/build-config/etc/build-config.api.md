@@ -10,7 +10,6 @@ import { defineConfig as defineViteConfig } from 'vite';
 import { LiteralUnion } from 'type-fest';
 import { merge } from 'ts-deepmerge';
 import { UserConfig } from 'vite';
-import { ViteUserConfig } from 'vitest/config';
 import z from 'zod';
 
 // @public (undocumented)
@@ -147,33 +146,23 @@ export type ResolvedBuildPlanEntry = BuildPlanEntryBase & {
 // @public (undocumented)
 export const RUNTIME_KINDS: readonly ["browser", "edge", "node", "universal"];
 
-// @public (undocumented)
+// @public
 export const schemaPackageMetaBanner: z.ZodObject<{
-    author: z.ZodObject<{
-        email: z.ZodEmail;
-        name: z.ZodString;
-    }, z.core.$strip>;
-    name: z.ZodString;
-    description: z.ZodString;
-    license: z.ZodDefault<z.ZodEnum<{
-        MIT: "MIT";
-        ISC: "ISC";
-        "GPL-3.0": "GPL-3.0";
-        "Apache-2.0": "Apache-2.0";
-        UNLICENSED: "UNLICENSED";
-    }>>;
-    repository: z.ZodUnion<readonly [z.ZodString, z.ZodObject<{
+    author: z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodObject<{
+        email: z.ZodOptional<z.ZodString>;
+        name: z.ZodOptional<z.ZodString>;
+        url: z.ZodOptional<z.ZodString>;
+    }, z.core.$loose>]>>;
+    description: z.ZodOptional<z.ZodString>;
+    license: z.ZodOptional<z.ZodString>;
+    repository: z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodObject<{
         directory: z.ZodOptional<z.ZodString>;
-        type: z.ZodDefault<z.ZodEnum<{
-            git: "git";
-            svn: "svn";
-            hg: "hg";
-            bzr: "bzr";
-        }>>;
-        url: z.ZodURL;
-    }, z.core.$strip>]>;
+        type: z.ZodOptional<z.ZodString>;
+        url: z.ZodOptional<z.ZodString>;
+    }, z.core.$loose>]>>;
+    name: z.ZodString;
     version: z.ZodString;
-}, z.core.$strip>;
+}, z.core.$loose>;
 
 // @public (undocumented)
 export function toPackageExportsPlan(plan: ResolvedBuildPlan, options?: ToPackageExportsPlanOptions): Record<string, Record<string, string>>;
@@ -210,14 +199,6 @@ export const viteAdapter: BuildAdapter;
 
 // @public (undocumented)
 export type ViteConfigInput = Array<UserConfig>;
-
-// @public (undocumented)
-export const vitest: {
-    config: () => VitestConfig;
-};
-
-// @public (undocumented)
-export type VitestConfig = ViteUserConfig;
 
 // (No @packageDocumentation comment for this package)
 

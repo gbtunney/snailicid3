@@ -23,7 +23,29 @@ export { createBanner, schemaPackageMetaBanner } from './build/banner.js'
 export type { BannerPackageMeta } from './build/banner.js'
 
 // ── Plan ─────────────────────────────────────────────────────────────────────
-export * from './build/plan.js'
+// Enumerated rather than `export *`: a star re-export silently republishes whatever the module happens to
+// export, so the packaged surface drifts without an intentional change here or in the API report.
+export {
+    defineBuildPlan,
+    deriveBuildPlanEntry,
+    entryKeyToSlug,
+    isRootEntryKey,
+    packageNameToDisplayName,
+    packageNameToModuleName,
+    toPackageExportsPlan,
+} from './build/plan.js'
+export type {
+    BuildPlanEntryBase,
+    BuildPlanEntryInput,
+    BuildPlanPackage,
+    BuildPlanRoot,
+    DefineBuildPlanInput,
+    PackageExportExtensionPreset,
+    PackageExportExtensions,
+    ResolvedBuildPlan,
+    ResolvedBuildPlanEntry,
+    ToPackageExportsPlanOptions,
+} from './build/plan.js'
 
 // ── Build port ────────────────────────────────────────────────────────────────
 export {
@@ -46,9 +68,5 @@ export {
     // SchemaBasePackage,
     // schemaRequiredScripts,
 } from './build/schemas/package.js'
-
-// ── Vitest ────────────────────────────────────────────────────────────────────
-export { vitest } from './vitest/index.js'
-export type { VitestConfig } from './vitest/index.js'
 
 export { merge } from 'ts-deepmerge'

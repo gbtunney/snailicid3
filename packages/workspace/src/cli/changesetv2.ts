@@ -19,8 +19,10 @@ import { fmt } from '@snailicid3/utils'
 import { z } from 'zod'
 import { readdirSync } from 'node:fs'
 import { basename, join } from 'node:path'
+import { createBranchFromBase, switchBranch } from './../core/branch-actions.js'
+import { localBranchExists } from './../core/branch-state.js'
 import { readWorkspaceEnvironment } from './../core/environment.js'
-import { getRepoRoot } from './../core/git.js'
+import { detectDefaultBranch, getRepoRoot } from './../core/git.js'
 import { runPackageBinary } from './../core/package-manager.js'
 
 export const optionsSchema = z.strictObject({
@@ -49,15 +51,6 @@ const listChangesets = (repoRoot: string): Array<string> => {
         .toSorted()
 }
 
-const detectDefaultBranch = (repoRoot: string): string => {
-    const result = runCommand(
-        'git',
-        ['symbolic-ref', '--quiet', '--short', 'refs/remotes/origin/HEAD'],
-        { cwd: repoRoot },
-    )
-    return result.success ? result.stdout.trim().replace(/^origin\//u, '') : ''
-}
-
 const requirePackageBinary = (
     repoRoot: string,
     binary: string,
@@ -73,6 +66,50 @@ const requirePackageBinary = (
         )
     }
     return result.stdout.trim()
+}
+
+export type ChangesetBranchResult = {
+    /** How the branch was attached: newly created, or an existing one switched to. */
+    action: 'created' | 'switched'
+    branch: string
+}
+
+/**
+ * Put the caller on the changeset branch — and stop there.
+ *
+ * Create-or-switch is the whole operation: staging, committing, pushing and opening a pull request are separate
+ * explicit steps, so starting a changeset never records work the caller did not ask for. A same-named branch that
+ * exists only on the remote cannot be adopted without fetching it, and fetching on the caller's behalf is recovery
+ * rather than starting, so that case reports the exact commands instead of guessing.
+ */
+export const attachChangesetBranch = (
+    repoRoot: string,
+    options: { branch: string; inherit?: boolean; startPoint: string },
+): ChangesetBranchResult => {
+    const { branch, inherit = false, startPoint } = options
+
+    if (localBranchExists(repoRoot, branch)) {
+        switchBranch(repoRoot, branch, { inherit })
+        return { action: 'switched', branch }
+    }
+
+    if (
+        runCommand(
+            'git',
+            ['ls-remote', '--exit-code', '--heads', 'origin', branch],
+            { cwd: repoRoot },
+        ).success
+    ) {
+        throw new Error(
+            [
+                `remote branch exists: ${branch}`,
+                `Resume it with: git fetch origin ${branch} && git switch ${branch}`,
+            ].join('\n'),
+        )
+    }
+
+    createBranchFromBase(repoRoot, branch, startPoint, { inherit })
+    return { action: 'created', branch }
 }
 
 export function main(args: Array<string> = process.argv.slice(2)): void {
@@ -170,43 +207,18 @@ export function main(args: Array<string> = process.argv.slice(2)): void {
     console.log(kvPair('Commit scope', scope))
     console.log(kvPair('Proposed branch', branch))
 
-    if (
-        runCommand(
-            'git',
-            ['show-ref', '--verify', '--quiet', `refs/heads/${branch}`],
-            { cwd: repoRoot },
-        ).success
-    ) {
-        throw new Error(`local branch exists: ${branch}`)
-    }
-    if (
-        runCommand(
-            'git',
-            ['ls-remote', '--exit-code', '--heads', 'origin', branch],
-            {
-                cwd: repoRoot,
-            },
-        ).success
-    ) {
-        throw new Error(`remote branch exists: ${branch}`)
-    }
+    write(`${kabob('Attaching branch...')}${spacer(1)}`)
+    attachChangesetBranch(repoRoot, {
+        branch,
+        inherit: true,
+        startPoint: currentBranch,
+    })
 
-    write(`${kabob('Creating branch...')}${spacer(1)}`)
-    runOrThrow('git', ['switch', '-c', branch], repoRoot)
-    log.info('Committing changeset...')
-
-    write(spacer(1))
-    runOrThrow('git', ['add', newFile], repoRoot)
-    requirePackageBinary(
-        repoRoot,
-        'scope-commit',
-        ['--checked-commit', 'changeset', slug, '--scope', scope],
-        true,
-    )
-
-    log.info('Done.')
+    log.info('Done. The changeset file is not staged or committed.')
     console.log(kvPair('Branch', branch))
-    console.log(kvPair('Next', `git push -u origin ${branch}`))
+    console.log(kvPair('Next', `git add ${newFile}`))
+    console.log(kvPair('Then', 'gbt-workflow commit'))
+    console.log(kvPair('Status', 'gbt-workflow'))
 }
 
 export default main

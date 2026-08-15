@@ -2,7 +2,7 @@
     "name": "@snailicid3/build-config",
     "version": "0.0.8",
     "private": false,
-    "description": "Shared tsdown, vite, vitest and typedoc build tool configs",
+    "description": "Typed tsdown, Vite and Vitest config factories with a shared build-plan model",
     "scripts": {
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
@@ -67,7 +67,33 @@
             "types": "./types/index.d.ts",
             "import": "./dist/index.js",
             "default": "./dist/index.js"
-        }
+        },
+        "./tsdown": {
+            "types": "./types/adapters/tsdown/index.d.ts",
+            "import": "./dist/adapters/tsdown/index.js",
+            "default": "./dist/adapters/tsdown/index.js"
+        },
+        "./vite": {
+            "types": "./types/adapters/vite/index.d.ts",
+            "import": "./dist/adapters/vite/index.js",
+            "default": "./dist/adapters/vite/index.js"
+        },
+        "./vitest": {
+            "types": "./types/vitest/index.d.ts",
+            "import": "./dist/vitest/index.js",
+            "default": "./dist/vitest/index.js"
+        },
+        "./plan": {
+            "types": "./types/build/plan.d.ts",
+            "import": "./dist/build/plan.js",
+            "default": "./dist/build/plan.js"
+        },
+        "./banner": {
+            "types": "./types/build/banner.d.ts",
+            "import": "./dist/build/banner.js",
+            "default": "./dist/build/banner.js"
+        },
+        "./package.json": "./package.json"
     },
     "files": [
         "CHANGELOG.md",
@@ -85,26 +111,22 @@
         "directory": "packages/build-config"
     },
     "dependencies": {
-        "@arethetypeswrong/core": "^0.18.3",
-        "@rollup/plugin-commonjs": "^29.0.3",
-        "@rollup/plugin-json": "^6.1.0",
-        "@rollup/plugin-node-resolve": "^16.0.3",
-        "@rollup/plugin-terser": "^1.0.0",
-        "@rollup/plugin-typescript": "^12.3.0",
-        "attw": "^1.0.0",
-        "esbuild": "^0.28.0",
-        "publint": "^0.3.21",
-        "rollup": "^4.61.1",
-        "rollup-plugin-node-externals": "^9.0.1",
-        "rollup-plugin-polyfill-node": "^0.13.0",
+        "@snailicid3/node-utils": "workspace:*",
         "ts-deepmerge": "^8.0.0",
         "ts-extras": "^1.0.0",
         "tsdown": "^0.22.2",
         "type-fest": "^5.7.0",
-        "unplugin-unused": "^0.6.0",
         "vite": "^8.0.16",
         "vite-plugin-dts": "^5.0.2",
         "zod": "^4.4.2"
+    },
+    "peerDependencies": {
+        "vitest": "^4.1.9"
+    },
+    "peerDependenciesMeta": {
+        "vitest": {
+            "optional": true
+        }
     },
     "devDependencies": {
         "@microsoft/api-extractor": "^7.58.8",

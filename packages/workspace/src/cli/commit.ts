@@ -8,23 +8,17 @@
  * - run git commit with
  * - live terminal output → Husky runs lint-staged once using .lintstagedrc.mts → commitlint validates the message
  */
-import {
-    runCliIfEntrypointAsync,
-    runCommand,
-    safeParseArgv,
-} from '@snailicid3/node-utils'
+import { runCliIfEntrypointAsync, safeParseArgv } from '@snailicid3/node-utils'
 import { z } from 'zod'
-import { readWorkspaceEnvironment } from './../core/environment.js'
-import { getGitChangedFiles, getRepoRoot } from './../core/git.js'
-import { runPackageBinary } from './../core/package-manager.js'
-import { getWorkspaceSnapshot } from './../core/packages.js'
 import {
-    type RepositoryScopeResolution,
-    resolveRepositoryScopes,
-} from './../core/repository-scopes.js'
-import { loadScopePathMatchers } from './../core/scope-matcher-config.js'
+    performCommit,
+    requireStagedChanges,
+    validateCommitMessage,
+} from './../core/commit-exec.js'
+import { resolveCommitScopes } from './../core/commit-scope.js'
+import { getGitChangedFiles, getRepoRoot } from './../core/git.js'
+import { type RepositoryScopeResolution } from './../core/repository-scopes.js'
 import { formatScopes, type ScopeFormat } from './../core/scopes.js'
-import { getWorkspaceScopes } from './../core/workspace-scopes.js'
 
 export type ChangeMode = 'all' | 'staged'
 export type FileInputSource = 'explicit' | ChangeMode
@@ -104,7 +98,7 @@ export async function main(
     const request = resolveCommitRequest(parsed)
 
     if (parsed.runCommitBefore) {
-        prepareCheckedCommit(repoRoot)
+        requireStagedChanges(repoRoot)
     }
 
     const files = resolveInputFiles(
@@ -113,11 +107,9 @@ export async function main(
         getGitChangedFiles,
         repoRoot,
     )
-    const detected = await resolveScopesForFiles(
-        repoRoot,
-        files,
-        parsed.keepPrefix,
-    )
+    const detected = await resolveCommitScopes(repoRoot, files, {
+        keepPrefix: parsed.keepPrefix,
+    })
     // An explicit scope overrides which scopes are used, but detection still runs so the report can
     // show what the files actually touch — including scopes the override leaves out.
     const resolution = parsed.explicitScope
@@ -279,33 +271,6 @@ function parseArgs(args: Array<string>): ParsedArgs {
     }
 }
 
-function performCommit(repoRoot: string, message: string): void {
-    const result = runCommand('git', ['commit', '-m', message], {
-        cwd: repoRoot,
-        stdio: 'inherit',
-    })
-
-    if (result.status !== 0) throw new Error('git commit failed')
-
-    process.stdout.write(result.stdout)
-}
-
-function prepareCheckedCommit(repoRoot: string): void {
-    const stagedDiff = runCommand('git', ['diff', '--cached', '--quiet'], {
-        cwd: repoRoot,
-    })
-
-    if (stagedDiff.status === 0) {
-        throw new Error(
-            'Nothing is staged. Stage the files you want to commit first.',
-        )
-    }
-
-    if (stagedDiff.status !== 1) {
-        throw new Error(stagedDiff.stderr || 'Unable to inspect staged files')
-    }
-}
-
 function printHelp(): void {
     console.log(`Usage:
   scope-commit [--staged|--all] [--csv|--list] [--keep-prefix] [--verbose] [file ...]
@@ -339,55 +304,11 @@ function resolveCommitRequest(parsed: ParsedArgs): CommitRequest {
     return { inputPaths, subject, type }
 }
 
-async function resolveScopesForFiles(
-    repoRoot: string,
-    files: ReadonlyArray<string>,
-    keepPrefix: boolean,
-): Promise<RepositoryScopeResolution> {
-    if (files.length === 0)
-        return { matches: {}, scopes: ['root'], unmatched: [] }
-
-    const resolved = getWorkspaceScopes({
-        keepPrefix,
-        overrides: await loadScopePathMatchers(repoRoot),
-        snapshot: getWorkspaceSnapshot(repoRoot),
-    })
-
-    return resolveRepositoryScopes(files, resolved.classifiers)
-}
-
 function splitExplicitScope(scopeValue: string): Array<string> {
     return scopeValue
         .split(',')
         .map((scope) => scope.trim())
         .filter(Boolean)
-}
-
-function validateCommitMessage(repoRoot: string, message: string): void {
-    if (readWorkspaceEnvironment(process.env).skipCommitlint) return
-
-    const result = runPackageBinary(
-        repoRoot,
-        'commitlint',
-        ['--cwd', repoRoot],
-        {
-            cwd: repoRoot,
-            input: `${message}\n`,
-        },
-    )
-
-    if (result.status !== 0) {
-        throw new Error(
-            [
-                'invalid commit message:',
-                `  ${message}`,
-                result.stderr.trim(),
-                result.stdout.trim(),
-            ]
-                .filter(Boolean)
-                .join('\n'),
-        )
-    }
 }
 
 export default main
