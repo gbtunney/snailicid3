@@ -109,6 +109,7 @@
         "zod": "^4.4.3"
     },
     "devDependencies": {
+        "@microsoft/api-extractor": "^7.58.8",
         "@snailicid3/config": "workspace:*",
         "@types/micromatch": "^4.0.10",
         "@types/node": "^26.2.0",
