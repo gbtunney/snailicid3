@@ -105,7 +105,6 @@
     },
     "devDependencies": {
         "@microsoft/api-extractor": "^7.58.8",
-        "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
         "@types/node": "^26.2.0",
         "@types/ramda": "^0.32.0",

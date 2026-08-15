@@ -1,3 +1,8 @@
+import {
+    packageIdentitySchema,
+    packageNameSchema,
+    packageVersionSchema,
+} from '@snailicid3/node-utils'
 import z from 'zod'
 import {
     LICENSES,
@@ -53,17 +58,27 @@ export function parsePackage(pkg: unknown): z.output<typeof schemaBasePackage> {
     return schemaBasePackage.parse(pkg)
 }
 
-//Stripped down to just the required meta ffieldd.
-export const schemaPackageMetaBanner = z.object({
-    ...schemaBasePackage.pick({
+/**
+ * The identity a banner needs, projected from the canonical manifest schema.
+ *
+ * `packageIdentitySchema` in node-utils is the one place package-name, SemVer, author, repository and license shapes
+ * are defined; duplicating them here produced a second, stricter opinion that rejected manifests npm accepts. This is a
+ * narrow refinement of that schema rather than a replacement: it keeps every field optional except the two a banner
+ * genuinely cannot be written without, so banner generation fails predictably when identity is absent instead of
+ * emitting `undefined v undefined`.
+ */
+export const schemaPackageMetaBanner = packageIdentitySchema
+    .pick({
         author: true,
         description: true,
         license: true,
         name: true,
         repository: true,
         version: true,
-    }).shape,
-})
-export type BannerPackageMeta = z.infer<typeof schemaPackageMetaBanner>
+    })
+    .extend({
+        name: packageNameSchema,
+        version: packageVersionSchema,
+    })
 
-const licenseDchem = z.enum(LICENSES).default('MIT')
+export type BannerPackageMeta = z.infer<typeof schemaPackageMetaBanner>

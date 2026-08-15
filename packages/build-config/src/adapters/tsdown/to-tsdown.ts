@@ -57,19 +57,6 @@ export function entryToTsdownConfig(
 
     const target = transpileToTarget(entry.transpile)
 
-    const lintSettings: Partial<TsdownBuildConfig> = entry.lint
-        ? {
-              attw: {
-                  level: 'error',
-                  profile: 'node16',
-              },
-              publint: true,
-              report: true,
-              unused: {
-                  level: 'warning', //This should be setup on publish or ci to do it for real
-              },
-          }
-        : {}
     logTsdownAdapter('entryToTsdownConfig:derived', {
         deps: externals,
         entryKey: entry.key,
@@ -95,9 +82,12 @@ export function entryToTsdownConfig(
         logLevel: entry.logLevel,
         outDir: entry.outputDir,
         platform,
-        report: true,
+        // `lint` controls tsdown's own build report and nothing else. Publint, ATTW and unused-dependency
+        // scanning are package validation: they answer "is this package correct?", which is Doctor's
+        // question, and running them from a build makes every build fail for reasons the build did not
+        // cause. Building emits artifacts; validating them is a separate, explicit step.
+        report: entry.lint,
         unbundle: !entry.bundle,
-        ...lintSettings,
         ...(target ? { target } : {}),
     }
 

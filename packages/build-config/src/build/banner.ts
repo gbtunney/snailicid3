@@ -46,24 +46,41 @@ export function createBanner(
     const lines: Array<string> = [
         `${validMeta.name} v${validMeta.version}`,
         `Module: ${resolvedModuleName}`,
-        `(c) ${String(new Date().getFullYear())} ${validMeta.author.name}`,
     ]
 
-    if (validMeta.description) lines.push(validMeta.description)
-    if (validMeta.repository) {
-        lines.push(
-            typeof validMeta.repository === 'string'
-                ? validMeta.repository
-                : validMeta.repository.url,
-        )
+    // Author, repository and license are optional in a valid manifest, and each may be written in more
+    // than one shape. An absent field is omitted rather than rendered as "undefined".
+    const authorName = resolveAuthorName(validMeta.author)
+    if (authorName) {
+        lines.push(`(c) ${String(new Date().getFullYear())} ${authorName}`)
     }
-    lines.push(`Released under the ${validMeta.license} License.`)
+
+    if (validMeta.description) lines.push(validMeta.description)
+
+    const repositoryUrl = resolveRepositoryUrl(validMeta.repository)
+    if (repositoryUrl) lines.push(repositoryUrl)
+
+    if (validMeta.license) {
+        lines.push(`Released under the ${validMeta.license} License.`)
+    }
+
     lines.push(`Build: ${new Date().toLocaleString()}`)
 
     return toBlockComment(lines)
+}
+
+function resolveAuthorName(author: BannerPackageMeta['author']): string {
+    if (author === undefined) return ''
+    return typeof author === 'string' ? author : (author.name ?? '')
+}
+
+function resolveRepositoryUrl(
+    repository: BannerPackageMeta['repository'],
+): string {
+    if (repository === undefined) return ''
+    return typeof repository === 'string' ? repository : (repository.url ?? '')
 }
 export {
     type BannerPackageMeta,
     schemaPackageMetaBanner,
 } from './schemas/package.js'
-const this_is_stupid = 'just a test'
