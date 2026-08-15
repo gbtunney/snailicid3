@@ -7,14 +7,7 @@ import {
 import { loadScopePathMatchers } from './scope-matcher-config.js'
 import { getWorkspaceScopes } from './workspace-scopes.js'
 
-/**
- * Commit-scope resolution shared by every commit path.
- *
- * `scope-commit` resolved scopes through a private helper, so a second commit entry point had to either duplicate the
- * snapshot/override/classifier wiring or drift from it. The scope a commit records is part of the workflow contract —
- * branch identity supplies the type and slug, this supplies the scope — so it lives in core where both CLIs consume the
- * same implementation.
- */
+/** Commit-scope resolution shared by every commit path. */
 
 export type CommitScopeOptions = {
     /** Keep the full package name instead of shortening it to a scope. */
@@ -31,16 +24,13 @@ export const getStagedFiles = (repoRoot: string): Array<string> =>
     })
 
 /**
- * Resolve repository scopes for an explicit file list.
+ * Resolve the scopes for the files a commit will record.
  *
- * Internal to this module: `scope-commit` composes its own equivalent for its reporting flow, and that is deliberate —
- * the two are CLI composition rather than competing engines. What is shared is the scope engine underneath
- * (`getWorkspaceScopes` + `resolveRepositoryScopes`), which both call.
- *
- * An empty list resolves to `root` rather than an empty scope: a commit message always needs a scope, and `root` is the
- * documented value for changes that match no package.
+ * This is the single composition boundary for commit scope resolution. Callers choose the files; this function loads
+ * workspace metadata and matcher overrides, then delegates matching to the repository-scope engine. An empty list
+ * resolves to `root` because every commit message requires a scope.
  */
-const resolveScopesForFiles = async (
+export const resolveCommitScopes = async (
     repoRoot: string,
     files: ReadonlyArray<string>,
     options: CommitScopeOptions = {},
@@ -57,15 +47,3 @@ const resolveScopesForFiles = async (
 
     return resolveRepositoryScopes(files, resolved.classifiers)
 }
-
-/**
- * Resolve the scope of the currently staged files.
- *
- * Each commit resolves its own scope: the workflow branch carries type and slug for the life of the branch, while the
- * scope belongs to the individual commit and is recalculated from what that commit stages.
- */
-export const resolveStagedScopes = async (
-    repoRoot: string,
-    options: CommitScopeOptions = {},
-): Promise<RepositoryScopeResolution> =>
-    resolveScopesForFiles(repoRoot, getStagedFiles(repoRoot), options)

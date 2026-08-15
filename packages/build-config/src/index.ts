@@ -69,8 +69,4 @@ export {
     // schemaRequiredScripts,
 } from './build/schemas/package.js'
 
-// ── Vitest ────────────────────────────────────────────────────────────────────
-export { vitest } from './vitest/index.js'
-export type { VitestConfig } from './vitest/index.js'
-
 export { merge } from 'ts-deepmerge'

@@ -15,7 +15,7 @@ import {
     requireStagedChanges,
     validateCommitMessage,
 } from './../core/commit-exec.js'
-import { resolveStagedScopes } from './../core/commit-scope.js'
+import { getStagedFiles, resolveCommitScopes } from './../core/commit-scope.js'
 import { readWorkspaceEnvironment } from './../core/environment.js'
 import { getRepoRoot, resolveBaseBranch } from './../core/git.js'
 import { formatScopes } from './../core/scopes.js'
@@ -175,9 +175,13 @@ const runBranchDerivedCommit = async (
         ? parsed.explicitScope
         : formatScopes(
               (
-                  await resolveStagedScopes(repoRoot, {
-                      keepPrefix: parsed.keepPrefix,
-                  })
+                  await resolveCommitScopes(
+                      repoRoot,
+                      getStagedFiles(repoRoot),
+                      {
+                          keepPrefix: parsed.keepPrefix,
+                      },
+                  )
               ).scopes,
               'csv',
           )

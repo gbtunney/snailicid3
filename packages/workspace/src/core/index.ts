@@ -9,16 +9,6 @@ export * from './branch-actions.js'
 export * from './branch-commit.js'
 export * from './branch-state.js'
 export {
-    performCommit,
-    requireStagedChanges,
-    validateCommitMessage,
-} from './commit-exec.js'
-export {
-    type CommitScopeOptions,
-    getStagedFiles,
-    resolveStagedScopes,
-} from './commit-scope.js'
-export {
     detectDefaultBranch,
     getCurrentBranch,
     getGitChangedFiles,
