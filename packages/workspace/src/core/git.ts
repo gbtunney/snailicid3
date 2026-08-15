@@ -27,6 +27,22 @@ const AREA_ORDER: ReadonlyArray<GitChangeArea> = [
     'untracked',
 ]
 
+/**
+ * Read the repository's default branch from `origin/HEAD`.
+ *
+ * Returns an empty string when the symbolic ref is absent — a clone that never ran `git remote set-head` simply has no
+ * recorded default, which is a fact for the caller to fall back on, not an error.
+ */
+export function detectDefaultBranch(repoRoot: string): string {
+    const result = runCommand(
+        'git',
+        ['symbolic-ref', '--quiet', '--short', 'refs/remotes/origin/HEAD'],
+        { cwd: repoRoot },
+    )
+
+    return result.success ? result.stdout.trim().replace(/^origin\//u, '') : ''
+}
+
 export function getCurrentBranch(repoRoot: string): string {
     const result = runCommand('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
         cwd: repoRoot,
@@ -133,4 +149,20 @@ export function getRepoRoot(options: { fallbackToCwd?: boolean } = {}): string {
             .filter(Boolean)
             .join('\n'),
     )
+}
+
+/**
+ * Resolve the base branch from the first source that supplies one: an explicit value, the recorded default, then
+ * `main`.
+ */
+export function resolveBaseBranch(
+    repoRoot: string,
+    ...preferred: ReadonlyArray<string | undefined>
+): string {
+    for (const candidate of preferred) {
+        const trimmed = candidate?.trim()
+        if (trimmed) return trimmed
+    }
+
+    return detectDefaultBranch(repoRoot) || 'main'
 }

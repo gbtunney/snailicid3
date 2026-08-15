@@ -84,7 +84,8 @@ The package currently declares these repository commands:
 | `scope-affected`              | Resolve Nx-affected, dirty-repository, and changeset paths to scopes                        |
 | `scope-commit`                | Resolve commit scopes, validate types, create messages, or run a checked commit             |
 | `workspace-hook`              | Dispatch `pre-commit`, `commit-msg`, and `pre-push` hook workflows                          |
-| `gbt-changeset`               | Preserve the current branch-aware changeset workflow while its TypeScript replacement lands |
+| `gbt-changeset`               | Start a changeset: create one Markdown file and attach its `changeset/<slug>` branch        |
+| `gbt-workflow`                | Report the read-only workflow plan, or run the explicit branch-derived commit               |
 | `gbt-exec`                    | Retain the existing executable-bit helper                                                   |
 | `gbt-setup` / `gbt-uninstall` | Install or remove repository bootstrap configuration                                        |
 | `gbt-patch`                   | Build, cache, and apply the patched esbuild binary                                          |
@@ -109,10 +110,35 @@ scopes, while `--no-nx` disables Nx. `--changeset <file>` adds scopes from a cha
 `--message <type> <subject>`, `--commit <type> <subject>`, and `--checked-commit <type> <subject>`;
 commit forms also accept `--scope` and `--dry-run`.
 
-The public `gbt-changeset` bin is still the compatibility shell workflow. Its TypeScript successor
-has a tested read-only assessment/decision core and an opt-in branch create/switch/relink action,
-but it is not wired to the public bin yet; changeset creation, commit, push, and PR continuation
-remain Phase 7 work.
+### Branch-aware changeset workflow
+
+The workflow branch is the durable state. `changeset/<slug>` and `release/<slug>` carry the commit
+type and the slug for the life of the branch, so later commits still work after Changesets deletes
+the original `.changeset/*.md` file. Scope is not stored on the branch: every commit recalculates it
+from its own staged files.
+
+```sh
+pnpm exec gbt-changeset                      # create the changeset file, attach the branch, stop
+git add .changeset/wacky-walker.md
+pnpm exec gbt-workflow                       # read-only plan and the exact next actions
+pnpm exec gbt-workflow commit "adjust generated output"
+```
+
+`gbt-changeset` creates exactly one changeset file and then creates or switches to its branch. It
+does not stage, commit, push, or open a pull request — those are separate explicit steps.
+
+`gbt-workflow` defaults to `plan`, which is strictly read-only: it reports the current branch or
+detached HEAD, the inferred workflow (or why none is available), working-tree cleanliness, the
+ancestry relationship to `origin/<base>`, whether a new branch here would be stacked, matching
+workflow branches, and the available next actions. It never fetches, stages, or commits, so remote
+facts come from the last fetched `refs/remotes/origin/*` state. `--json` emits the same plan as data.
+
+`gbt-workflow commit [text]` is the explicit mutation: it derives the type and slug from the current
+workflow branch, resolves the scope from the currently staged files, appends optional text, validates
+the message with Commitlint, and commits. It accepts `--scope`, `--keep-prefix`, and `--dry-run`.
+
+Pull-request creation, manual release preparation, and reconnect/recovery are tracked separately and
+are not implemented by these commands yet.
 
 ## Environment
 
@@ -160,9 +186,9 @@ registry release yet, so its rehearsal must choose a first publishable version, 
 and pnpm consumers. Publish node-utils first.
 
 Before that rehearsal, reconcile `package.json#buildConfig.buildStrategy` with the actual tsc-only
-build. The TypeScript changeset successor is not a release dependency: its automated tests pass, but
-the maintainer has not manually exercised its read-only plan or opt-in `--apply` path, and the
-public `gbt-changeset` bin still points to the compatibility shell workflow.
+build. The branch-aware workflow is not a release dependency: its automated tests pass, but the
+maintainer has not manually exercised `gbt-workflow`'s read-only plan or its branch-derived commit
+against a real remote.
 
 ## Development
 
