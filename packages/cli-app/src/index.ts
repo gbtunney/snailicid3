@@ -25,6 +25,40 @@ export {
     type SpinnerStatus,
 } from '@snailicid3/logger'
 
+// ── Terminal output ──────────────────────────────────────────────────────────
+// A curated slice of the logger's terminal surface, so a CLI does not reach past cli-app for the
+// formatting it needs. Deliberately not a re-export of raw Ansis: consumers get the helpers that
+// respect the logger's colour handling, not an unbounded styling library.
+export {
+    type AnsiColorPreset,
+    block,
+    type BlockOptions,
+    getColorAnsiInstance,
+    header,
+    isAnsiColorPreset,
+    type KeyValuePairOptions,
+    kvPair,
+    line,
+    type LoggerColor,
+    rule,
+    type RuleOptions,
+    section,
+    spacer,
+    statusPair,
+    type StatusPairOptions,
+    step,
+    stripAnsi,
+    styleText,
+    subheader,
+    table,
+    type TableOptions,
+    type TableRow,
+    terminalLink,
+    type TerminalStyle,
+    visibleLength,
+    wrapColorAnsiText,
+} from '@snailicid3/logger'
+
 export { isPlainObject, json } from '@snailicid3/node-utils'
 export type {
     Json,

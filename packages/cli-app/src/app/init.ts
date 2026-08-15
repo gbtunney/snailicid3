@@ -1,4 +1,5 @@
 import { logger } from '@snailicid3/logger'
+import { type ArgvObject, safeValidateArgvRecord } from '@snailicid3/node-utils'
 import { fmt } from '@snailicid3/utils'
 import yargs from 'yargs'
 import type { Argv, Options } from 'yargs'
@@ -99,9 +100,13 @@ export const initApp = async <AppOptionsSchema extends ZodObjectSchema>(
             yargsInstance.showHelp()
             return yargsInstance
         }
-        const raw_arguments = yargsInstance.argv as Record<string, unknown>
+        // Yargs tokenizes once, here. The result is then handed to the shared node-utils validator rather
+        // than being re-parsed: calling node-utils' `parseArgv` would build a second Yargs instance and
+        // tokenize the same argv again, while validating the record directly here would fork the
+        // positional/result contract that every other Snailicid3 CLI relies on.
+        const raw_arguments = yargsInstance.parseSync() as ArgvObject
 
-        const argSuccess = optionsSchema.safeParse(raw_arguments)
+        const argSuccess = safeValidateArgvRecord(optionsSchema, raw_arguments)
 
         if (argSuccess.success) {
             const resolvedArgs: z.output<AppOptionsSchema> = argSuccess.data

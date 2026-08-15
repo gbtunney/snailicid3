@@ -1,7 +1,14 @@
 import { describe, expect, expectTypeOf, test } from 'vitest'
 import { z } from 'zod'
 
-import { parseArgv, parseArgvPositionals, safeParseArgv } from './argv.js'
+import {
+    parseArgv,
+    parseArgvObject,
+    parseArgvPositionals,
+    safeParseArgv,
+    safeValidateArgvRecord,
+    validateArgvRecord,
+} from './argv.js'
 
 const argumentSchema = z.object({
     count: z.coerce.number().int().default(1),
@@ -170,5 +177,68 @@ describe('boolean flag declaration', () => {
 
         expect(parsed.options.verbose).toBe(true)
         expect(parsed.positionals).toEqual(['tail'])
+    })
+})
+
+describe('validateArgvRecord', () => {
+    test('validates a record another Yargs instance already produced', () => {
+        // The seam a CLI with its own configured Yargs instance uses: tokens are parsed once, there,
+        // and only validation is shared.
+        const record = parseArgvObject(
+            ['--count', '3', 'left', 'right'],
+            ['dryRun'],
+        )
+
+        expect(
+            validateArgvRecord(argumentSchema, record, z.array(z.string())),
+        ).toEqual({
+            options: { count: 3, dryRun: false, tags: [] },
+            positionals: ['left', 'right'],
+        })
+    })
+
+    test('separates the Yargs bookkeeping keys from the named options', () => {
+        // `_` and `$0` are Yargs metadata, not user options; a strict schema must not see them.
+        const strict = z.strictObject({ scope: z.string() })
+
+        expect(
+            validateArgvRecord(strict, {
+                $0: 'tool',
+                _: ['extra'],
+                scope: 'config',
+            }),
+        ).toEqual({ scope: 'config' })
+    })
+
+    test('agrees with parseArgv for the same argv', () => {
+        const argv = ['--count', '2', '--tags', 'a', '--tags', 'b', 'trailing']
+        const viaParse = parseArgv(argumentSchema, argv, z.array(z.string()))
+        const viaRecord = validateArgvRecord(
+            argumentSchema,
+            parseArgvObject(argv, ['dryRun']),
+            z.array(z.string()),
+        )
+
+        expect(viaRecord).toEqual(viaParse)
+    })
+})
+
+describe('safeValidateArgvRecord', () => {
+    test('reports a Zod failure instead of throwing', () => {
+        const result = safeValidateArgvRecord(z.object({ count: z.number() }), {
+            _: [],
+            count: 'not-a-number',
+        })
+
+        expect(result.success).toBe(false)
+    })
+
+    test('returns the validated data on success', () => {
+        expect(
+            safeValidateArgvRecord(argumentSchema, { _: [], count: 5 }),
+        ).toEqual({
+            data: { count: 5, dryRun: false, tags: [] },
+            success: true,
+        })
     })
 })

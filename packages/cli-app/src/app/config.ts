@@ -1,8 +1,12 @@
 import { isValidColor, parseColorToHex } from '@snailicid3/color'
 import { logger } from '@snailicid3/logger'
+import {
+    packageIdentitySchema,
+    packageNameSchema,
+} from '@snailicid3/node-utils'
 import { stringUtils } from '@snailicid3/utils'
 import { z } from 'zod'
-import { tgZodSchema, wrapSchema } from '../schema/utils.js'
+import { tgZodSchema } from '../schema/utils.js'
 export type AppConfig = AppConfigOut
 
 export type AppConfigIn = z.input<typeof appConfigSchema>
@@ -101,11 +105,24 @@ export const resolveAppConfigSchema = (
         return undefined
     }
 }
-const packageSchema = wrapSchema<typeof appConfigSchema>(appConfigSchema).pick({
-    description: true,
-    name: true,
-    version: true,
-})
+/**
+ * App identity, projected from the canonical manifest schema.
+ *
+ * `packageIdentitySchema` in node-utils is the one decoder for a package.json; keeping a second one here meant this
+ * package had its own opinion about what a valid manifest looks like. Only `name` is required — an app must be called
+ * something — and the transform preserves the previous contract: the name is hyphenated and lowercased for use as the
+ * script name, and a missing version falls back to `0.0.0`.
+ */
+const packageSchema = packageIdentitySchema
+    .pick({ description: true, name: true, version: true })
+    .extend({ name: packageNameSchema })
+    .transform((identity) => ({
+        ...(identity.description === undefined
+            ? {}
+            : { description: identity.description }),
+        name: stringUtils.hyphenate(identity.name).toLowerCase(),
+        version: identity.version ?? '0.0.0',
+    }))
 
 export const parsePackageJson = (
     pkg: unknown,
