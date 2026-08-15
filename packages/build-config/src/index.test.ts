@@ -77,8 +77,10 @@ describe('@snailicid3/build-config', () => {
     })
 
     test('banner fails predictably when required identity is absent', () => {
-        // The type now requires name and version, so these casts stand in for the untyped callers that
-        // actually reach this guard: a manifest read from disk arrives as `unknown`.
+        /**
+         * The type now requires name and version, so this cast stands in for the untyped callers that actually reach
+         * the runtime guard: a manifest read from disk arrives as `unknown`.
+         */
         const sparse = (value: unknown): string | undefined =>
             createBanner(value as Parameters<typeof createBanner>[0])
 

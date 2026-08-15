@@ -79,16 +79,16 @@ const environment = readWorkspaceEnvironment(process.env)
 
 The package currently declares these repository commands:
 
-| Command                       | Purpose                                                                                     |
-| ----------------------------- | ------------------------------------------------------------------------------------------- |
-| `scope-affected`              | Resolve Nx-affected, dirty-repository, and changeset paths to scopes                        |
-| `scope-commit`                | Resolve commit scopes, validate types, create messages, or run a checked commit             |
-| `workspace-hook`              | Dispatch `pre-commit`, `commit-msg`, and `pre-push` hook workflows                          |
-| `gbt-changeset`               | Start a changeset: create one Markdown file and attach its `changeset/<slug>` branch        |
-| `gbt-workflow`                | Report the read-only workflow plan, or run the explicit branch-derived commit               |
-| `gbt-exec`                    | Retain the existing executable-bit helper                                                   |
-| `gbt-setup` / `gbt-uninstall` | Install or remove repository bootstrap configuration                                        |
-| `gbt-patch`                   | Build, cache, and apply the patched esbuild binary                                          |
+| Command                       | Purpose                                                                              |
+| ----------------------------- | ------------------------------------------------------------------------------------ |
+| `scope-affected`              | Resolve Nx-affected, dirty-repository, and changeset paths to scopes                 |
+| `scope-commit`                | Resolve commit scopes, validate types, create messages, or run a checked commit      |
+| `workspace-hook`              | Dispatch `pre-commit`, `commit-msg`, and `pre-push` hook workflows                   |
+| `gbt-changeset`               | Start a changeset: create one Markdown file and attach its `changeset/<slug>` branch |
+| `gbt-workflow`                | Report the read-only workflow plan, or run the explicit branch-derived commit        |
+| `gbt-exec`                    | Retain the existing executable-bit helper                                            |
+| `gbt-setup` / `gbt-uninstall` | Install or remove repository bootstrap configuration                                 |
+| `gbt-patch`                   | Build, cache, and apply the patched esbuild binary                                   |
 
 Examples from the repository root:
 
@@ -118,9 +118,9 @@ the original `.changeset/*.md` file. Scope is not stored on the branch: every co
 from its own staged files.
 
 ```sh
-pnpm exec gbt-changeset                      # create the changeset file, attach the branch, stop
+pnpm exec gbt-changeset # create the changeset file, attach the branch, stop
 git add .changeset/wacky-walker.md
-pnpm exec gbt-workflow                       # read-only plan and the exact next actions
+pnpm exec gbt-workflow # read-only plan and the exact next actions
 pnpm exec gbt-workflow commit "adjust generated output"
 ```
 
@@ -131,11 +131,13 @@ does not stage, commit, push, or open a pull request — those are separate expl
 detached HEAD, the inferred workflow (or why none is available), working-tree cleanliness, the
 ancestry relationship to `origin/<base>`, whether a new branch here would be stacked, matching
 workflow branches, and the available next actions. It never fetches, stages, or commits, so remote
-facts come from the last fetched `refs/remotes/origin/*` state. `--json` emits the same plan as data.
+facts come from the last fetched `refs/remotes/origin/*` state. `--json` emits the same plan as
+data.
 
 `gbt-workflow commit [text]` is the explicit mutation: it derives the type and slug from the current
-workflow branch, resolves the scope from the currently staged files, appends optional text, validates
-the message with Commitlint, and commits. It accepts `--scope`, `--keep-prefix`, and `--dry-run`.
+workflow branch, resolves the scope from the currently staged files, appends optional text,
+validates the message with Commitlint, and commits. It accepts `--scope`, `--keep-prefix`, and
+`--dry-run`.
 
 Pull-request creation, manual release preparation, and reconnect/recovery are tracked separately and
 are not implemented by these commands yet.

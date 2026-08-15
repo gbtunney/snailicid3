@@ -29,6 +29,7 @@
         "scope-commit": "./bin/workspace/scope-commit.sh",
         "scope-affected": "./bin/workspace/scope-affected.sh",
         "gbt-changeset": "./bin/workspace/gbt-changeset.sh",
+        "gbt-workflow": "./bin/workspace/gbt-workflow.sh",
         "gbt-exec": "./bin/workspace/gbt-exec.sh",
         "gbt-setup": "./bin/workspace/gbt-setup.sh",
         "gbt-uninstall": "./bin/workspace/gbt-uninstall.sh",
@@ -115,8 +116,7 @@
         "types",
         "typescript-config",
         "bin/**/*.sh",
-        "bin/**/*.md",
-        "completions"
+        "bin/**/*.md"
     ],
     "author": {
         "name": "Gillian Tunney",
