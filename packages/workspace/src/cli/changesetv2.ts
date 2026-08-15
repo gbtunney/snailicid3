@@ -28,10 +28,18 @@ import { runPackageBinary } from './../core/package-manager.js'
 export const optionsSchema = z.strictObject({
     allowDirty: z.boolean().optional(),
     base: z.string().optional(),
+    h: z.boolean().optional(),
+    help: z.boolean().optional(),
     prefix: z.string().optional(),
 })
 
 type Options = z.output<typeof optionsSchema>
+
+const HELP = `Usage:
+  gbt-changeset [--base <branch>] [--prefix <prefix>] [--allow-dirty]
+
+Creates exactly one changeset file, attaches changeset/<slug>, and stops.
+It does not stage, commit, push, or create a pull request.`
 
 const write = (value: string): void => {
     process.stdout.write(value)
@@ -119,6 +127,11 @@ export function main(args: Array<string> = process.argv.slice(2)): void {
     }
 
     const options: Options = parsed.data
+    if (options.help === true || options.h === true) {
+        console.log(HELP)
+        return
+    }
+
     const environment = readWorkspaceEnvironment(process.env)
     const repoRoot = getRepoRoot()
     const log = getLogger()

@@ -1,9 +1,5 @@
+import type { EntriesOf, FromEntriesTuples, KeysOf } from '@snailicid3/types'
 import type { Simplify, UnknownRecord, ValueOf } from 'type-fest'
-import type {
-    EntriesOf,
-    FromEntriesTuples,
-    KeysOf,
-} from './../types/utility.js'
 export const keysOf = <ObjectType extends UnknownRecord>(
     obj: ObjectType,
 ): Array<KeysOf<ObjectType>> => Object.keys(obj)

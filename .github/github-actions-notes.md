@@ -136,14 +136,19 @@ Do not make report or autofix jobs required.
    `vars.DISABLE_NX_CLOUD`.
 5. Shared `call-*` workflows, composite actions, and scripts live in
    [gbtunney/snailicid3-actions](https://github.com/gbtunney/snailicid3-actions) and are referenced
-   `@main`. This repository keeps only the thin caller workflows (`dispatch-*`, `pr-checks`,
-   `push-*`).
+   `@main` here so this repository is the canary. Other consumer repositories must use a released,
+   immutable tag or commit SHA; Codex propagates a new ref only after it passes the canary and
+   consumer rehearsal. This repository keeps only the thin caller workflows (`dispatch-*`,
+   `pr-checks`, `push-*`).
 
 ### Notes on the extracted actions repository
 
 - Composite actions inside the reusable workflows are referenced fully qualified
   (`gbtunney/snailicid3-actions/.github/actions/<name>@main`) — local `./` paths resolve against the
   caller's checkout and break cross-repo consumers.
+- Action tags are release records and must not be moved after publication. An immutable commit SHA
+  is the strongest consumer pin. Updating package versions never implicitly updates an Action ref;
+  the two release channels are coordinated but independent.
 - Version-PR titles reuse the scope-commit-derived release message; the changeset slug appears only
   in the `release/<slug>` branch name.
 - The actions repository self-tests on every PR via its fixture workspace (`test-actions.yml`).

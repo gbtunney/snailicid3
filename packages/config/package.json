@@ -181,6 +181,9 @@
         "yargs": "^18.0.0",
         "zod": "^4.4.3"
     },
+    "peerDependencies": {
+        "nx": "^23.0.0"
+    },
     "devDependencies": {
         "@microsoft/api-extractor": "^7.58.8",
         "@types/node": "26.2.0",

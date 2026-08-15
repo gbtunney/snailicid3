@@ -33,6 +33,14 @@ BOOTSTRAP_CALLER_SOURCE="$SCRIPT_SOURCE_PATH"
 unset BOOTSTRAP_CALLER_SOURCE
 # END SH BOOTSTRAP LOADER
 
+COMMAND_NAME="${COMMAND_NAME:-gbt-setup}"
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+    log "Install pnpm shell completions for bash and zsh." "grey"
+    spacer 1
+    log "Usage: $COMMAND_NAME" "white"
+    exit 0
+fi
+
 section "Installing pnpm completions for zsh and bash..."
 
 ########################################

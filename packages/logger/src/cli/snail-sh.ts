@@ -27,6 +27,14 @@ const optionalString = z.string().optional()
 const optionalBoolean = z.stringbool().optional()
 const optionalInteger = z.coerce.number().int().optional()
 
+const HELP = `Usage:
+  snail-sh <command> [...args]
+
+Commands:
+  log, info, success, warn, error, critical
+  header, subheader, section, kabob, rule, line, spacer
+  kv-pair, status-pair, step, style-text, gray-ramp`
+
 const ruleArgumentsSchema = z.tuple([
     optionalString,
     optionalString,
@@ -66,6 +74,14 @@ const normalizeCommand = (value: string): string =>
     value.trim().toLowerCase().replaceAll('-', '_')
 
 export function main(argv: Array<string> = process.argv.slice(2)): void {
+    if (
+        argv.length === 1 &&
+        (argv[0] === '--help' || argv[0] === '-h' || argv[0] === 'help')
+    ) {
+        console.log(HELP)
+        return
+    }
+
     const positionalArgv =
         argv.length === 0 ? argv : [argv[0] ?? '', '--', ...argv.slice(1)]
     const parsed = parseArgv(z.object({}), positionalArgv, rawInvocationSchema)

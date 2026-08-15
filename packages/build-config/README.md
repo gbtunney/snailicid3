@@ -4,7 +4,7 @@
 [![license](https://img.shields.io/npm/l/@snailicid3/build-config)](../../LICENSE)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://prettier.io/)
 
-_Provides reusable build configurations and adapters for tsdown, vite, vitest, and typedoc._
+_Provides reusable build plans and config factories for tsdown, Vite, and Vitest._
 
 ---
 
@@ -92,63 +92,54 @@ pnpm add --save-dev @snailicid3/build-config
 
 ```ts
 /* @file tsdown.config.ts */
-import {
-  defineEntry,
-  definePlan,
-  identityFromPackage,
-  toTsdownConfig,
-} from '@snailicid3/build-config'
+import { defineBuildPlan, toTsdownConfigs } from '@snailicid3/build-config'
 import { defineConfig } from 'tsdown'
 import pkg from './package.json' with { type: 'json' }
 
-const identity = identityFromPackage(pkg)
+const plan = defineBuildPlan(pkg, {
+  entries: [
+    {
+      banner: true,
+      exports: true,
+      key: '*',
+      output_formats: ['esm', 'cjs', 'ts'],
+      runtime: 'node',
+    },
+  ],
+  root: {
+    outputDir: './dist',
+    sourceDir: './src',
+  },
+})
 
-const plan = definePlan(identity, './src', './dist', [
-  defineEntry('.', ['esm', 'cjs'], {
-    banner: true,
-    dts: true,
-    sourcemap: true,
-  }),
-])
-
-export default defineConfig(toTsdownConfig(plan))
+export default defineConfig(toTsdownConfigs(plan))
 ```
 
 ### Vitest Config
 
 ```ts
 /* @file vitest.config.ts */
-import { vitest } from '@snailicid3/build-config'
+import { vitest } from '@snailicid3/build-config/vitest'
 export default vitest.config()
-```
-
-### TypeDoc Config
-
-```ts
-/* @file typedoc.config.ts */
-import { typedoc } from '@snailicid3/build-config'
-import url from 'node:url'
-const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
-
-export default typedoc.configMaterialTheme(__dirname, {})
 ```
 
 ### Deriving package.json exports from a build plan
 
 ```ts
-import {
-  defineEntry,
-  definePlan,
-  identityFromPackage,
-  toPackageExports,
-} from '@snailicid3/build-config'
+import { defineBuildPlan, toPackageExportsPlan } from '@snailicid3/build-config'
 import pkg from './package.json' with { type: 'json' }
 
-const plan = definePlan(identityFromPackage(pkg), './src', './dist', [
-  defineEntry('.', ['esm', 'cjs'], { dts: true }),
-])
+const plan = defineBuildPlan(pkg, {
+  entries: [
+    {
+      exports: true,
+      key: '*',
+      output_formats: ['esm', 'cjs', 'ts'],
+    },
+  ],
+})
 
-console.log(toPackageExports(plan))
+console.log(toPackageExportsPlan(plan))
 // {
 //   '.': {
 //     types: './dist/index.d.ts',

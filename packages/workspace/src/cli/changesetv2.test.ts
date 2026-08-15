@@ -1,10 +1,10 @@
 import { safeParseArgv } from '@snailicid3/node-utils'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { execFileSync } from 'node:child_process'
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { attachChangesetBranch, optionsSchema } from './changesetv2.js'
+import { attachChangesetBranch, main, optionsSchema } from './changesetv2.js'
 
 describe('changeset CLI argument schema', () => {
     it('parses the supported options through the shared argv parser', () => {
@@ -30,6 +30,17 @@ describe('changeset CLI argument schema', () => {
         expect(
             safeParseArgv(optionsSchema, ['--not-a-real-option']),
         ).toMatchObject({ success: false })
+    })
+
+    it('prints help without inspecting or mutating a repository', () => {
+        const output = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+        main(['--help'])
+
+        expect(output).toHaveBeenCalledWith(
+            expect.stringContaining('Usage:\n  gbt-changeset'),
+        )
+        output.mockRestore()
     })
 })
 

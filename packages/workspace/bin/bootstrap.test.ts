@@ -6,6 +6,12 @@ import path from 'node:path'
 const bootstrapScript = path.resolve(import.meta.dirname, 'bootstrap.sh')
 const loggerScript = path.resolve(import.meta.dirname, 'snail-sh-logger.sh')
 const scratchScript = path.resolve(import.meta.dirname, 'snail-sh-test.sh')
+const shippedShellBins = [
+    path.resolve(import.meta.dirname, 'make-executable.sh'),
+    path.resolve(import.meta.dirname, 'completions/install-pnpm.sh'),
+    path.resolve(import.meta.dirname, 'uninstall.sh'),
+    path.resolve(import.meta.dirname, 'esbuild-patch/patch.sh'),
+]
 const configManifest = path.resolve(
     import.meta.dirname,
     '../../config/package.json',
@@ -52,6 +58,16 @@ success ready
         expect(loggerSource).not.toContain('grey_ramp()')
         expect(loggerSource).not.toContain('Command dispatcher')
         expect(loggerSource).not.toContain('resolve_kabob_side_widths()')
+    })
+
+    it('prints help for every shipped shell bin without performing its mutation', () => {
+        for (const script of shippedShellBins) {
+            const output = execFileSync('bash', [script, '--help'], {
+                encoding: 'utf8',
+            })
+
+            expect(output).toContain('Usage:')
+        }
     })
 })
 

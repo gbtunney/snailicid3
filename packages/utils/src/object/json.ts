@@ -1,7 +1,7 @@
+import { type Json } from '@snailicid3/types'
 import { type Jsonifiable, type Tagged } from 'type-fest'
 import { compact, normalize, pretty } from './json-value.js'
 import { isJsonifiable, isJsonValue } from '../typeguard/json.typeguards.js'
-import { type Json } from '../types/utility.js'
 
 /**
  * PrettyPrint a JSON value.

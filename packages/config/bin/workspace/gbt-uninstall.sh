@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-exec "$(dirname "$0")/../package-bin.sh" @snailicid3/workspace gbt-uninstall "$@"
+exec bash "$(dirname "$0")/../package-bin.sh" @snailicid3/workspace gbt-uninstall "$@"

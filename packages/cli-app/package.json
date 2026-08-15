@@ -9,8 +9,7 @@
         "clean:nx": "nx run $npm_package_name:clean",
         "dev:nx": "nx run $npm_package_name:dev",
         "api:report:nx": "nx run $npm_package_name:api:report",
-        "test:example": "nx run $npm_package_name:check:ts && pnpm exec tsx ./src/example/index.ts --help",
-        "test:example:cli": "pnpm run build:nx && nx run $npm_package_name:check:ts && pnpm exec node ./dist/example.mjs  --help"
+        "test:example": "nx run $npm_package_name:check:ts && pnpm exec tsx ./src/example/index.ts --help"
     },
     "nx": {
         "targets": {
@@ -67,7 +66,6 @@
             "types": "./dist/index.d.mts",
             "import": "./dist/index.mjs"
         },
-        "./example": "./dist/example.mjs",
         "./package.json": "./package.json"
     },
     "keywords": [

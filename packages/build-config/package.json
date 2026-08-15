@@ -51,11 +51,10 @@
         "typescript",
         "snailicid3",
         "monorepo",
-        "rollup",
+        "config-factory",
         "vite",
         "tsdown",
         "vitest",
-        "typedoc",
         "build",
         "bundler"
     ],

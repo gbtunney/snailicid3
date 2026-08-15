@@ -22,6 +22,12 @@ importers:
             '@snailicid3/config':
                 specifier: workspace:*
                 version: link:packages/config
+            '@snailicid3/logger':
+                specifier: workspace:*
+                version: link:packages/logger
+            '@snailicid3/workspace':
+                specifier: workspace:*
+                version: link:packages/workspace
             '@types/node':
                 specifier: ^26.2.0
                 version: 26.2.0

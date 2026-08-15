@@ -65,6 +65,8 @@
         "@eslint/config-inspector": "^3.1.0",
         "@snailicid3/build-config": "workspace:*",
         "@snailicid3/config": "workspace:*",
+        "@snailicid3/logger": "workspace:*",
+        "@snailicid3/workspace": "workspace:*",
         "@types/node": "^26.2.0",
         "@vitest/coverage-v8": "^4.1.10",
         "@vitest/ui": "^4.1.10",
