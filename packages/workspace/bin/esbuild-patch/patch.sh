@@ -7,6 +7,14 @@ BOOTSTRAP_CALLER_SOURCE="${BASH_SOURCE[0]}"
 # shellcheck source=../bootstrap.sh
 . "$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)/bootstrap.sh"
 
+COMMAND_NAME="${COMMAND_NAME:-gbt-patch}"
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+    log "Patch installed Darwin x64 esbuild binaries for macOS Catalina." "grey"
+    spacer 1
+    log "Usage: $COMMAND_NAME" "white"
+    exit 0
+fi
+
 CONSUMER_DIR="${GBT_PATCH_CWD:-$PWD}"
 PNPM_STORE_DIR="$CONSUMER_DIR/node_modules/.pnpm"
 PATCH_REVISION="catalina-v1"

@@ -7,6 +7,16 @@ afterEach(() => {
 })
 
 describe('snail-sh dispatcher', () => {
+    test('prints command help without dispatching', () => {
+        const output = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+        main(['--help'])
+
+        expect(output).toHaveBeenCalledWith(
+            expect.stringContaining('Usage:\n  snail-sh <command>'),
+        )
+    })
+
     test('dispatches simple status output', () => {
         const output = vi.spyOn(console, 'log').mockImplementation(() => {})
 

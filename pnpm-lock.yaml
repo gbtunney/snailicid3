@@ -724,6 +724,9 @@ importers:
                 specifier: ^4.4.3
                 version: 4.4.3
         devDependencies:
+            '@microsoft/api-extractor':
+                specifier: ^7.58.8
+                version: 7.58.12(@types/node@26.2.0)
             '@snailicid3/config':
                 specifier: workspace:*
                 version: link:../config

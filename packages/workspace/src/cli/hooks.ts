@@ -15,7 +15,17 @@ import {
 
 type HookName = 'commit-msg' | 'pre-commit' | 'pre-push'
 
+const HELP = `Usage:
+  workspace-hook pre-commit
+  workspace-hook commit-msg <message-file>
+  workspace-hook pre-push`
+
 export function main(args: Array<string> = process.argv.slice(2)): void {
+    if (args[0] === '--help' || args[0] === '-h') {
+        console.log(HELP)
+        return
+    }
+
     const [hook, messageFile] = args
     const repoRoot = getRepoRoot({ fallbackToCwd: true })
 

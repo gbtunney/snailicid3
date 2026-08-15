@@ -1,7 +1,7 @@
 {
     "name": "@snailicid3/storybook-config",
-    "version": "0.0.0",
-    "private": true,
+    "version": "0.1.0",
+    "private": false,
     "description": "Shared Storybook config wrapper \u2014 framework and addons pre-wired, thin consumer entries",
     "scripts": {
         "build:nx": "nx run $npm_package_name:build",

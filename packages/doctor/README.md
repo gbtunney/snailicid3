@@ -34,8 +34,8 @@ _Read-only package and artifact diagnostics for npm and pnpm workspaces._
 ---
 
 > **MVP status:** this package is private at `0.0.0`. It is an implementation workspace, not a
-> release candidate. The first slice reports manifest/export/bin reality and labels the first two
-> registered export fixtures; it does not fix files or enforce CI policy.
+> release candidate. The first slice reports manifest/export/bin reality and labels the retained
+> example-package export fixture; it does not fix files or enforce CI policy.
 
 ## Principles
 
@@ -86,12 +86,14 @@ formatters, the diagnostic model, and the executable fixture registry.
 
 ## Fixture coverage
 
-The executable registry contains all five fixture IDs from the architecture plan. This MVP produces
-and regression-tests:
+The executable registry contains the retained example fixture and three reserved logger fixture IDs.
+This MVP produces and regression-tests:
 
 - `EXP-EXAMPLE-001` when the example package has a declared export target missing from observed
   artifacts
-- `EXP-LOGGER-001` when logger's root export omits an explicit `types` condition
+
+Logger's former `EXP-LOGGER-001` declaration-routing fixture was retired when the package export
+conditions were repaired in #232.
 
 The API forgotten-export, packed-declaration, and runtime-intent codes are reserved but their
 collectors are not implemented yet. A reserved code does not count as coverage and does not hide the

@@ -76,11 +76,12 @@ depend on the old config surface, but they delegate to the owning package.
 | `@snailicid3/config/api-extractor/base.json` | Generated API Extractor base                    |
 | `@snailicid3/config/tsconfig/*`              | TypeScript presets                              |
 
-The package still exposes compatibility bins for `snail-sh`, workspace hooks, scoped commands,
-changesets, setup, uninstall, and patching. The wrappers delegate according to package metadata;
-logger owns `snail-sh` and workspace owns the repository-aware commands. A release must prove that
-those wrappers resolve cleanly from installed registry packages, without workspace links or an
-unpublished dependency.
+The package temporarily exposes compatibility bins for `snail-sh`, workspace hooks, scoped commands,
+changesets, setup, uninstall, and patching because `config@0.2.0` published those command names. The
+wrappers delegate according to package metadata; logger owns `snail-sh` and workspace owns the
+repository-aware commands. New consumers should install `@snailicid3/logger` and
+`@snailicid3/workspace` directly. The compatibility bins may be removed only in an explicit breaking
+release after consumers have migrated.
 
 ## Installation
 

@@ -14,14 +14,6 @@ const plan = defineBuildPlan(pkg, {
             runtime: 'node',
             //   Transpile: ['es2020']
         },
-        {
-            key: 'example',
-            lint: false,
-            output_formats: ['esm'],
-            runtime: 'node',
-            sourceFile: './example/index.ts',
-            transpile: ['es2022'],
-        },
     ],
     root: {
         outputDir: './dist',

@@ -28,7 +28,6 @@ export type DoctorDiagnostic = Readonly<{
 
 export const FIXTURE_IDS = [
     'EXP-EXAMPLE-001',
-    'EXP-LOGGER-001',
     'API-LOGGER-001',
     'PACK-LOGGER-001',
     'RUNTIME-LOGGER-001',

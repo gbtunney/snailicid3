@@ -1,7 +1,7 @@
 {
     "name": "@snailicid3/workspace",
-    "version": "0.0.0",
-    "private": true,
+    "version": "0.1.0",
+    "private": false,
     "description": "Workspace discovery, repository operations, and Snailicid3 workspace commands",
     "keywords": [
         "typescript",
@@ -11,6 +11,9 @@
         "repository",
         "cli"
     ],
+    "publishConfig": {
+        "access": "public"
+    },
     "scripts": {
         "build:nx": "nx run $npm_package_name:build",
         "test:nx": "nx run $npm_package_name:test",
@@ -106,6 +109,7 @@
         "zod": "^4.4.3"
     },
     "devDependencies": {
+        "@microsoft/api-extractor": "^7.58.8",
         "@snailicid3/config": "workspace:*",
         "@types/micromatch": "^4.0.10",
         "@types/node": "^26.2.0",

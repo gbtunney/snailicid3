@@ -6,14 +6,14 @@
 
 import { default as dayjs } from 'dayjs';
 import type { EmptyObject } from 'type-fest';
-import { EntriesOf } from '@snailicid3/types';
+import type { EntriesOf } from '@snailicid3/types';
 import type { Finite } from 'type-fest';
 import { flatten } from 'flat';
-import { FromEntriesTuples } from '@snailicid3/types';
+import type { FromEntriesTuples } from '@snailicid3/types';
 import type { Integer } from 'type-fest';
 import { Json } from '@snailicid3/types';
 import { Jsonifiable } from 'type-fest';
-import { KeysOf } from '@snailicid3/types';
+import type { KeysOf } from '@snailicid3/types';
 import type { LiteralUnion } from 'type-fest';
 import type { NonNegativeInteger } from 'type-fest';
 import type { Simplify } from 'type-fest';
@@ -33,6 +33,16 @@ const cleanString: (value: string) => string;
 
 // @public (undocumented)
 const cleanupNumericSeparators: (str: string) => string;
+
+// Warning: (ae-forgotten-export) The symbol "JsonValue" needs to be exported by the entry point index.d.ts
+//
+// @public
+export const compact: <Type extends JsonValue>(value: Type) => CompactSerializedJsonString<Type>;
+
+// Warning: (ae-forgotten-export) The symbol "Brand" needs to be exported by the entry point index.d.ts
+//
+// @public
+export type CompactSerializedJsonString<Type extends JsonValue = JsonValue> = Brand<SerializedJsonString<Type>, 'CompactSerializedJsonString'>;
 
 declare namespace dateUtils {
     export {
@@ -199,13 +209,24 @@ export const isValidUrl: <Type extends string = string>(value: Type, scheme?: Ar
 export const isZodParsable: <Schema extends z.ZodType>(value: unknown, schema: Schema) => value is z.infer<Schema>;
 
 // @public (undocumented)
-export const jsonLooseCodec: <TSchema extends z.ZodType<Exclude<Jsonifiable, boolean | null | number>>>(schema: TSchema) => z.ZodType<string | z.output<TSchema>>;
+export type JsonGuard<Type extends JsonValue> = (value: unknown) => value is Type;
 
 // @public
-export const jsonParser: <TSchema extends z.ZodType = z.ZodJSONSchema>(schema?: TSchema) => JsonStringifiedSchema<TSchema>;
+export namespace JsonGuards {
+    const // Warning: (ae-forgotten-export) The symbol "JsonPrimitive" needs to be exported by the entry point index.d.ts
+    primitive: (value: unknown) => value is JsonPrimitive;
+    const // Warning: (ae-forgotten-export) The symbol "JsonArray" needs to be exported by the entry point index.d.ts
+    array: (value: unknown) => value is JsonArray;
+    const // Warning: (ae-forgotten-export) The symbol "JsonObject" needs to be exported by the entry point index.d.ts
+    object: (value: unknown) => value is JsonObject;
+    const valueOf: (value: unknown) => value is JsonValue;
+    const serializedString: <Type extends JsonValue = JsonValue>(value: string) => value is SerializedJsonString<Type>;
+}
 
 // @public (undocumented)
-export const jsonSchema: <TSchema extends z.ZodType>(schema: TSchema) => JsonStringifiedSchema<TSchema>;
+export type JsonNormalizeOptions = {
+    parseJsonStrings?: boolean;
+};
 
 // @public
 export type JsonStringified<Type> = string & {
@@ -219,6 +240,35 @@ export const jsonStringified: <TSchema extends z.ZodType>(schema: TSchema) => Js
 //
 // @public (undocumented)
 export type JsonStringifiedSchema<TSchema extends z.ZodType> = JsonStringifiedAPI<TSchema> & z.ZodType<JsonStringified<z.infer<TSchema>>, string>;
+
+// @public (undocumented)
+export type JsonStringifyOptions = {
+    indentSpaces?: number;
+    pretty?: boolean;
+};
+
+// @public
+export const jsonValue: {
+    readonly compact: <Type extends JsonValue>(value: Type) => CompactSerializedJsonString<Type>;
+    readonly guard: typeof JsonGuards;
+    readonly normalize: (input: unknown, input2?: JsonNormalizeOptions) => JsonValue | undefined;
+    readonly normalizeArray: (input: unknown, options?: JsonNormalizeOptions) => JsonArray | undefined;
+    readonly normalizeAs: <Type extends JsonValue>(input: unknown, guard: JsonGuard<Type>, options?: JsonNormalizeOptions) => Type | undefined;
+    readonly normalizeObject: (input: unknown, options?: JsonNormalizeOptions) => JsonObject | undefined;
+    readonly normalizePrimitive: (input: unknown, options?: JsonNormalizeOptions) => JsonPrimitive | undefined;
+    readonly parse: (text: string) => JsonValue | undefined;
+    readonly parseArray: (text: string) => JsonArray | undefined;
+    readonly parseAs: <Type extends JsonValue>(text: string, guard: JsonGuard<Type>) => Type | undefined;
+    readonly parseObject: (text: string) => JsonObject | undefined;
+    readonly parsePrimitive: (text: string) => JsonPrimitive | undefined;
+    readonly pretty: <Type extends JsonValue>(value: Type, indentSpaces?: number) => PrettySerializedJsonString<Type>;
+    readonly serialize: (input: unknown, options?: JsonNormalizeOptions & JsonStringifyOptions) => SerializedJsonString | undefined;
+    readonly serializeCompact: (input: unknown, options?: JsonNormalizeOptions) => CompactSerializedJsonString | undefined;
+    readonly serializePretty: (input: unknown, options?: JsonNormalizeOptions & {
+        indentSpaces?: number;
+    }) => PrettySerializedJsonString | undefined;
+    readonly stringify: <Type extends JsonValue>(value: Type, options?: JsonStringifyOptions) => SerializedJsonString<Type>;
+};
 
 // @public (undocumented)
 export const keysOf: <ObjectType extends UnknownRecord>(obj: ObjectType) => Array<KeysOf<ObjectType>>;
@@ -251,6 +301,21 @@ export const minLen: (value: string, min: number) => boolean;
 
 // @public
 const msToIsoString: (ms_value: number) => string;
+
+// @public
+export const normalize: (input: unknown, input2?: JsonNormalizeOptions) => JsonValue | undefined;
+
+// @public
+export const normalizeArray: (input: unknown, options?: JsonNormalizeOptions) => JsonArray | undefined;
+
+// @public
+export const normalizeAs: <Type extends JsonValue>(input: unknown, guard: JsonGuard<Type>, options?: JsonNormalizeOptions) => Type | undefined;
+
+// @public
+export const normalizeObject: (input: unknown, options?: JsonNormalizeOptions) => JsonObject | undefined;
+
+// @public
+export const normalizePrimitive: (input: unknown, options?: JsonNormalizeOptions) => JsonPrimitive | undefined;
 
 // @public
 const nsToMs: (ns_value: number) => number;
@@ -392,6 +457,15 @@ const numericToFloat: <Type extends Numeric>(value: Type) => Numeric | undefined
 // @public
 const numericToInteger: <Type extends Numeric, Strict = false>(value: Strict extends true ? Integer<Type> : Type) => Numeric | undefined;
 
+// @public
+export const parse: (text: string) => JsonValue | undefined;
+
+// @public
+export const parseArray: (text: string) => JsonArray | undefined;
+
+// @public
+export const parseAs: <Type extends JsonValue>(text: string, guard: JsonGuard<Type>) => Type | undefined;
+
 // @public (undocumented)
 const parseBigintLiteral: (value: string) => bigint;
 
@@ -416,8 +490,14 @@ function parseMaster(rawValue: string): bigint | number | undefined;
 // @public (undocumented)
 const parseNumeric: typeof parseMaster;
 
+// @public
+export const parseObject: (text: string) => JsonObject | undefined;
+
 // @public (undocumented)
 const parseOctal: (value: string) => number;
+
+// @public
+export const parsePrimitive: (text: string) => JsonPrimitive | undefined;
 
 // @public (undocumented)
 const parseScientific: (value: string) => number;
@@ -441,7 +521,13 @@ export const parseZodData: <Schema extends z.ZodType>(value: unknown, schema: Sc
 type PossibleNumeric = bigint | number | string;
 
 // @public
+export const pretty: <Type extends JsonValue>(value: Type, indentSpaces?: number) => PrettySerializedJsonString<Type>;
+
+// @public
 export const prettyPrintJSON: <Type extends Jsonifiable>(value: Type, indentSpaces?: number) => string;
+
+// @public
+export type PrettySerializedJsonString<Type extends JsonValue = JsonValue> = Brand<SerializedJsonString<Type>, 'PrettySerializedJsonString'>;
 
 // Warning: (ae-forgotten-export) The symbol "IntegerInRange" needs to be exported by the entry point index.d.ts
 //
@@ -513,6 +599,22 @@ export const safeSerializeJson: <Type extends Jsonifiable>(data: Type, prettyPri
 export const schemaForType: <Type>() => <Schema extends z.ZodType<Type>>(arg: Schema) => Schema;
 
 // @public
+export const serialize: (input: unknown, options?: JsonNormalizeOptions & JsonStringifyOptions) => SerializedJsonString | undefined;
+
+// @public
+export const serializeCompact: (input: unknown, options?: JsonNormalizeOptions) => CompactSerializedJsonString | undefined;
+
+// @public
+export type SerializedJsonString<Type extends JsonValue = JsonValue> = Brand<string, 'SerializedJsonString'> & {
+    readonly __jsonValue?: Type;
+};
+
+// @public
+export const serializePretty: (input: unknown, options?: JsonNormalizeOptions & {
+    indentSpaces?: number;
+}) => PrettySerializedJsonString | undefined;
+
+// @public
 export const startsWithPrefix: (value: string, prefix: string, trimmed?: boolean) => boolean;
 
 // @public
@@ -520,6 +622,9 @@ export const stringContainsLetter: <Type extends string>(value: Type) => value i
 
 // @public
 export const stringContainsNumber: <Type extends string>(value: Type) => value is Type;
+
+// @public
+export const stringify: <Type extends JsonValue>(value: Type, options?: JsonStringifyOptions) => SerializedJsonString<Type>;
 
 // @public (undocumented)
 export const stringUtils: {

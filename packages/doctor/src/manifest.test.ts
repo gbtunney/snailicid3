@@ -129,7 +129,7 @@ describe('repository package export maps', () => {
             )
 
             // A bare top-level `types` would resolve first for both modes and
-            // hand ESM consumers the CommonJS declaration (EXP-LOGGER-001).
+            // hand ESM consumers the CommonJS declaration.
             expect(
                 targets.filter(
                     (target) =>
@@ -191,15 +191,15 @@ describe('repository package export maps', () => {
         ])
     })
 
-    it('B13 keeps the cli-app example importable without a public bin', () => {
+    it('B13 keeps the cli-app example out of the public package surface', () => {
         const manifest = readRepositoryManifest('packages/cli-app/package.json')
 
         expect(manifest.bin).toBeUndefined()
-        expect(collectDeclaredExportTargets(manifest.exports)).toContainEqual({
-            conditions: [],
-            exportKey: './example',
-            target: './dist/example.mjs',
-        })
+        expect(
+            collectDeclaredExportTargets(manifest.exports).some(
+                ({ exportKey }) => exportKey === './example',
+            ),
+        ).toBe(false)
     })
 })
 
@@ -250,7 +250,7 @@ describe('analyzePackage', () => {
         })
     })
 
-    it('labels logger declaration routing without claiming runtime import failure', () => {
+    it('accepts logger declaration routing after the fixture is repaired', () => {
         const manifest = readRepositoryManifest('packages/logger/package.json')
         const binTarget = getOnlyBinTarget(manifest)
         const emittedFiles: Record<string, string> = {
@@ -277,14 +277,7 @@ describe('analyzePackage', () => {
         withTempPackage(manifest, emittedFiles, (packageRoot) => {
             chmodSync(path.resolve(packageRoot, binTarget), 0o755)
 
-            const diagnostics = analyzePackage(packageRoot).diagnostics
-
-            expect(diagnostics).toEqual([
-                expect.objectContaining({
-                    code: 'EXPORT_TYPES_CONDITION_MISSING',
-                    fixtureId: 'EXP-LOGGER-001',
-                }),
-            ])
+            expect(analyzePackage(packageRoot).diagnostics).toEqual([])
         })
     })
 

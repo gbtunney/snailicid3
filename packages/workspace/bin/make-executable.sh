@@ -39,7 +39,7 @@ print_usage() {
 
     log "Make shell scripts executable." "grey"
     spacer 1
-    log "$COMMAND_NAME <path/to/script.sh|path/to/directory|glob> [...]" "white"
+    log "Usage: $COMMAND_NAME <path/to/script.sh|path/to/directory|glob> [...]" "white"
     spacer 1
     section "examples" "magenta" "-" false 1 true
     kv_pair "directory" "$COMMAND_NAME ./scripts/lib"

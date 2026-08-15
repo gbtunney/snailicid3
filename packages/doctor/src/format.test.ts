@@ -7,19 +7,19 @@ const report: DoctorReport = {
         {
             code: 'EXPORT_TYPES_CONDITION_MISSING',
             evidence: ['package.json#types -> ./dist/index.d.ts'],
-            fixtureId: 'EXP-LOGGER-001',
+            fixtureId: 'EXP-EXAMPLE-001',
             message: 'Missing root types condition.',
-            packageName: '@snailicid3/logger',
-            packageRoot: '/repo/packages/logger',
+            packageName: '@snailicid3/example-package',
+            packageRoot: '/repo/packages/example-package',
             severity: 'warning',
         },
     ],
     packages: [
         {
             diagnostics: [],
-            manifestPath: '/repo/packages/logger/package.json',
-            packageName: '@snailicid3/logger',
-            packageRoot: '/repo/packages/logger',
+            manifestPath: '/repo/packages/example-package/package.json',
+            packageName: '@snailicid3/example-package',
+            packageRoot: '/repo/packages/example-package',
         },
     ],
     root: '/repo',
@@ -35,7 +35,7 @@ describe('Doctor report formatting', () => {
     it('distinguishes known fixtures and states that the report is read-only', () => {
         const output = formatDoctorText(report)
 
-        expect(output).toContain('known fixture EXP-LOGGER-001')
+        expect(output).toContain('known fixture EXP-EXAMPLE-001')
         expect(output).toContain('Read-only report: no files were changed.')
     })
 

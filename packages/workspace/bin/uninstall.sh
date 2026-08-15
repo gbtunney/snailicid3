@@ -33,6 +33,14 @@ BOOTSTRAP_CALLER_SOURCE="$SCRIPT_SOURCE_PATH"
 unset BOOTSTRAP_CALLER_SOURCE
 # END SH BOOTSTRAP LOADER
 
+COMMAND_NAME="${COMMAND_NAME:-gbt-uninstall}"
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+    log "Remove generated builds, dependency installs, caches, and lockfiles from a repository." "grey"
+    spacer 1
+    log "Usage: $COMMAND_NAME" "white"
+    exit 0
+fi
+
 remove_if_exists() {
     local target="$1"
 
