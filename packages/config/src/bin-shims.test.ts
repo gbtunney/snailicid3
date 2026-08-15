@@ -5,6 +5,9 @@ const packageRoot = new URL('../', import.meta.url)
 const manifest = JSON.parse(
     readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
 ) as { bin: Record<string, string> }
+const rootManifest = JSON.parse(
+    readFileSync(new URL('../../../package.json', import.meta.url), 'utf8'),
+) as { devDependencies: Record<string, string> }
 
 describe('temporary CLI compatibility shims', () => {
     for (const [command, target] of Object.entries(manifest.bin)) {
@@ -16,4 +19,13 @@ describe('temporary CLI compatibility shims', () => {
             )
         })
     }
+
+    test('root installs only the shim package while compatibility bins overlap', () => {
+        expect(rootManifest.devDependencies).not.toHaveProperty(
+            '@snailicid3/logger',
+        )
+        expect(rootManifest.devDependencies).not.toHaveProperty(
+            '@snailicid3/workspace',
+        )
+    })
 })
