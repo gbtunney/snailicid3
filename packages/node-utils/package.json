@@ -1,6 +1,6 @@
 {
     "name": "@snailicid3/node-utils",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "private": false,
     "description": "Node.js filesystem, path, zod schemas, and package.json utilities",
     "keywords": [

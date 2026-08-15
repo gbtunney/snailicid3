@@ -1,6 +1,6 @@
 {
     "name": "@snailicid3/doctor",
-    "version": "0.0.0",
+    "version": "0.0.1",
     "private": true,
     "description": "Read-only package and artifact diagnostics for npm and pnpm workspaces",
     "keywords": [
