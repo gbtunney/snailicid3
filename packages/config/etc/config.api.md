@@ -10,52 +10,45 @@ import type { Config as Config_2 } from 'prettier';
 import config_conventional from '@commitlint/config-conventional';
 import { Configuration } from 'lint-staged';
 import type { Configuration as Configuration_2 } from 'markdownlint';
-import { DEFAULT_SCOPE_PATH_MATCHERS } from '@snailicid3/workspace';
 import { defineConfig as defineConfig_2 } from '@eslint/config-helpers';
-import { getPackageBinaryCommand } from '@snailicid3/workspace';
-import { getPackageManager } from '@snailicid3/workspace';
-import { getPackageScriptCommand } from '@snailicid3/workspace';
+import { doesFileExist } from '@snailicid3/node-utils';
+import { getDirname } from '@snailicid3/node-utils';
+import { getExt } from '@snailicid3/node-utils';
+import { getFilename } from '@snailicid3/node-utils';
+import { getFilePath } from '@snailicid3/node-utils';
+import { getFullPath } from '@snailicid3/node-utils';
 import { IConfigFile } from '@microsoft/api-extractor';
+import { isPlainObject } from '@snailicid3/node-utils';
 import { IterableElement } from 'type-fest';
-import type { JsonArray } from 'type-fest';
-import { Jsonifiable } from 'type-fest';
-import type { JsonObject } from 'type-fest';
-import type { JsonPrimitive } from 'type-fest';
-import type { JsonValue } from 'type-fest';
+import { Json } from '@snailicid3/node-utils';
+import { json } from '@snailicid3/node-utils';
+import { JSONExportConfig } from '@snailicid3/node-utils';
+import { JSONExportEntry } from '@snailicid3/node-utils';
+import { Jsonifiable } from '@snailicid3/node-utils';
 import type { KeyAsString } from 'type-fest';
 import { LiteralUnion } from 'type-fest';
-import { loadScopePathMatchers } from '@snailicid3/workspace';
-import { matchScopesForPath } from '@snailicid3/workspace';
 import type { Merge } from 'type-fest';
 import { merge } from 'ts-deepmerge';
+import { normalizePath } from '@snailicid3/node-utils';
 import type { NxJsonConfiguration } from 'nx/src/config/nx-json.js';
 import { OmitDeep } from 'type-fest';
 import { OmitIndexSignature } from 'type-fest';
 import type { Options } from 'prettier-plugin-jsdoc';
 import type { Options as Options_2 } from 'prettier';
-import { PackageCommand } from '@snailicid3/workspace';
-import { PackageManager } from '@snailicid3/workspace';
-import { PackageManagerResolution } from '@snailicid3/workspace';
+import { PathRoot } from '@snailicid3/node-utils';
+import { paths } from '@snailicid3/node-utils';
 import type { Plugin } from 'prettier';
 import { PluginOptions } from 'typedoc-plugin-markdown';
-import { resolvePackageManager } from '@snailicid3/workspace';
-import { resolveScopePathMatchers } from '@snailicid3/workspace';
-import { runPackageBinary } from '@snailicid3/workspace';
-import { runPackageManager } from '@snailicid3/workspace';
-import { runPackageScript } from '@snailicid3/workspace';
-import { scopeMatchersFromCommitlintConfig } from '@snailicid3/workspace';
-import { ScopePathMatcherOverrides } from '@snailicid3/workspace';
-import { ScopePathMatchers } from '@snailicid3/workspace';
+import { resolveCwd } from '@snailicid3/node-utils';
 import { Simplify } from 'type-fest';
-import { Snailicid3CommitlintSettings } from '@snailicid3/workspace';
 import { Spread } from 'type-fest';
-import type { Tagged } from 'type-fest';
 import type { TargetConfiguration } from 'nx/src/config/workspace-json-project-json.js';
 import { Config as TsConfig } from 'typescript-eslint';
 import { TypeDocOptions } from 'typedoc';
 import { UnknownArray } from 'type-fest';
 import { UnknownRecord } from 'type-fest';
 import { UserConfig } from '@commitlint/types';
+import { WorkspaceScopeOverrides } from '@snailicid3/workspace';
 import { Writable } from 'type-fest';
 import { WritableDeep } from 'type-fest';
 
@@ -176,8 +169,6 @@ export type ConfigToolRegistryEntry<TConfig, TFunctionOptions> = {
 // @public (undocumented)
 export type ConventionalCommitType = KeyAsString<typeof config_conventional.prompt.questions.type.enum>;
 
-export { DEFAULT_SCOPE_PATH_MATCHERS }
-
 // @public
 export const defineConfig: <const TConfig>(config: TConfig) => TConfig;
 
@@ -190,8 +181,7 @@ export const defineNxConfig: <const TConfig extends NxPreset>(config: TConfig) =
 // @public
 export const defineNxTargets: <const TTargets extends NxTargets>(targets: TTargets) => TTargets;
 
-// @public
-export const doesFileExist: (filePath: string) => boolean;
+export { doesFileExist }
 
 // @public (undocumented)
 export const EsLint: {
@@ -226,35 +216,20 @@ export type FileExtensionHint = LiteralUnion<AllowedExtensions, string>;
 // @public
 export const filterCommitTypes: (exclude: ReadonlyArray<ConventionalCommitType>) => Array<ConventionalCommitType>;
 
-// @public
-export const getDirname: (root: PathRoot, _filePath?: string) => string;
+export { getDirname }
 
-// @public
-export const getExt: (fullPath: string) => string;
+export { getExt }
 
-// @public
-export const getFilename: (fullPath: string) => string;
+export { getFilename }
 
-// @public
-export const getFilePath: (rootormeta: PathRoot | undefined, filePath: string) => string;
+export { getFilePath }
 
-// @public
-export const getFullPath: (value: string, root: PathRoot | undefined) => string;
-
-export { getPackageBinaryCommand }
-
-export { getPackageManager }
-
-export { getPackageScriptCommand }
+export { getFullPath }
 
 // @public
 export type IdentityDefineConfig<TConfig> = <const TValue extends TConfig>(config: TValue) => TValue;
 
-// Warning: (ae-forgotten-export) The symbol "PlainObject_2" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "PlainRecord" needs to be exported by the entry point index.d.ts
-//
-// @public
-export const isPlainObject: <Type extends PlainObject_2 = PlainRecord>(value: unknown) => value is Type;
+export { isPlainObject }
 
 export { IterableElement }
 
@@ -270,38 +245,13 @@ export const JSLIKE_FILE_EXTENSIONS: Spread<typeof JS_FILE_EXTENSIONS, typeof TS
 // @public (undocumented)
 export type JSLikeFileExtensions = ArrayValues<typeof JSLIKE_FILE_EXTENSIONS>;
 
-// @public
-export namespace Json {
-    export type Array = JsonArray;
-    export type Object = JsonObject;
-    export type Primitive = JsonPrimitive;
-    // Warning: (ae-forgotten-export) The symbol "JSONStringOf" needs to be exported by the entry point index.d.ts
-    export type StringOf<Type extends JsonValue = JsonValue> = JSONStringOf<Type>;
-    export type Value = JsonValue;
-}
+export { Json }
 
-// @public (undocumented)
-export const json: {
-    deserialize: (data: unknown) => JsonValue | undefined;
-    deserializeObject: (data: unknown) => JsonObject | undefined;
-    exportFile: (config: JSONExportConfig, outdir?: string, overwrite?: boolean, logData?: boolean) => boolean;
-    importFile: (filename: string) => Promise<JsonValue | undefined>;
-    importObject: (filename: string) => Promise<JsonObject | undefined>;
-    isObject: (value: unknown) => value is JsonObject;
-    isValue: (value: unknown) => value is JsonValue;
-    object: (data: unknown) => JsonObject | undefined;
-    prettyPrint: (value: unknown, indentSpaces?: number) => JSONStringOf;
-    serialize: (value: unknown, options?: JSONSerializeOptions) => JSONStringOf;
-};
+export { json }
 
-// @public
-export type JSONExportConfig = Array<JSONExportEntry>;
+export { JSONExportConfig }
 
-// @public
-export type JSONExportEntry<Type = unknown> = {
-    data: Type;
-    filename: string;
-};
+export { JSONExportEntry }
 
 export { Jsonifiable }
 
@@ -330,8 +280,6 @@ export type LintStagedConfigFunctionOptions = ConfigFunctionOptions<{
 export type LintStagedTool = ConfigTool<LintStagedConfig, LintStagedConfigFunctionOptions, typeof LintStaged.defineConfig, Omit<typeof LintStaged, 'config' | 'defineConfig'>>;
 
 export { LiteralUnion }
-
-export { loadScopePathMatchers }
 
 // @public (undocumented)
 export const MARKDOWN_FILE_EXTENSIONS: readonly ["md", "markdown"];
@@ -381,8 +329,6 @@ export type MarkdownlintRuleConfiguration<Bool extends boolean = true> = OmitMar
 // @public (undocumented)
 export type MarkdownlintTool = ConfigTool<MarkdownlintConfig, MarkdownlintConfigFunctionOptions, typeof Markdownlint.defineConfig, Omit<typeof Markdownlint, 'config' | 'defineConfig'>>;
 
-export { matchScopesForPath }
-
 // @public (undocumented)
 export type MaterialThemeOptions = {
     themeColor?: string;
@@ -390,8 +336,7 @@ export type MaterialThemeOptions = {
 
 export { merge }
 
-// @public
-export const normalizePath: (value: string) => string;
+export { normalizePath }
 
 // @public (undocumented)
 export const Nx: {
@@ -422,26 +367,9 @@ export { OmitDeep }
 
 export { OmitIndexSignature }
 
-export { PackageCommand }
+export { PathRoot }
 
-export { PackageManager }
-
-export { PackageManagerResolution }
-
-// @public (undocumented)
-export type PathRoot = ImportMeta | string;
-
-// @public (undocumented)
-export const paths: {
-    dirname: typeof getDirname;
-    exists: typeof doesFileExist;
-    extension: typeof getExt;
-    file: typeof getFilePath;
-    filename: typeof getFilename;
-    full: typeof getFullPath;
-    normalize: typeof normalizePath;
-    resolveCwd: typeof resolveCwd;
-};
+export { paths }
 
 // @public (undocumented)
 export type PlainObject = {
@@ -566,8 +494,7 @@ export type RemarkPluginOptions = {
 // @public
 export type ReservedPrettierOptionKey = 'exclude' | 'excludeFiles' | 'files' | 'options' | 'overrides' | 'plugins';
 
-// @public
-export const resolveCwd: (cwd: PathRoot | undefined) => string;
+export { resolveCwd }
 
 // @public (undocumented)
 export type ResolvedBaseConfigFunctionOptions = {
@@ -585,28 +512,10 @@ export type ResolvedPrettierPlugin = Plugin & {
     readonly [RESOLVED_PRETTIER_PLUGIN]: true;
 };
 
-export { resolvePackageManager }
-
-export { resolveScopePathMatchers }
-
-export { runPackageBinary }
-
-export { runPackageManager }
-
-export { runPackageScript }
-
-export { scopeMatchersFromCommitlintConfig }
-
-export { ScopePathMatcherOverrides }
-
-export { ScopePathMatchers }
-
 // @public
 export const selectTargets: (targets: NxTargets, keys: Array<string>) => NxTargets;
 
 export { Simplify }
-
-export { Snailicid3CommitlintSettings }
 
 // @public
 export type StripIndexSignature<Type> = {
@@ -1033,7 +942,7 @@ export { UnknownArray }
 
 export { UnknownRecord }
 
-// @public (undocumented)
+// @public
 export const workspaceScopes: (options?: WorkspaceScopesOptions) => Array<string>;
 
 // @public (undocumented)
@@ -1044,7 +953,7 @@ export type WorkspaceScopesOptions = {
     format?: 'array' | 'csv';
     includeBaseScopes?: boolean;
     keepPrefix?: boolean;
-    matchers?: ScopePathMatcherOverrides;
+    matchers?: WorkspaceScopeOverrides;
     mergeScopes?: ReadonlyArray<string>;
 };
 
@@ -1055,7 +964,6 @@ export { WritableDeep }
 // Warnings were encountered during analysis:
 //
 // src/api-extractor/index.ts:22:1 - (ae-forgotten-export) The symbol "getBaseConfig" needs to be exported by the entry point index.d.ts
-// src/utilities/json.ts:420:5 - (ae-forgotten-export) The symbol "JSONSerializeOptions" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
