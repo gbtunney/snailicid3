@@ -1,5 +1,9 @@
 # Snailicid3 Architecture and Refactor Plan
 
+> Historical implementation plan. Current work and acceptance criteria live in GitHub issues. PR
+> #232 retired `EXP-LOGGER-001` and made the CLI-app example internal; later references to those
+> states describe the audited baseline, not current protected fixtures.
+>
 > **Audited 2026-08-14** against `main` at `fa0992b`. Corrections are marked inline; the full
 > reconciliation, the defects found, and the current backlog live in
 > [`plan-state-audit-2026-08-14.md`](./plan-state-audit-2026-08-14.md). Newly registered in this

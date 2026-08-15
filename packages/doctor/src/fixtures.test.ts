@@ -24,7 +24,7 @@ describe('Doctor fixture registry', () => {
                     'package.json#exports["."] has no types condition',
                 ],
             ),
-        ).toBe('EXP-LOGGER-001')
+        ).toBeUndefined()
         expect(
             findFixtureId(
                 '@snailicid3/node-utils',

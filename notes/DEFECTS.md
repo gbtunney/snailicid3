@@ -10,54 +10,17 @@ Severity: 🔴 blocks a release · 🟠 wrong in a way that will bite · 🟡 cl
 
 ---
 
-## ⛔ DO NOT FIX — registered Doctor fixtures
+## ⛔ Intentionally retained Doctor fixture
 
-**Read this before running any automated export/manifest fix pass.**
+Only `@snailicid3/example-package` is deliberately broken for the active export collector.
+`EXP-EXAMPLE-001` protects its mismatched declared/emitted exports until that fixture is replaced.
 
-Two packages are **deliberately broken** and are Doctor's only regression coverage. They are the
-five registered fixtures in plan §10.3, mirrored executably in `packages/doctor/src/fixtures.ts`.
-Fixing them silently deletes the tests.
+Logger's `EXP-LOGGER-001` fixture was retired in #232 when its declaration conditions were fixed.
+The reserved `API-LOGGER-001`, `PACK-LOGGER-001`, and `RUNTIME-LOGGER-001` IDs describe future
+collectors; they do not protect unrelated logger defects from repair.
 
-| Package                       | Why it is broken on purpose                                                                                          |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `@snailicid3/example-package` | `EXP-EXAMPLE-001` — declared exports deliberately disagree with emitted/packed reality. Its **whole point** is this. |
-| `@snailicid3/logger`          | `EXP-LOGGER-001`, `API-LOGGER-001`, `PACK-LOGGER-001`, `RUNTIME-LOGGER-001`                                          |
-
-**The specific landmine:** `logger` and `node-utils` currently have a _nearly identical_ manifest
-shape — both declare `"types": "./dist/index.d.cts"` at top level with **no `types` condition inside
-`exports["."]`**:
-
-```jsonc
-// logger — PROTECTED, this IS EXP-LOGGER-001
-"types": "./dist/index.d.cts",
-"exports": { ".": { "import": "./dist/index.js", "require": "./dist/index.cjs" } }
-
-// node-utils — UNREGISTERED, fix this one (B1)
-"types": "./dist/index.d.cts",
-"exports": { ".": { "import": "./dist/index.mjs" } }
-```
-
-An instruction like _"add missing `types` conditions everywhere"_ fixes **both**, and the logger one
-takes `EXP-LOGGER-001` with it.
-
-**It fails quietly, too.** `matchesExpectedEvidence` (`fixtures.ts:98-108`) matches on **exact
-evidence strings**, including exact filenames. Change any declared path in a fixture package and the
-row simply stops matching — the finding is not lost, it just silently reclassifies from "known
-fixture" to "unregistered finding." Nothing goes red.
-
-**Scope the fix pass to these packages only:** `node-utils`, `utils`, `config`, `workspace`,
-`cli-app`, `build-config`, `doctor`, `storybook-config`, `color`, `types`, and the repo root.
-
-**One narrow exception — B5 only.** Deleting the dead `buildConfig` key **is** safe in
-`example-package`, because no fixture matches on it: `EXP-EXAMPLE-001` matches only
-`EXPORT_TARGET_MISSING`, `EXPORT_TYPES_CONDITION_MISSING`, and `LEGACY_TARGET_MISSING`, whose
-evidence is `exports` / `main` / `module` / `types` paths. `logger` declares no `buildConfig` at
-all, so it is untouched either way. Nothing else in a fixture package may be edited.
-
-**If you kept other busted things as tests:** rule 2.5 says the §10.3 list is exhaustive —
-unregistered breakage is indistinguishable from a defect and is not protected. Anything you want
-kept needs a registry row (location, expected finding, retirement gate) plus a `fixtures.ts` entry,
-or it will eventually be "fixed" by someone reading this checklist. Only five rows exist today.
+The executable registry in `packages/doctor/src/fixtures.ts` is authoritative. Any new retained
+breakage needs a registry entry, expected evidence, a regression test, and a retirement gate.
 
 ---
 
@@ -94,8 +57,8 @@ or it will eventually be "fixed" by someone reading this checklist. Only five ro
       first for every consumer, so ESM importers were handed the **CommonJS** declaration. `utils`
       and `node-utils` had that shape after the first B1/B2 pass; `color`, `types` and
       `storybook-config` had no `types` condition at all and fell through to the top-level field,
-      which points at the CJS declaration for the same reason. Both are the `EXP-LOGGER-001`
-      finding. Fixed by putting `types` alongside `default` inside each branch. → §4.3
+      which points at the CJS declaration for the same reason. Fixed by putting `types` alongside
+      `default` inside each branch. → §4.3
 - [x] **B15** 🟠 Same fix applied to `color`, `types` and `storybook-config`, which my original §4.3
       table never listed. → §4.3
 
@@ -109,10 +72,9 @@ would have pointed at files that do not exist:
 
 An earlier draft of B14 claimed `.d.mts` for `utils`; that was wrong — only `node-utils` emits
 `.mjs`. The top-level `types` field is deliberately left on the CJS declaration, matching `main` for
-legacy node10 resolution. `logger` and `example-package` are untouched (registered fixtures), and
-`cli-app` already routed correctly. Locked in by the `B14/B15` test in
-`packages/doctor/src/manifest.test.ts`, which asserts per-mode routing and the absence of a bare
-top-level `types` condition.
+legacy node10 resolution. `example-package` remains the registered fixture. Locked in by the
+`B14/B15` test in `packages/doctor/src/manifest.test.ts`, which asserts per-mode routing and the
+absence of a bare top-level `types` condition.
 
 ### buildConfig
 

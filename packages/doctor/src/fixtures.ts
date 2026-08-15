@@ -12,7 +12,7 @@ export type DoctorFixtureMatch = Readonly<{
 }>
 
 /**
- * Executable counterpart to the architecture plan's intentional fixture registry.
+ * Executable registry of intentionally retained diagnostic fixtures.
  *
  * A row labels matching observed evidence; it never authorizes mutation or suppresses a finding. Some reserved
  * diagnostic codes do not have collectors yet and therefore cannot match until their read-only collector lands.
@@ -47,19 +47,6 @@ export const DOCTOR_FIXTURES: ReadonlyArray<DoctorFixture> = [
             },
         ],
         packageName: '@snailicid3/example-package',
-    },
-    {
-        id: 'EXP-LOGGER-001',
-        matches: [
-            {
-                diagnosticCode: 'EXPORT_TYPES_CONDITION_MISSING',
-                expectedEvidence: [
-                    'package.json#types -> ./dist/index.d.cts',
-                    'package.json#exports["."] has no types condition',
-                ],
-            },
-        ],
-        packageName: '@snailicid3/logger',
     },
     {
         id: 'API-LOGGER-001',

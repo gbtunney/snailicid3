@@ -105,10 +105,10 @@ status. Root orchestration lives in `package.json` and shared Nx target defaults
 Some package and export inconsistencies are deliberately retained so the read-only Doctor can be
 developed against real, reproducible failures. The private `@snailicid3/doctor@0.0.0` MVP now
 discovers npm/pnpm packages, reports manifest/export/bin evidence, emits text or JSON, and labels
-the initial example/logger export findings. The fixture registry in the
-[architecture/refactor plan](./notes/snailicid3-architecture-and-refactor-plan.md) is authoritative:
-currently it covers the busted exports in `@snailicid3/example-package` and selected declaration,
-packaging, and runtime-intent drift in `@snailicid3/logger`.
+registered findings. The executable registry in `packages/doctor/src/fixtures.ts` is authoritative:
+it currently covers the busted exports in `@snailicid3/example-package`. Logger's repaired
+declaration-routing fixture is retired; its API, packed-declaration, and runtime-intent diagnostic
+codes remain reserved for future collectors.
 
 Do not fix a registered fixture as drive-by cleanup. Doctor must report it without mutating the
 package. API-report, packed-declaration, runtime-intent, Nx, Publint, ATTW, and Knip collectors
