@@ -1,5 +1,15 @@
 # @snailicid3/utils
 
+## 0.1.0
+
+### Minor Changes
+
+- e78f39e: Finalize public package boundaries, exports, CLI ownership, and release-ready manifests.
+
+### Patch Changes
+
+- @snailicid3/types@0.0.3
+
 ## 0.0.6
 
 ### Patch Changes

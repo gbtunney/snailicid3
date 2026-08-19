@@ -1,5 +1,17 @@
 # @snailicid3/logger
 
+## 0.1.0
+
+### Minor Changes
+
+- e78f39e: Finalize public package boundaries, exports, CLI ownership, and release-ready manifests.
+
+### Patch Changes
+
+- Updated dependencies [e78f39e]
+  - @snailicid3/node-utils@0.2.0
+  - @snailicid3/color@0.0.7
+
 ## 0.0.6
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
     "name": "@snailicid3/build-config",
-    "version": "0.0.8",
+    "version": "0.1.0",
     "private": false,
     "description": "Typed tsdown, Vite and Vitest config factories with a shared build-plan model",
     "scripts": {

@@ -1,5 +1,14 @@
 # @snailicid3/color
 
+## 0.0.7
+
+### Patch Changes
+
+- e78f39e: Finalize public package boundaries, exports, CLI ownership, and release-ready manifests.
+- Updated dependencies [e78f39e]
+  - @snailicid3/utils@0.1.0
+  - @snailicid3/types@0.0.3
+
 ## 0.0.6
 
 ### Patch Changes
