@@ -42,7 +42,7 @@ jobs:
 
     detect:
         name: detect release state
-        uses: gbtunney/snailicid3-actions/.github/workflows/call-detect-release-state.yml@main
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-detect-release-state.yml@v1
         with:
             ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
@@ -50,7 +50,7 @@ jobs:
         name: pending changeset
         needs: detect
         if: ${{ needs.detect.outputs.should_version == 'true' }}
-        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@main
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@v1
         secrets: inherit
         with:
             run_chromatic: false
@@ -69,7 +69,7 @@ jobs:
         name: pending release
         needs: detect
         if: ${{ needs.detect.outputs.should_publish == 'true' }}
-        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@main
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@v1
         secrets: inherit
         with:
             run_chromatic: false
@@ -88,7 +88,7 @@ jobs:
         name: main
         needs: detect
         if: ${{ needs.detect.outputs.should_skip == 'true' }}
-        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@main
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@v1
         secrets: inherit
         with:
             run_chromatic: false
