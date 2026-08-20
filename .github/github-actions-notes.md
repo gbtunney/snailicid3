@@ -135,20 +135,19 @@ Do not make report or autofix jobs required.
 4. Keep `call-pipeline.yml` generic, with optional `disable_nx_cloud` input override and fallback to
    `vars.DISABLE_NX_CLOUD`.
 5. Shared `call-*` workflows, composite actions, and scripts live in
-   [gbtunney/snailicid3-actions](https://github.com/gbtunney/snailicid3-actions) and are referenced
-   `@v1` here so this repository is the canary. Other consumer repositories must use a released,
-   immutable tag or commit SHA; Codex propagates a new ref only after it passes the canary and
-   consumer rehearsal. This repository keeps only the thin caller workflows (`dispatch-*`,
-   `pr-checks`, `push-*`).
+   [gbtunney/snailicid3-actions](https://github.com/gbtunney/snailicid3-actions). This repository
+   consumes the released `@v1` major-version ref rather than the moving `main` branch. It keeps only
+   the thin caller workflows (`dispatch-*`, `pr-checks`, `push-*`).
 
 ### Notes on the extracted actions repository
 
-- Composite actions inside the reusable workflows are referenced fully qualified
-  (`gbtunney/snailicid3-actions/.github/actions/<name>@v1`) — local `./` paths resolve against the
-  caller's checkout and break cross-repo consumers.
-- Action tags are release records and must not be moved after publication. An immutable commit SHA
-  is the strongest consumer pin. Updating package versions never implicitly updates an Action ref;
-  the two release channels are coordinated but independent.
+- Reusable `call-*` workflows inside `snailicid3-actions` reference same-repository composite
+  actions and reusable workflows with `$/`, so they resolve from the same repository commit as the
+  reusable workflow being executed.
+- Consumer repositories reference `snailicid3-actions` through released refs such as `@v1`; they do
+  not use `$/`, because `$` would refer to the consumer repository.
+- `v1.0.0` is the immutable first v1 release. `v1` is the rolling major-version alias used by
+  consumers and may advance to later compatible v1 releases.
 - Version-PR titles reuse the scope-commit-derived release message; the changeset slug appears only
   in the `release/<slug>` branch name.
 - The actions repository self-tests on every PR via its fixture workspace (`test-actions.yml`).
