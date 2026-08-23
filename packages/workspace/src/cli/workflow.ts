@@ -171,7 +171,9 @@ export async function main(
             )
         }
 
-        const pullRequest = planWorkflowPullRequest(baseBranch, identity)
+        const scope =
+            parsed.explicitScope || (await resolveWorkflowScope(repoRoot))
+        const pullRequest = planWorkflowPullRequest(baseBranch, identity, scope)
         const command = renderGhPrCreateCommand(pullRequest)
         const output = parsed.commandOutput
             ? command
@@ -188,6 +190,16 @@ export async function main(
     }
 
     await runBranchDerivedCommit(repoRoot, baseBranch, parsed)
+}
+
+const resolveWorkflowScope = async (repoRoot: string): Promise<string> => {
+    const stagedFiles = getStagedFiles(repoRoot)
+    if (stagedFiles.length === 0) return ''
+
+    return formatScopes(
+        (await resolveCommitScopes(repoRoot, stagedFiles)).scopes,
+        'csv',
+    )
 }
 
 const copyWorkflowValue = (

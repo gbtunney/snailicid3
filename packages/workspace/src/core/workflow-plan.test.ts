@@ -177,18 +177,21 @@ describe('planWorkflow', () => {
     })
 
     it('offers push when the remote workflow branch exists but local is ahead', () => {
-        expect(
-            actionIds(
-                facts({
-                    aheadCount: 2,
-                    remoteRelation: {
-                        aheadCount: 1,
-                        behindCount: 0,
-                        relation: 'ahead',
-                    },
-                }),
-            ),
-        ).toEqual(['push'])
+        const plan = planWorkflow(
+            facts({
+                aheadCount: 2,
+                remoteRelation: {
+                    aheadCount: 1,
+                    behindCount: 0,
+                    relation: 'ahead',
+                },
+            }),
+        )
+
+        expect(actionIds(plan.facts)).toEqual(['push'])
+        expect(plan.nextActions[0]?.consequence).toContain(
+            'publishes the 1 unpushed changeset commit(s)',
+        )
     })
 
     it('offers nothing further once the branch is already pushed', () => {

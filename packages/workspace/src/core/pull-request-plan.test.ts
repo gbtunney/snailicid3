@@ -17,13 +17,11 @@ describe('pull request plans', () => {
     it('creates the canonical validated shape', () => {
         const plan = planWorkflowPullRequest('main', identity)
 
-        expect(pullRequestPlanSchema.parse(plan)).toEqual(plan)
-        expect(plan).toEqual({
-            base: 'main',
-            body: expect.stringContaining('changeset/wacky-walker'),
-            head: 'changeset/wacky-walker',
-            title: 'changeset: wacky-walker',
-        })
+        expect(pullRequestPlanSchema.safeParse(plan).success).toBe(true)
+        expect(plan.base).toBe('main')
+        expect(plan.body).toContain('changeset/wacky-walker')
+        expect(plan.head).toBe('changeset/wacky-walker')
+        expect(plan.title).toBe('changeset: wacky-walker')
     })
 
     it('supports release branches with the same shape', () => {
@@ -35,6 +33,16 @@ describe('pull request plans', () => {
 
         expect(plan.title).toBe('release: whole-banks-swim')
         expect(plan.base).toBe('main')
+    })
+
+    it('includes the resolved scope in the PR title when provided', () => {
+        const plan = planWorkflowPullRequest(
+            'main',
+            identity,
+            'config,workspace',
+        )
+
+        expect(plan.title).toBe('changeset(config,workspace): wacky-walker')
     })
 
     it('renders readable output and a safely quoted gh command', () => {

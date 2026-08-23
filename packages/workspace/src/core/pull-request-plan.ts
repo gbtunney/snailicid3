@@ -33,6 +33,7 @@ export const createPullRequestPlan = (
 export const planWorkflowPullRequest = (
     base: string,
     identity: WorkflowIdentity,
+    scope?: string,
 ): PullRequestPlan =>
     createPullRequestPlan({
         base,
@@ -44,7 +45,7 @@ export const planWorkflowPullRequest = (
             'The branch remains the source of truth for subsequent workflow commits.',
         ].join('\n'),
         head: identity.branch,
-        title: `${identity.mode}: ${identity.slug}`,
+        title: `${identity.mode}${scope ? `(${scope})` : ''}: ${identity.slug}`,
     })
 
 /** Format a pull request plan for a human-readable terminal report. */

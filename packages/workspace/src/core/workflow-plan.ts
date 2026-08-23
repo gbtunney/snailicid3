@@ -157,7 +157,7 @@ export const planWorkflow = (facts: WorkflowFacts): WorkflowPlan => {
         ) {
             nextActions.push({
                 command: `git push -u origin ${facts.currentBranch}`,
-                consequence: `publishes the ${facts.aheadCount.toString()} local ${facts.identity.mode} commit(s); open a pull request against origin/${facts.baseBranch} once it is pushed.`,
+                consequence: `publishes the ${(facts.remoteRelation.relation === 'unknown' ? facts.aheadCount : facts.remoteRelation.aheadCount).toString()} unpushed ${facts.identity.mode} commit(s) on ${facts.currentBranch}; open a pull request against origin/${facts.baseBranch} once it is pushed.`,
                 id: 'push',
             })
         } else if (facts.aheadCount === 0) {
