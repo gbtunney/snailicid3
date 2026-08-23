@@ -77,9 +77,6 @@ export const createBranchFromBase: (repoRoot: string, branch: string, startPoint
 export const createPullRequestPlan: (input: PullRequestPlanInput) => PullRequestPlan;
 
 // @public
-export function createReleasePackagePlan(input: ReleasePackagePlanInput): ReleasePackagePlan;
-
-// @public
 export function createReleasePlan(input: CreateReleasePlanInput): ReleasePlan;
 
 // @public
@@ -147,7 +144,6 @@ export const createReleasePlanInputSchema: z.ZodObject<{
             registryUrl: z.ZodURL;
             state: z.ZodEnum<{
                 exists: "exists";
-                invalid_identity: "invalid_identity";
                 missing: "missing";
                 unknown_auth: "unknown_auth";
                 unknown_network: "unknown_network";
@@ -367,281 +363,13 @@ export function readPackageName(packageJsonPath: string): null | string;
 // @public
 export const readWorkspaceEnvironment: (environment: Readonly<Record<string, unknown>>) => WorkspaceEnvironment;
 
-// @public (undocumented)
-export type ReleaseDoctorFacts = z.infer<typeof releaseDoctorFactsSchema>;
-
-// @public (undocumented)
-export const releaseDoctorFactsSchema: z.ZodObject<{
-    artifact: z.ZodEnum<{
-        unknown: "unknown";
-        invalid: "invalid";
-        valid: "valid";
-    }>;
-    dependencyClosure: z.ZodEnum<{
-        unknown: "unknown";
-        valid: "valid";
-        blocked: "blocked";
-    }>;
-}, z.core.$strict>;
-
-// @public (undocumented)
-export type ReleaseExecution = z.infer<typeof releaseExecutionSchema>;
-
-// @public (undocumented)
-export const releaseExecutionSchema: z.ZodObject<{
-    operation: z.ZodEnum<{
-        observe: "observe";
-        prepare: "prepare";
-        publish: "publish";
-        tag: "tag";
-    }>;
-}, z.core.$strict>;
-
-// @public (undocumented)
-export type ReleaseGitTagIntent = z.infer<typeof releaseGitTagIntentSchema>;
-
-// @public (undocumented)
-export const releaseGitTagIntentSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
-    selected: z.ZodLiteral<false>;
-}, z.core.$strict>, z.ZodObject<{
-    name: z.ZodString;
-    selected: z.ZodLiteral<true>;
-}, z.core.$strict>], "selected">;
-
-// @public (undocumented)
-export type ReleaseIntent = z.infer<typeof releaseIntentSchema>;
-
-// @public (undocumented)
-export const releaseIntentSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
-    source: z.ZodLiteral<"none">;
-}, z.core.$strict>, z.ZodObject<{
-    bump: z.ZodEnum<{
-        major: "major";
-        minor: "minor";
-        patch: "patch";
-    }>;
-    reason: z.ZodString;
-    source: z.ZodLiteral<"changesets">;
-}, z.core.$strict>, z.ZodObject<{
-    bump: z.ZodEnum<{
-        major: "major";
-        minor: "minor";
-        patch: "patch";
-    }>;
-    reason: z.ZodString;
-    source: z.ZodLiteral<"explicit">;
-}, z.core.$strict>], "source">;
-
-// @public (undocumented)
-export type ReleaseNextOperation = z.infer<typeof releaseNextOperationSchema>;
-
-// @public (undocumented)
-export const releaseNextOperationSchema: z.ZodEnum<{
-    observe: "observe";
-    prepare: "prepare";
-    publish: "publish";
-    tag: "tag";
-}>;
-
-// @public (undocumented)
-export type ReleasePackagePlan = z.infer<typeof releasePackagePlanSchema>;
-
-// @public (undocumented)
-export type ReleasePackagePlanInput = z.infer<typeof releasePackagePlanInputSchema>;
-
-// @public (undocumented)
-export const releasePackagePlanInputSchema: z.ZodObject<{
-    access: z.ZodOptional<z.ZodEnum<{
-        public: "public";
-        restricted: "restricted";
-    }>>;
-    doctor: z.ZodObject<{
-        artifact: z.ZodEnum<{
-            unknown: "unknown";
-            invalid: "invalid";
-            valid: "valid";
-        }>;
-        dependencyClosure: z.ZodEnum<{
-            unknown: "unknown";
-            valid: "valid";
-            blocked: "blocked";
-        }>;
-    }, z.core.$strict>;
-    gitTag: z.ZodDiscriminatedUnion<[z.ZodObject<{
-        selected: z.ZodLiteral<false>;
-    }, z.core.$strict>, z.ZodObject<{
-        name: z.ZodString;
-        selected: z.ZodLiteral<true>;
-    }, z.core.$strict>], "selected">;
-    intent: z.ZodDiscriminatedUnion<[z.ZodObject<{
-        source: z.ZodLiteral<"none">;
-    }, z.core.$strict>, z.ZodObject<{
-        bump: z.ZodEnum<{
-            major: "major";
-            minor: "minor";
-            patch: "patch";
-        }>;
-        reason: z.ZodString;
-        source: z.ZodLiteral<"changesets">;
-    }, z.core.$strict>, z.ZodObject<{
-        bump: z.ZodEnum<{
-            major: "major";
-            minor: "minor";
-            patch: "patch";
-        }>;
-        reason: z.ZodString;
-        source: z.ZodLiteral<"explicit">;
-    }, z.core.$strict>], "source">;
-    name: z.ZodString;
-    policy: z.ZodDiscriminatedUnion<[z.ZodObject<{
-        channel: z.ZodString;
-        decision: z.ZodLiteral<"selected">;
-        reason: z.ZodString;
-    }, z.core.$strict>, z.ZodObject<{
-        decision: z.ZodLiteral<"held">;
-        reason: z.ZodString;
-    }, z.core.$strict>], "decision">;
-    private: z.ZodBoolean;
-    registry: z.ZodObject<{
-        distTags: z.ZodRecord<z.ZodString, z.ZodString>;
-        registryUrl: z.ZodURL;
-        state: z.ZodEnum<{
-            exists: "exists";
-            invalid_identity: "invalid_identity";
-            missing: "missing";
-            unknown_auth: "unknown_auth";
-            unknown_network: "unknown_network";
-            unknown_registry: "unknown_registry";
-        }>;
-    }, z.core.$strict>;
-    version: z.ZodString;
-    versionState: z.ZodDiscriminatedUnion<[z.ZodObject<{
-        state: z.ZodLiteral<"current">;
-    }, z.core.$strict>, z.ZodObject<{
-        intendedVersion: z.ZodString;
-        state: z.ZodLiteral<"pending">;
-    }, z.core.$strict>], "state">;
-}, z.core.$strict>;
-
-// @public (undocumented)
-export const releasePackagePlanSchema: z.ZodObject<{
-    access: z.ZodOptional<z.ZodEnum<{
-        public: "public";
-        restricted: "restricted";
-    }>>;
-    doctor: z.ZodObject<{
-        artifact: z.ZodEnum<{
-            unknown: "unknown";
-            invalid: "invalid";
-            valid: "valid";
-        }>;
-        dependencyClosure: z.ZodEnum<{
-            unknown: "unknown";
-            valid: "valid";
-            blocked: "blocked";
-        }>;
-    }, z.core.$strict>;
-    gitTag: z.ZodDiscriminatedUnion<[z.ZodObject<{
-        selected: z.ZodLiteral<false>;
-    }, z.core.$strict>, z.ZodObject<{
-        name: z.ZodString;
-        selected: z.ZodLiteral<true>;
-    }, z.core.$strict>], "selected">;
-    intent: z.ZodDiscriminatedUnion<[z.ZodObject<{
-        source: z.ZodLiteral<"none">;
-    }, z.core.$strict>, z.ZodObject<{
-        bump: z.ZodEnum<{
-            major: "major";
-            minor: "minor";
-            patch: "patch";
-        }>;
-        reason: z.ZodString;
-        source: z.ZodLiteral<"changesets">;
-    }, z.core.$strict>, z.ZodObject<{
-        bump: z.ZodEnum<{
-            major: "major";
-            minor: "minor";
-            patch: "patch";
-        }>;
-        reason: z.ZodString;
-        source: z.ZodLiteral<"explicit">;
-    }, z.core.$strict>], "source">;
-    name: z.ZodString;
-    policy: z.ZodDiscriminatedUnion<[z.ZodObject<{
-        channel: z.ZodString;
-        decision: z.ZodLiteral<"selected">;
-        reason: z.ZodString;
-    }, z.core.$strict>, z.ZodObject<{
-        decision: z.ZodLiteral<"held">;
-        reason: z.ZodString;
-    }, z.core.$strict>], "decision">;
-    private: z.ZodBoolean;
-    registry: z.ZodObject<{
-        distTags: z.ZodRecord<z.ZodString, z.ZodString>;
-        registryUrl: z.ZodURL;
-        state: z.ZodEnum<{
-            exists: "exists";
-            invalid_identity: "invalid_identity";
-            missing: "missing";
-            unknown_auth: "unknown_auth";
-            unknown_network: "unknown_network";
-            unknown_registry: "unknown_registry";
-        }>;
-    }, z.core.$strict>;
-    version: z.ZodString;
-    versionState: z.ZodDiscriminatedUnion<[z.ZodObject<{
-        state: z.ZodLiteral<"current">;
-    }, z.core.$strict>, z.ZodObject<{
-        intendedVersion: z.ZodString;
-        state: z.ZodLiteral<"pending">;
-    }, z.core.$strict>], "state">;
-    availableNextOperations: z.ZodArray<z.ZodEnum<{
-        observe: "observe";
-        prepare: "prepare";
-        publish: "publish";
-        tag: "tag";
-    }>>;
-    status: z.ZodEnum<{
-        unknown_registry: "unknown_registry";
-        blocked_dependency_closure: "blocked_dependency_closure";
-        blocked_invalid_artifact: "blocked_invalid_artifact";
-        blocked_unknown_artifact: "blocked_unknown_artifact";
-        blocked_unknown_dependency_closure: "blocked_unknown_dependency_closure";
-        pending_eligible: "pending_eligible";
-        pending_held: "pending_held";
-        private_unpublishable: "private_unpublishable";
-        published: "published";
-    }>;
-}, z.core.$strict>;
-
-// @public (undocumented)
-export type ReleasePackageStatus = z.infer<typeof releasePackageStatusSchema>;
-
-// @public (undocumented)
-export const releasePackageStatusSchema: z.ZodEnum<{
-    unknown_registry: "unknown_registry";
-    blocked_dependency_closure: "blocked_dependency_closure";
-    blocked_invalid_artifact: "blocked_invalid_artifact";
-    blocked_unknown_artifact: "blocked_unknown_artifact";
-    blocked_unknown_dependency_closure: "blocked_unknown_dependency_closure";
-    pending_eligible: "pending_eligible";
-    pending_held: "pending_held";
-    private_unpublishable: "private_unpublishable";
-    published: "published";
-}>;
+// @public
+export type ReleasePackagePlan = ReleasePlan['packages'][number];
 
 // @public (undocumented)
 export type ReleasePlan = z.infer<typeof releasePlanSchema>;
 
-// @public (undocumented)
-export type ReleasePlanExecution = z.infer<typeof releasePlanExecutionSchema>;
-
-// @public (undocumented)
-export const releasePlanExecutionSchema: z.ZodObject<{
-    operation: z.ZodLiteral<"observe">;
-}, z.core.$strict>;
-
-// @public (undocumented)
+// @public
 export const releasePlanSchema: z.ZodObject<{
     execution: z.ZodObject<{
         operation: z.ZodLiteral<"observe">;
@@ -703,7 +431,6 @@ export const releasePlanSchema: z.ZodObject<{
             registryUrl: z.ZodURL;
             state: z.ZodEnum<{
                 exists: "exists";
-                invalid_identity: "invalid_identity";
                 missing: "missing";
                 unknown_auth: "unknown_auth";
                 unknown_network: "unknown_network";
@@ -746,77 +473,6 @@ export const releasePlanSchema: z.ZodObject<{
         unknown: z.ZodNumber;
     }, z.core.$strict>;
 }, z.core.$strict>;
-
-// @public (undocumented)
-export type ReleasePlanSummary = z.infer<typeof releasePlanSummarySchema>;
-
-// @public (undocumented)
-export const releasePlanSummarySchema: z.ZodObject<{
-    blocked: z.ZodNumber;
-    eligible: z.ZodNumber;
-    held: z.ZodNumber;
-    packages: z.ZodNumber;
-    private: z.ZodNumber;
-    published: z.ZodNumber;
-    unknown: z.ZodNumber;
-}, z.core.$strict>;
-
-// @public (undocumented)
-export type ReleasePublishPolicy = z.infer<typeof releasePublishPolicySchema>;
-
-// @public (undocumented)
-export const releasePublishPolicySchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
-    channel: z.ZodString;
-    decision: z.ZodLiteral<"selected">;
-    reason: z.ZodString;
-}, z.core.$strict>, z.ZodObject<{
-    decision: z.ZodLiteral<"held">;
-    reason: z.ZodString;
-}, z.core.$strict>], "decision">;
-
-// @public (undocumented)
-export type ReleaseRegistryObservation = z.infer<typeof releaseRegistryObservationSchema>;
-
-// @public (undocumented)
-export const releaseRegistryObservationSchema: z.ZodObject<{
-    distTags: z.ZodRecord<z.ZodString, z.ZodString>;
-    registryUrl: z.ZodURL;
-    state: z.ZodEnum<{
-        exists: "exists";
-        invalid_identity: "invalid_identity";
-        missing: "missing";
-        unknown_auth: "unknown_auth";
-        unknown_network: "unknown_network";
-        unknown_registry: "unknown_registry";
-    }>;
-}, z.core.$strict>;
-
-// @public (undocumented)
-export type ReleaseRegistryState = z.infer<typeof releaseRegistryStateSchema>;
-
-// @public (undocumented)
-export const releaseRegistryStateSchema: z.ZodEnum<{
-    exists: "exists";
-    invalid_identity: "invalid_identity";
-    missing: "missing";
-    unknown_auth: "unknown_auth";
-    unknown_network: "unknown_network";
-    unknown_registry: "unknown_registry";
-}>;
-
-// @public
-export const releaseRegistryUrlSchema: z.ZodURL;
-
-// @public (undocumented)
-export type ReleaseVersionState = z.infer<typeof releaseVersionStateSchema>;
-
-// @public (undocumented)
-export const releaseVersionStateSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
-    state: z.ZodLiteral<"current">;
-}, z.core.$strict>, z.ZodObject<{
-    intendedVersion: z.ZodString;
-    state: z.ZodLiteral<"pending">;
-}, z.core.$strict>], "state">;
 
 // @public
 export const remoteBranchExists: (repoRoot: string, branch: string) => boolean;

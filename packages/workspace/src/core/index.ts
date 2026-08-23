@@ -33,7 +33,22 @@ export {
     type WorkspaceSnapshotResult,
 } from './packages.js'
 export * from './pull-request-plan.js'
-export * from './release-plan.js'
+/**
+ * The release-plan contract is exported deliberately narrowly.
+ *
+ * Every name here is one an external adapter needs: the composer, the inputs it accepts, the canonical plan it returns,
+ * one package record, and the schema that lets a consumer reject an unsupported `schemaVersion` before reading a field.
+ * The intermediate state schemas stay internal on purpose — this slice only observes, and publishing the whole
+ * intermediate vocabulary would freeze shapes that later prepare/tag/publish slices still need to move.
+ */
+export {
+    createReleasePlan,
+    type CreateReleasePlanInput,
+    createReleasePlanInputSchema,
+    type ReleasePackagePlan,
+    type ReleasePlan,
+    releasePlanSchema,
+} from './release-plan.js'
 export {
     createRepositoryScopeClassifiers,
     getWorkspaceScopeClassifiers,
