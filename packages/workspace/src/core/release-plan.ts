@@ -154,3 +154,103 @@ export type ReleaseRegistryObservation = z.infer<
 >
 export type ReleaseRegistryState = z.infer<typeof releaseRegistryStateSchema>
 export type ReleaseVersionState = z.infer<typeof releaseVersionStateSchema>
+
+export type CreateReleasePlanInput = {
+    execution?: ReleasePlanExecution
+    packages: ReadonlyArray<ReleasePackagePlanInput>
+}
+
+/** Compose and validate the canonical read-only workspace release plan. */
+export function createReleasePlan(input: CreateReleasePlanInput): ReleasePlan {
+    const packages = input.packages.map(createReleasePackagePlan)
+
+    return releasePlanSchema.parse({
+        execution: input.execution ?? { operation: 'observe' },
+        packages,
+        schemaVersion: 1,
+        summary: summarizeReleasePackages(packages),
+    })
+}
+
+/** Derive one package record without performing registry, Doctor, or Changesets IO. */
+export function createReleasePackagePlan(
+    input: ReleasePackagePlanInput,
+): ReleasePackagePlan {
+    const facts = releasePackagePlanInputSchema.parse(input)
+    const status = deriveReleasePackageStatus(facts)
+
+    return releasePackagePlanSchema.parse({
+        ...facts,
+        availableNextOperations: deriveAvailableNextOperations(facts, status),
+        status,
+    })
+}
+
+function deriveReleasePackageStatus(
+    input: ReleasePackagePlanInput,
+): ReleasePackageStatus {
+    if (
+        input.registry.state !== 'exists' &&
+        input.registry.state !== 'missing'
+    ) {
+        return 'unknown_registry'
+    }
+
+    if (input.registry.state === 'exists') return 'published'
+    if (input.private) return 'private_unpublishable'
+    if (input.policy.decision === 'held') return 'pending_held'
+    if (input.doctor.artifact === 'invalid') {
+        return 'blocked_invalid_artifact'
+    }
+    if (input.doctor.artifact === 'unknown') {
+        return 'blocked_unknown_artifact'
+    }
+    if (input.doctor.dependencyClosure === 'blocked') {
+        return 'blocked_dependency_closure'
+    }
+    if (input.doctor.dependencyClosure === 'unknown') {
+        return 'blocked_unknown_dependency_closure'
+    }
+
+    return 'pending_eligible'
+}
+
+function deriveAvailableNextOperations(
+    input: ReleasePackagePlanInput,
+    status: ReleasePackageStatus,
+): Array<ReleaseNextOperation> {
+    const operations = new Set<ReleaseNextOperation>(['observe'])
+
+    if (input.versionState.state === 'pending') operations.add('prepare')
+    if (input.gitTag.selected) operations.add('tag')
+    if (status === 'pending_eligible') operations.add('publish')
+
+    return [...operations]
+}
+
+function summarizeReleasePackages(
+    packages: ReadonlyArray<ReleasePackagePlan>,
+): ReleasePlanSummary {
+    const summary: ReleasePlanSummary = {
+        blocked: 0,
+        eligible: 0,
+        held: 0,
+        packages: packages.length,
+        private: 0,
+        published: 0,
+        unknown: 0,
+    }
+
+    for (const packagePlan of packages) {
+        if (packagePlan.status.startsWith('blocked_')) summary.blocked += 1
+        else if (packagePlan.status === 'pending_eligible')
+            summary.eligible += 1
+        else if (packagePlan.status === 'pending_held') summary.held += 1
+        else if (packagePlan.status === 'private_unpublishable') {
+            summary.private += 1
+        } else if (packagePlan.status === 'published') summary.published += 1
+        else summary.unknown += 1
+    }
+
+    return summary
+}
