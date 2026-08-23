@@ -135,6 +135,10 @@ export const releasePlanSchema = z.strictObject({
     summary: releasePlanSummarySchema,
 })
 
+export type CreateReleasePlanInput = {
+    execution?: ReleasePlanExecution
+    packages: ReadonlyArray<ReleasePackagePlanInput>
+}
 export type ReleaseDoctorFacts = z.infer<typeof releaseDoctorFactsSchema>
 export type ReleaseExecution = z.infer<typeof releaseExecutionSchema>
 export type ReleaseGitTagIntent = z.infer<typeof releaseGitTagIntentSchema>
@@ -153,11 +157,21 @@ export type ReleaseRegistryObservation = z.infer<
     typeof releaseRegistryObservationSchema
 >
 export type ReleaseRegistryState = z.infer<typeof releaseRegistryStateSchema>
+
 export type ReleaseVersionState = z.infer<typeof releaseVersionStateSchema>
 
-export type CreateReleasePlanInput = {
-    execution?: ReleasePlanExecution
-    packages: ReadonlyArray<ReleasePackagePlanInput>
+/** Derive one package record without performing registry, Doctor, or Changesets IO. */
+export function createReleasePackagePlan(
+    input: ReleasePackagePlanInput,
+): ReleasePackagePlan {
+    const facts = releasePackagePlanInputSchema.parse(input)
+    const status = deriveReleasePackageStatus(facts)
+
+    return releasePackagePlanSchema.parse({
+        ...facts,
+        availableNextOperations: deriveAvailableNextOperations(facts, status),
+        status,
+    })
 }
 
 /** Compose and validate the canonical read-only workspace release plan. */
@@ -172,18 +186,17 @@ export function createReleasePlan(input: CreateReleasePlanInput): ReleasePlan {
     })
 }
 
-/** Derive one package record without performing registry, Doctor, or Changesets IO. */
-export function createReleasePackagePlan(
+function deriveAvailableNextOperations(
     input: ReleasePackagePlanInput,
-): ReleasePackagePlan {
-    const facts = releasePackagePlanInputSchema.parse(input)
-    const status = deriveReleasePackageStatus(facts)
+    status: ReleasePackageStatus,
+): Array<ReleaseNextOperation> {
+    const operations = new Set<ReleaseNextOperation>(['observe'])
 
-    return releasePackagePlanSchema.parse({
-        ...facts,
-        availableNextOperations: deriveAvailableNextOperations(facts, status),
-        status,
-    })
+    if (input.versionState.state === 'pending') operations.add('prepare')
+    if (input.gitTag.selected) operations.add('tag')
+    if (status === 'pending_eligible') operations.add('publish')
+
+    return [...operations]
 }
 
 function deriveReleasePackageStatus(
@@ -213,19 +226,6 @@ function deriveReleasePackageStatus(
     }
 
     return 'pending_eligible'
-}
-
-function deriveAvailableNextOperations(
-    input: ReleasePackagePlanInput,
-    status: ReleasePackageStatus,
-): Array<ReleaseNextOperation> {
-    const operations = new Set<ReleaseNextOperation>(['observe'])
-
-    if (input.versionState.state === 'pending') operations.add('prepare')
-    if (input.gitTag.selected) operations.add('tag')
-    if (status === 'pending_eligible') operations.add('publish')
-
-    return [...operations]
 }
 
 function summarizeReleasePackages(

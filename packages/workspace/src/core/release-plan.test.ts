@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
     createReleasePackagePlan,
     createReleasePlan,
+    type ReleasePackagePlanInput,
     releasePlanSchema,
     releaseRegistryObservationSchema,
-    type ReleasePackagePlanInput,
     type ReleaseRegistryState,
 } from './release-plan.js'
 
