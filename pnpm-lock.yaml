@@ -705,6 +705,15 @@ importers:
             '@changesets/parse':
                 specifier: ^1.0.0
                 version: 1.0.0
+            '@commitlint/lint':
+                specifier: ^21.2.2
+                version: 21.2.2
+            '@commitlint/load':
+                specifier: ^21.2.2
+                version: 21.2.2(@types/node@26.2.0)(typescript@6.0.3)
+            '@commitlint/types':
+                specifier: ^21.2.0
+                version: 21.2.0
             '@snailicid3/logger':
                 specifier: workspace:*
                 version: link:../logger

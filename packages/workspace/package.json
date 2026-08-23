@@ -101,6 +101,9 @@
     },
     "dependencies": {
         "@changesets/parse": "^1.0.0",
+        "@commitlint/lint": "^21.2.2",
+        "@commitlint/load": "^21.2.2",
+        "@commitlint/types": "^21.2.0",
         "@snailicid3/logger": "workspace:*",
         "@snailicid3/node-utils": "workspace:*",
         "@snailicid3/utils": "workspace:*",

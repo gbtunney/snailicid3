@@ -197,7 +197,7 @@ const runBranchDerivedCommit = async (
         )
     }
 
-    validateCommitMessage(repoRoot, derived.message)
+    await validateCommitMessage(repoRoot, derived.message)
 
     if (parsed.dryRun) {
         console.log(derived.message)

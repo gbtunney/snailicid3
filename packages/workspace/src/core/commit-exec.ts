@@ -1,6 +1,8 @@
+import lint from '@commitlint/lint'
+import load from '@commitlint/load'
+import type { LintOptions, LintOutcome } from '@commitlint/types'
 import { runCommand } from '@snailicid3/node-utils'
 import { readWorkspaceEnvironment } from './environment.js'
-import { runPackageBinary } from './package-manager.js'
 
 /**
  * The two mutating steps every commit path shares: validate the message, then record the commit.
@@ -38,33 +40,38 @@ export const requireStagedChanges = (repoRoot: string): void => {
     }
 }
 
-/** Validate a commit message with the repository's Commitlint configuration. */
-export const validateCommitMessage = (
+/** Lint a commit message against the repository's Commitlint configuration, in-process. */
+export const lintCommitMessage = async (
     repoRoot: string,
     message: string,
-): void => {
+): Promise<LintOutcome> => {
+    const config = await load({}, { cwd: repoRoot })
+
+    return lint(message, config.rules, {
+        defaultIgnores: config.defaultIgnores,
+        ignores: config.ignores,
+        parserOpts: config.parserPreset
+            ?.parserOpts as LintOptions['parserOpts'],
+        plugins: config.plugins,
+    })
+}
+
+/** Validate a commit message with the repository's Commitlint configuration. */
+export const validateCommitMessage = async (
+    repoRoot: string,
+    message: string,
+): Promise<void> => {
     if (readWorkspaceEnvironment(process.env).skipCommitlint) return
 
-    const result = runPackageBinary(
-        repoRoot,
-        'commitlint',
-        ['--cwd', repoRoot],
-        {
-            cwd: repoRoot,
-            input: `${message}\n`,
-        },
-    )
+    const outcome = await lintCommitMessage(repoRoot, message)
 
-    if (result.status !== 0) {
+    if (!outcome.valid) {
+        const problems = [...outcome.errors, ...outcome.warnings].map(
+            (rule) => `  ${rule.name} ${rule.message}`,
+        )
+
         throw new Error(
-            [
-                'invalid commit message:',
-                `  ${message}`,
-                result.stderr.trim(),
-                result.stdout.trim(),
-            ]
-                .filter(Boolean)
-                .join('\n'),
+            ['invalid commit message:', `  ${message}`, ...problems].join('\n'),
         )
     }
 }
