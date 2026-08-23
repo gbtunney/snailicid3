@@ -22,15 +22,12 @@ env:
 jobs:
     required:
         name: required
-        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@main
-        secrets: inherit
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@v1
         with:
-            run_chromatic: false
             mode: abort_on_error
             check_mode: check
-            require_lockfile: true
+            lockfile_mode: frozen
+            build_mode: abort_on_error
+            test_mode: abort_on_error
+            docs_mode: skip
             require_clean_repo: true
-            run_build: true
-            run_test: true
-            run_docs_build: false
-            pnpm_cache: true

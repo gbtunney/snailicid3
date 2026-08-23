@@ -27,7 +27,7 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         steps:
             - name: Checkout pull request merge ref
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
               with:
                   fetch-depth: 0
                   ref: refs/pull/${{ github.event.pull_request.number }}/merge
@@ -42,7 +42,7 @@ jobs:
 
     detect:
         name: detect release state
-        uses: gbtunney/snailicid3-actions/.github/workflows/call-detect-release-state.yml@main
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-detect-release-state.yml@v1
         with:
             ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
@@ -50,57 +50,48 @@ jobs:
         name: pending changeset
         needs: detect
         if: ${{ needs.detect.outputs.should_version == 'true' }}
-        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@main
-        secrets: inherit
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@v1
         with:
-            run_chromatic: false
             checkout_ref: ${{ github.event_name == 'pull_request' && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.ref }}
             mode: abort_on_error
             check_mode: check
-            require_lockfile: true
-            require_clean_repo: true
-            run_build: true
-            run_test: true
-            run_docs_build: true
+            lockfile_mode: frozen
+            build_mode: abort_on_error
+            test_mode: abort_on_error
+            docs_mode: abort_on_error
             api_report_mode: update
-            pnpm_cache: true
+            require_clean_repo: true
 
     pending_release:
         name: pending release
         needs: detect
         if: ${{ needs.detect.outputs.should_publish == 'true' }}
-        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@main
-        secrets: inherit
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@v1
         with:
-            run_chromatic: false
             checkout_ref: ${{ github.event_name == 'pull_request' && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.ref }}
             mode: abort_on_error
             check_mode: check
-            require_lockfile: true
-            require_clean_repo: true
-            run_build: true
-            run_test: true
-            run_docs_build: true
+            lockfile_mode: frozen
+            build_mode: abort_on_error
+            test_mode: abort_on_error
+            docs_mode: abort_on_error
             api_report_mode: check
-            pnpm_cache: true
+            require_clean_repo: true
 
     main:
         name: main
         needs: detect
         if: ${{ needs.detect.outputs.should_skip == 'true' }}
-        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@main
-        secrets: inherit
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@v1
         with:
-            run_chromatic: false
             checkout_ref: ${{ github.event_name == 'pull_request' && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.ref }}
             mode: abort_on_error
             check_mode: check
-            require_lockfile: true
+            lockfile_mode: frozen
+            build_mode: abort_on_error
+            test_mode: abort_on_error
+            docs_mode: skip
             require_clean_repo: true
-            run_build: true
-            run_test: true
-            run_docs_build: false
-            pnpm_cache: true
 
     required:
         name: required

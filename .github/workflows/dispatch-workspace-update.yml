@@ -25,6 +25,13 @@ on:
                 default: false
                 type: boolean
 
+            repair_lockfile:
+                description: >
+                    Update pnpm-lock.yaml as needed to satisfy the manifests (pnpm install --no-frozen-lockfile) and commit the result. This is not a reset: the existing lockfile is updated, not deleted and re-resolved from scratch. Leave off and a stale lockfile fails the run instead of being rewritten silently.
+                required: true
+                default: false
+                type: boolean
+
             commit_message_type:
                 description: Conventional commit type prefix
                 required: false
@@ -39,9 +46,7 @@ on:
                 type: string
 
 permissions:
-    contents: write
-    actions: read
-    id-token: write
+    contents: read
 
 env:
     HUSKY: 0
@@ -63,24 +68,33 @@ jobs:
 
                   if [[ "${{ inputs.run_fix }}" != "true" &&
                         "${{ inputs.run_docs }}" != "true" &&
-                        "${{ inputs.run_api_report }}" != "true" ]]; then
-                    echo "::error::Select at least one routine: fix, docs, or API report."
+                        "${{ inputs.run_api_report }}" != "true" &&
+                        "${{ inputs.repair_lockfile }}" != "true" ]]; then
+                    echo "::error::Select at least one routine: fix, docs, API report, or lockfile repair."
                     exit 1
                   fi
 
-                  echo "Branch: ${{ github.ref_name }}"
+                  {
+                    echo "## 🧰 Workspace update"
+                    echo ""
+                    echo "- branch: \`${{ github.ref_name }}\`"
+                    echo "- fix: \`${{ inputs.run_fix }}\`"
+                    echo "- docs: \`${{ inputs.run_docs }}\`"
+                    echo "- api report: \`${{ inputs.run_api_report }}\`"
+                    echo "- lockfile: \`${{ inputs.repair_lockfile && 'reconcile (repair, not reset)' || 'frozen (a stale lockfile fails the run)' }}\`"
+                  } | tee -a "$GITHUB_STEP_SUMMARY"
 
     pipeline_workspace_update:
         name: Run selected pipeline routines
         needs: guard
-        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@main
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@v1
         with:
             mode: report
             check_mode: ${{ inputs.run_fix && 'fix' || 'skip' }}
-            require_lockfile: false
-            run_build: false
-            run_test: false
-            run_docs_build: ${{ inputs.run_docs }}
+            lockfile_mode: ${{ inputs.repair_lockfile && 'reconcile' || 'frozen' }}
+            build_mode: skip
+            test_mode: skip
+            docs_mode: ${{ inputs.run_docs && 'report' || 'skip' }}
             api_report_mode: ${{ inputs.run_api_report && 'update' || 'skip' }}
             require_clean_repo: false
             upload_workspace_artifact: true
@@ -90,8 +104,13 @@ jobs:
         name: Apply artifact and commit
         needs: pipeline_workspace_update
         if: ${{ needs.pipeline_workspace_update.result == 'success' && needs.pipeline_workspace_update.outputs.artifact_uploaded == 'true' }}
-        uses: gbtunney/snailicid3-actions/.github/workflows/call-apply-workspace-artifact.yml@main
-        secrets: inherit
+        permissions:
+            contents: write
+            actions: read
+            id-token: write
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-apply-workspace-artifact.yml@v1
+        secrets:
+            GH_PAT: ${{ secrets.GH_PAT }}
         with:
             ref: ${{ github.ref_name }}
             artifact_name: ${{ needs.pipeline_workspace_update.outputs.workspace_artifact_name }}
