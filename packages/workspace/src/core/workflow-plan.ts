@@ -22,6 +22,7 @@ export type BaseRelation = 'ahead' | 'behind' | 'diverged' | 'equal' | 'unknown'
 
 export type WorkflowActionId =
     | 'commit'
+    | 'push'
     | 'stage'
     | 'start-changeset'
     | 'switch-workflow-branch'
@@ -107,7 +108,9 @@ export const inferWorkflowIdentity = (
 export const planWorkflow = (facts: WorkflowFacts): WorkflowPlan => {
     const warnings: Array<string> = []
     const nextActions: Array<WorkflowNextAction> = []
-    const stacked = facts.aheadCount > 0
+    // An existing workflow branch is not "created from here" by anything this plan offers next, so only the no-identity
+    // case — about to run `gbt-changeset` — can stack a new branch on unmerged commits.
+    const stacked = !facts.identity && facts.aheadCount > 0
 
     if (facts.workingTree === 'dirty') {
         warnings.push(
@@ -140,7 +143,16 @@ export const planWorkflow = (facts: WorkflowFacts): WorkflowPlan => {
                 consequence: `commits the ${facts.stagedFiles.length.toString()} staged file(s) as ${facts.identity.mode}(<scope>): ${facts.identity.slug}, with the scope resolved from those files.`,
                 id: 'commit',
             })
-        } else {
+        } else if (
+            facts.aheadCount > 0 &&
+            !facts.matchingBranches.remote.includes(facts.currentBranch)
+        ) {
+            nextActions.push({
+                command: `git push -u origin ${facts.currentBranch}`,
+                consequence: `publishes the ${facts.aheadCount.toString()} local ${facts.identity.mode} commit(s); open a pull request against origin/${facts.baseBranch} once it is pushed.`,
+                id: 'push',
+            })
+        } else if (facts.aheadCount === 0) {
             nextActions.push({
                 command: 'git add <path>',
                 consequence: `stages files for the next ${facts.identity.mode} commit; nothing is staged, so there is nothing to commit yet.`,

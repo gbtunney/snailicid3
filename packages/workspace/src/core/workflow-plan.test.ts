@@ -115,18 +115,52 @@ describe('planWorkflow', () => {
     })
 
     it('marks a stacked state from ancestry, not from the branch name', () => {
-        expect(planWorkflow(facts({ aheadCount: 2 })).stacked).toBe(true)
-        expect(planWorkflow(facts({ aheadCount: 0 })).stacked).toBe(false)
-        // On the base branch itself: still stacked when HEAD carries unmerged commits.
+        // Only the no-identity case proposes creating a new branch, so only it can be "stacked".
         expect(
             planWorkflow(
                 facts({
-                    aheadCount: 1,
+                    aheadCount: 2,
                     currentBranch: 'main',
                     identity: undefined,
                 }),
             ).stacked,
         ).toBe(true)
+        expect(
+            planWorkflow(
+                facts({
+                    aheadCount: 0,
+                    currentBranch: 'main',
+                    identity: undefined,
+                }),
+            ).stacked,
+        ).toBe(false)
+        // An existing workflow branch is not "created from here" by anything this plan offers next.
+        expect(planWorkflow(facts({ aheadCount: 2 })).stacked).toBe(false)
+    })
+
+    it('offers a push once a workflow branch is committed and clean', () => {
+        expect(actionIds(facts({ aheadCount: 1 }))).toEqual(['push'])
+
+        const plan = planWorkflow(facts({ aheadCount: 1 }))
+
+        expect(plan.nextActions[0]).toMatchObject({
+            command: 'git push -u origin changeset/wacky-walker',
+            id: 'push',
+        })
+    })
+
+    it('offers nothing further once the branch is already pushed', () => {
+        expect(
+            actionIds(
+                facts({
+                    aheadCount: 1,
+                    matchingBranches: {
+                        local: ['changeset/wacky-walker'],
+                        remote: ['changeset/wacky-walker'],
+                    },
+                }),
+            ),
+        ).toEqual([])
     })
 
     it('warns about dirty, behind and diverged states', () => {
@@ -175,7 +209,7 @@ describe('formatWorkflowPlan', () => {
 
         expect(output).toContain('changeset (slug: wacky-walker)')
         expect(output).toContain('ahead by 2 commit(s)')
-        expect(output).toContain('yes — a new branch here would stack')
+        expect(output).toContain('no')
         expect(output).toContain('Matching workflow branches')
         expect(output).toContain('gbt-workflow commit [text]')
     })
