@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { parseChangesetFile } from '@changesets/parse'
 import { runCliIfEntrypointAsync, safeParseArgv } from '@snailicid3/node-utils'
 import { z } from 'zod'
 import { existsSync, readFileSync } from 'node:fs'
@@ -85,9 +86,11 @@ function collectChangesetScopes(
 
         if (!existsSync(absolutePath)) return []
 
-        return parseChangesetPackageNames(
+        return parseChangesetFile(
             readFileSync(absolutePath, 'utf8'),
-        ).map((scope) => normalizeScopeName(scope, keepPrefix, snapshot()))
+        ).releases.map((release) =>
+            normalizeScopeName(release.name, keepPrefix, snapshot()),
+        )
     })
 }
 
@@ -248,27 +251,6 @@ function parseArgs(args: Array<string>): ParsedArgs {
         nxHead: options.head ?? '',
         scopeFormat: options.list === true ? 'list' : 'csv',
     }
-}
-
-function parseChangesetPackageNames(markdown: string): Array<string> {
-    const lines = markdown.replaceAll('\r', '').split('\n')
-
-    if (lines[0] !== '---') return []
-
-    const packageNames: Array<string> = []
-
-    for (const line of lines.slice(1)) {
-        if (line === '---') break
-
-        const match =
-            /^["']?([^"':]+)["']?:\s*(?:major|minor|patch|none)\s*$/.exec(
-                line.trim(),
-            )
-
-        if (match?.[1]) packageNames.push(match[1])
-    }
-
-    return packageNames
 }
 
 function printHelp(): void {

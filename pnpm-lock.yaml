@@ -702,6 +702,9 @@ importers:
 
     packages/workspace:
         dependencies:
+            '@changesets/parse':
+                specifier: ^1.0.0
+                version: 1.0.0
             '@snailicid3/logger':
                 specifier: workspace:*
                 version: link:../logger
@@ -959,6 +962,13 @@ packages:
                 integrity: sha512-ZDmNc53+dXdWEv7fqIUSgRQOLYoUom5Z40gmLgmATmYR9NbL6FJJHwakcCpzaeCy+1D0m0n7mT4jj2B/MQPl7A==,
             }
 
+    '@changesets/parse@1.0.0':
+        resolution:
+            {
+                integrity: sha512-P0iaMb9p9CRYZiTgAllEIF9AUMQHIy1G72tKlcIqJp61icZSsKQNiOPdxAMZG8m/DvZwt/oz5xEbTpike//dWg==,
+            }
+        engines: { node: ^22.11 || ^24 || >=26 }
+
     '@changesets/pre@2.0.2':
         resolution:
             {
@@ -988,6 +998,13 @@ packages:
             {
                 integrity: sha512-rKQcJ+o1nKNgeoYRHKOS07tAMNd3YSN0uHaJOZYjBAgxfV7TUE7JE+z4BzZdQwb5hKaYbayKN5KrYV7ODb2rAA==,
             }
+
+    '@changesets/types@7.0.0':
+        resolution:
+            {
+                integrity: sha512-c5GoiQyt3pxiXjrWSNoP8/GRf4kG+VnKzovx1OQM8dYYALlSwgedmkPmJ+ZqGxqwg9D3Bkj85Uo4KLd5BN3A0w==,
+            }
+        engines: { node: ^22.11 || ^24 || >=26 }
 
     '@changesets/write@0.4.0':
         resolution:
@@ -2554,10 +2571,10 @@ packages:
             }
         engines: { node: '>=14', npm: '>=6', yarn: '>=1' }
 
-    '@testing-library/user-event@14.6.4':
+    '@testing-library/user-event@14.6.6':
         resolution:
             {
-                integrity: sha512-QCGwP6QrjypBLwyj5cuyfVamkaIEy/XGY+1VDehbtbQqOggYmTFpFOdWR5mPz14vX8vXLMVjDHlRNBcClyO9ew==,
+                integrity: sha512-Jbs9FpkkIDw8FgSc6kOVsOv8JuuqGAL7J4X1oot77JxAoDlkNn2GRkd0aYRVuQ+pVQAiHWVkE4rX/dkF5fBiCw==,
             }
         engines: { node: '>=12', npm: '>=6' }
         peerDependencies:
@@ -4685,10 +4702,10 @@ packages:
             }
         engines: { node: '>=18' }
 
-    default-browser@5.5.0:
+    default-browser@5.5.1:
         resolution:
             {
-                integrity: sha512-H9LMLr5zwIbSxrmvikGuI/5KGhZ8E2zH3stkMgM5LpOWDutGM2JZaj460Udnf1a+946zc7YBgrqEWwbk7zHvGw==,
+                integrity: sha512-m1pAzaJgZ/gssEqlOhJkPJp8Xly7QyW6xcrkUa2KKcDeDSEMP7X8xipU3snUcfisTQx0w1AGae+9UtJSfVnXGw==,
             }
         engines: { node: '>=18' }
 
@@ -10409,6 +10426,11 @@ snapshots:
             '@changesets/types': 6.1.0
             js-yaml: 4.3.1
 
+    '@changesets/parse@1.0.0':
+        dependencies:
+            '@changesets/types': 7.0.0
+            yaml: 2.9.0
+
     '@changesets/pre@2.0.2':
         dependencies:
             '@changesets/errors': 0.2.0
@@ -10434,6 +10456,8 @@ snapshots:
     '@changesets/types@4.1.0': {}
 
     '@changesets/types@6.1.0': {}
+
+    '@changesets/types@7.0.0': {}
 
     '@changesets/write@0.4.0':
         dependencies:
@@ -11283,7 +11307,7 @@ snapshots:
             picocolors: 1.1.1
             redent: 3.0.0
 
-    '@testing-library/user-event@14.6.4(@testing-library/dom@10.4.1)':
+    '@testing-library/user-event@14.6.6(@testing-library/dom@10.4.1)':
         dependencies:
             '@testing-library/dom': 10.4.1
 
@@ -12526,7 +12550,7 @@ snapshots:
             bundle-name: 4.1.0
             default-browser-id: 5.0.0
 
-    default-browser@5.5.0:
+    default-browser@5.5.1:
         dependencies:
             bundle-name: 4.1.0
             default-browser-id: 5.0.1
@@ -14649,7 +14673,7 @@ snapshots:
 
     open@10.2.0:
         dependencies:
-            default-browser: 5.5.0
+            default-browser: 5.5.1
             define-lazy-prop: 3.0.0
             is-inside-container: 1.0.0
             wsl-utils: 0.1.0
@@ -15435,7 +15459,7 @@ snapshots:
             '@storybook/icons': 2.1.0(react@19.2.8)
             '@testing-library/dom': 10.4.1
             '@testing-library/jest-dom': 6.9.1
-            '@testing-library/user-event': 14.6.4(@testing-library/dom@10.4.1)
+            '@testing-library/user-event': 14.6.6(@testing-library/dom@10.4.1)
             '@vitest/expect': 3.2.4
             '@vitest/spy': 3.2.4
             '@webcontainer/env': 1.1.1
