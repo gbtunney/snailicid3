@@ -32,6 +32,7 @@ export {
     type WorkspaceSnapshot,
     type WorkspaceSnapshotResult,
 } from './packages.js'
+export * from './pull-request-plan.js'
 export {
     createRepositoryScopeClassifiers,
     getWorkspaceScopeClassifiers,

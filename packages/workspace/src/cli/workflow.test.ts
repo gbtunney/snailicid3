@@ -32,6 +32,17 @@ describe('parseWorkflowArgs', () => {
         }
     })
 
+    it('parses the read-only pull request renderer options', () => {
+        expect(
+            parseWorkflowArgs(['pr', '--json', '--command', '--copy', 'body']),
+        ).toMatchObject({
+            command: 'pr',
+            commandOutput: true,
+            copy: 'body',
+            json: true,
+        })
+    })
+
     it('reads scope, base and keep-prefix options', () => {
         expect(
             parseWorkflowArgs([
@@ -209,5 +220,39 @@ describe('gbt-workflow plan', () => {
         expect(parsed).toMatchObject({
             facts: { identity: { mode: 'changeset', slug: 'wacky-walker' } },
         })
+    })
+
+    it('renders a pull request plan without mutating the repository', async () => {
+        const { git, root } = makeRepo()
+
+        git('switch', '-q', '-c', 'changeset/wacky-walker')
+        const before = execFileSync('git', ['status', '--porcelain'], {
+            cwd: root,
+            encoding: 'utf8',
+        })
+
+        const output = await runIn(root, ['pr'])
+
+        expect(output).toContain('Pull request plan')
+        expect(output).toContain('changeset: wacky-walker')
+        expect(output).toContain('changeset/wacky-walker')
+        expect(
+            execFileSync('git', ['status', '--porcelain'], {
+                cwd: root,
+                encoding: 'utf8',
+            }),
+        ).toBe(before)
+    })
+
+    it('renders a safely copyable gh command', async () => {
+        const { git, root } = makeRepo()
+
+        git('switch', '-q', '-c', 'release/wacky-walker')
+
+        const output = await runIn(root, ['pr', '--command'])
+
+        expect(output).toContain('gh pr create')
+        expect(output).toContain("--base 'main'")
+        expect(output).toContain("--head 'release/wacky-walker'")
     })
 })

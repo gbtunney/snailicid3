@@ -7,7 +7,11 @@
  * type and slug from the current workflow branch, resolves the scope from the files staged for that individual commit,
  * and records it. Nothing else here stages, pushes or touches a pull request.
  */
-import { runCliIfEntrypointAsync, safeParseArgv } from '@snailicid3/node-utils'
+import {
+    runCliIfEntrypointAsync,
+    runCommand,
+    safeParseArgv,
+} from '@snailicid3/node-utils'
 import { z } from 'zod'
 import { deriveCommitFromBranch } from './../core/branch-commit.js'
 import {
@@ -18,6 +22,11 @@ import {
 import { getStagedFiles, resolveCommitScopes } from './../core/commit-scope.js'
 import { readWorkspaceEnvironment } from './../core/environment.js'
 import { getRepoRoot, resolveBaseBranch } from './../core/git.js'
+import {
+    formatPullRequestPlan,
+    planWorkflowPullRequest,
+    renderGhPrCreateCommand,
+} from './../core/pull-request-plan.js'
 import { formatScopes } from './../core/scopes.js'
 import {
     formatWorkflowPlan,
@@ -28,6 +37,8 @@ import {
 
 export const optionsSchema = z.strictObject({
     base: z.string().optional(),
+    command: z.boolean().optional(),
+    copy: z.enum(['body', 'command', 'title']).optional(),
     dry: z.boolean().optional(),
     dryRun: z.boolean().optional(),
     fullScope: z.boolean().optional(),
@@ -43,16 +54,19 @@ export type ParsedWorkflowArgs = {
     append: string
     baseOverride: string
     command: WorkflowCommand
+    commandOutput: boolean
+    copy: 'body' | 'command' | 'title' | undefined
     dryRun: boolean
     explicitScope: string
     json: boolean
     keepPrefix: boolean
 }
 
-export type WorkflowCommand = 'commit' | 'plan'
+export type WorkflowCommand = 'commit' | 'plan' | 'pr'
 
 const HELP = `Usage:
   gbt-workflow [plan] [--base <branch>] [--json]
+    gbt-workflow pr [--base <branch>] [--json] [--command] [--copy title|body|command]
   gbt-workflow commit [text ...] [--scope <scope>] [--keep-prefix] [--dry-run]
 
 Commands:
@@ -88,15 +102,16 @@ export const parseWorkflowArgs = (
     // `plan` is the default, so a bare `gbt-workflow` and an explicit `gbt-workflow plan` agree. Any other
     // leading token is treated as commit text rather than a mistyped command, because `commit` is the only
     // subcommand that accepts free text and silently dropping it would lose the user's message.
-    const command: WorkflowCommand = first === 'commit' ? 'commit' : 'plan'
+    const command: WorkflowCommand =
+        first === 'commit' ? 'commit' : first === 'pr' ? 'pr' : 'plan'
     const append =
         command === 'commit'
             ? rest.join(' ').trim()
-            : first === 'plan'
+            : first === 'plan' || first === 'pr'
               ? ''
               : [first, ...rest].filter(Boolean).join(' ').trim()
 
-    if (command === 'plan' && append) {
+    if ((command === 'plan' || command === 'pr') && append) {
         throw new Error(
             `unknown command "${append.split(' ')[0] ?? ''}". Run "gbt-workflow --help".`,
         )
@@ -106,6 +121,8 @@ export const parseWorkflowArgs = (
         append,
         baseOverride: options.base?.trim() ?? '',
         command,
+        commandOutput: options.command === true,
+        copy: options.copy,
         dryRun:
             options.dryRun === true ||
             options.dry === true ||
@@ -143,7 +160,74 @@ export async function main(
         return
     }
 
+    if (parsed.command === 'pr') {
+        const workflowPlan = buildPlan(repoRoot, baseBranch)
+        const identity = workflowPlan.facts.identity
+
+        if (!identity) {
+            throw new Error(
+                workflowPlan.unavailableReason ??
+                    'a changeset/* or release/* branch is required for a pull request plan.',
+            )
+        }
+
+        const scope =
+            parsed.explicitScope || (await resolveWorkflowScope(repoRoot))
+        const pullRequest = planWorkflowPullRequest(baseBranch, identity, scope)
+        const command = renderGhPrCreateCommand(pullRequest)
+        const output = parsed.commandOutput
+            ? command
+            : parsed.json
+              ? JSON.stringify(pullRequest, undefined, 2)
+              : formatPullRequestPlan(pullRequest)
+
+        console.log(output)
+
+        if (parsed.copy) {
+            copyWorkflowValue(parsed.copy, pullRequest, command)
+        }
+        return
+    }
+
     await runBranchDerivedCommit(repoRoot, baseBranch, parsed)
+}
+
+const resolveWorkflowScope = async (repoRoot: string): Promise<string> => {
+    const stagedFiles = getStagedFiles(repoRoot)
+    if (stagedFiles.length === 0) return ''
+
+    return formatScopes(
+        (await resolveCommitScopes(repoRoot, stagedFiles)).scopes,
+        'csv',
+    )
+}
+
+const copyWorkflowValue = (
+    target: 'body' | 'command' | 'title',
+    plan: ReturnType<typeof planWorkflowPullRequest>,
+    command: string,
+): void => {
+    const value = target === 'command' ? command : plan[target]
+    const candidates: Array<[string, Array<string>]> =
+        process.platform === 'darwin'
+            ? [['pbcopy', [] as Array<string>]]
+            : process.platform === 'win32'
+              ? [['clip', [] as Array<string>]]
+              : [
+                    ['wl-copy', [] as Array<string>],
+                    ['xclip', ['-selection', 'clipboard']],
+                ]
+
+    for (const [program, args] of candidates) {
+        const result = runCommand(program, args, { input: value })
+        if (result.success) {
+            console.error(`Copied ${target} to the clipboard.`)
+            return
+        }
+    }
+
+    console.error(`Clipboard unavailable; ${target} value:`)
+    console.error(value)
 }
 
 /**
@@ -197,7 +281,7 @@ const runBranchDerivedCommit = async (
         )
     }
 
-    validateCommitMessage(repoRoot, derived.message)
+    await validateCommitMessage(repoRoot, derived.message)
 
     if (parsed.dryRun) {
         console.log(derived.message)

@@ -2,9 +2,13 @@
 
 import { runCliIfEntrypointAsync, safeParseArgv } from '@snailicid3/node-utils'
 import { z } from 'zod'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { splitNonEmptyLines, uniqueSorted } from './../core/array.js'
+import {
+    isChangesetContentFile,
+    readChangesetPackageNames,
+} from './../core/changeset-files.js'
 import { getGitChangedFiles, getRepoRoot } from './../core/git.js'
 import { runPackageBinary } from './../core/package-manager.js'
 import {
@@ -15,8 +19,8 @@ import { resolveRepositoryScopes } from './../core/repository-scopes.js'
 import { loadScopePathMatchers } from './../core/scope-matcher-config.js'
 import {
     formatScopes,
+    resolveProjectScopeName,
     type ScopeFormat,
-    shortenScopeName,
 } from './../core/scopes.js'
 import {
     getWorkspaceScopes,
@@ -85,9 +89,9 @@ function collectChangesetScopes(
 
         if (!existsSync(absolutePath)) return []
 
-        return parseChangesetPackageNames(
-            readFileSync(absolutePath, 'utf8'),
-        ).map((scope) => normalizeScopeName(scope, keepPrefix, snapshot()))
+        return readChangesetPackageNames(repoRoot, filePath).map((name) =>
+            resolveProjectScopeName(name, keepPrefix, snapshot()),
+        )
     })
 }
 
@@ -107,12 +111,7 @@ function collectDirtyRepoScopes(
 
     // A changeset file names its own packages; unmatched ones fall back to reading it.
     const changesetScopes = changedFiles
-        .filter(
-            (file) =>
-                !matched.has(file) &&
-                file.startsWith('.changeset/') &&
-                file.endsWith('.md'),
-        )
+        .filter((file) => !matched.has(file) && isChangesetContentFile(file))
         .flatMap((file) =>
             collectChangesetScopes(repoRoot, [file], keepPrefix, snapshot),
         )
@@ -139,29 +138,8 @@ function collectNxAffectedScopes(
     if (result.status !== 0) return []
 
     return splitNonEmptyLines(result.stdout).map((projectName) =>
-        normalizeScopeName(projectName, parsed.keepPrefix, snapshot),
+        resolveProjectScopeName(projectName, parsed.keepPrefix, snapshot),
     )
-}
-
-/**
- * Map an Nx project name to a commit scope.
- *
- * Root is decided by the package's normalized path, not by its name: a nested package may legitimately be called
- * `@scope/root`. Nx reports bare project names with no path attached, so the name is resolved back to a package record
- * through the snapshot first.
- */
-function normalizeScopeName(
-    projectName: string,
-    keepPrefix: boolean,
-    snapshot: WorkspaceSnapshot,
-): string {
-    if (projectName === '.') return 'root'
-
-    const workspacePackage = snapshot.lookup.get(projectName)
-
-    if (workspacePackage?.path === '.') return 'root'
-
-    return shortenScopeName(projectName, keepPrefix)
 }
 
 const toStringArray = (
@@ -248,27 +226,6 @@ function parseArgs(args: Array<string>): ParsedArgs {
         nxHead: options.head ?? '',
         scopeFormat: options.list === true ? 'list' : 'csv',
     }
-}
-
-function parseChangesetPackageNames(markdown: string): Array<string> {
-    const lines = markdown.replaceAll('\r', '').split('\n')
-
-    if (lines[0] !== '---') return []
-
-    const packageNames: Array<string> = []
-
-    for (const line of lines.slice(1)) {
-        if (line === '---') break
-
-        const match =
-            /^["']?([^"':]+)["']?:\s*(?:major|minor|patch|none)\s*$/.exec(
-                line.trim(),
-            )
-
-        if (match?.[1]) packageNames.push(match[1])
-    }
-
-    return packageNames
 }
 
 function printHelp(): void {

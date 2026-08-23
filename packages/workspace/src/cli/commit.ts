@@ -91,7 +91,7 @@ export async function main(
 
         if (!type) throw new Error('--validate-type requires <type>')
 
-        validateCommitMessage(repoRoot, makeMessage(type, 'root', 'test'))
+        await validateCommitMessage(repoRoot, makeMessage(type, 'root', 'test'))
         return
     }
 
@@ -133,7 +133,7 @@ export async function main(
     if (parsed.outputMode === 'message' || parsed.outputMode === 'commit') {
         const message = makeMessage(request.type, scopeValue, request.subject)
 
-        validateCommitMessage(repoRoot, message)
+        await validateCommitMessage(repoRoot, message)
 
         if (parsed.outputMode === 'message' || parsed.dryRun) {
             console.log(message)

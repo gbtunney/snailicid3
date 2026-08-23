@@ -185,8 +185,8 @@ describe('tsdownv2 adapter', () => {
     })
 
     test('transpile array passes explicit targets through', () => {
-        const explicitTargets: Array<'chrome120.0.0' | 'node20.0.0'> = [
-            'node20.0.0',
+        const explicitTargets: Array<'chrome120.0.0' | 'node22.12.0'> = [
+            'node22.12.0',
             'chrome120.0.0',
         ]
         const plan = defineBuildPlan(parsedPkg, {
