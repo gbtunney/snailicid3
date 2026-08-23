@@ -94,6 +94,17 @@ describe('release plan composition', () => {
         ).toThrow(/credentials/u)
     })
 
+    it('validates package identity at the model boundary', () => {
+        expect(() =>
+            createReleasePackagePlan(
+                packageInput({ name: 'not a package name' }),
+            ),
+        ).toThrow()
+        expect(() =>
+            createReleasePackagePlan(packageInput({ version: 'next' })),
+        ).toThrow()
+    })
+
     it.each([
         [
             { artifact: 'invalid', dependencyClosure: 'valid' },

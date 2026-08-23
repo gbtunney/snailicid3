@@ -1,3 +1,4 @@
+import { packageNameSchema, packageVersionSchema } from '@snailicid3/node-utils'
 import { z } from 'zod'
 
 const nonEmptyStringSchema = z.string().trim().min(1)
@@ -105,11 +106,11 @@ export const releasePackagePlanInputSchema = z.strictObject({
     doctor: releaseDoctorFactsSchema,
     gitTag: releaseGitTagIntentSchema,
     intent: releaseIntentSchema,
-    name: nonEmptyStringSchema,
+    name: packageNameSchema,
     policy: releasePublishPolicySchema,
     private: z.boolean(),
     registry: releaseRegistryObservationSchema,
-    version: nonEmptyStringSchema,
+    version: packageVersionSchema,
     versionState: releaseVersionStateSchema,
 })
 
@@ -135,10 +136,16 @@ export const releasePlanSchema = z.strictObject({
     summary: releasePlanSummarySchema,
 })
 
-export type CreateReleasePlanInput = {
-    execution?: ReleasePlanExecution
-    packages: ReadonlyArray<ReleasePackagePlanInput>
-}
+/** Validated inputs accepted by the pure release-plan composer. */
+export const createReleasePlanInputSchema = z.strictObject({
+    execution: releasePlanExecutionSchema.optional(),
+    packages: z.array(releasePackagePlanInputSchema),
+})
+
+/** Inputs accepted by the pure release-plan composer. */
+export type CreateReleasePlanInput = z.input<
+    typeof createReleasePlanInputSchema
+>
 export type ReleaseDoctorFacts = z.infer<typeof releaseDoctorFactsSchema>
 export type ReleaseExecution = z.infer<typeof releaseExecutionSchema>
 export type ReleaseGitTagIntent = z.infer<typeof releaseGitTagIntentSchema>
@@ -176,10 +183,11 @@ export function createReleasePackagePlan(
 
 /** Compose and validate the canonical read-only workspace release plan. */
 export function createReleasePlan(input: CreateReleasePlanInput): ReleasePlan {
-    const packages = input.packages.map(createReleasePackagePlan)
+    const parsedInput = createReleasePlanInputSchema.parse(input)
+    const packages = parsedInput.packages.map(createReleasePackagePlan)
 
     return releasePlanSchema.parse({
-        execution: input.execution ?? { operation: 'observe' },
+        execution: parsedInput.execution ?? { operation: 'observe' },
         packages,
         schemaVersion: 1,
         summary: summarizeReleasePackages(packages),
