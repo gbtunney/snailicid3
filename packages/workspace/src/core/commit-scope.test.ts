@@ -81,22 +81,20 @@ describe('applyChangesetFileScopes', () => {
         expect(resolution.scopes).toEqual(['root'])
     })
 
-    it('falls back to root when the changeset file has no releases', () => {
+    it('throws when the changeset file has malformed content', () => {
         withTempRepo((repoRoot) => {
             mkdirSync(path.join(repoRoot, '.changeset'), { recursive: true })
             const file = '.changeset/empty.md'
             writeFileSync(path.join(repoRoot, file), 'not a changeset\n')
 
-            const resolution = applyChangesetFileScopes(
-                repoRoot,
-                { matches: {}, scopes: ['root'], unmatched: [file] },
-                snapshot([]),
-                false,
-            )
-
-            expect(resolution.scopes).toEqual(['root'])
-            expect(resolution.matches['root']).toEqual([file])
-            expect(resolution.unmatched).toEqual([])
+            expect(() =>
+                applyChangesetFileScopes(
+                    repoRoot,
+                    { matches: {}, scopes: ['root'], unmatched: [file] },
+                    snapshot([]),
+                    false,
+                ),
+            ).toThrow(/Unable to parse changeset \.changeset\/empty\.md/u)
         })
     })
 

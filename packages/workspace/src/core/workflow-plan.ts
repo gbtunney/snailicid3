@@ -49,6 +49,7 @@ export type WorkflowFacts = {
     identity: undefined | WorkflowIdentity
     /** Workflow branches sharing the current slug. Empty without an identity. */
     matchingBranches: WorkflowBranches
+    remoteRelation: WorkflowRemoteRelation
     /** Files staged for the next commit. */
     stagedFiles: Array<string>
     /** Every recognized workflow branch known locally. */
@@ -87,6 +88,12 @@ export type WorkflowPlan = {
     unavailableReason: string | undefined
     /** Non-fatal advisories. */
     warnings: Array<string>
+}
+
+export type WorkflowRemoteRelation = {
+    aheadCount: number
+    behindCount: number
+    relation: BaseRelation
 }
 
 /** Infer the workflow identity a branch carries, or `undefined` when the branch is not a recognized one. */
@@ -144,8 +151,9 @@ export const planWorkflow = (facts: WorkflowFacts): WorkflowPlan => {
                 id: 'commit',
             })
         } else if (
-            facts.aheadCount > 0 &&
-            !facts.matchingBranches.remote.includes(facts.currentBranch)
+            (facts.remoteRelation.relation === 'unknown'
+                ? facts.aheadCount
+                : facts.remoteRelation.aheadCount) > 0
         ) {
             nextActions.push({
                 command: `git push -u origin ${facts.currentBranch}`,
@@ -346,6 +354,49 @@ export const getBaseRelation = (
     return { aheadCount, behindCount, relation }
 }
 
+/** Compare the current workflow branch with its fetched origin counterpart. */
+export const getWorkflowRemoteRelation = (
+    repoRoot: string,
+    branch: string,
+): WorkflowRemoteRelation => {
+    if (!branch) {
+        return { aheadCount: 0, behindCount: 0, relation: 'unknown' }
+    }
+
+    const counts = gitOut(repoRoot, [
+        'rev-list',
+        '--left-right',
+        '--count',
+        `HEAD...origin/${branch}`,
+    ])
+    const unknown = {
+        aheadCount: 0,
+        behindCount: 0,
+        relation: 'unknown' as const,
+    }
+
+    if (!counts) return unknown
+
+    const [aheadRaw, behindRaw] = counts.split(/\s+/u)
+    const aheadCount = Number(aheadRaw)
+    const behindCount = Number(behindRaw)
+
+    if (!Number.isFinite(aheadCount) || !Number.isFinite(behindCount)) {
+        return unknown
+    }
+
+    const relation: BaseRelation =
+        aheadCount === 0 && behindCount === 0
+            ? 'equal'
+            : aheadCount > 0 && behindCount > 0
+              ? 'diverged'
+              : behindCount > 0
+                ? 'behind'
+                : 'ahead'
+
+    return { aheadCount, behindCount, relation }
+}
+
 /** Gather every fact the plan reports. Read-only: nothing here fetches, stages, commits or switches. */
 export const gatherWorkflowFacts = (
     repoRoot: string,
@@ -359,6 +410,7 @@ export const gatherWorkflowFacts = (
         repoRoot,
         options.baseBranch,
     )
+    const remoteRelation = getWorkflowRemoteRelation(repoRoot, currentBranch)
 
     const matches = (branch: string): boolean =>
         identity !== undefined &&
@@ -376,6 +428,7 @@ export const gatherWorkflowFacts = (
             local: workflowBranches.local.filter(matches),
             remote: workflowBranches.remote.filter(matches),
         },
+        remoteRelation,
         stagedFiles: getStagedFiles(repoRoot),
         workflowBranches,
         workingTree: getWorkingTreeStatus(repoRoot),

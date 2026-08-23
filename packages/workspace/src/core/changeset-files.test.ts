@@ -53,15 +53,15 @@ describe('readChangesetPackageNames', () => {
         })
     })
 
-    it('returns no names for missing content', () => {
+    it('throws with the filename for missing content', () => {
         withTempRepo((repoRoot) => {
-            expect(
+            expect(() =>
                 readChangesetPackageNames(repoRoot, '.changeset/missing.md'),
-            ).toEqual([])
+            ).toThrow(/Unable to parse changeset \.changeset\/missing\.md/u)
         })
     })
 
-    it('returns no names for malformed frontmatter instead of throwing', () => {
+    it('throws with the filename for malformed frontmatter', () => {
         withTempRepo((repoRoot) => {
             mkdirSync(path.join(repoRoot, '.changeset'), { recursive: true })
             writeFileSync(
@@ -69,9 +69,9 @@ describe('readChangesetPackageNames', () => {
                 'not a changeset\n',
             )
 
-            expect(
+            expect(() =>
                 readChangesetPackageNames(repoRoot, '.changeset/bad.md'),
-            ).toEqual([])
+            ).toThrow(/Unable to parse changeset \.changeset\/bad\.md/u)
         })
     })
 })

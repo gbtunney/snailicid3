@@ -20,8 +20,8 @@ export const isChangesetContentFile = (file: string): boolean =>
  * Package names a changeset file's frontmatter declares release intent for.
  *
  * A changeset's own path never lives inside the package it describes, so callers that classify scope by path alone
- * always miss it; its frontmatter is the authoritative source instead. Unreadable or malformed content resolves to no
- * names rather than throwing, matching how an unmatched path falls back to `root`.
+ * always miss it; its frontmatter is the authoritative source instead. Unreadable or malformed content is an error
+ * because silently falling back to `root` would discard release intent.
  */
 export const readChangesetPackageNames = (
     repoRoot: string,
@@ -32,7 +32,10 @@ export const readChangesetPackageNames = (
         return parseChangesetFile(contents).releases.map(
             (release) => release.name,
         )
-    } catch {
-        return []
+    } catch (error) {
+        const reason = error instanceof Error ? error.message : String(error)
+        throw new Error(`Unable to parse changeset ${file}: ${reason}`, {
+            cause: error,
+        })
     }
 }

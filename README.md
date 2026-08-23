@@ -37,7 +37,7 @@ changeset/version decision and clean external-consumer proof.
 
 ## Requirements
 
-- Node.js `>=20.0.0`
+- Node.js `>=22.12.0`
 - pnpm `>=10.30.2 <11` (`pnpm@10.30.2` is pinned in `package.json`)
 
 ## Getting started

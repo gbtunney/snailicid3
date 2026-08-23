@@ -139,8 +139,11 @@ workflow branch, resolves the scope from the currently staged files, appends opt
 validates the message with Commitlint, and commits. It accepts `--scope`, `--keep-prefix`, and
 `--dry-run`.
 
-Pull-request creation, manual release preparation, and reconnect/recovery are tracked separately and
-are not implemented by these commands yet.
+`gbt-workflow pr` creates a canonical read-only pull request plan for the current `changeset/*` or
+`release/*` branch. It supports `--json`, `--command`, and `--copy title|body|command`; the rendered
+`gh pr create` command is for display or copying only and is never executed by Workspace.
+Pull-request creation/update, manual release preparation, and reconnect/recovery remain separate
+operations.
 
 ## Environment
 

@@ -26,6 +26,7 @@ const facts = (overrides: Partial<WorkflowFacts> = {}): WorkflowFacts => ({
         slug: 'wacky-walker',
     },
     matchingBranches: { local: [], remote: [] },
+    remoteRelation: { aheadCount: 0, behindCount: 0, relation: 'unknown' },
     stagedFiles: [],
     workflowBranches: { local: [], remote: [] },
     workingTree: 'clean',
@@ -139,7 +140,18 @@ describe('planWorkflow', () => {
     })
 
     it('offers a push once a workflow branch is committed and clean', () => {
-        expect(actionIds(facts({ aheadCount: 1 }))).toEqual(['push'])
+        expect(
+            actionIds(
+                facts({
+                    aheadCount: 1,
+                    remoteRelation: {
+                        aheadCount: 1,
+                        behindCount: 0,
+                        relation: 'unknown',
+                    },
+                }),
+            ),
+        ).toEqual(['push'])
 
         const plan = planWorkflow(facts({ aheadCount: 1 }))
 
@@ -147,6 +159,36 @@ describe('planWorkflow', () => {
             command: 'git push -u origin changeset/wacky-walker',
             id: 'push',
         })
+    })
+
+    it('does not offer push when the remote workflow branch is equal', () => {
+        expect(
+            actionIds(
+                facts({
+                    aheadCount: 1,
+                    remoteRelation: {
+                        aheadCount: 0,
+                        behindCount: 0,
+                        relation: 'equal',
+                    },
+                }),
+            ),
+        ).toEqual([])
+    })
+
+    it('offers push when the remote workflow branch exists but local is ahead', () => {
+        expect(
+            actionIds(
+                facts({
+                    aheadCount: 2,
+                    remoteRelation: {
+                        aheadCount: 1,
+                        behindCount: 0,
+                        relation: 'ahead',
+                    },
+                }),
+            ),
+        ).toEqual(['push'])
     })
 
     it('offers nothing further once the branch is already pushed', () => {
@@ -157,6 +199,11 @@ describe('planWorkflow', () => {
                     matchingBranches: {
                         local: ['changeset/wacky-walker'],
                         remote: ['changeset/wacky-walker'],
+                    },
+                    remoteRelation: {
+                        aheadCount: 0,
+                        behindCount: 0,
+                        relation: 'equal',
                     },
                 }),
             ),
@@ -306,6 +353,25 @@ describe('gatherWorkflowFacts', () => {
             planWorkflow(gatherWorkflowFacts(root, { baseBranch: 'main' }))
                 .stacked,
         ).toBe(true)
+    })
+
+    it('measures workflow branch ancestry independently from base ancestry', () => {
+        const { git, root } = makeRepo()
+
+        git('switch', '-q', '-c', 'changeset/wacky-walker')
+        git('update-ref', 'refs/remotes/origin/changeset/wacky-walker', 'HEAD')
+        writeFileSync(path.join(root, 'tracked.txt'), 'v2\n')
+        git('add', 'tracked.txt')
+        git('commit', '-qm', 'second')
+
+        const gathered = gatherWorkflowFacts(root, { baseBranch: 'main' })
+
+        expect(gathered.remoteRelation).toEqual({
+            aheadCount: 1,
+            behindCount: 0,
+            relation: 'ahead',
+        })
+        expect(planWorkflow(gathered).nextActions[0]?.id).toBe('push')
     })
 
     it('lists remote workflow branches from remote-tracking refs', () => {
