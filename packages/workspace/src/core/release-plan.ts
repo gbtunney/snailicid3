@@ -12,11 +12,13 @@ export const releaseRegistryUrlSchema = z.url().refine(
     { message: 'Registry URLs must not contain credentials' },
 )
 
-export const releaseExecutionSchema = z.strictObject({
-    operation: z.enum(['observe', 'prepare', 'publish', 'tag']),
-})
-
-export const releasePlanExecutionSchema = releaseExecutionSchema.extend({
+/**
+ * The execution recorded on a composed plan.
+ *
+ * Deliberately narrower than {@link releaseNextOperationSchema}: this foundation observes, and a plan document claiming
+ * to be a prepare, tag or publish is rejected rather than parsed into an execution nothing implements.
+ */
+export const releasePlanExecutionSchema = z.strictObject({
     operation: z.literal('observe'),
 })
 
@@ -37,14 +39,21 @@ export const releaseIntentSchema = z.discriminatedUnion('source', [
 export const releaseVersionStateSchema = z.discriminatedUnion('state', [
     z.strictObject({ state: z.literal('current') }),
     z.strictObject({
-        intendedVersion: nonEmptyStringSchema,
+        intendedVersion: packageVersionSchema,
         state: z.literal('pending'),
     }),
 ])
 
+/**
+ * The outcome of asking one resolved registry whether an exact `name@version` exists.
+ *
+ * Authentication, permission, registry-resolution and network failures stay distinct from each other and none of them
+ * collapses into `missing`: a lookup that did not answer is unknown, never confirmed-unpublished. Local identity is not
+ * a member of this union — a malformed name or version is rejected by {@link releasePackagePlanInputSchema} at the model
+ * boundary, so no plan record can carry one.
+ */
 export const releaseRegistryStateSchema = z.enum([
     'exists',
-    'invalid_identity',
     'missing',
     'unknown_auth',
     'unknown_network',
@@ -94,6 +103,13 @@ export const releasePackageStatusSchema = z.enum([
     'unknown_registry',
 ])
 
+/**
+ * The operations a package record may point at next.
+ *
+ * Naming an operation is not the same as supporting it. Every operation the release model will eventually own is listed
+ * here so `availableNextOperations` can signal work a later slice performs, but only `observe` is an accepted plan
+ * execution today — see {@link releasePlanExecutionSchema}.
+ */
 export const releaseNextOperationSchema = z.enum([
     'observe',
     'prepare',
@@ -129,6 +145,12 @@ export const releasePlanSummarySchema = z.strictObject({
     unknown: z.number().int().nonnegative(),
 })
 
+/**
+ * The canonical machine contract every renderer and adapter reads.
+ *
+ * `schemaVersion` is declared by the document rather than inferred from the package version, so an adapter can reject
+ * an unsupported shape before it maps a single field.
+ */
 export const releasePlanSchema = z.strictObject({
     execution: releasePlanExecutionSchema,
     packages: z.array(releasePackagePlanSchema),
@@ -147,11 +169,12 @@ export type CreateReleasePlanInput = z.input<
     typeof createReleasePlanInputSchema
 >
 export type ReleaseDoctorFacts = z.infer<typeof releaseDoctorFactsSchema>
-export type ReleaseExecution = z.infer<typeof releaseExecutionSchema>
 export type ReleaseGitTagIntent = z.infer<typeof releaseGitTagIntentSchema>
 export type ReleaseIntent = z.infer<typeof releaseIntentSchema>
 export type ReleaseNextOperation = z.infer<typeof releaseNextOperationSchema>
-export type ReleasePackagePlan = z.infer<typeof releasePackagePlanSchema>
+/** One package record inside a composed plan, derived from the canonical plan shape. */
+export type ReleasePackagePlan = ReleasePlan['packages'][number]
+
 export type ReleasePackagePlanInput = z.infer<
     typeof releasePackagePlanInputSchema
 >
@@ -207,9 +230,20 @@ function deriveAvailableNextOperations(
     return [...operations]
 }
 
+/**
+ * Reduce the separate state axes to one per-package status.
+ *
+ * Order encodes precedence, and the first two steps are the ones that must not be reordered. `private: true` is a
+ * manifest fact about npm publication, so it settles the status before any registry observation is consulted: a private
+ * package is unpublishable whether the registry reports its version as present, absent or unknown, and it keeps its
+ * independent versioning and Git-tag intent either way. A registry that did not answer is then unknown rather than
+ * missing, so an unanswered lookup can never fall through to eligibility.
+ */
 function deriveReleasePackageStatus(
     input: ReleasePackagePlanInput,
 ): ReleasePackageStatus {
+    if (input.private) return 'private_unpublishable'
+
     if (
         input.registry.state !== 'exists' &&
         input.registry.state !== 'missing'
@@ -218,7 +252,6 @@ function deriveReleasePackageStatus(
     }
 
     if (input.registry.state === 'exists') return 'published'
-    if (input.private) return 'private_unpublishable'
     if (input.policy.decision === 'held') return 'pending_held'
     if (input.doctor.artifact === 'invalid') {
         return 'blocked_invalid_artifact'
