@@ -1,0 +1,43 @@
+# ─────────────────────────────────────────────────────────────
+# SYNCED from gbtunney/snailicid3-actions/templates/workflows — do not edit
+# here. Change the template and re-run bin/sync-callers.sh.
+# ─────────────────────────────────────────────────────────────
+name: Dispatch Nx Targets
+
+on:
+    workflow_dispatch:
+        inputs:
+            scope:
+                description: Run targets across all projects or only affected projects
+                required: true
+                default: all
+                type: choice
+                options:
+                    - all
+                    - affected
+
+            targets:
+                description: Space-delimited Nx target names
+                required: true
+                default: lint test build
+                type: string
+
+            mode:
+                description: Failure mode for the requested Nx targets
+                required: true
+                default: report
+                type: choice
+                options:
+                    - report
+                    - abort_on_error
+
+permissions:
+    contents: read
+
+jobs:
+    nx_targets:
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-nx-targets.yml@v1
+        with:
+            scope: ${{ inputs.scope }}
+            targets: ${{ inputs.targets }}
+            mode: ${{ inputs.mode }}

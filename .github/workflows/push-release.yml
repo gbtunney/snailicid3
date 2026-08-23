@@ -29,13 +29,14 @@ jobs:
     release_plan:
         name: release plan
         uses: gbtunney/snailicid3-actions/.github/workflows/call-release-plan.yml@v1
-        secrets: inherit
+        secrets:
+            GH_PAT: ${{ secrets.GH_PAT }}
+            NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         with:
             ref: ''
             dry_run: false
             allow_non_main: false
             run_pipeline: true
             upload_workspace_artifact: true
-            require_lockfile: true
+            lockfile_mode: frozen
             node_version: lts/*
-            pnpm_cache: true
