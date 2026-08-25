@@ -7,7 +7,7 @@ import { type WorkspacePackage } from './packages.js'
 import { createReleasePlan } from './release-plan.js'
 import {
     type NpmCommandRunner,
-    observeWorkspaceRegistry,
+    observeRegistryForMembers,
     type WorkspaceRegistryObservation,
 } from './release-registry.js'
 
@@ -126,11 +126,11 @@ const observeOne = ({ answers = {}, manifest = {}, pkg = {} }: Scenario = {}): {
         }
 
         const { calls, runNpm } = stubNpm(answers)
-        const [observation] = observeWorkspaceRegistry({
-            packages: [member],
+        const [observation] = observeRegistryForMembers(
             repoRoot,
+            [member],
             runNpm,
-        })
+        )
 
         return { calls, observation }
     } finally {
@@ -652,11 +652,11 @@ describe('release registry observation', () => {
                     }),
                 )
 
-                const observations = observeWorkspaceRegistry({
-                    packages: [workspacePackage({ version: '0.2.0' })],
+                const observations = observeRegistryForMembers(
                     repoRoot,
+                    [workspacePackage({ version: '0.2.0' })],
                     runNpm,
-                })
+                )
 
                 expect(planFrom(observations).summary.held).toBe(1)
             } finally {
