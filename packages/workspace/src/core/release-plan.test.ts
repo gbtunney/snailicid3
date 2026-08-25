@@ -49,22 +49,36 @@ describe('release plan composition', () => {
     })
 
     it('keeps exact version existence separate from dist-tags', () => {
-        const packagePlan = createReleasePackagePlan(
+        const missing = createReleasePackagePlan(
             packageInput({
                 registry: {
-                    distTags: { latest: '0.1.0' },
+                    distTags: { latest: '0.0.9', next: '0.2.0-beta.1' },
                     registryUrl: 'https://registry.npmjs.org/',
                     state: 'missing',
                 },
             }),
         )
 
-        expect(packagePlan.registry.distTags.latest).toBe(packagePlan.version)
-        expect(packagePlan.status).toBe('pending_held')
+        expect(missing.registry.distTags.latest).not.toBe(missing.version)
+        expect(missing.status).toBe('pending_held')
+
+        const supersededButPublished = createReleasePackagePlan(
+            packageInput({
+                registry: {
+                    distTags: { latest: '0.2.0' },
+                    registryUrl: 'https://registry.npmjs.org/',
+                    state: 'exists',
+                },
+            }),
+        )
+
+        expect(supersededButPublished.registry.distTags.latest).not.toBe(
+            supersededButPublished.version,
+        )
+        expect(supersededButPublished.status).toBe('published')
     })
 
     it.each<ReleaseRegistryState>([
-        'invalid_identity',
         'unknown_auth',
         'unknown_network',
         'unknown_registry',
@@ -144,12 +158,75 @@ describe('release plan composition', () => {
                 gitTag: { name: '@snailicid3/private@0.1.0', selected: true },
                 name: '@snailicid3/private',
                 private: true,
+                versionState: {
+                    intendedVersion: '0.2.0',
+                    state: 'pending',
+                },
             }),
         )
 
         expect(packagePlan.status).toBe('private_unpublishable')
-        expect(packagePlan.availableNextOperations).toContain('tag')
+        expect(packagePlan.availableNextOperations).toEqual([
+            'observe',
+            'prepare',
+            'tag',
+        ])
         expect(packagePlan.availableNextOperations).not.toContain('publish')
+    })
+
+    it.each<ReleaseRegistryState>([
+        'exists',
+        'missing',
+        'unknown_auth',
+        'unknown_network',
+        'unknown_registry',
+    ])(
+        'resolves a private package to private_unpublishable over %s',
+        (state) => {
+            const packagePlan = createReleasePackagePlan(
+                packageInput({
+                    name: '@snailicid3/private',
+                    policy: {
+                        channel: 'latest',
+                        decision: 'selected',
+                        reason: 'Explicit release operation',
+                    },
+                    private: true,
+                    registry: {
+                        distTags: {},
+                        registryUrl: 'https://registry.npmjs.org/',
+                        state,
+                    },
+                }),
+            )
+
+            expect(packagePlan.status).toBe('private_unpublishable')
+            expect(packagePlan.availableNextOperations).not.toContain('publish')
+        },
+    )
+
+    it('validates the intended version with the shared version schema', () => {
+        expect(() =>
+            createReleasePackagePlan(
+                packageInput({
+                    versionState: {
+                        intendedVersion: 'next',
+                        state: 'pending',
+                    },
+                }),
+            ),
+        ).toThrow(/semver/u)
+
+        expect(
+            createReleasePackagePlan(
+                packageInput({
+                    versionState: {
+                        intendedVersion: '0.2.0-beta.1',
+                        state: 'pending',
+                    },
+                }),
+            ).availableNextOperations,
+        ).toContain('prepare')
     })
 
     it('derives deterministic summaries and operation order', () => {

@@ -1,71 +1,49 @@
-import {
-    createReleasePlan,
-    type ReleasePackagePlanInput,
-    type ReleasePlan,
-} from './../src/core/release-plan.js'
+import { readFileSync } from 'node:fs'
 
-const publicPackageNames = [
-    '@snailicid3/build-config',
-    '@snailicid3/cli-app',
-    '@snailicid3/color',
-    '@snailicid3/config',
-    '@snailicid3/logger',
-    '@snailicid3/node-utils',
-    '@snailicid3/storybook-config',
-    '@snailicid3/utils',
-    '@snailicid3/workspace',
+/**
+ * Frozen release-plan documents recorded from real repository and registry history.
+ *
+ * These are literal JSON files rather than composer output. A fixture that calls `createReleasePlan()` can only ever
+ * agree with the composer, which makes it a mirror instead of a characterization: it would drift silently the moment
+ * the derivation rules changed. Reading checked-in documents lets the tests assert two independent things — that the
+ * canonical schema still parses a document an external adapter may already hold, and that today's composer still
+ * reproduces what was actually observed at those commits.
+ *
+ * Each document records what was true at that pull request's head commit: local versions read from the workspace
+ * manifests, and exact `name@version` existence in the npm registry. Dist-tag pointers are recorded as `{}` because the
+ * historical Actions detector never captured them per package — and a plan must never claim `latest` points at a
+ * version it simultaneously reports as missing.
+ *
+ * `pull-request-232` is head `a7093c8`, where no changesets were pending and `storybook-config@0.1.0` and
+ * `workspace@0.1.0` were the two exact versions absent from npm; merging that pull request published both.
+ * `pull-request-233` is head `e78f39e`, where the `whole-banks-swim` changeset was pending yet every public exact
+ * version existed in npm, so intent alone produced no candidates. `pull-request-234` is head `ddf77e3`, where that
+ * changeset had been consumed and its versions applied, leaving nine public exact versions absent from npm and still
+ * unauthorized.
+ *
+ * The workspace held twelve packages at all three commits: ten public and two private. #206 describes the public
+ * inventory as nine because `@snailicid3/types@0.0.3` was already published and never moved across the three commits,
+ * so it was never a candidate — the candidate counts in that narrative match these documents exactly.
+ */
+export const releasePlanFixtureNames = [
+    'pull-request-232',
+    'pull-request-233',
+    'pull-request-234',
 ] as const
 
-const packageInput = (
-    name: string,
-    registryState: 'exists' | 'missing',
-    version = '0.1.0',
-): ReleasePackagePlanInput => ({
-    access: 'public',
-    doctor: { artifact: 'valid', dependencyClosure: 'valid' },
-    gitTag: { selected: false },
-    intent: { source: 'none' },
-    name,
-    policy: {
-        decision: 'held',
-        reason: 'No publish operation selected',
-    },
-    private: false,
-    registry: {
-        distTags: { latest: version },
-        registryUrl: 'https://registry.npmjs.org/',
-        state: registryState,
-    },
-    version,
-    versionState: { state: 'current' },
-})
+export type ReleasePlanFixtureName = (typeof releasePlanFixtureNames)[number]
 
-/** PR #232 observed two missing exact versions without authorizing publication. */
-export const pullRequest232ReleasePlanFixture: ReleasePlan = createReleasePlan({
-    packages: publicPackageNames.map((name) =>
-        packageInput(
-            name,
-            name === '@snailicid3/workspace' ||
-                name === '@snailicid3/storybook-config'
-                ? 'missing'
-                : 'exists',
+/**
+ * Read one frozen plan document as `unknown`.
+ *
+ * The return type is deliberately `unknown`: these documents stand in for machine input arriving from outside the
+ * package, so a test must earn its types by parsing them with the canonical schema rather than by asserting them.
+ */
+export function readReleasePlanFixture(name: ReleasePlanFixtureName): unknown {
+    return JSON.parse(
+        readFileSync(
+            new URL(`./release-plan/${name}.json`, import.meta.url),
+            'utf8',
         ),
-    ),
-})
-
-/** PR #233 observed that every public exact version existed in npm. */
-export const pullRequest233ReleasePlanFixture: ReleasePlan = createReleasePlan({
-    packages: publicPackageNames.map((name) => packageInput(name, 'exists')),
-})
-
-/** PR #234 observed nine missing exact versions while keeping publish policy explicit. */
-export const pullRequest234ReleasePlanFixture: ReleasePlan = createReleasePlan({
-    packages: publicPackageNames.map((name) => ({
-        ...packageInput(name, 'missing', '0.2.0'),
-        intent: {
-            bump: 'patch' as const,
-            reason: 'Intentional or dependency-propagated Changesets version',
-            source: 'changesets' as const,
-        },
-    })),
-})
+    )
+}

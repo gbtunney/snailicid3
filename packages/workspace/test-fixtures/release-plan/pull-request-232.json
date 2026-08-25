@@ -1,0 +1,375 @@
+{
+    "execution": {
+        "operation": "observe"
+    },
+    "packages": [
+        {
+            "access": "public",
+            "availableNextOperations": ["observe"],
+            "doctor": {
+                "artifact": "unknown",
+                "dependencyClosure": "unknown"
+            },
+            "gitTag": {
+                "selected": false
+            },
+            "intent": {
+                "source": "none"
+            },
+            "name": "@snailicid3/build-config",
+            "policy": {
+                "decision": "held",
+                "reason": "No publish operation selected"
+            },
+            "private": false,
+            "registry": {
+                "distTags": {},
+                "registryUrl": "https://registry.npmjs.org/",
+                "state": "exists"
+            },
+            "status": "published",
+            "version": "0.0.8",
+            "versionState": {
+                "state": "current"
+            }
+        },
+        {
+            "access": "public",
+            "availableNextOperations": ["observe"],
+            "doctor": {
+                "artifact": "unknown",
+                "dependencyClosure": "unknown"
+            },
+            "gitTag": {
+                "selected": false
+            },
+            "intent": {
+                "source": "none"
+            },
+            "name": "@snailicid3/cli-app",
+            "policy": {
+                "decision": "held",
+                "reason": "No publish operation selected"
+            },
+            "private": false,
+            "registry": {
+                "distTags": {},
+                "registryUrl": "https://registry.npmjs.org/",
+                "state": "exists"
+            },
+            "status": "published",
+            "version": "0.1.0",
+            "versionState": {
+                "state": "current"
+            }
+        },
+        {
+            "access": "public",
+            "availableNextOperations": ["observe"],
+            "doctor": {
+                "artifact": "unknown",
+                "dependencyClosure": "unknown"
+            },
+            "gitTag": {
+                "selected": false
+            },
+            "intent": {
+                "source": "none"
+            },
+            "name": "@snailicid3/color",
+            "policy": {
+                "decision": "held",
+                "reason": "No publish operation selected"
+            },
+            "private": false,
+            "registry": {
+                "distTags": {},
+                "registryUrl": "https://registry.npmjs.org/",
+                "state": "exists"
+            },
+            "status": "published",
+            "version": "0.0.6",
+            "versionState": {
+                "state": "current"
+            }
+        },
+        {
+            "access": "public",
+            "availableNextOperations": ["observe"],
+            "doctor": {
+                "artifact": "unknown",
+                "dependencyClosure": "unknown"
+            },
+            "gitTag": {
+                "selected": false
+            },
+            "intent": {
+                "source": "none"
+            },
+            "name": "@snailicid3/config",
+            "policy": {
+                "decision": "held",
+                "reason": "No publish operation selected"
+            },
+            "private": false,
+            "registry": {
+                "distTags": {},
+                "registryUrl": "https://registry.npmjs.org/",
+                "state": "exists"
+            },
+            "status": "published",
+            "version": "0.2.0",
+            "versionState": {
+                "state": "current"
+            }
+        },
+        {
+            "availableNextOperations": ["observe"],
+            "doctor": {
+                "artifact": "unknown",
+                "dependencyClosure": "unknown"
+            },
+            "gitTag": {
+                "selected": false
+            },
+            "intent": {
+                "source": "none"
+            },
+            "name": "@snailicid3/doctor",
+            "policy": {
+                "decision": "held",
+                "reason": "No publish operation selected"
+            },
+            "private": true,
+            "registry": {
+                "distTags": {},
+                "registryUrl": "https://registry.npmjs.org/",
+                "state": "unknown_registry"
+            },
+            "status": "private_unpublishable",
+            "version": "0.0.0",
+            "versionState": {
+                "state": "current"
+            }
+        },
+        {
+            "availableNextOperations": ["observe"],
+            "doctor": {
+                "artifact": "unknown",
+                "dependencyClosure": "unknown"
+            },
+            "gitTag": {
+                "selected": false
+            },
+            "intent": {
+                "source": "none"
+            },
+            "name": "@snailicid3/example-package",
+            "policy": {
+                "decision": "held",
+                "reason": "No publish operation selected"
+            },
+            "private": true,
+            "registry": {
+                "distTags": {},
+                "registryUrl": "https://registry.npmjs.org/",
+                "state": "unknown_registry"
+            },
+            "status": "private_unpublishable",
+            "version": "0.0.0",
+            "versionState": {
+                "state": "current"
+            }
+        },
+        {
+            "access": "public",
+            "availableNextOperations": ["observe"],
+            "doctor": {
+                "artifact": "unknown",
+                "dependencyClosure": "unknown"
+            },
+            "gitTag": {
+                "selected": false
+            },
+            "intent": {
+                "source": "none"
+            },
+            "name": "@snailicid3/logger",
+            "policy": {
+                "decision": "held",
+                "reason": "No publish operation selected"
+            },
+            "private": false,
+            "registry": {
+                "distTags": {},
+                "registryUrl": "https://registry.npmjs.org/",
+                "state": "exists"
+            },
+            "status": "published",
+            "version": "0.0.6",
+            "versionState": {
+                "state": "current"
+            }
+        },
+        {
+            "access": "public",
+            "availableNextOperations": ["observe"],
+            "doctor": {
+                "artifact": "unknown",
+                "dependencyClosure": "unknown"
+            },
+            "gitTag": {
+                "selected": false
+            },
+            "intent": {
+                "source": "none"
+            },
+            "name": "@snailicid3/node-utils",
+            "policy": {
+                "decision": "held",
+                "reason": "No publish operation selected"
+            },
+            "private": false,
+            "registry": {
+                "distTags": {},
+                "registryUrl": "https://registry.npmjs.org/",
+                "state": "exists"
+            },
+            "status": "published",
+            "version": "0.1.0",
+            "versionState": {
+                "state": "current"
+            }
+        },
+        {
+            "access": "public",
+            "availableNextOperations": ["observe"],
+            "doctor": {
+                "artifact": "unknown",
+                "dependencyClosure": "unknown"
+            },
+            "gitTag": {
+                "selected": false
+            },
+            "intent": {
+                "source": "none"
+            },
+            "name": "@snailicid3/storybook-config",
+            "policy": {
+                "decision": "held",
+                "reason": "No publish operation selected"
+            },
+            "private": false,
+            "registry": {
+                "distTags": {},
+                "registryUrl": "https://registry.npmjs.org/",
+                "state": "missing"
+            },
+            "status": "pending_held",
+            "version": "0.1.0",
+            "versionState": {
+                "state": "current"
+            }
+        },
+        {
+            "access": "public",
+            "availableNextOperations": ["observe"],
+            "doctor": {
+                "artifact": "unknown",
+                "dependencyClosure": "unknown"
+            },
+            "gitTag": {
+                "selected": false
+            },
+            "intent": {
+                "source": "none"
+            },
+            "name": "@snailicid3/types",
+            "policy": {
+                "decision": "held",
+                "reason": "No publish operation selected"
+            },
+            "private": false,
+            "registry": {
+                "distTags": {},
+                "registryUrl": "https://registry.npmjs.org/",
+                "state": "exists"
+            },
+            "status": "published",
+            "version": "0.0.3",
+            "versionState": {
+                "state": "current"
+            }
+        },
+        {
+            "access": "public",
+            "availableNextOperations": ["observe"],
+            "doctor": {
+                "artifact": "unknown",
+                "dependencyClosure": "unknown"
+            },
+            "gitTag": {
+                "selected": false
+            },
+            "intent": {
+                "source": "none"
+            },
+            "name": "@snailicid3/utils",
+            "policy": {
+                "decision": "held",
+                "reason": "No publish operation selected"
+            },
+            "private": false,
+            "registry": {
+                "distTags": {},
+                "registryUrl": "https://registry.npmjs.org/",
+                "state": "exists"
+            },
+            "status": "published",
+            "version": "0.0.6",
+            "versionState": {
+                "state": "current"
+            }
+        },
+        {
+            "access": "public",
+            "availableNextOperations": ["observe"],
+            "doctor": {
+                "artifact": "unknown",
+                "dependencyClosure": "unknown"
+            },
+            "gitTag": {
+                "selected": false
+            },
+            "intent": {
+                "source": "none"
+            },
+            "name": "@snailicid3/workspace",
+            "policy": {
+                "decision": "held",
+                "reason": "No publish operation selected"
+            },
+            "private": false,
+            "registry": {
+                "distTags": {},
+                "registryUrl": "https://registry.npmjs.org/",
+                "state": "missing"
+            },
+            "status": "pending_held",
+            "version": "0.1.0",
+            "versionState": {
+                "state": "current"
+            }
+        }
+    ],
+    "schemaVersion": 1,
+    "summary": {
+        "blocked": 0,
+        "eligible": 0,
+        "held": 2,
+        "packages": 12,
+        "private": 2,
+        "published": 8,
+        "unknown": 0
+    }
+}
