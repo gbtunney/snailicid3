@@ -101,6 +101,32 @@ type NpmViewOutcome =
       }
     | { kind: 'unreadable' }
 
+/** What a workspace member's own manifest said about `publishConfig.registry`. */
+type PublishConfigResult =
+    | { kind: 'absent' }
+    | { kind: 'unreadable' }
+    | { kind: 'value'; registry: string }
+
+/**
+ * What `npm config get` reported.
+ *
+ * A failed config read is kept distinct from a config that simply selects nothing. Collapsing the two would let a
+ * broken read fall through to npm's default registry and report an answer as though the default had been chosen.
+ */
+type RegistryConfigResult =
+    { kind: 'read'; values: Map<string, string> } | { kind: 'unreadable' }
+
+/**
+ * The registry a package will be asked about.
+ *
+ * `flags` is empty whenever npm's own configuration already selects this registry: re-stating it in argv would gain
+ * nothing and, for a configured URL carrying inline credentials, would copy a secret into a process argument list.
+ * Flags are used only to override npm — that is, when the target came from the package's own `publishConfig`.
+ */
+type TargetRegistry =
+    | { flags: Array<string>; kind: 'resolved'; registryUrl: string }
+    | { kind: 'unresolved' }
+
 /**
  * Observe every canonical workspace package against its resolved target registry.
  *
@@ -140,7 +166,7 @@ export function observeWorkspaceRegistry(
 
 /** Validate every recorded observation, so a credential can never reach a plan even if stripping were bypassed. */
 function buildObservation(
-    registryUrl: string,
+    registryUrl: null | string,
     distTags: Record<string, string>,
     state: ReleaseRegistryState,
 ): ReleaseRegistryObservation {
@@ -165,6 +191,17 @@ function createNpmCommandRunner(repoRoot: string): NpmCommandRunner {
     return (args) => runCommand('npm', args, { cwd: repoRoot })
 }
 
+/** Whether a URL carries credentials inline, which must never be copied into argv. */
+function hasInlineCredentials(value: string): boolean {
+    try {
+        const url = new URL(value)
+
+        return url.username !== '' || url.password !== ''
+    } catch {
+        return false
+    }
+}
+
 /**
  * Ask one registry what it holds for a package, then decide existence from `versions` alone.
  *
@@ -174,21 +211,20 @@ function createNpmCommandRunner(repoRoot: string): NpmCommandRunner {
  */
 function observePackageRegistry(
     pkg: WorkspacePackage,
-    requestUrl: null | string,
+    target: TargetRegistry,
     runNpm: NpmCommandRunner,
 ): ReleaseRegistryObservation {
-    if (requestUrl === null) {
-        return buildObservation(DEFAULT_NPM_REGISTRY, {}, 'unknown_registry')
+    if (target.kind === 'unresolved') {
+        return buildObservation(null, {}, 'unknown_registry')
     }
 
-    const registryUrl =
-        toCredentialFreeRegistryUrl(requestUrl) ?? DEFAULT_NPM_REGISTRY
+    const { registryUrl } = target
 
     if (pkg.private === true) {
         return buildObservation(registryUrl, {}, 'unknown_registry')
     }
 
-    const outcome = readNpmView(pkg.name, requestUrl, runNpm)
+    const outcome = readNpmView(pkg.name, target.flags, runNpm)
 
     if (outcome.kind === 'error') {
         return buildObservation(
@@ -274,7 +310,7 @@ function readNpmErrorCode(stderr: string): null | string {
 function readNpmRegistryConfig(
     names: ReadonlyArray<string>,
     runNpm: NpmCommandRunner,
-): Map<string, string> {
+): RegistryConfigResult {
     const scopes = [
         ...new Set(
             names
@@ -287,31 +323,24 @@ function readNpmRegistryConfig(
     const result = runNpm(['config', 'get', ...keys])
 
     return result.success
-        ? parseNpmConfigValues(result.stdout, keys)
-        : new Map<string, string>()
+        ? { kind: 'read', values: parseNpmConfigValues(result.stdout, keys) }
+        : { kind: 'unreadable' }
 }
 
 /** Ask npm for a package's version list and dist-tags, and report whether the answer was usable. */
 function readNpmView(
     name: string,
-    registryUrl: string,
+    flags: ReadonlyArray<string>,
     runNpm: NpmCommandRunner,
 ): NpmViewOutcome {
-    const scope = packageScope(name)
-    const args = [
+    const result = runNpm([
         'view',
         name,
         'versions',
         'dist-tags',
         '--json',
-        `--registry=${registryUrl}`,
-    ]
-
-    // A configured `@scope:registry` outranks `--registry` inside npm, so a scoped lookup must pin the scope key too or
-    // the recorded URL could name a registry that was never actually queried.
-    if (scope !== null) args.push(`--${scope}:registry=${registryUrl}`)
-
-    const result = runNpm(args)
+        ...flags,
+    ])
     const parsed = parseJson(result.stdout)
 
     if (parsed !== null) {
@@ -343,42 +372,91 @@ function readNpmView(
 function readPublishConfigRegistry(
     repoRoot: string,
     pkg: WorkspacePackage,
-): string | undefined {
+): PublishConfigResult {
     const manifest = readPackageManifest(
         path.join(repoRoot, pkg.path, 'package.json'),
     )
 
-    if (!manifest.success) return undefined
+    if (!manifest.success) return { kind: 'unreadable' }
 
     const parsed = publishConfigSchema.safeParse(manifest.data)
 
-    return parsed.success ? parsed.data.publishConfig?.registry : undefined
+    if (!parsed.success) return { kind: 'unreadable' }
+
+    const registry = parsed.data.publishConfig?.registry
+
+    return registry === undefined
+        ? { kind: 'absent' }
+        : { kind: 'value', registry }
 }
 
 /**
- * Resolve the registry a package would publish to.
+ * Resolve the registry a package would publish to, or report that it cannot be named truthfully.
  *
  * Most specific wins: the package's own `publishConfig.registry`, then a `@scope:registry` configuration, then the
- * overall `registry` configuration, then npm's default. Returning null means configuration named a registry that cannot
- * be used, which is a resolution failure rather than a reason to quietly fall back — npm only warns and reaches for the
- * default, which would attribute an answer to a registry nobody selected.
+ * overall `registry` configuration, then npm's default. A package-specific publish target outranks general npm config
+ * because it is the registry that package actually publishes to.
+ *
+ * Only a `publishConfig` target produces npm flags. Everything else is already npm's own configuration, so npm will
+ * select it unaided — passing it back in argv would add nothing and would copy any inline credentials into a process
+ * argument list. That also means an inline-credential `publishConfig` URL is unresolved rather than exposed: there is
+ * no way to override npm toward it without putting the secret on the command line.
+ *
+ * Every path that cannot establish a target returns `unresolved`, and no registry is queried for it. A read that failed
+ * is never treated as a read that found nothing.
  */
 function resolveTargetRegistry(
     name: string,
-    publishConfigRegistry: string | undefined,
-    registryConfig: Map<string, string>,
-): null | string {
+    publishConfig: PublishConfigResult,
+    registryConfig: RegistryConfigResult,
+): TargetRegistry {
+    if (publishConfig.kind === 'unreadable') return { kind: 'unresolved' }
+
+    if (publishConfig.kind === 'value') {
+        const registryUrl = toCredentialFreeRegistryUrl(publishConfig.registry)
+
+        if (
+            registryUrl === null ||
+            hasInlineCredentials(publishConfig.registry)
+        )
+            return { kind: 'unresolved' }
+
+        const scope = packageScope(name)
+
+        return {
+            flags: [
+                `--registry=${registryUrl}`,
+                ...(scope === null
+                    ? []
+                    : [`--${scope}:registry=${registryUrl}`]),
+            ],
+            kind: 'resolved',
+            registryUrl,
+        }
+    }
+
+    if (registryConfig.kind === 'unreadable') return { kind: 'unresolved' }
+
     const scope = packageScope(name)
     const configured =
-        publishConfigRegistry ??
         (scope === null
             ? undefined
-            : registryConfig.get(`${scope}:registry`)) ??
-        registryConfig.get('registry')
+            : registryConfig.values.get(`${scope}:registry`)) ??
+        registryConfig.values.get('registry')
 
-    if (configured === undefined) return DEFAULT_NPM_REGISTRY
+    if (configured === undefined) {
+        return {
+            flags: [],
+            kind: 'resolved',
+            registryUrl: DEFAULT_NPM_REGISTRY,
+        }
+    }
 
-    return toCredentialFreeRegistryUrl(configured) === null ? null : configured
+    const registryUrl = toCredentialFreeRegistryUrl(configured)
+
+    return registryUrl === null
+        ? { kind: 'unresolved' }
+        : { flags: [], kind: 'resolved', registryUrl }
 }
 
 /** Normalize a registry URL for recording, dropping any inline credentials and rejecting anything not http(s). */

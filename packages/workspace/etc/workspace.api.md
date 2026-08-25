@@ -141,7 +141,7 @@ export const createReleasePlanInputSchema: z.ZodObject<{
         private: z.ZodBoolean;
         registry: z.ZodObject<{
             distTags: z.ZodRecord<z.ZodString, z.ZodString>;
-            registryUrl: z.ZodURL;
+            registryUrl: z.ZodNullable<z.ZodURL>;
             state: z.ZodEnum<{
                 exists: "exists";
                 missing: "missing";
@@ -441,7 +441,7 @@ export const releasePlanSchema: z.ZodObject<{
         private: z.ZodBoolean;
         registry: z.ZodObject<{
             distTags: z.ZodRecord<z.ZodString, z.ZodString>;
-            registryUrl: z.ZodURL;
+            registryUrl: z.ZodNullable<z.ZodURL>;
             state: z.ZodEnum<{
                 exists: "exists";
                 missing: "missing";
