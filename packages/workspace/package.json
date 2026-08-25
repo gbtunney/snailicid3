@@ -103,7 +103,11 @@
         "directory": "packages/workspace"
     },
     "dependencies": {
+        "@changesets/assemble-release-plan": "^7.0.0",
+        "@changesets/config": "^4.0.0",
         "@changesets/parse": "^1.0.0",
+        "@changesets/pre": "^3.0.0",
+        "@changesets/read": "^1.0.0",
         "@commitlint/lint": "^21.2.2",
         "@commitlint/load": "^21.2.2",
         "@commitlint/types": "^21.2.0",
@@ -116,6 +120,7 @@
         "zod": "^4.4.3"
     },
     "devDependencies": {
+        "@changesets/types": "^7.0.0",
         "@microsoft/api-extractor": "^7.59.0",
         "@snailicid3/config": "workspace:*",
         "@types/micromatch": "^4.0.10",
