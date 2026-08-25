@@ -86,6 +86,38 @@ export {
     type ReleasePreparePlanSummary,
 } from './release-prepare.js'
 /**
+ * Publishing exports the plan, the operation, and the evidence a caller must assemble — nothing that mutates.
+ *
+ * The adapter behind `executeReleasePublishPlan` stays internal. It is a test seam, not part of the supported external
+ * execution model, and a consumer able to supply its own would be able to substitute the thing that decides what
+ * "published" means.
+ */
+export {
+    executeReleasePublishPlan,
+    type ExecuteReleasePublishPlanOptions,
+    type ReleasePublishResult,
+    releasePublishResultSchema,
+    type ReleasePublishStep,
+} from './release-publish-execute.js'
+export {
+    createReleasePublishPlan,
+    type CreateReleasePublishPlanInput,
+    createReleasePublishPlanInputSchema,
+    type ReleasePublishArtifact,
+    releasePublishArtifactSchema,
+    type ReleasePublishAuthorization,
+    type ReleasePublishCandidate,
+    releasePublishCandidateSchema,
+    type ReleasePublishClosureEdge,
+    releasePublishClosureEdgeSchema,
+    type ReleasePublishDoctorEvidence,
+    releasePublishDoctorEvidenceSchema,
+    type ReleasePublishPackage,
+    type ReleasePublishPlan,
+    releasePublishPlanSchema,
+    type ReleasePublishPlanSummary,
+} from './release-publish.js'
+/**
  * Registry observation is exported as one entry point, not as a toolkit.
  *
  * Callers need to observe the workspace and hand the result to `createReleasePlan`; they do not need the resolver,

@@ -282,6 +282,184 @@ export const createReleasePreparePlanInputSchema: z.ZodObject<{
 }, z.core.$strict>;
 
 // @public
+export function createReleasePublishPlan(input: CreateReleasePublishPlanInput): ReleasePublishPlan;
+
+// @public (undocumented)
+export type CreateReleasePublishPlanInput = z.input<typeof createReleasePublishPlanInputSchema>;
+
+// @public (undocumented)
+export const createReleasePublishPlanInputSchema: z.ZodObject<{
+    candidates: z.ZodArray<z.ZodObject<{
+        artifact: z.ZodObject<{
+            integrity: z.ZodString;
+            name: z.ZodString;
+            tarball: z.ZodString;
+            version: z.ZodString;
+        }, z.core.$strict>;
+        doctor: z.ZodObject<{
+            artifact: z.ZodEnum<{
+                unknown: "unknown";
+                invalid: "invalid";
+                valid: "valid";
+            }>;
+            closure: z.ZodDiscriminatedUnion<[z.ZodObject<{
+                edges: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
+                    name: z.ZodString;
+                    range: z.ZodString;
+                    resolution: z.ZodLiteral<"available_in_registry">;
+                    satisfiedBy: z.ZodString;
+                }, z.core.$strict>, z.ZodObject<{
+                    name: z.ZodString;
+                    range: z.ZodString;
+                    resolution: z.ZodLiteral<"included_in_cohort">;
+                }, z.core.$strict>, z.ZodObject<{
+                    name: z.ZodString;
+                    resolution: z.ZodLiteral<"embedded_not_exposed">;
+                }, z.core.$strict>, z.ZodObject<{
+                    name: z.ZodString;
+                    range: z.ZodString;
+                    resolution: z.ZodLiteral<"unavailable">;
+                }, z.core.$strict>, z.ZodObject<{
+                    name: z.ZodString;
+                    resolution: z.ZodLiteral<"unknown">;
+                }, z.core.$strict>], "resolution">>;
+                state: z.ZodLiteral<"valid">;
+            }, z.core.$strict>, z.ZodObject<{
+                edges: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
+                    name: z.ZodString;
+                    range: z.ZodString;
+                    resolution: z.ZodLiteral<"available_in_registry">;
+                    satisfiedBy: z.ZodString;
+                }, z.core.$strict>, z.ZodObject<{
+                    name: z.ZodString;
+                    range: z.ZodString;
+                    resolution: z.ZodLiteral<"included_in_cohort">;
+                }, z.core.$strict>, z.ZodObject<{
+                    name: z.ZodString;
+                    resolution: z.ZodLiteral<"embedded_not_exposed">;
+                }, z.core.$strict>, z.ZodObject<{
+                    name: z.ZodString;
+                    range: z.ZodString;
+                    resolution: z.ZodLiteral<"unavailable">;
+                }, z.core.$strict>, z.ZodObject<{
+                    name: z.ZodString;
+                    resolution: z.ZodLiteral<"unknown">;
+                }, z.core.$strict>], "resolution">>;
+                state: z.ZodLiteral<"blocked">;
+            }, z.core.$strict>, z.ZodObject<{
+                state: z.ZodLiteral<"unknown">;
+            }, z.core.$strict>], "state">;
+        }, z.core.$strict>;
+        name: z.ZodString;
+    }, z.core.$strict>>;
+    channel: z.ZodString;
+    plan: z.ZodObject<{
+        execution: z.ZodObject<{
+            operation: z.ZodLiteral<"observe">;
+        }, z.core.$strict>;
+        packages: z.ZodArray<z.ZodObject<{
+            access: z.ZodOptional<z.ZodEnum<{
+                public: "public";
+                restricted: "restricted";
+            }>>;
+            doctor: z.ZodObject<{
+                artifact: z.ZodEnum<{
+                    unknown: "unknown";
+                    invalid: "invalid";
+                    valid: "valid";
+                }>;
+                dependencyClosure: z.ZodEnum<{
+                    unknown: "unknown";
+                    valid: "valid";
+                    blocked: "blocked";
+                }>;
+            }, z.core.$strict>;
+            gitTag: z.ZodDiscriminatedUnion<[z.ZodObject<{
+                selected: z.ZodLiteral<false>;
+            }, z.core.$strict>, z.ZodObject<{
+                name: z.ZodString;
+                selected: z.ZodLiteral<true>;
+            }, z.core.$strict>], "selected">;
+            intent: z.ZodDiscriminatedUnion<[z.ZodObject<{
+                source: z.ZodLiteral<"none">;
+            }, z.core.$strict>, z.ZodObject<{
+                bump: z.ZodEnum<{
+                    major: "major";
+                    minor: "minor";
+                    patch: "patch";
+                }>;
+                reason: z.ZodString;
+                source: z.ZodLiteral<"changesets">;
+            }, z.core.$strict>, z.ZodObject<{
+                bump: z.ZodEnum<{
+                    major: "major";
+                    minor: "minor";
+                    patch: "patch";
+                }>;
+                reason: z.ZodString;
+                source: z.ZodLiteral<"explicit">;
+            }, z.core.$strict>], "source">;
+            name: z.ZodString;
+            policy: z.ZodDiscriminatedUnion<[z.ZodObject<{
+                channel: z.ZodString;
+                decision: z.ZodLiteral<"selected">;
+                reason: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                decision: z.ZodLiteral<"held">;
+                reason: z.ZodString;
+            }, z.core.$strict>], "decision">;
+            private: z.ZodBoolean;
+            registry: z.ZodObject<{
+                distTags: z.ZodRecord<z.ZodString, z.ZodString>;
+                registryUrl: z.ZodNullable<z.ZodURL>;
+                state: z.ZodEnum<{
+                    unknown_auth: "unknown_auth";
+                    unknown_network: "unknown_network";
+                    unknown_registry: "unknown_registry";
+                    missing: "missing";
+                    exists: "exists";
+                }>;
+            }, z.core.$strict>;
+            version: z.ZodString;
+            versionState: z.ZodDiscriminatedUnion<[z.ZodObject<{
+                state: z.ZodLiteral<"current">;
+            }, z.core.$strict>, z.ZodObject<{
+                intendedVersion: z.ZodString;
+                state: z.ZodLiteral<"pending">;
+            }, z.core.$strict>], "state">;
+            availableNextOperations: z.ZodArray<z.ZodEnum<{
+                publish: "publish";
+                observe: "observe";
+                prepare: "prepare";
+                tag: "tag";
+            }>>;
+            status: z.ZodEnum<{
+                unknown_registry: "unknown_registry";
+                blocked_dependency_closure: "blocked_dependency_closure";
+                blocked_invalid_artifact: "blocked_invalid_artifact";
+                blocked_unknown_artifact: "blocked_unknown_artifact";
+                blocked_unknown_dependency_closure: "blocked_unknown_dependency_closure";
+                pending_eligible: "pending_eligible";
+                pending_held: "pending_held";
+                private_unpublishable: "private_unpublishable";
+                published: "published";
+            }>;
+        }, z.core.$strict>>;
+        schemaVersion: z.ZodLiteral<1>;
+        summary: z.ZodObject<{
+            blocked: z.ZodNumber;
+            eligible: z.ZodNumber;
+            held: z.ZodNumber;
+            packages: z.ZodNumber;
+            private: z.ZodNumber;
+            published: z.ZodNumber;
+            unknown: z.ZodNumber;
+        }, z.core.$strict>;
+    }, z.core.$strict>;
+    selection: z.ZodArray<z.ZodString>;
+}, z.core.$strict>;
+
+// @public
 export function createReleaseTagPlan(input: CreateReleaseTagPlanInput): ReleaseTagPlan;
 
 // @public (undocumented)
@@ -432,6 +610,14 @@ export const executeBranchAction: (repoRoot: string, decision: BranchDecision, s
 export type ExecuteBranchOptions = {
     inherit?: boolean;
     updateBase?: boolean;
+};
+
+// @public
+export function executeReleasePublishPlan(plan: ReleasePublishPlan, options?: ExecuteReleasePublishPlanOptions): ReleasePublishResult;
+
+// @public (undocumented)
+export type ExecuteReleasePublishPlanOptions = {
+    repoRoot?: string;
 };
 
 // @public
@@ -806,6 +992,327 @@ export const releasePreparePlanSchema: z.ZodObject<{
 
 // @public (undocumented)
 export type ReleasePreparePlanSummary = ReleasePreparePlan['summary'];
+
+// @public (undocumented)
+export type ReleasePublishArtifact = z.infer<typeof releasePublishArtifactSchema>;
+
+// @public
+export const releasePublishArtifactSchema: z.ZodObject<{
+    integrity: z.ZodString;
+    name: z.ZodString;
+    tarball: z.ZodString;
+    version: z.ZodString;
+}, z.core.$strict>;
+
+// @public (undocumented)
+export type ReleasePublishAuthorization = ReleasePublishPlan['authorization'];
+
+// @public (undocumented)
+export type ReleasePublishCandidate = z.infer<typeof releasePublishCandidateSchema>;
+
+// @public
+export const releasePublishCandidateSchema: z.ZodObject<{
+    artifact: z.ZodObject<{
+        integrity: z.ZodString;
+        name: z.ZodString;
+        tarball: z.ZodString;
+        version: z.ZodString;
+    }, z.core.$strict>;
+    doctor: z.ZodObject<{
+        artifact: z.ZodEnum<{
+            unknown: "unknown";
+            invalid: "invalid";
+            valid: "valid";
+        }>;
+        closure: z.ZodDiscriminatedUnion<[z.ZodObject<{
+            edges: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
+                name: z.ZodString;
+                range: z.ZodString;
+                resolution: z.ZodLiteral<"available_in_registry">;
+                satisfiedBy: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                name: z.ZodString;
+                range: z.ZodString;
+                resolution: z.ZodLiteral<"included_in_cohort">;
+            }, z.core.$strict>, z.ZodObject<{
+                name: z.ZodString;
+                resolution: z.ZodLiteral<"embedded_not_exposed">;
+            }, z.core.$strict>, z.ZodObject<{
+                name: z.ZodString;
+                range: z.ZodString;
+                resolution: z.ZodLiteral<"unavailable">;
+            }, z.core.$strict>, z.ZodObject<{
+                name: z.ZodString;
+                resolution: z.ZodLiteral<"unknown">;
+            }, z.core.$strict>], "resolution">>;
+            state: z.ZodLiteral<"valid">;
+        }, z.core.$strict>, z.ZodObject<{
+            edges: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
+                name: z.ZodString;
+                range: z.ZodString;
+                resolution: z.ZodLiteral<"available_in_registry">;
+                satisfiedBy: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                name: z.ZodString;
+                range: z.ZodString;
+                resolution: z.ZodLiteral<"included_in_cohort">;
+            }, z.core.$strict>, z.ZodObject<{
+                name: z.ZodString;
+                resolution: z.ZodLiteral<"embedded_not_exposed">;
+            }, z.core.$strict>, z.ZodObject<{
+                name: z.ZodString;
+                range: z.ZodString;
+                resolution: z.ZodLiteral<"unavailable">;
+            }, z.core.$strict>, z.ZodObject<{
+                name: z.ZodString;
+                resolution: z.ZodLiteral<"unknown">;
+            }, z.core.$strict>], "resolution">>;
+            state: z.ZodLiteral<"blocked">;
+        }, z.core.$strict>, z.ZodObject<{
+            state: z.ZodLiteral<"unknown">;
+        }, z.core.$strict>], "state">;
+    }, z.core.$strict>;
+    name: z.ZodString;
+}, z.core.$strict>;
+
+// @public (undocumented)
+export type ReleasePublishClosureEdge = z.infer<typeof releasePublishClosureEdgeSchema>;
+
+// @public
+export const releasePublishClosureEdgeSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
+    name: z.ZodString;
+    range: z.ZodString;
+    resolution: z.ZodLiteral<"available_in_registry">;
+    satisfiedBy: z.ZodString;
+}, z.core.$strict>, z.ZodObject<{
+    name: z.ZodString;
+    range: z.ZodString;
+    resolution: z.ZodLiteral<"included_in_cohort">;
+}, z.core.$strict>, z.ZodObject<{
+    name: z.ZodString;
+    resolution: z.ZodLiteral<"embedded_not_exposed">;
+}, z.core.$strict>, z.ZodObject<{
+    name: z.ZodString;
+    range: z.ZodString;
+    resolution: z.ZodLiteral<"unavailable">;
+}, z.core.$strict>, z.ZodObject<{
+    name: z.ZodString;
+    resolution: z.ZodLiteral<"unknown">;
+}, z.core.$strict>], "resolution">;
+
+// @public (undocumented)
+export type ReleasePublishDoctorEvidence = z.infer<typeof releasePublishDoctorEvidenceSchema>;
+
+// @public
+export const releasePublishDoctorEvidenceSchema: z.ZodObject<{
+    artifact: z.ZodEnum<{
+        unknown: "unknown";
+        invalid: "invalid";
+        valid: "valid";
+    }>;
+    closure: z.ZodDiscriminatedUnion<[z.ZodObject<{
+        edges: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
+            name: z.ZodString;
+            range: z.ZodString;
+            resolution: z.ZodLiteral<"available_in_registry">;
+            satisfiedBy: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            name: z.ZodString;
+            range: z.ZodString;
+            resolution: z.ZodLiteral<"included_in_cohort">;
+        }, z.core.$strict>, z.ZodObject<{
+            name: z.ZodString;
+            resolution: z.ZodLiteral<"embedded_not_exposed">;
+        }, z.core.$strict>, z.ZodObject<{
+            name: z.ZodString;
+            range: z.ZodString;
+            resolution: z.ZodLiteral<"unavailable">;
+        }, z.core.$strict>, z.ZodObject<{
+            name: z.ZodString;
+            resolution: z.ZodLiteral<"unknown">;
+        }, z.core.$strict>], "resolution">>;
+        state: z.ZodLiteral<"valid">;
+    }, z.core.$strict>, z.ZodObject<{
+        edges: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
+            name: z.ZodString;
+            range: z.ZodString;
+            resolution: z.ZodLiteral<"available_in_registry">;
+            satisfiedBy: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            name: z.ZodString;
+            range: z.ZodString;
+            resolution: z.ZodLiteral<"included_in_cohort">;
+        }, z.core.$strict>, z.ZodObject<{
+            name: z.ZodString;
+            resolution: z.ZodLiteral<"embedded_not_exposed">;
+        }, z.core.$strict>, z.ZodObject<{
+            name: z.ZodString;
+            range: z.ZodString;
+            resolution: z.ZodLiteral<"unavailable">;
+        }, z.core.$strict>, z.ZodObject<{
+            name: z.ZodString;
+            resolution: z.ZodLiteral<"unknown">;
+        }, z.core.$strict>], "resolution">>;
+        state: z.ZodLiteral<"blocked">;
+    }, z.core.$strict>, z.ZodObject<{
+        state: z.ZodLiteral<"unknown">;
+    }, z.core.$strict>], "state">;
+}, z.core.$strict>;
+
+// @public (undocumented)
+export type ReleasePublishPackage = ReleasePublishPlan['packages'][number];
+
+// @public (undocumented)
+export type ReleasePublishPlan = z.infer<typeof releasePublishPlanSchema>;
+
+// @public
+export const releasePublishPlanSchema: z.ZodObject<{
+    authorization: z.ZodDiscriminatedUnion<[z.ZodObject<{
+        state: z.ZodLiteral<"authorized">;
+    }, z.core.$strict>, z.ZodObject<{
+        reasons: z.ZodArray<z.ZodEnum<{
+            no_selected_packages: "no_selected_packages";
+            no_publishable_packages: "no_publishable_packages";
+            unresolved_prerequisites: "unresolved_prerequisites";
+            unknown_selected_package: "unknown_selected_package";
+        }>>;
+        state: z.ZodLiteral<"withheld">;
+    }, z.core.$strict>], "state">;
+    channel: z.ZodString;
+    operation: z.ZodLiteral<"publish">;
+    packages: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
+        artifact: z.ZodObject<{
+            integrity: z.ZodString;
+            name: z.ZodString;
+            tarball: z.ZodString;
+            version: z.ZodString;
+        }, z.core.$strict>;
+        channel: z.ZodString;
+        decision: z.ZodLiteral<"planned">;
+        name: z.ZodString;
+        registryUrl: z.ZodURL;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        decision: z.ZodLiteral<"already_published">;
+        name: z.ZodString;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        decision: z.ZodLiteral<"not_selected">;
+        name: z.ZodString;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        decision: z.ZodLiteral<"blocked_private">;
+        name: z.ZodString;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        decision: z.ZodLiteral<"blocked_policy_held">;
+        name: z.ZodString;
+        reason: z.ZodString;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        decision: z.ZodLiteral<"blocked_registry_unknown">;
+        name: z.ZodString;
+        registryState: z.ZodEnum<{
+            unknown_auth: "unknown_auth";
+            unknown_network: "unknown_network";
+            unknown_registry: "unknown_registry";
+        }>;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        decision: z.ZodLiteral<"blocked_artifact_unavailable">;
+        name: z.ZodString;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        decision: z.ZodLiteral<"blocked_artifact_invalid">;
+        name: z.ZodString;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        decision: z.ZodLiteral<"unknown_artifact_facts">;
+        name: z.ZodString;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        decision: z.ZodLiteral<"blocked_dependency_closure">;
+        name: z.ZodString;
+        unresolved: z.ZodArray<z.ZodString>;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        decision: z.ZodLiteral<"unknown_dependency_closure">;
+        name: z.ZodString;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        decision: z.ZodLiteral<"blocked_closure_dependency_not_in_cohort">;
+        missing: z.ZodArray<z.ZodString>;
+        name: z.ZodString;
+        version: z.ZodString;
+    }, z.core.$strict>], "decision">>;
+    schemaVersion: z.ZodLiteral<1>;
+    summary: z.ZodObject<{
+        alreadyPublished: z.ZodNumber;
+        blocked: z.ZodNumber;
+        packages: z.ZodNumber;
+        planned: z.ZodNumber;
+        selected: z.ZodNumber;
+        unknown: z.ZodNumber;
+    }, z.core.$strict>;
+}, z.core.$strict>;
+
+// @public (undocumented)
+export type ReleasePublishPlanSummary = ReleasePublishPlan['summary'];
+
+// @public (undocumented)
+export type ReleasePublishResult = z.infer<typeof releasePublishResultSchema>;
+
+// @public (undocumented)
+export const releasePublishResultSchema: z.ZodObject<{
+    operation: z.ZodLiteral<"publish">;
+    schemaVersion: z.ZodLiteral<1>;
+    started: z.ZodBoolean;
+    steps: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
+        channel: z.ZodString;
+        name: z.ZodString;
+        outcome: z.ZodLiteral<"published">;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        name: z.ZodString;
+        outcome: z.ZodLiteral<"skipped_already_published">;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        name: z.ZodString;
+        observed: z.ZodString;
+        outcome: z.ZodLiteral<"failed_registry_precheck">;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        expected: z.ZodString;
+        name: z.ZodString;
+        observed: z.ZodNullable<z.ZodString>;
+        outcome: z.ZodLiteral<"failed_artifact_integrity">;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        detail: z.ZodString;
+        name: z.ZodString;
+        outcome: z.ZodLiteral<"failed_publish">;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        name: z.ZodString;
+        observed: z.ZodString;
+        outcome: z.ZodLiteral<"failed_verification">;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        channel: z.ZodString;
+        detail: z.ZodString;
+        name: z.ZodString;
+        outcome: z.ZodLiteral<"failed_dist_tag">;
+        version: z.ZodString;
+    }, z.core.$strict>], "outcome">>;
+    summary: z.ZodObject<{
+        failed: z.ZodNumber;
+        published: z.ZodNumber;
+        skipped: z.ZodNumber;
+    }, z.core.$strict>;
+}, z.core.$strict>;
+
+// @public (undocumented)
+export type ReleasePublishStep = ReleasePublishResult['steps'][number];
 
 // @public
 export type ReleaseRegistryObservation = ReleasePackagePlan['registry'];
