@@ -34,6 +34,21 @@ export {
 } from './packages.js'
 export * from './pull-request-plan.js'
 /**
+ * One entry point, not a Changesets toolkit.
+ *
+ * Callers need pending release intent joined onto the plan's axes. The adapters behind it — building the package shape
+ * Changesets expects, restoring the file context its reader drops, translating a comprehensive release onto intent and
+ * version state — are implementation, and exporting them would invite a second release calculator to grow beside
+ * Changesets' own.
+ */
+export {
+    observeWorkspaceChangesetIntent,
+    type ObserveWorkspaceChangesetIntentOptions,
+    type ReleaseIntent,
+    type ReleaseVersionState,
+    type WorkspaceChangesetIntent,
+} from './release-changesets.js'
+/**
  * The release-plan contract is exported deliberately narrowly.
  *
  * Every name here is one an external adapter needs: the composer, the inputs it accepts, the canonical plan it returns,

@@ -312,6 +312,15 @@ export const localBranchExists: (repoRoot: string, branch: string) => boolean;
 export type NpmCommandRunner = (args: ReadonlyArray<string>) => CommandResult;
 
 // @public
+export function observeWorkspaceChangesetIntent(options?: ObserveWorkspaceChangesetIntentOptions): Promise<Array<WorkspaceChangesetIntent>>;
+
+// @public (undocumented)
+export type ObserveWorkspaceChangesetIntentOptions = {
+    packages?: ReadonlyArray<WorkspacePackage>;
+    repoRoot?: string;
+};
+
+// @public
 export function observeWorkspaceRegistry(options?: ObserveWorkspaceRegistryOptions): Array<WorkspaceRegistryObservation>;
 
 // @public (undocumented)
@@ -375,6 +384,9 @@ export function readPackageName(packageJsonPath: string): null | string;
 
 // @public
 export const readWorkspaceEnvironment: (environment: Readonly<Record<string, unknown>>) => WorkspaceEnvironment;
+
+// @public (undocumented)
+export type ReleaseIntent = ReleasePackagePlan['intent'];
 
 // @public
 export type ReleasePackagePlan = ReleasePlan['packages'][number];
@@ -489,6 +501,9 @@ export const releasePlanSchema: z.ZodObject<{
 
 // @public
 export type ReleaseRegistryObservation = ReleasePackagePlan['registry'];
+
+// @public (undocumented)
+export type ReleaseVersionState = ReleasePackagePlan['versionState'];
 
 // @public
 export const remoteBranchExists: (repoRoot: string, branch: string) => boolean;
@@ -634,6 +649,14 @@ export type WorkflowRemoteRelation = {
 
 // @public (undocumented)
 export type WorkingTreeStatus = 'clean' | 'dirty';
+
+// @public
+export type WorkspaceChangesetIntent = {
+    intent: ReleaseIntent;
+    name: string;
+    version: string;
+    versionState: ReleaseVersionState;
+};
 
 // @public (undocumented)
 export type WorkspaceEnvironment = z.output<typeof workspaceEnvironment.schema>;
