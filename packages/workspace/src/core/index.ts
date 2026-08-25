@@ -66,6 +66,24 @@ export {
     type ReleaseRegistryObservation,
 } from './release-plan.js'
 /**
+ * Prepare and tag are their own contracts, exported the same way the observation is.
+ *
+ * Each publishes its composer, its schema so an adapter can reject an unsupported `schemaVersion`, its document type
+ * and the per-package outcome a caller iterates. The blocker and summary shapes derive from those documents rather than
+ * from their own schemas, so they can be named without publishing the schemas behind them. Nothing intermediate leaves
+ * the package: no selection resolvers, no blocker derivation, no adapters.
+ */
+export {
+    createReleasePreparePlan,
+    type CreateReleasePreparePlanInput,
+    createReleasePreparePlanInputSchema,
+    type ReleasePrepareBlocker,
+    type ReleasePreparePackage,
+    type ReleasePreparePlan,
+    releasePreparePlanSchema,
+    type ReleasePreparePlanSummary,
+} from './release-prepare.js'
+/**
  * Registry observation is exported as one entry point, not as a toolkit.
  *
  * Callers need to observe the workspace and hand the result to `createReleasePlan`; they do not need the resolver,
@@ -88,6 +106,17 @@ export {
     renderReleasePlanMarkdown,
     renderReleasePlanTerminal,
 } from './release-render.js'
+export {
+    createReleaseTagPlan,
+    type CreateReleaseTagPlanInput,
+    createReleaseTagPlanInputSchema,
+    formatReleaseTagName,
+    type ReleaseTagBlocker,
+    type ReleaseTagPackage,
+    type ReleaseTagPlan,
+    releaseTagPlanSchema,
+    type ReleaseTagPlanSummary,
+} from './release-tag.js'
 export {
     createRepositoryScopeClassifiers,
     getWorkspaceScopeClassifiers,

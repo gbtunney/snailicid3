@@ -56,16 +56,13 @@ describe('release tag planning', () => {
             )
         })
 
-        it('rejects an identity that is not name@version', () => {
-            for (const [name, version] of [
-                ['@snailicid3/workspace', 'next'],
-                ['bad name', '1.0.0'],
-                ['', '1.0.0'],
-            ]) {
-                expect(() =>
-                    formatReleaseTagName(name ?? '', version ?? ''),
-                ).toThrow()
-            }
+        it.each([
+            ['@snailicid3/workspace', 'next'],
+            ['bad name', '1.0.0'],
+            ['', '1.0.0'],
+            ['@snailicid3/workspace', '0.2'],
+        ])('rejects %s@%s as a tag identity', (name, version) => {
+            expect(() => formatReleaseTagName(name, version)).toThrow()
         })
 
         it('carries a prerelease version through intact', () => {
