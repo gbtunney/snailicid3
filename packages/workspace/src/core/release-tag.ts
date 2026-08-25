@@ -1,6 +1,10 @@
 import { packageNameSchema, packageVersionSchema } from '@snailicid3/node-utils'
 import { z } from 'zod'
 import { releasePlanSchema } from './release-plan.js'
+import {
+    type ReleasePreparationEvidence,
+    releasePreparationEvidenceSchema,
+} from './release-prepare.js'
 
 /**
  * Git tag planning, kept on its own axis.
@@ -13,14 +17,20 @@ import { releasePlanSchema } from './release-plan.js'
  */
 
 /**
- * The prerequisite the observation contract could not express on its own.
+ * The prerequisite the observation contract cannot express at all.
  *
  * `ReleaseVersionState` distinguishes `pending` — a bump intended but not yet written into the manifest — from
- * `current`. That is exactly the prerequisite tagging needs, read the right way round: a `pending` version does not
- * exist in the tree yet, so tagging it would point a tag at a commit that does not contain the version the tag names.
- * Preparation is what turns `pending` into `current`, so "preparation completed" needs no new canonical state; it is
- * `current` observed after the fact. What the observation genuinely cannot say is whether a tag already exists, and
- * that is a Git fact supplied to this planner rather than a property of the plan being read.
+ * `current`, and a pending version is plainly untaggable: the tree does not contain it, so the tag would name a version
+ * its own commit lacks. But `current` is not the other half of that answer. It describes a package whose manifest
+ * version is simply what it is, which is equally true of a version a preparation just wrote and of an ordinary package
+ * that has sat unchanged with no intent behind it. Tagging on `current` alone would let any untouched package acquire a
+ * brand-new tag pointing at whatever commit happened to be checked out — a claim about history that nothing
+ * established.
+ *
+ * Two facts are supplied to the planner instead: {@link ReleasePreparationEvidence} naming the exact `name@version` a
+ * preparation produced, and the Git tag inventory. Neither is a property of the plan being read, and the absence of
+ * either stays explicit rather than resolving into a permission. Recovering a version that was prepared but never
+ * tagged belongs to the reconnect workflow; it must not fall out of a missing tag here.
  */
 const releaseTagNameSchema = z
     .string()
@@ -40,6 +50,7 @@ export const releaseTagBlockerSchema = z.discriminatedUnion('reason', [
         reason: z.literal('unknown_selected_package'),
     }),
     z.strictObject({ reason: z.literal('tag_inventory_unavailable') }),
+    z.strictObject({ reason: z.literal('preparation_evidence_unavailable') }),
 ])
 
 /**
@@ -61,6 +72,25 @@ export const releaseTagPackageSchema = z.discriminatedUnion('decision', [
     z.strictObject({
         decision: z.literal('blocked_preparation_incomplete'),
         intendedVersion: packageVersionSchema,
+        name: packageNameSchema,
+        private: z.boolean(),
+        version: packageVersionSchema,
+    }),
+    z.strictObject({
+        decision: z.literal('blocked_preparation_unproven'),
+        name: packageNameSchema,
+        private: z.boolean(),
+        version: packageVersionSchema,
+    }),
+    z.strictObject({
+        decision: z.literal('blocked_preparation_version_mismatch'),
+        name: packageNameSchema,
+        preparedVersion: packageVersionSchema,
+        private: z.boolean(),
+        version: packageVersionSchema,
+    }),
+    z.strictObject({
+        decision: z.literal('unknown_preparation_evidence'),
         name: packageNameSchema,
         private: z.boolean(),
         version: packageVersionSchema,
@@ -108,6 +138,7 @@ export const releaseTagPlanSchema = z.strictObject({
 export const createReleaseTagPlanInputSchema = z.strictObject({
     existingTags: z.array(z.string()).nullable(),
     plan: releasePlanSchema,
+    preparedVersions: z.array(releasePreparationEvidenceSchema).nullable(),
     selection: z.array(packageNameSchema),
 })
 
@@ -141,6 +172,15 @@ export function createReleaseTagPlan(
     const unknown = [...selection].filter((name) => !known.has(name)).toSorted()
     const existing =
         parsed.existingTags === null ? null : new Set(parsed.existingTags)
+    const prepared =
+        parsed.preparedVersions === null
+            ? null
+            : new Map(
+                  parsed.preparedVersions.map((evidence) => [
+                      evidence.name,
+                      evidence,
+                  ]),
+              )
 
     const packages = parsed.plan.packages.map(
         (packagePlan): ReleaseTagPackage => {
@@ -159,6 +199,25 @@ export function createReleaseTagPlan(
                     ...shared,
                     decision: 'blocked_preparation_incomplete',
                     intendedVersion: packagePlan.versionState.intendedVersion,
+                }
+            }
+
+            if (prepared === null) {
+                return { ...shared, decision: 'unknown_preparation_evidence' }
+            }
+
+            const evidence: ReleasePreparationEvidence | undefined =
+                prepared.get(packagePlan.name)
+
+            if (evidence === undefined) {
+                return { ...shared, decision: 'blocked_preparation_unproven' }
+            }
+
+            if (evidence.version !== packagePlan.version) {
+                return {
+                    ...shared,
+                    decision: 'blocked_preparation_version_mismatch',
+                    preparedVersion: evidence.version,
                 }
             }
 
@@ -181,6 +240,7 @@ export function createReleaseTagPlan(
 
     return releaseTagPlanSchema.parse({
         blockers: deriveBlockers({
+            evidenceUnavailable: prepared === null,
             inventoryUnavailable: existing === null,
             planned: planned.length,
             selected: selection.size,
@@ -210,6 +270,7 @@ export function formatReleaseTagName(name: string, version: string): string {
 }
 
 function deriveBlockers(facts: {
+    evidenceUnavailable: boolean
     inventoryUnavailable: boolean
     planned: number
     selected: number
@@ -227,6 +288,10 @@ function deriveBlockers(facts: {
             names: [...facts.unknown],
             reason: 'unknown_selected_package',
         })
+    }
+
+    if (facts.evidenceUnavailable) {
+        blockers.push({ reason: 'preparation_evidence_unavailable' })
     }
 
     if (facts.inventoryUnavailable) {

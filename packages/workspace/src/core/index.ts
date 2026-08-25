@@ -77,6 +77,8 @@ export {
     createReleasePreparePlan,
     type CreateReleasePreparePlanInput,
     createReleasePreparePlanInputSchema,
+    type ReleasePreparationEvidence,
+    releasePreparationEvidenceSchema,
     type ReleasePrepareBlocker,
     type ReleasePreparePackage,
     type ReleasePreparePlan,

@@ -28,11 +28,30 @@ const packageInput = (
 const planOf = (...packages: Array<ReleasePackagePlanInput>): ReleasePlan =>
     createReleasePlan({ packages })
 
+/** Evidence that every package in the plan was prepared at exactly its current version. */
+const preparedAsObserved = (
+    plan: ReleasePlan,
+): Array<{ name: string; version: string }> =>
+    plan.packages.map((packagePlan) => ({
+        name: packagePlan.name,
+        version: packagePlan.version,
+    }))
+
 const tag = (
     plan: ReleasePlan,
     selection: Array<string>,
     existingTags: Array<string> | null = [],
-) => createReleaseTagPlan({ existingTags, plan, selection })
+    preparedVersions?: Array<{ name: string; version: string }> | null,
+) =>
+    createReleaseTagPlan({
+        existingTags,
+        plan,
+        preparedVersions:
+            preparedVersions === undefined
+                ? preparedAsObserved(plan)
+                : preparedVersions,
+        selection,
+    })
 
 const entryFor = (plan: ReturnType<typeof tag>, name: string) =>
     plan.packages.find((entry) => entry.name === name)
@@ -312,6 +331,185 @@ describe('release tag planning', () => {
             expect(planned.schemaVersion).toBe(1)
             expect(planned.operation).toBe('tag')
             expect(plan.execution.operation).toBe('observe')
+        })
+    })
+
+    describe('preparation evidence', () => {
+        /**
+         * The regression this whole axis exists for.
+         *
+         * An ordinary package that nobody changed sits at `versionState: current` with no intent, exactly like a
+         * version a preparation just produced. If `current` were treated as evidence, selecting such a package with no
+         * tag present would mint `name@version` against whatever commit happened to be checked out — a tag asserting a
+         * release that never happened.
+         */
+        it('does not tag an unchanged current package with no intent and no existing tag', () => {
+            const plan = planOf(
+                packageInput({ intent: { source: 'none' }, version: '0.2.0' }),
+            )
+            const planned = tag(plan, ['@snailicid3/workspace'], [], [])
+
+            expect(entryFor(planned, '@snailicid3/workspace')).toEqual({
+                decision: 'blocked_preparation_unproven',
+                name: '@snailicid3/workspace',
+                private: false,
+                version: '0.2.0',
+            })
+            expect(planned.summary.planned).toBe(0)
+            expect(JSON.stringify(planned)).not.toContain(
+                '@snailicid3/workspace@0.2.0',
+            )
+        })
+
+        it('tags only when evidence names the exact package and version', () => {
+            const plan = planOf(packageInput({ version: '0.2.0' }))
+            const planned = tag(
+                plan,
+                ['@snailicid3/workspace'],
+                [],
+                [{ name: '@snailicid3/workspace', version: '0.2.0' }],
+            )
+
+            expect(entryFor(planned, '@snailicid3/workspace')).toMatchObject({
+                decision: 'planned',
+                tag: '@snailicid3/workspace@0.2.0',
+            })
+        })
+
+        it('blocks evidence recorded for a different version', () => {
+            const plan = planOf(packageInput({ version: '0.2.0' }))
+            const planned = tag(
+                plan,
+                ['@snailicid3/workspace'],
+                [],
+                [{ name: '@snailicid3/workspace', version: '0.1.0' }],
+            )
+
+            expect(entryFor(planned, '@snailicid3/workspace')).toEqual({
+                decision: 'blocked_preparation_version_mismatch',
+                name: '@snailicid3/workspace',
+                preparedVersion: '0.1.0',
+                private: false,
+                version: '0.2.0',
+            })
+        })
+
+        it('never accepts evidence for a different package', () => {
+            const plan = planOf(packageInput({ version: '0.2.0' }))
+            const planned = tag(
+                plan,
+                ['@snailicid3/workspace'],
+                [],
+                [{ name: '@snailicid3/config', version: '0.2.0' }],
+            )
+
+            expect(entryFor(planned, '@snailicid3/workspace')?.decision).toBe(
+                'blocked_preparation_unproven',
+            )
+        })
+
+        it('reports unknown when evidence could not be read at all', () => {
+            const planned = tag(
+                planOf(packageInput()),
+                ['@snailicid3/workspace'],
+                [],
+                null,
+            )
+
+            expect(entryFor(planned, '@snailicid3/workspace')).toMatchObject({
+                decision: 'unknown_preparation_evidence',
+            })
+            expect(planned.summary.unknown).toBe(1)
+            expect(planned.blockers).toContainEqual({
+                reason: 'preparation_evidence_unavailable',
+            })
+        })
+
+        it('keeps missing evidence distinct from unreadable evidence', () => {
+            const plan = planOf(packageInput())
+
+            expect(
+                entryFor(
+                    tag(plan, ['@snailicid3/workspace'], [], []),
+                    '@snailicid3/workspace',
+                )?.decision,
+            ).toBe('blocked_preparation_unproven')
+            expect(
+                entryFor(
+                    tag(plan, ['@snailicid3/workspace'], [], null),
+                    '@snailicid3/workspace',
+                )?.decision,
+            ).toBe('unknown_preparation_evidence')
+        })
+
+        it('checks preparation before the tag inventory', () => {
+            const planned = tag(
+                planOf(packageInput({ version: '0.2.0' })),
+                ['@snailicid3/workspace'],
+                ['@snailicid3/workspace@0.2.0'],
+                [],
+            )
+
+            expect(entryFor(planned, '@snailicid3/workspace')?.decision).toBe(
+                'blocked_preparation_unproven',
+            )
+        })
+
+        it('still blocks an already-tagged version that was properly prepared', () => {
+            const planned = tag(
+                planOf(packageInput({ version: '0.2.0' })),
+                ['@snailicid3/workspace'],
+                ['@snailicid3/workspace@0.2.0'],
+                [{ name: '@snailicid3/workspace', version: '0.2.0' }],
+            )
+
+            expect(entryFor(planned, '@snailicid3/workspace')?.decision).toBe(
+                'blocked_already_tagged',
+            )
+        })
+
+        it('does not let evidence override a pending version', () => {
+            const plan = planOf(
+                packageInput({
+                    version: '0.1.0',
+                    versionState: {
+                        intendedVersion: '0.2.0',
+                        state: 'pending',
+                    },
+                }),
+            )
+            const planned = tag(
+                plan,
+                ['@snailicid3/workspace'],
+                [],
+                [{ name: '@snailicid3/workspace', version: '0.2.0' }],
+            )
+
+            expect(entryFor(planned, '@snailicid3/workspace')?.decision).toBe(
+                'blocked_preparation_incomplete',
+            )
+        })
+
+        it('tags a private package that has evidence', () => {
+            const plan = planOf(
+                packageInput({
+                    name: '@snailicid3/doctor',
+                    private: true,
+                    version: '0.0.1',
+                }),
+            )
+            const planned = tag(
+                plan,
+                ['@snailicid3/doctor'],
+                [],
+                [{ name: '@snailicid3/doctor', version: '0.0.1' }],
+            )
+
+            expect(entryFor(planned, '@snailicid3/doctor')).toMatchObject({
+                decision: 'planned',
+                private: true,
+                tag: '@snailicid3/doctor@0.0.1',
+            })
         })
     })
 })

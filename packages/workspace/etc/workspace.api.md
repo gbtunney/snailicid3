@@ -393,6 +393,10 @@ export const createReleaseTagPlanInputSchema: z.ZodObject<{
             unknown: z.ZodNumber;
         }, z.core.$strict>;
     }, z.core.$strict>;
+    preparedVersions: z.ZodNullable<z.ZodArray<z.ZodObject<{
+        name: z.ZodString;
+        version: z.ZodString;
+    }, z.core.$strict>>>;
     selection: z.ZodArray<z.ZodString>;
 }, z.core.$strict>;
 
@@ -733,6 +737,15 @@ export const releasePlanSchema: z.ZodObject<{
 }, z.core.$strict>;
 
 // @public (undocumented)
+export type ReleasePreparationEvidence = z.infer<typeof releasePreparationEvidenceSchema>;
+
+// @public
+export const releasePreparationEvidenceSchema: z.ZodObject<{
+    name: z.ZodString;
+    version: z.ZodString;
+}, z.core.$strict>;
+
+// @public (undocumented)
 export type ReleasePrepareBlocker = ReleasePreparePlan['blockers'][number];
 
 // @public (undocumented)
@@ -817,6 +830,8 @@ export const releaseTagPlanSchema: z.ZodObject<{
         reason: z.ZodLiteral<"unknown_selected_package">;
     }, z.core.$strict>, z.ZodObject<{
         reason: z.ZodLiteral<"tag_inventory_unavailable">;
+    }, z.core.$strict>, z.ZodObject<{
+        reason: z.ZodLiteral<"preparation_evidence_unavailable">;
     }, z.core.$strict>], "reason">>;
     operation: z.ZodLiteral<"tag">;
     packages: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
@@ -828,6 +843,22 @@ export const releaseTagPlanSchema: z.ZodObject<{
     }, z.core.$strict>, z.ZodObject<{
         decision: z.ZodLiteral<"blocked_preparation_incomplete">;
         intendedVersion: z.ZodString;
+        name: z.ZodString;
+        private: z.ZodBoolean;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        decision: z.ZodLiteral<"blocked_preparation_unproven">;
+        name: z.ZodString;
+        private: z.ZodBoolean;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        decision: z.ZodLiteral<"blocked_preparation_version_mismatch">;
+        name: z.ZodString;
+        preparedVersion: z.ZodString;
+        private: z.ZodBoolean;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        decision: z.ZodLiteral<"unknown_preparation_evidence">;
         name: z.ZodString;
         private: z.ZodBoolean;
         version: z.ZodString;

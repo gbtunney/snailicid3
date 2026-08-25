@@ -35,6 +35,27 @@ const releaseSlugSchema = z
     )
 
 /**
+ * Proof that one exact `name@version` was produced by a completed preparation.
+ *
+ * Preparation is what mints a version; this is the record that it did. Tagging consumes it because no state on the
+ * observed plan can stand in for it: `versionState: 'current'` describes a package whose manifest version is simply
+ * what it is, which is equally true of a version a preparation just wrote and of one that has sat unchanged for a year
+ * with no intent behind it. Tagging on `current` alone would let an ordinary untouched package acquire a brand-new tag
+ * pointing at whatever commit happened to be checked out, which is a claim about history that nothing established.
+ *
+ * The evidence is keyed by exact name and version so that a record for a different version cannot be read as a record
+ * for this one.
+ */
+export const releasePreparationEvidenceSchema = z.strictObject({
+    name: packageNameSchema,
+    version: packageVersionSchema,
+})
+
+export type ReleasePreparationEvidence = z.infer<
+    typeof releasePreparationEvidenceSchema
+>
+
+/**
  * Why a preparation cannot proceed, or cannot proceed completely.
  *
  * A reason rather than a flag: a caller that only learns preparation is unavailable cannot tell a dirty working tree
