@@ -183,9 +183,8 @@ export type ReleasePlan = z.infer<typeof releasePlanSchema>
 export type ReleasePlanExecution = z.infer<typeof releasePlanExecutionSchema>
 export type ReleasePlanSummary = z.infer<typeof releasePlanSummarySchema>
 export type ReleasePublishPolicy = z.infer<typeof releasePublishPolicySchema>
-export type ReleaseRegistryObservation = z.infer<
-    typeof releaseRegistryObservationSchema
->
+/** One registry's answer about an exact `name@version`, derived from the canonical plan shape. */
+export type ReleaseRegistryObservation = ReleasePackagePlan['registry']
 export type ReleaseRegistryState = z.infer<typeof releaseRegistryStateSchema>
 
 export type ReleaseVersionState = z.infer<typeof releaseVersionStateSchema>

@@ -308,6 +308,19 @@ export function loadScopePathMatchers(repoRoot: string): Promise<WorkspaceScopeO
 // @public
 export const localBranchExists: (repoRoot: string, branch: string) => boolean;
 
+// @public
+export type NpmCommandRunner = (args: ReadonlyArray<string>) => CommandResult;
+
+// @public
+export function observeWorkspaceRegistry(options?: ObserveWorkspaceRegistryOptions): Array<WorkspaceRegistryObservation>;
+
+// @public (undocumented)
+export type ObserveWorkspaceRegistryOptions = {
+    packages?: ReadonlyArray<WorkspacePackage>;
+    repoRoot?: string;
+    runNpm?: NpmCommandRunner;
+};
+
 // @public (undocumented)
 export type PackageCommand = {
     args: Array<string>;
@@ -473,6 +486,9 @@ export const releasePlanSchema: z.ZodObject<{
         unknown: z.ZodNumber;
     }, z.core.$strict>;
 }, z.core.$strict>;
+
+// @public
+export type ReleaseRegistryObservation = ReleasePackagePlan['registry'];
 
 // @public
 export const remoteBranchExists: (repoRoot: string, branch: string) => boolean;
@@ -647,6 +663,13 @@ export const workspacePackageManagerOutputSchema: (repoRoot: string) => z.ZodTyp
 
 // @public
 export const workspacePackageRecordSchema: (repoRoot: string) => z.ZodType<WorkspacePackage>;
+
+// @public
+export type WorkspaceRegistryObservation = {
+    name: string;
+    registry: ReleaseRegistryObservation;
+    version: string;
+};
 
 // @public
 export type WorkspaceScopeDefinition = ReadonlyArray<string> | true;
