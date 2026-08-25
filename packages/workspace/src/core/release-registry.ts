@@ -129,6 +129,35 @@ type TargetRegistry =
     | { kind: 'unresolved' }
 
 /**
+ * Observe one exact `name@version` against a named registry.
+ *
+ * Kept off the package barrel. Publication needs this immediately before and immediately after mutating a registry, and
+ * routing it through the same `npm view` read and the same error classification the workspace observer uses is what
+ * stops a second, subtly different notion of "published" growing beside the first.
+ */
+export function observeExactVersion(
+    name: string,
+    version: string,
+    registryUrl: string,
+    runNpm: NpmCommandRunner,
+): ReleaseRegistryState {
+    const scope = packageScope(name)
+    const outcome = readNpmView(
+        name,
+        [
+            `--registry=${registryUrl}`,
+            ...(scope === null ? [] : [`--${scope}:registry=${registryUrl}`]),
+        ],
+        runNpm,
+    )
+
+    if (outcome.kind === 'error') return classifyRegistryErrorCode(outcome.code)
+    if (outcome.kind === 'unreadable') return 'unknown_registry'
+
+    return outcome.versions.includes(version) ? 'exists' : 'missing'
+}
+
+/**
  * The observation itself, over members someone else resolved and through a runner someone else supplied.
  *
  * Kept off the package barrel deliberately. Tests need both seams — a fabricated workspace, and a runner that produces
