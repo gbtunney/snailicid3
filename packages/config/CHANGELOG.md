@@ -1,5 +1,14 @@
 # @snailicid3/config
 
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies [fbd8245]
+  - @snailicid3/workspace@0.2.0
+  - @snailicid3/logger@0.1.0
+  - @snailicid3/node-utils@0.2.0
+
 ## 0.3.0
 
 ### Minor Changes

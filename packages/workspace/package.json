@@ -1,6 +1,6 @@
 {
     "name": "@snailicid3/workspace",
-    "version": "0.1.1",
+    "version": "0.2.0",
     "private": false,
     "description": "Workspace discovery, repository operations, and Snailicid3 workspace commands",
     "keywords": [
