@@ -316,7 +316,6 @@ export function observeWorkspaceChangesetIntent(options?: ObserveWorkspaceChange
 
 // @public (undocumented)
 export type ObserveWorkspaceChangesetIntentOptions = {
-    packages?: ReadonlyArray<WorkspacePackage>;
     repoRoot?: string;
 };
 

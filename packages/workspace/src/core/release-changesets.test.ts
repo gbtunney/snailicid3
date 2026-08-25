@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { type WorkspacePackage } from './packages.js'
-import { observeWorkspaceChangesetIntent } from './release-changesets.js'
+import { observeChangesetIntentForMembers } from './release-changesets.js'
 import { createReleasePlan } from './release-plan.js'
 
 type Manifest = {
@@ -91,10 +91,7 @@ const withRepo = async <T>(
 
 const observe = async (repo: Repo) =>
     withRepo(repo, async (repoRoot) =>
-        observeWorkspaceChangesetIntent({
-            packages: members(repo),
-            repoRoot,
-        }),
+        observeChangesetIntentForMembers(repoRoot, members(repo)),
     )
 
 const changeset = (releases: Record<string, string>, summary: string): string =>

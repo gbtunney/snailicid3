@@ -48,7 +48,6 @@ const changesetsPackageJsonSchema = z.looseObject({
 })
 
 export type ObserveWorkspaceChangesetIntentOptions = {
-    packages?: ReadonlyArray<WorkspacePackage>
     repoRoot?: string
 }
 
@@ -65,21 +64,16 @@ export type WorkspaceChangesetIntent = {
 }
 
 /**
- * Observe pending Changesets intent for every canonical workspace package.
+ * The observation itself, over members someone else resolved.
  *
- * Membership comes from {@link getWorkspaceSnapshot}, so a package is considered because the workspace claims it. The
- * manifests behind that membership are handed to Changesets, which decides what each package's next version would be.
- *
- * A package with no pending release carries `source: 'none'` and a `current` version state. That is a statement about
- * Changesets alone: it says nothing about whether the package exists in a registry, and it never authorizes
- * publishing.
+ * Kept off the package barrel deliberately. Tests need to drive this against a fabricated workspace, but a consumer
+ * that could supply its own member list would be able to route around {@link getWorkspaceSnapshot} — the boundary this
+ * module exists to respect. Splitting the seam here keeps it available inside the package and unreachable outside it.
  */
-export async function observeWorkspaceChangesetIntent(
-    options: ObserveWorkspaceChangesetIntentOptions = {},
+export async function observeChangesetIntentForMembers(
+    repoRoot: string,
+    members: ReadonlyArray<WorkspacePackage>,
 ): Promise<Array<WorkspaceChangesetIntent>> {
-    const repoRoot = options.repoRoot ?? getRepoRoot({ fallbackToCwd: true })
-    const members = options.packages ?? getWorkspaceSnapshot(repoRoot).list
-
     if (!existsSync(path.join(repoRoot, CHANGESET_DIRECTORY))) {
         return members.map(withoutIntent)
     }
@@ -121,6 +115,27 @@ export async function observeWorkspaceChangesetIntent(
                       },
         }
     })
+}
+
+/**
+ * Observe pending Changesets intent for every canonical workspace package.
+ *
+ * Membership comes from {@link getWorkspaceSnapshot}, so a package is considered because the workspace claims it. The
+ * manifests behind that membership are handed to Changesets, which decides what each package's next version would be.
+ *
+ * A package with no pending release carries `source: 'none'` and a `current` version state. That is a statement about
+ * Changesets alone: it says nothing about whether the package exists in a registry, and it never authorizes
+ * publishing.
+ */
+export async function observeWorkspaceChangesetIntent(
+    options: ObserveWorkspaceChangesetIntentOptions = {},
+): Promise<Array<WorkspaceChangesetIntent>> {
+    const repoRoot = options.repoRoot ?? getRepoRoot({ fallbackToCwd: true })
+
+    return observeChangesetIntentForMembers(
+        repoRoot,
+        getWorkspaceSnapshot(repoRoot).list,
+    )
 }
 
 /**
