@@ -496,6 +496,12 @@ export const remoteBranchExists: (repoRoot: string, branch: string) => boolean;
 // @public
 export const renderGhPrCreateCommand: (plan: PullRequestPlan) => string;
 
+// @public
+export function renderReleasePlanMarkdown(plan: ReleasePlan): string;
+
+// @public
+export function renderReleasePlanTerminal(plan: ReleasePlan): string;
+
 // @public (undocumented)
 export type RepositoryScopeClassifiers = StringClassifiers;
 

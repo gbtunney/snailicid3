@@ -63,6 +63,17 @@ export {
     type ObserveWorkspaceRegistryOptions,
     type WorkspaceRegistryObservation,
 } from './release-registry.js'
+/**
+ * Two renderers, no presentation model.
+ *
+ * Callers need a plan drawn for a terminal or a pull-request comment. The presentation model both renderers share stays
+ * internal until something outside the package genuinely needs to build a third projection — exporting it now would
+ * freeze a shape whose only job so far is to keep these two in step.
+ */
+export {
+    renderReleasePlanMarkdown,
+    renderReleasePlanTerminal,
+} from './release-render.js'
 export {
     createRepositoryScopeClassifiers,
     getWorkspaceScopeClassifiers,
