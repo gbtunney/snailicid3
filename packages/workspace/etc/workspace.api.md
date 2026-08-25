@@ -309,9 +309,6 @@ export function loadScopePathMatchers(repoRoot: string): Promise<WorkspaceScopeO
 export const localBranchExists: (repoRoot: string, branch: string) => boolean;
 
 // @public
-export type NpmCommandRunner = (args: ReadonlyArray<string>) => CommandResult;
-
-// @public
 export function observeWorkspaceChangesetIntent(options?: ObserveWorkspaceChangesetIntentOptions): Promise<Array<WorkspaceChangesetIntent>>;
 
 // @public (undocumented)
@@ -324,9 +321,7 @@ export function observeWorkspaceRegistry(options?: ObserveWorkspaceRegistryOptio
 
 // @public (undocumented)
 export type ObserveWorkspaceRegistryOptions = {
-    packages?: ReadonlyArray<WorkspacePackage>;
     repoRoot?: string;
-    runNpm?: NpmCommandRunner;
 };
 
 // @public (undocumented)

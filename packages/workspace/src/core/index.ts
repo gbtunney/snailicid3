@@ -73,7 +73,6 @@ export {
  * without a contract change, which is the whole point of the narrow surface established for the plan itself.
  */
 export {
-    type NpmCommandRunner,
     observeWorkspaceRegistry,
     type ObserveWorkspaceRegistryOptions,
     type WorkspaceRegistryObservation,

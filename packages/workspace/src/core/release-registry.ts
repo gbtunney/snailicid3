@@ -76,13 +76,14 @@ const publishConfigSchema = z.looseObject({
  * Injected rather than imported so every resolution and classification path can be driven from fixtures. The registry
  * behavior this module encodes is mostly about failures, and failures are exactly what a live network will not produce
  * on demand.
+ *
+ * Internal to the package. It was public only to type the `runNpm` option, and a consumer able to substitute the runner
+ * could replace registry observation wholesale while still calling it an observation.
  */
 export type NpmCommandRunner = (args: ReadonlyArray<string>) => CommandResult
 
 export type ObserveWorkspaceRegistryOptions = {
-    packages?: ReadonlyArray<WorkspacePackage>
     repoRoot?: string
-    runNpm?: NpmCommandRunner
 }
 
 /** One package's exact-version observation, shaped to drop straight into a release-plan package input. */
@@ -128,22 +129,18 @@ type TargetRegistry =
     | { kind: 'unresolved' }
 
 /**
- * Observe every canonical workspace package against its resolved target registry.
+ * The observation itself, over members someone else resolved and through a runner someone else supplied.
  *
- * Membership comes from the package manager's own workspace listing rather than a filesystem walk, so a package is
- * observed because the workspace claims it, not because a `package.json` happened to be found.
- *
- * Private packages are never looked up. They cannot publish through npm whatever a registry reports, so querying would
- * leak a private name to a third party to learn something that cannot change the outcome. Their observation is recorded
- * as `unknown_registry`, which is literally true — nothing was asked.
+ * Kept off the package barrel deliberately. Tests need both seams — a fabricated workspace, and a runner that produces
+ * the failures a live network will not produce on demand — but neither belongs to consumers. A caller able to pass its
+ * own member list could route around {@link getWorkspaceSnapshot}, and one able to pass its own runner could replace the
+ * registry lookup entirely while the result still claimed to be an observation of npm.
  */
-export function observeWorkspaceRegistry(
-    options: ObserveWorkspaceRegistryOptions = {},
+export function observeRegistryForMembers(
+    repoRoot: string,
+    packages: ReadonlyArray<WorkspacePackage>,
+    runNpm: NpmCommandRunner,
 ): Array<WorkspaceRegistryObservation> {
-    const repoRoot = options.repoRoot ?? getRepoRoot({ fallbackToCwd: true })
-    const runNpm = options.runNpm ?? createNpmCommandRunner(repoRoot)
-    const packages = options.packages ?? getWorkspaceSnapshot(repoRoot).list
-
     const registryConfig = readNpmRegistryConfig(
         packages.map((pkg) => pkg.name),
         runNpm,
@@ -162,6 +159,28 @@ export function observeWorkspaceRegistry(
             version: pkg.version,
         }
     })
+}
+
+/**
+ * Observe every canonical workspace package against its resolved target registry.
+ *
+ * Membership comes from the package manager's own workspace listing rather than a filesystem walk, so a package is
+ * observed because the workspace claims it, not because a `package.json` happened to be found.
+ *
+ * Private packages are never looked up. They cannot publish through npm whatever a registry reports, so querying would
+ * leak a private name to a third party to learn something that cannot change the outcome. Their observation is recorded
+ * as `unknown_registry`, which is literally true — nothing was asked.
+ */
+export function observeWorkspaceRegistry(
+    options: ObserveWorkspaceRegistryOptions = {},
+): Array<WorkspaceRegistryObservation> {
+    const repoRoot = options.repoRoot ?? getRepoRoot({ fallbackToCwd: true })
+
+    return observeRegistryForMembers(
+        repoRoot,
+        getWorkspaceSnapshot(repoRoot).list,
+        createNpmCommandRunner(repoRoot),
+    )
 }
 
 /** Validate every recorded observation, so a credential can never reach a plan even if stripping were bypassed. */
