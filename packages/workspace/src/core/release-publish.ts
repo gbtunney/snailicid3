@@ -75,9 +75,15 @@ export const releasePublishClosureEdgeSchema = z.discriminatedUnion(
 /**
  * Doctor's verdict on one selected package, supplied as data.
  *
- * `@snailicid3/doctor` is a private package and `@snailicid3/workspace` is published, so Workspace cannot take a code
- * dependency on it — not as a temporary arrangement but permanently. Doctor's findings therefore cross the boundary as
- * a validated document, which also means this schema is the contract #226 must eventually satisfy.
+ * The boundary is about ownership, not packaging. Doctor owns dependency-edge analysis, packed-artifact safety and
+ * consumer-facing residual references; Workspace owns selection, registry truth, policy and orchestration. Defining
+ * what proof Workspace requires — rather than computing it — is what keeps a second closure analyzer from growing
+ * here.
+ *
+ * Facts crossing as a validated document rather than a function call also means the producer is interchangeable: a
+ * Doctor run, a cached report from CI, or a fixture in a test all satisfy the same contract, and a publish plan stays
+ * composable and serializable without Doctor's analysis machinery having to run. This schema is therefore the contract
+ * #226 must eventually satisfy, and #226 not existing yet is a missing producer rather than a reason to weaken it.
  */
 export const releasePublishDoctorEvidenceSchema = z.strictObject({
     artifact: z.enum(['invalid', 'unknown', 'valid']),
