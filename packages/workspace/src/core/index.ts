@@ -48,7 +48,21 @@ export {
     type ReleasePackagePlan,
     type ReleasePlan,
     releasePlanSchema,
+    type ReleaseRegistryObservation,
 } from './release-plan.js'
+/**
+ * Registry observation is exported as one entry point, not as a toolkit.
+ *
+ * Callers need to observe the workspace and hand the result to `createReleasePlan`; they do not need the resolver,
+ * classifier or npm parsing helpers behind it. Keeping those internal leaves the observation strategy free to change
+ * without a contract change, which is the whole point of the narrow surface established for the plan itself.
+ */
+export {
+    type NpmCommandRunner,
+    observeWorkspaceRegistry,
+    type ObserveWorkspaceRegistryOptions,
+    type WorkspaceRegistryObservation,
+} from './release-registry.js'
 export {
     createRepositoryScopeClassifiers,
     getWorkspaceScopeClassifiers,
