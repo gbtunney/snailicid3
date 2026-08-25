@@ -34,7 +34,7 @@ jobs:
             NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         with:
             ref: ''
-            dry_run: false
+            dry_run: true
             allow_non_main: false
             run_pipeline: true
             upload_workspace_artifact: true
