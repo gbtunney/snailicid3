@@ -29,6 +29,12 @@ import { type ReleasePackagePlan } from './release-plan.js'
  * would create a second release calculator that agrees with `changeset version` only until it doesn't. This module
  * supplies inputs to `assembleReleasePlan` and translates its answer onto the plan's intent and version-state axes.
  *
+ * The four calls below are the same composition `@changesets/get-release-plan` performs, in the same order, with one
+ * substitution: it discovers packages with `@manypkg/get-packages`, which walks the filesystem, and this reads them
+ * from {@link getWorkspaceSnapshot} instead. Its signature accepts a cwd and an optional config override but no
+ * `Packages`, so adopting it would mean giving up the canonical membership boundary and reinstating the recursive
+ * `package.json` walk #206 rules out. That is the only reason it is not used here — do not "simplify" this back to it.
+ *
  * Nothing is consumed or written. Changeset files are read and left exactly where they are.
  */
 
