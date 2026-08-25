@@ -60,9 +60,17 @@ export const releaseRegistryStateSchema = z.enum([
     'unknown_registry',
 ])
 
+/**
+ * What one registry reported, and which registry was asked.
+ *
+ * `registryUrl` is null exactly when resolution failed — configuration named no usable target, or naming one truthfully
+ * was impossible. Recording npm's default in that case would attribute an answer to a registry nobody selected and
+ * nothing queried, so the absence is represented rather than papered over. A null URL always accompanies a state of
+ * `unknown_registry`; a state of `exists` or `missing` always names the registry that said so.
+ */
 export const releaseRegistryObservationSchema = z.strictObject({
     distTags: z.record(nonEmptyStringSchema, nonEmptyStringSchema),
-    registryUrl: releaseRegistryUrlSchema,
+    registryUrl: releaseRegistryUrlSchema.nullable(),
     state: releaseRegistryStateSchema,
 })
 
