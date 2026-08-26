@@ -488,7 +488,8 @@ function publishWith(closure: ReleasePublishDoctorEvidence['closure']) {
 
 function sourceMap(workspacePath: string): string {
     return JSON.stringify({
-        mappings: '',
+        // One segment resolving to source index 0: the source contributes to the emitted output.
+        mappings: 'AAAA',
         names: [],
         sources: [`../../${workspacePath}/src/index.ts`],
         version: 3,

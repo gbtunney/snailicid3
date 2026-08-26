@@ -165,6 +165,90 @@ describe('embedded workspace code provenance', () => {
         ).toEqual([])
     })
 
+    it('does not attribute a source that is listed but never mapped', () => {
+        const artifact = createArtifact({
+            'dist/index.js': 'export const answer = 42',
+            'dist/index.js.map': sourceMap(
+                ['../../packages/private/src/index.ts'],
+                { mappings: '' },
+            ),
+        })
+
+        // A bundler keeps the `sources` entry after tree-shaking every byte from that file, so listing alone says
+        // nothing about whether the code travels in the artifact.
+        expect(
+            collect(artifact, [member('@fixture/private', { private: true })]),
+        ).toEqual([])
+    })
+
+    it('attributes only the source the mappings actually resolve to', () => {
+        const artifact = createArtifact({
+            'dist/index.js.map': sourceMap(
+                [
+                    '../../packages/dropped/src/index.ts',
+                    '../../packages/kept/src/index.ts',
+                ],
+                // One segment whose source-index delta is +1, so it resolves to the second source only.
+                { mappings: 'ACAA' },
+            ),
+        })
+
+        expect(
+            collect(artifact, [
+                member('@fixture/dropped'),
+                member('@fixture/kept'),
+            ]).map(({ name }) => name),
+        ).toEqual(['@fixture/kept'])
+    })
+
+    it('attributes an unmapped source whose text the artifact still distributes', () => {
+        const artifact = createArtifact({
+            'dist/index.js.map': sourceMap(
+                ['../../packages/private/src/index.ts'],
+                {
+                    mappings: '',
+                    sourcesContent: ['export const secret = 1\n'],
+                },
+            ),
+        })
+
+        // Nothing from it survived emitting, but the map carries its source verbatim, so the code is still distributed.
+        expect(
+            collect(artifact, [member('@fixture/private', { private: true })]),
+        ).toEqual([
+            {
+                evidence: [
+                    'sourcesContent:dist/index.js.map:../../packages/private/src/index.ts',
+                ],
+                kind: 'sourcemap',
+                name: '@fixture/private',
+                workspacePrivate: true,
+            },
+        ])
+    })
+
+    it('does not attribute an unmapped source whose shipped text is empty', () => {
+        const artifact = createArtifact({
+            'dist/index.js.map': sourceMap(
+                ['../../packages/private/src/index.ts'],
+                { mappings: '', sourcesContent: [null] },
+            ),
+        })
+
+        expect(collect(artifact, [member('@fixture/private')])).toEqual([])
+    })
+
+    it('abandons a map whose mappings cannot be decoded rather than guessing an index', () => {
+        const artifact = createArtifact({
+            'dist/index.js.map': sourceMap(
+                ['../../packages/private/src/index.ts'],
+                { mappings: 'A!AA' },
+            ),
+        })
+
+        expect(collect(artifact, [member('@fixture/private')])).toEqual([])
+    })
+
     it('reports absence of provenance rather than proof that nothing is embedded', () => {
         const artifact = createArtifact({
             'dist/index.js': 'export const answer = 42',
@@ -229,12 +313,22 @@ function member(
     }
 }
 
-function sourceMap(sources: ReadonlyArray<string>): string {
+/** `AAAA` is one segment resolving to source index 0, so the first source counts as contributing. */
+function sourceMap(
+    sources: ReadonlyArray<string>,
+    options: {
+        mappings?: string
+        sourcesContent?: ReadonlyArray<null | string>
+    } = {},
+): string {
     return JSON.stringify({
-        mappings: '',
+        mappings: options.mappings ?? 'AAAA',
         names: [],
         sources: [...sources],
         version: 3,
+        ...(options.sourcesContent === undefined
+            ? {}
+            : { sourcesContent: [...options.sourcesContent] }),
     })
 }
 

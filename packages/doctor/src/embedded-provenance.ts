@@ -15,8 +15,10 @@ export type CollectEmbeddedWorkspaceCodeProvenanceInput = Readonly<{
  * How the packed artifact itself proves that another workspace package's code travels inside it.
  *
  * Every kind here is read out of the artifact, never out of bundler configuration and never out of a caller's claim.
- * `bundled_module` is deliberately separate from the other two: npm shipping `node_modules/<name>` keeps the dependency
- * resolvable under its own specifier, which is a different mechanism from a bundler inlining its source.
+ * `sourcemap` means the map shows the dependency actually contributing — a mapping segment resolving to it, or its text
+ * carried in `sourcesContent` — not merely that its path appears in `sources`. `bundled_module` is deliberately
+ * separate from the other two: npm shipping `node_modules/<name>` keeps the dependency resolvable under its own
+ * specifier, which is a different mechanism from a bundler inlining its source.
  */
 export type EmbeddedProvenanceKind =
     'bundled_module' | 'sourcemap' | 'vendored_content'
@@ -32,6 +34,9 @@ type ArtifactFile = Readonly<{ absolute: string; relative: string }>
 
 const INLINE_SOURCE_MAP =
     /\/[/*]#\s*sourceMappingURL=data:application\/json[^,]*base64,([A-Za-z0-9+/=]+)/gu
+
+const VLQ_ALPHABET =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
 /** Content small enough to collide by accident between unrelated generated files proves nothing. */
 const MINIMUM_VENDORED_BYTES = 128
@@ -49,8 +54,10 @@ const bundledManifestSchema = z.looseObject({
 })
 
 const sourceMapSchema = z.looseObject({
+    mappings: z.string().optional(),
     sourceRoot: z.string().optional(),
     sources: z.array(z.string()).optional(),
+    sourcesContent: z.array(z.union([z.string(), z.null()])).optional(),
 })
 
 /**
@@ -237,14 +244,22 @@ function collectSourceMapProvenance(
 ): void {
     for (const file of files) {
         for (const map of readSourceMaps(file)) {
-            for (const source of map.sources ?? []) {
+            const sources = map.sources ?? []
+            if (sources.length === 0) continue
+            const mapped = mappedSourceIndexes(map.mappings ?? '')
+
+            for (const [index, source] of sources.entries()) {
+                // Being listed in `sources` is not contribution: a bundler keeps the entry after tree-shaking every
+                // byte from that file. Either a mapping segment points at it, or its text ships in `sourcesContent`.
+                const isMapped = mapped.has(index)
+                if (!isMapped && !shipsSourceText(map, index)) continue
                 const segments = normalizeSourceSegments(source, map.sourceRoot)
                 for (const member of members) {
                     if (!attributesTo(segments, member)) continue
                     record(
                         member.name,
                         'sourcemap',
-                        `sourcemap:${file.relative}:${source}`,
+                        `${isMapped ? 'sourcemap' : 'sourcesContent'}:${file.relative}:${source}`,
                     )
                 }
             }
@@ -294,8 +309,55 @@ function collectVendoredContent(
     }
 }
 
+function decodeVlqSegment(segment: string): null | ReadonlyArray<number> {
+    const fields: Array<number> = []
+    let value = 0
+    let shift = 0
+
+    for (const character of segment) {
+        const digit = VLQ_ALPHABET.indexOf(character)
+        if (digit === -1) return null
+        value += (digit & 31) << shift
+        if ((digit & 32) === 32) {
+            shift += 5
+            continue
+        }
+        const magnitude = value >> 1
+        fields.push((value & 1) === 1 ? -magnitude : magnitude)
+        value = 0
+        shift = 0
+    }
+
+    return shift === 0 ? fields : null
+}
+
 function isCodeFile(file: string): boolean {
     return /(?:\.[cm]?js|\.[cm]?ts|\.tsx|\.jsx)$/u.test(file)
+}
+
+/**
+ * Source indexes that at least one mapping segment points at.
+ *
+ * A segment carries a source index only when it has four or more fields; one-field segments mark generated columns with
+ * no origin. The index is a running delta across the whole `mappings` string, so a segment that fails to decode
+ * desynchronizes everything after it — that abandons the map rather than attributing code to the wrong package.
+ */
+function mappedSourceIndexes(mappings: string): ReadonlySet<number> {
+    const indexes = new Set<number>()
+    let sourceIndex = 0
+
+    for (const group of mappings.split(';')) {
+        for (const segment of group.split(',')) {
+            if (segment === '') continue
+            const fields = decodeVlqSegment(segment)
+            if (fields === null) return new Set()
+            if (fields.length < 4) continue
+            sourceIndex += fields[1] ?? 0
+            indexes.add(sourceIndex)
+        }
+    }
+
+    return indexes
 }
 
 function memberSegments(member: WorkspacePackage): ReadonlyArray<string> {
@@ -343,4 +405,13 @@ function resolveMemberRoot(
     if (!existsSync(memberRoot) || !statSync(memberRoot).isDirectory())
         return null
     return memberRoot
+}
+
+/** Whether the map distributes the source text itself, which is disclosure regardless of what survived emitting. */
+function shipsSourceText(
+    map: z.output<typeof sourceMapSchema>,
+    index: number,
+): boolean {
+    const content = map.sourcesContent?.[index]
+    return typeof content === 'string' && content.trim() !== ''
 }
