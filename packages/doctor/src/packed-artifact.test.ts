@@ -10,6 +10,7 @@ import {
 } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
+import { gzipSync } from 'node:zlib'
 import {
     analyzePackedTarballWorkspaceDependencyClosure,
     runIsolatedPackageConsumer,
@@ -140,6 +141,29 @@ function createSnapshot(
     }
 }
 
+function createTar(name: string, contents: string): Buffer {
+    const body = Buffer.from(contents)
+    const header = Buffer.alloc(512)
+    header.write(name, 0, 100, 'utf8')
+    writeTarOctal(header, 100, 8, 0o644)
+    writeTarOctal(header, 108, 8, 0)
+    writeTarOctal(header, 116, 8, 0)
+    writeTarOctal(header, 124, 12, body.length)
+    writeTarOctal(header, 136, 12, 0)
+    header.fill(' ', 148, 156)
+    header.write('0', 156, 1, 'ascii')
+    header.write('ustar\0', 257, 6, 'ascii')
+    header.write('00', 263, 2, 'ascii')
+
+    const checksum = header.reduce((sum, byte) => sum + byte, 0)
+    header.write(checksum.toString(8).padStart(6, '0'), 148, 6, 'ascii')
+    header[154] = 0
+    header[155] = 0x20
+
+    const padding = Buffer.alloc((512 - (body.length % 512)) % 512)
+    return Buffer.concat([header, body, padding, Buffer.alloc(1024)])
+}
+
 function member(name: string): WorkspacePackage {
     return { name, path: 'packages/lib', version: '1.0.0' }
 }
@@ -147,14 +171,8 @@ function member(name: string): WorkspacePackage {
 function packEscapingFixture(): string {
     const root = mkdtempSync(path.join(tmpdir(), 'doctor-escape-fixture-'))
     temporaryRoots.push(root)
-    writeFileSync(path.join(root, 'safe'), 'escape')
     const tarball = path.join(root, 'escape.tgz')
-    const packed = spawnSync(
-        'tar',
-        ['-czf', tarball, '-s', ',^safe$,../escape,', 'safe'],
-        { cwd: root, encoding: 'utf8' },
-    )
-    if (packed.status !== 0) throw new Error(packed.stderr)
+    writeFileSync(tarball, gzipSync(createTar('../escape', 'escape')))
     return tarball
 }
 
@@ -222,4 +240,19 @@ function packLinkedFixture(): string {
     })
     if (packed.status !== 0) throw new Error(packed.stderr)
     return tarball
+}
+
+function writeTarOctal(
+    header: Buffer,
+    offset: number,
+    length: number,
+    value: number,
+): void {
+    header.write(
+        value.toString(8).padStart(length - 1, '0'),
+        offset,
+        length - 1,
+        'ascii',
+    )
+    header[offset + length - 1] = 0
 }
