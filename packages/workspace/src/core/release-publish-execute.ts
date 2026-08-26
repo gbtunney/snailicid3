@@ -41,6 +41,18 @@ export const releasePublishStepSchema = z.discriminatedUnion('outcome', [
         version: z.string().min(1),
     }),
     z.strictObject({
+        name: z.string().min(1),
+        outcome: z.literal('blocked_dependency_cycle'),
+        requires: z.array(z.string().min(1)).min(1),
+        version: z.string().min(1),
+    }),
+    z.strictObject({
+        name: z.string().min(1),
+        outcome: z.literal('blocked_dependency_unavailable'),
+        requires: z.array(z.string().min(1)).min(1),
+        version: z.string().min(1),
+    }),
+    z.strictObject({
         channel: z.string().min(1),
         name: z.string().min(1),
         outcome: z.literal('assigned_dist_tag'),
@@ -139,6 +151,7 @@ export type ReleasePublishAdapter = {
     ) => string
     publishTarball: (
         artifact: ReleasePublishArtifact,
+        channel: string,
         registryUrl: string,
     ) => { detail: string; ok: boolean }
     readIntegrity: (tarball: string) => null | string
@@ -167,12 +180,41 @@ export function executePublishWithAdapter(
         return buildResult(false, [])
     }
 
+    const executable = parsed.packages.filter(
+        (entry) =>
+            entry.decision === 'planned' ||
+            entry.decision === 'already_published',
+    )
+    const { cycleNames, order } = orderExecution(executable)
     const steps: Array<ReleasePublishStep> = []
+    const results = new Map<string, ReleasePublishStep>()
 
-    for (const entry of parsed.packages) {
-        if (entry.decision !== 'planned') continue
+    for (const entry of order) {
+        if (cycleNames.has(entry.name)) {
+            const step: ReleasePublishStep = {
+                name: entry.name,
+                outcome: 'blocked_dependency_cycle',
+                requires: [...cycleNames].toSorted((left, right) =>
+                    left.localeCompare(right),
+                ),
+                version: entry.version,
+            }
+            results.set(entry.name, step)
+            steps.push(step)
+            continue
+        }
 
-        steps.push(publishOne(entry, adapter))
+        const dependencyFailure = evaluateDependencyReadiness(entry, results)
+
+        if (dependencyFailure !== undefined) {
+            results.set(entry.name, dependencyFailure)
+            steps.push(dependencyFailure)
+            continue
+        }
+
+        const step = publishOne(entry, adapter)
+        results.set(entry.name, step)
+        steps.push(step)
     }
 
     return buildResult(true, steps)
@@ -285,6 +327,7 @@ function createNpmPublishAdapter(
             ),
         publishTarball: (
             artifact,
+            channel,
             registryUrl,
         ): {
             detail: string
@@ -293,6 +336,7 @@ function createNpmPublishAdapter(
             const result = runNpm([
                 'publish',
                 path.resolve(repoRoot, artifact.tarball),
+                `--tag=${channel}`,
                 `--registry=${registryUrl}`,
             ])
 
@@ -300,6 +344,124 @@ function createNpmPublishAdapter(
         },
         readIntegrity: (tarball) => readTarballIntegrity(repoRoot, tarball),
     }
+}
+
+function evaluateDependencyReadiness(
+    entry: Extract<
+        ReleasePublishPlan['packages'][number],
+        { decision: 'already_published' | 'planned' }
+    >,
+    results: ReadonlyMap<string, ReleasePublishStep>,
+): ReleasePublishStep | undefined {
+    const required = entry.requires ?? []
+    if (required.length === 0) return undefined
+
+    const missing = required.filter((name) => {
+        const result = results.get(name)
+        return (
+            result === undefined ||
+            ![
+                'assigned_dist_tag',
+                'published',
+                'skipped_already_published',
+            ].includes(result.outcome)
+        )
+    })
+
+    if (missing.length > 0) {
+        return {
+            name: entry.name,
+            outcome: 'blocked_dependency_unavailable',
+            requires: missing,
+            version: entry.version,
+        }
+    }
+
+    return undefined
+}
+
+function orderExecution(
+    entries: Array<
+        Extract<
+            ReleasePublishPlan['packages'][number],
+            { decision: 'already_published' | 'planned' }
+        >
+    >,
+): {
+    cycleNames: Set<string>
+    order: Array<
+        Extract<
+            ReleasePublishPlan['packages'][number],
+            { decision: 'already_published' | 'planned' }
+        >
+    >
+} {
+    const remaining = new Map(entries.map((entry) => [entry.name, entry]))
+    const indegree = new Map(
+        entries.map((entry) => [
+            entry.name,
+            Math.max(0, entry.requires.length),
+        ]),
+    )
+    const dependents = new Map<string, Array<string>>()
+
+    for (const entry of entries) {
+        for (const dependency of entry.requires) {
+            if (!remaining.has(dependency)) continue
+            const deps = dependents.get(dependency) ?? []
+            deps.push(entry.name)
+            dependents.set(dependency, deps)
+        }
+    }
+
+    const ready: Array<(typeof entries)[number]> = [...entries]
+        .filter((entry) => (indegree.get(entry.name) ?? 0) === 0)
+        .toSorted((left, right) => left.name.localeCompare(right.name))
+
+    const ordered: Array<(typeof entries)[number]> = []
+
+    while (ready.length > 0) {
+        const current = ready.shift()
+        if (current === undefined) {
+            break
+        }
+
+        ordered.push(current)
+        const nextDependents = dependents.get(current.name) ?? []
+
+        for (const dependent of nextDependents.toSorted((left, right) =>
+            left.localeCompare(right),
+        )) {
+            const next = (indegree.get(dependent) ?? 0) - 1
+            indegree.set(dependent, next)
+
+            if (next === 0) {
+                const dependentEntry = remaining.get(dependent)
+                if (dependentEntry !== undefined) {
+                    ready.push(dependentEntry)
+                }
+            }
+        }
+
+        ready.sort((left, right) => left.name.localeCompare(right.name))
+    }
+
+    const cycleNames = new Set(
+        [...remaining.keys()].filter(
+            (name) => !ordered.some((entry) => entry.name === name),
+        ),
+    )
+
+    if (ordered.length === entries.length) return { cycleNames, order: ordered }
+
+    for (const name of [...cycleNames].toSorted((left, right) =>
+        left.localeCompare(right),
+    )) {
+        const entry = remaining.get(name)
+        if (entry !== undefined) ordered.push(entry)
+    }
+
+    return { cycleNames, order: ordered }
 }
 
 /** Parse a JSON document, returning null rather than throwing on anything unparseable. */
@@ -321,13 +483,17 @@ function parseJsonOrNull(value: string): unknown {
 function publishOne(
     entry: Extract<
         ReleasePublishPlan['packages'][number],
-        { decision: 'planned' }
+        { decision: 'already_published' | 'planned' }
     >,
     adapter: ReleasePublishAdapter,
 ): ReleasePublishStep {
-    const { artifact, registryUrl } = entry
+    const { artifact, channel, registryUrl } = entry
     const shared = { name: entry.name, version: entry.version }
     const before = adapter.observeExact(artifact, registryUrl)
+
+    if (entry.decision === 'already_published') {
+        return settleDistTag(entry, adapter, true)
+    }
 
     if (before !== 'exists' && before !== 'missing') {
         return {
@@ -349,7 +515,7 @@ function publishOne(
             }
         }
 
-        const published = adapter.publishTarball(artifact, registryUrl)
+        const published = adapter.publishTarball(artifact, channel, registryUrl)
 
         if (!published.ok) {
             return {
@@ -409,7 +575,7 @@ function readTarballIntegrity(
 function settleDistTag(
     entry: Extract<
         ReleasePublishPlan['packages'][number],
-        { decision: 'planned' }
+        { decision: 'already_published' | 'planned' }
     >,
     adapter: ReleasePublishAdapter,
     alreadyPublished: boolean,

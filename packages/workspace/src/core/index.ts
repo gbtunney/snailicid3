@@ -86,7 +86,7 @@ export {
     type ReleasePreparePlanSummary,
 } from './release-prepare.js'
 /**
- * Publishing exports the plan, the operation, and the evidence a caller must assemble — nothing that mutates.
+ * Publishing exports the plan, the execution entry point, and the evidence a caller must assemble.
  *
  * The adapter behind `executeReleasePublishPlan` stays internal. It is a test seam, not part of the supported external
  * execution model, and a consumer able to supply its own would be able to substitute the thing that decides what

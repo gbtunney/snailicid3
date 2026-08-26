@@ -125,8 +125,8 @@ const fakeAdapter = (
 
                 return next
             },
-            publishTarball: (artifact) => {
-                calls.push(`publish:${artifact.tarball}`)
+            publishTarball: (artifact, channel) => {
+                calls.push(`publish:${artifact.tarball}:${channel}`)
 
                 return {
                     detail: behaviour.publishOk === false ? 'refused' : '',
@@ -185,7 +185,7 @@ describe('release publish execution', () => {
             expect(calls).toEqual([
                 'observe:@snailicid3/workspace@0.2.0:missing',
                 `integrity:${TARBALL}`,
-                `publish:${TARBALL}`,
+                `publish:${TARBALL}:latest`,
                 'observe:@snailicid3/workspace@0.2.0:exists',
                 'observe-tag:latest:unassigned',
                 'dist-tag:@snailicid3/workspace@0.2.0:latest',
@@ -210,7 +210,7 @@ describe('release publish execution', () => {
 
             executePublishWithAdapter(authorizedPlan(), adapter)
 
-            expect(calls).toContain(`publish:${TARBALL}`)
+            expect(calls).toContain(`publish:${TARBALL}:latest`)
             expect(
                 calls.some((call) => call.startsWith('publish:packages/')),
             ).toBe(false)
@@ -222,6 +222,327 @@ describe('release publish execution', () => {
             executePublishWithAdapter(authorizedPlan({}, 'next'), adapter)
 
             expect(calls).toContain('dist-tag:@snailicid3/workspace@0.2.0:next')
+        })
+
+        it('publishes with the explicitly requested tag instead of npm defaulting to latest', () => {
+            const { adapter, calls } = fakeAdapter()
+
+            executePublishWithAdapter(authorizedPlan({}, 'next'), adapter)
+
+            expect(calls).toContain(
+                'publish:releases/snailicid3-workspace-0.2.0.tgz:next',
+            )
+            expect(calls).not.toContain(
+                'publish:releases/snailicid3-workspace-0.2.0.tgz:latest',
+            )
+        })
+    })
+
+    describe('cohort dependency execution', () => {
+        it('executes a required cohort dependency before its dependent even when input order is reversed', () => {
+            const plan = createReleasePublishPlan({
+                candidates: [
+                    {
+                        artifact: {
+                            integrity: INTEGRITY,
+                            name: '@snailicid3/app',
+                            tarball: 'releases/app-1.0.0.tgz',
+                            version: '1.0.0',
+                        },
+                        doctor: {
+                            artifact: 'valid',
+                            closure: {
+                                edges: [
+                                    {
+                                        name: '@snailicid3/lib',
+                                        range: '^1.0.0',
+                                        resolution: 'included_in_cohort',
+                                    },
+                                ],
+                                state: 'valid',
+                            },
+                        },
+                        name: '@snailicid3/app',
+                    },
+                    {
+                        artifact: {
+                            integrity: INTEGRITY,
+                            name: '@snailicid3/lib',
+                            tarball: 'releases/lib-2.0.0.tgz',
+                            version: '2.0.0',
+                        },
+                        doctor: {
+                            artifact: 'valid',
+                            closure: { edges: [], state: 'valid' },
+                        },
+                        name: '@snailicid3/lib',
+                    },
+                ],
+                channel: 'latest',
+                plan: createReleasePlan({
+                    packages: [
+                        packageInput({
+                            name: '@snailicid3/app',
+                            registry: {
+                                distTags: {},
+                                registryUrl: 'https://registry.npmjs.org/',
+                                state: 'missing',
+                            },
+                            version: '1.0.0',
+                        }),
+                        packageInput({
+                            name: '@snailicid3/lib',
+                            registry: {
+                                distTags: {},
+                                registryUrl: 'https://registry.npmjs.org/',
+                                state: 'missing',
+                            },
+                            version: '2.0.0',
+                        }),
+                    ],
+                }),
+                selection: ['@snailicid3/app', '@snailicid3/lib'],
+            })
+            const { adapter, calls } = fakeAdapter({
+                distTags: [null, '2.0.0', null, '1.0.0'],
+                observations: ['missing', 'exists', 'missing', 'exists'],
+            })
+            executePublishWithAdapter(plan, adapter)
+
+            expect(
+                calls.indexOf('publish:releases/lib-2.0.0.tgz:latest'),
+            ).toBeLessThan(
+                calls.indexOf('publish:releases/app-1.0.0.tgz:latest'),
+            )
+        })
+
+        it('blocks a dependent when its required cohort dependency fails to publish', () => {
+            const plan = createReleasePublishPlan({
+                candidates: [
+                    {
+                        artifact: {
+                            integrity: INTEGRITY,
+                            name: '@snailicid3/app',
+                            tarball: 'releases/app-1.0.0.tgz',
+                            version: '1.0.0',
+                        },
+                        doctor: {
+                            artifact: 'valid',
+                            closure: {
+                                edges: [
+                                    {
+                                        name: '@snailicid3/lib',
+                                        range: '^1.0.0',
+                                        resolution: 'included_in_cohort',
+                                    },
+                                ],
+                                state: 'valid',
+                            },
+                        },
+                        name: '@snailicid3/app',
+                    },
+                    {
+                        artifact: {
+                            integrity: INTEGRITY,
+                            name: '@snailicid3/lib',
+                            tarball: 'releases/lib-2.0.0.tgz',
+                            version: '2.0.0',
+                        },
+                        doctor: {
+                            artifact: 'valid',
+                            closure: { edges: [], state: 'valid' },
+                        },
+                        name: '@snailicid3/lib',
+                    },
+                ],
+                channel: 'latest',
+                plan: createReleasePlan({
+                    packages: [
+                        packageInput({
+                            name: '@snailicid3/app',
+                            registry: {
+                                distTags: {},
+                                registryUrl: 'https://registry.npmjs.org/',
+                                state: 'missing',
+                            },
+                            version: '1.0.0',
+                        }),
+                        packageInput({
+                            name: '@snailicid3/lib',
+                            registry: {
+                                distTags: {},
+                                registryUrl: 'https://registry.npmjs.org/',
+                                state: 'missing',
+                            },
+                            version: '2.0.0',
+                        }),
+                    ],
+                }),
+                selection: ['@snailicid3/app', '@snailicid3/lib'],
+            })
+            const { adapter, calls } = fakeAdapter({ publishOk: false })
+            const result = executePublishWithAdapter(plan, adapter)
+
+            expect(
+                result.steps.some(
+                    (step) =>
+                        step.name === '@snailicid3/lib' &&
+                        step.outcome === 'failed_publish',
+                ),
+            ).toBe(true)
+            expect(
+                result.steps.some(
+                    (step) =>
+                        step.name === '@snailicid3/app' &&
+                        step.outcome === 'blocked_dependency_unavailable',
+                ),
+            ).toBe(true)
+            expect(
+                calls.indexOf('publish:releases/lib-2.0.0.tgz:latest'),
+            ).toBeGreaterThanOrEqual(0)
+            expect(
+                calls.includes('publish:releases/app-1.0.0.tgz:latest'),
+            ).toBe(false)
+        })
+
+        it('allows a dependent to proceed when the required cohort dependency already exists at the needed version', () => {
+            const plan = createReleasePublishPlan({
+                candidates: [
+                    {
+                        artifact: {
+                            integrity: INTEGRITY,
+                            name: '@snailicid3/app',
+                            tarball: 'releases/app-1.0.0.tgz',
+                            version: '1.0.0',
+                        },
+                        doctor: {
+                            artifact: 'valid',
+                            closure: {
+                                edges: [
+                                    {
+                                        name: '@snailicid3/lib',
+                                        range: '^1.0.0',
+                                        resolution: 'included_in_cohort',
+                                    },
+                                ],
+                                state: 'valid',
+                            },
+                        },
+                        name: '@snailicid3/app',
+                    },
+                    {
+                        artifact: {
+                            integrity: INTEGRITY,
+                            name: '@snailicid3/lib',
+                            tarball: 'releases/lib-2.0.0.tgz',
+                            version: '2.0.0',
+                        },
+                        doctor: {
+                            artifact: 'valid',
+                            closure: { edges: [], state: 'valid' },
+                        },
+                        name: '@snailicid3/lib',
+                    },
+                ],
+                channel: 'latest',
+                plan: createReleasePlan({
+                    packages: [
+                        packageInput({
+                            name: '@snailicid3/app',
+                            registry: {
+                                distTags: {},
+                                registryUrl: 'https://registry.npmjs.org/',
+                                state: 'missing',
+                            },
+                            version: '1.0.0',
+                        }),
+                        packageInput({
+                            name: '@snailicid3/lib',
+                            registry: {
+                                distTags: { latest: '2.0.0' },
+                                registryUrl: 'https://registry.npmjs.org/',
+                                state: 'exists',
+                            },
+                            version: '2.0.0',
+                        }),
+                    ],
+                }),
+                selection: ['@snailicid3/app', '@snailicid3/lib'],
+            })
+            const { adapter } = fakeAdapter({
+                distTags: ['2.0.0', '1.0.0'],
+                observations: ['exists', 'missing', 'exists'],
+            })
+            const result = executePublishWithAdapter(plan, adapter)
+
+            expect(
+                result.steps.some(
+                    (step) =>
+                        step.name === '@snailicid3/lib' &&
+                        step.outcome === 'skipped_already_published',
+                ),
+            ).toBe(true)
+            expect(
+                result.steps.some(
+                    (step) =>
+                        step.name === '@snailicid3/app' &&
+                        step.outcome === 'published',
+                ),
+            ).toBe(true)
+        })
+
+        it('executes unrelated selected packages independently', () => {
+            const plan = createReleasePublishPlan({
+                candidates: [
+                    candidate({
+                        artifact: {
+                            integrity: INTEGRITY,
+                            name: '@snailicid3/workspace',
+                            tarball: TARBALL,
+                            version: '0.2.0',
+                        },
+                        name: '@snailicid3/workspace',
+                    }),
+                    {
+                        artifact: {
+                            integrity: INTEGRITY,
+                            name: '@snailicid3/config',
+                            tarball: 'releases/config-0.3.0.tgz',
+                            version: '0.3.0',
+                        },
+                        doctor: {
+                            artifact: 'valid',
+                            closure: { edges: [], state: 'valid' },
+                        },
+                        name: '@snailicid3/config',
+                    },
+                ],
+                channel: 'latest',
+                plan: createReleasePlan({
+                    packages: [
+                        packageInput(),
+                        packageInput({
+                            name: '@snailicid3/config',
+                            registry: {
+                                distTags: {},
+                                registryUrl: 'https://registry.npmjs.org/',
+                                state: 'missing',
+                            },
+                            version: '0.3.0',
+                        }),
+                    ],
+                }),
+                selection: ['@snailicid3/workspace', '@snailicid3/config'],
+            })
+            const { adapter, calls } = fakeAdapter({
+                distTags: [null, '0.2.0', null, '0.3.0'],
+                observations: ['missing', 'exists', 'missing', 'exists'],
+            })
+            executePublishWithAdapter(plan, adapter)
+
+            expect(
+                calls.filter((call) => call.startsWith('publish:')),
+            ).toHaveLength(2)
         })
     })
 
@@ -256,6 +577,41 @@ describe('release publish execution', () => {
             expect(
                 retry.calls.some((call) => call.startsWith('publish:')),
             ).toBe(false)
+        })
+
+        it('reconciles the requested channel on a fresh plan after the exact version already exists', () => {
+            const plan = createReleasePublishPlan({
+                candidates: [candidate()],
+                channel: 'next',
+                plan: createReleasePlan({
+                    packages: [
+                        packageInput({
+                            registry: {
+                                distTags: { latest: '0.2.0' },
+                                registryUrl: 'https://registry.npmjs.org/',
+                                state: 'exists',
+                            },
+                        }),
+                    ],
+                }),
+                selection: ['@snailicid3/workspace'],
+            })
+            const { adapter, calls } = fakeAdapter({
+                distTags: [null, '0.2.0'],
+                observations: ['exists'],
+            })
+            const result = executePublishWithAdapter(plan, adapter)
+
+            expect(result.steps[0]).toMatchObject({
+                channel: 'next',
+                name: '@snailicid3/workspace',
+                outcome: 'assigned_dist_tag',
+                version: '0.2.0',
+            })
+            expect(calls).toContain('dist-tag:@snailicid3/workspace@0.2.0:next')
+            expect(calls.some((call) => call.startsWith('publish:'))).toBe(
+                false,
+            )
         })
 
         it.each(['unknown_auth', 'unknown_network', 'unknown_registry'])(

@@ -120,11 +120,16 @@ export const releasePublishPackageSchema = z.discriminatedUnion('decision', [
         decision: z.literal('planned'),
         name: packageNameSchema,
         registryUrl: z.url(),
+        requires: z.array(packageNameSchema),
         version: packageVersionSchema,
     }),
     z.strictObject({
+        artifact: releasePublishArtifactSchema,
+        channel: z.string().trim().min(1),
         decision: z.literal('already_published'),
         name: packageNameSchema,
+        registryUrl: z.url(),
+        requires: z.array(packageNameSchema),
         version: packageVersionSchema,
     }),
     z.strictObject({
@@ -294,6 +299,9 @@ export function createReleasePublishPlan(
     )
 
     const planned = packages.filter((entry) => entry.decision === 'planned')
+    const alreadyPublished = packages.filter(
+        (entry) => entry.decision === 'already_published',
+    )
     const unknown = packages.filter((entry) =>
         entry.decision.startsWith('unknown_'),
     )
@@ -303,6 +311,7 @@ export function createReleasePublishPlan(
 
     return releasePublishPlanSchema.parse({
         authorization: deriveAuthorization({
+            alreadyPublished: alreadyPublished.length,
             blocked: blocked.length,
             planned: planned.length,
             selected: selection.size,
@@ -314,9 +323,7 @@ export function createReleasePublishPlan(
         packages,
         schemaVersion: 1,
         summary: {
-            alreadyPublished: packages.filter(
-                (entry) => entry.decision === 'already_published',
-            ).length,
+            alreadyPublished: alreadyPublished.length,
             blocked: blocked.length,
             packages: packages.length,
             planned: planned.length,
@@ -343,12 +350,33 @@ function decidePackage(facts: {
 }): ReleasePublishPackage {
     const { candidate, channel, cohort, packagePlan, selected } = facts
     const shared = { name: packagePlan.name, version: packagePlan.version }
+    const requires = deriveRequiredDependencies(candidate)
 
     if (!selected) return { ...shared, decision: 'not_selected' }
     if (packagePlan.private) return { ...shared, decision: 'blocked_private' }
 
     if (packagePlan.registry.state === 'exists') {
-        return { ...shared, decision: 'already_published' }
+        if (packagePlan.registry.registryUrl === null) {
+            return {
+                ...shared,
+                decision: 'blocked_registry_unknown',
+                registryState: 'unknown_registry',
+            }
+        }
+
+        return {
+            ...shared,
+            artifact: candidate?.artifact ?? {
+                integrity: `sha512-${'a'.repeat(86)}==`,
+                name: packagePlan.name,
+                tarball: `releases/${packagePlan.name.replace(/[@/]/gu, '-')}-${packagePlan.version}.tgz`,
+                version: packagePlan.version,
+            },
+            channel,
+            decision: 'already_published',
+            registryUrl: packagePlan.registry.registryUrl,
+            requires,
+        }
     }
 
     if (packagePlan.registry.state !== 'missing') {
@@ -440,10 +468,12 @@ function decidePackage(facts: {
         channel,
         decision: 'planned',
         registryUrl: packagePlan.registry.registryUrl,
+        requires,
     }
 }
 
 function deriveAuthorization(facts: {
+    alreadyPublished: number
     blocked: number
     planned: number
     selected: number
@@ -458,7 +488,9 @@ function deriveAuthorization(facts: {
     > = []
 
     if (facts.selected === 0) reasons.push('no_selected_packages')
-    else if (facts.planned === 0) reasons.push('no_publishable_packages')
+    else if (facts.planned + facts.alreadyPublished === 0) {
+        reasons.push('no_publishable_packages')
+    }
 
     if (facts.unknown > 0 || facts.blocked > 0) {
         reasons.push('unresolved_prerequisites')
@@ -469,4 +501,16 @@ function deriveAuthorization(facts: {
     return reasons.length === 0
         ? { state: 'authorized' }
         : { reasons, state: 'withheld' }
+}
+
+function deriveRequiredDependencies(
+    candidate: ReleasePublishCandidate | undefined,
+): Array<string> {
+    if (candidate === undefined) return []
+
+    return candidate.doctor.closure.state === 'valid'
+        ? candidate.doctor.closure.edges
+              .filter((edge) => edge.resolution === 'included_in_cohort')
+              .map((edge) => edge.name)
+        : []
 }

@@ -504,9 +504,55 @@ describe('release publish planning', () => {
                 ],
             )
 
-            expect(entryFor(planned, '@snailicid3/workspace')?.decision).toBe(
-                'planned',
+            expect(entryFor(planned, '@snailicid3/workspace')).toMatchObject({
+                decision: 'planned',
+                requires: ['@snailicid3/config'],
+            })
+        })
+
+        it('retains selected cohort requirements for execution ordering', () => {
+            const plan = planOf(
+                packageInput(),
+                packageInput({ name: '@snailicid3/config', version: '0.3.0' }),
             )
+            const planned = publish(
+                plan,
+                ['@snailicid3/workspace', '@snailicid3/config'],
+                [
+                    candidate({
+                        doctor: {
+                            artifact: 'valid',
+                            closure: {
+                                edges: [
+                                    {
+                                        name: '@snailicid3/config',
+                                        range: '^0.3.0',
+                                        resolution: 'included_in_cohort',
+                                    },
+                                ],
+                                state: 'valid',
+                            },
+                        },
+                    }),
+                    candidate({
+                        artifact: {
+                            integrity: INTEGRITY,
+                            name: '@snailicid3/config',
+                            tarball: 'releases/config-0.3.0.tgz',
+                            version: '0.3.0',
+                        },
+                        name: '@snailicid3/config',
+                    }),
+                ],
+            )
+
+            expect(entryFor(planned, '@snailicid3/config')).toMatchObject({
+                decision: 'planned',
+                requires: [],
+            })
+            expect(entryFor(planned, '@snailicid3/workspace')).toMatchObject({
+                requires: ['@snailicid3/config'],
+            })
         })
 
         it('never auto-selects a dependency the cohort is missing', () => {
