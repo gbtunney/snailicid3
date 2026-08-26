@@ -1,0 +1,128 @@
+import type { WorkspacePackage, WorkspaceSnapshot } from '@snailicid3/workspace'
+import { afterEach, describe, expect, it } from 'vitest'
+import { spawnSync } from 'node:child_process'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
+import {
+    analyzePackedTarballWorkspaceDependencyClosure,
+    runIsolatedPackageConsumer,
+} from './packed-artifact.js'
+
+const temporaryRoots: Array<string> = []
+
+afterEach(() => {
+    for (const root of temporaryRoots.splice(0)) {
+        rmSync(root, { force: true, recursive: true })
+    }
+})
+
+describe('packed tarball analysis', () => {
+    it('reads dependency references from the tarball payload', () => {
+        const tarball = packFixture({
+            dependencies: { '@fixture/lib': '*' },
+            files: { 'dist/index.js': "import '@fixture/lib'" },
+        })
+        const result = analyzePackedTarballWorkspaceDependencyClosure({
+            facts: [{ name: '@fixture/lib', state: 'unavailable' }],
+            snapshot: createSnapshot([member('@fixture/lib')]),
+            tarball,
+        })
+        expect(result.evidence.closure).toMatchObject({ state: 'blocked' })
+        expect(result.evidence.artifact).toBe('valid')
+        expect(result.references['@fixture/lib'].runtime).toEqual([
+            'dist/index.js',
+        ])
+    })
+})
+
+describe('isolated package consumer', () => {
+    it('installs and imports a genuinely self-contained tarball in an empty project', () => {
+        const tarball = packFixture({
+            files: { 'dist/index.js': 'export const answer = 42' },
+        })
+        const result = runIsolatedPackageConsumer({
+            imports: ['@fixture/self-contained'],
+            tarball,
+        })
+        expect(result.state).toBe('passed')
+        expect(
+            result.checks.map(({ name, state }) => `${name}:${state}`),
+        ).toEqual(['install:passed', 'import:@fixture/self-contained:passed'])
+    })
+
+    it('only proves optional absence after a successful omitted-optional consumer run', () => {
+        const tarball = packFixture({
+            files: { 'dist/index.js': 'export const answer = 42' },
+            optionalDependencies: {
+                '@fixture/not-installed': 'file:./missing',
+            },
+        })
+        const result = runIsolatedPackageConsumer({
+            imports: ['@fixture/self-contained'],
+            omitOptional: true,
+            tarball,
+        })
+        expect(result).toMatchObject({
+            optionalAbsenceProven: true,
+            state: 'passed',
+        })
+    })
+})
+
+function createSnapshot(
+    list: ReadonlyArray<WorkspacePackage>,
+): WorkspaceSnapshot {
+    return {
+        list: [...list],
+        lookup: new Map(list.map((pkg) => [pkg.name, pkg])),
+        repoRoot: '/fixture',
+    }
+}
+
+function member(name: string): WorkspacePackage {
+    return { name, path: 'packages/lib', version: '1.0.0' }
+}
+
+function packFixture(options: {
+    dependencies?: Record<string, string>
+    files: Record<string, string>
+    optionalDependencies?: Record<string, string>
+}): string {
+    const root = mkdtempSync(path.join(tmpdir(), 'doctor-pack-fixture-'))
+    temporaryRoots.push(root)
+    const packageRoot = path.join(root, 'source')
+    mkdirSync(packageRoot, { recursive: true })
+    writeFileSync(
+        path.join(packageRoot, 'package.json'),
+        JSON.stringify({
+            dependencies: options.dependencies,
+            exports: './dist/index.js',
+            files: ['dist'],
+            name: '@fixture/self-contained',
+            optionalDependencies: options.optionalDependencies,
+            type: 'module',
+            version: '1.0.0',
+        }),
+    )
+    for (const [file, contents] of Object.entries(options.files)) {
+        const target = path.join(packageRoot, file)
+        mkdirSync(path.dirname(target), { recursive: true })
+        writeFileSync(target, contents)
+    }
+    const packed = spawnSync(
+        'npm',
+        ['pack', '--json', '--pack-destination', root],
+        {
+            cwd: packageRoot,
+            encoding: 'utf8',
+            env: {
+                ...process.env,
+                npm_config_cache: path.join(root, '.npm-cache'),
+            },
+        },
+    )
+    if (packed.status !== 0) throw new Error(packed.stderr)
+    const output = JSON.parse(packed.stdout) as Array<{ filename: string }>
+    return path.join(root, output[0]?.filename ?? 'missing.tgz')
+}
