@@ -16,6 +16,10 @@ import { satisfies } from 'semver'
 import { z } from 'zod'
 import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
+import {
+    hasOptionalAbsenceProof,
+    type IsolatedPackageConsumerResult,
+} from './isolated-consumer-evidence.js'
 import type { DoctorDiagnostic } from './types.js'
 
 export const workspaceDependencyKindSchema = z.enum([
@@ -45,6 +49,7 @@ export const packedPackageManifestSchema = packageIdentitySchema.extend({
 
 export type AnalyzeWorkspaceDependencyClosureInput = Readonly<{
     artifactRoot: string
+    consumerEvidence?: IsolatedPackageConsumerResult
     facts?: ReadonlyArray<WorkspaceDependencyFact>
     manifest?: PackedPackageManifest
     snapshot: WorkspaceSnapshot
@@ -114,6 +119,13 @@ export function analyzeWorkspaceDependencyClosure(
     for (const edge of primaryEdges(edges)) {
         const refs = references[edge.name] ?? emptyReferences()
         const fact = facts.get(edge.name)
+        if (
+            edge.kind === 'optionalDependencies' &&
+            fact?.state === 'unavailable' &&
+            hasOptionalAbsenceProof(input.consumerEvidence, edge.name)
+        ) {
+            continue
+        }
         const resolved = resolveEdge(edge, fact)
         closureEdges.push(resolved)
 
@@ -318,19 +330,13 @@ function manifestKindsForName(
     return kinds
 }
 
-function normalizeWorkspaceRange(range: string): string {
-    if (!range.startsWith('workspace:')) return range
-    const normalized = range.slice('workspace:'.length)
-    return normalized === '' ? '*' : normalized
-}
-
 function primaryEdges(
     edges: ReadonlyArray<WorkspaceDependencyEdge>,
 ): ReadonlyArray<WorkspaceDependencyEdge> {
     const priorities: ReadonlyArray<WorkspaceDependencyKind> = [
+        'optionalDependencies',
         'dependencies',
         'peerDependencies',
-        'optionalDependencies',
     ]
     const selected = new Map<string, WorkspaceDependencyEdge>()
     for (const kind of priorities) {
@@ -353,7 +359,10 @@ function resolveEdge(
     fact: undefined | WorkspaceDependencyFact,
 ): ReleasePublishClosureEdge {
     if (fact?.state === 'available_in_registry') {
-        const range = normalizeWorkspaceRange(edge.range ?? '*')
+        const range = edge.range ?? '*'
+        if (range.startsWith('workspace:')) {
+            return { name: edge.name, resolution: 'unknown' }
+        }
         if (!satisfies(fact.version, range, { includePrerelease: false })) {
             return { name: edge.name, resolution: 'unknown' }
         }

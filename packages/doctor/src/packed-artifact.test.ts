@@ -11,6 +11,7 @@ import {
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { gzipSync } from 'node:zlib'
+import { analyzeWorkspaceDependencyClosure } from './dependency-closure.js'
 import {
     analyzePackedTarballWorkspaceDependencyClosure,
     runIsolatedPackageConsumer,
@@ -61,6 +62,56 @@ describe('packed tarball analysis', () => {
             }),
         ).toThrow('unsafe path')
     })
+
+    it('blocks an unavailable optional workspace dependency without consumer proof', () => {
+        const tarball = packFixture({
+            files: { 'dist/index.js': 'export const answer = 42' },
+            optionalDependencies: {
+                '@fixture/not-installed': 'file:./missing',
+            },
+        })
+        const result = analyzePackedTarballWorkspaceDependencyClosure({
+            facts: [{ name: '@fixture/not-installed', state: 'unavailable' }],
+            snapshot: createSnapshot([member('@fixture/not-installed')]),
+            tarball,
+        })
+        expect(result.evidence.closure).toMatchObject({ state: 'blocked' })
+    })
+
+    it('allows an unavailable optional dependency after a relevant omitted-optional consumer run', () => {
+        const tarball = packFixture({
+            dependencies: {
+                '@fixture/not-installed': 'file:./missing',
+            },
+            files: { 'dist/index.js': 'export const answer = 42' },
+            optionalDependencies: {
+                '@fixture/not-installed': 'file:./missing',
+            },
+        })
+        const result = analyzePackedTarballWorkspaceDependencyClosure({
+            consumer: { imports: ['@fixture/self-contained'] },
+            facts: [{ name: '@fixture/not-installed', state: 'unavailable' }],
+            snapshot: createSnapshot([member('@fixture/not-installed')]),
+            tarball,
+        })
+        expect(result.evidence.closure).toEqual({ edges: [], state: 'valid' })
+    })
+
+    it('does not allow an unavailable optional dependency after an install-only run', () => {
+        const tarball = packFixture({
+            files: { 'dist/index.js': 'export const answer = 42' },
+            optionalDependencies: {
+                '@fixture/not-installed': 'file:./missing',
+            },
+        })
+        const result = analyzePackedTarballWorkspaceDependencyClosure({
+            consumer: {},
+            facts: [{ name: '@fixture/not-installed', state: 'unavailable' }],
+            snapshot: createSnapshot([member('@fixture/not-installed')]),
+            tarball,
+        })
+        expect(result.evidence.closure).toMatchObject({ state: 'blocked' })
+    })
 })
 
 describe('isolated package consumer', () => {
@@ -103,6 +154,7 @@ describe('isolated package consumer', () => {
             },
         })
         const result = runIsolatedPackageConsumer({
+            absentPackages: ['@fixture/not-installed'],
             imports: ['@fixture/self-contained'],
             omitOptional: true,
             tarball,
@@ -121,6 +173,7 @@ describe('isolated package consumer', () => {
             },
         })
         const result = runIsolatedPackageConsumer({
+            absentPackages: ['@fixture/not-installed'],
             omitOptional: true,
             tarball,
         })
@@ -129,7 +182,42 @@ describe('isolated package consumer', () => {
             state: 'passed',
         })
     })
+
+    it('does not waive an ordinary runtime dependency with optional consumer evidence', () => {
+        const tarball = packFixture({
+            files: { 'dist/index.js': 'export const answer = 42' },
+            optionalDependencies: {
+                '@fixture/not-installed': 'file:./missing',
+            },
+        })
+        const consumerEvidence = runIsolatedPackageConsumer({
+            absentPackages: ['@fixture/not-installed'],
+            imports: ['@fixture/self-contained'],
+            omitOptional: true,
+            tarball,
+        })
+        const artifactRoot = createArtifact({
+            dependencies: { '@fixture/lib': '^1.0.0' },
+        })
+        const result = analyzeWorkspaceDependencyClosure({
+            artifactRoot,
+            consumerEvidence,
+            facts: [{ name: '@fixture/lib', state: 'unavailable' }],
+            snapshot: createSnapshot([member('@fixture/lib')]),
+        })
+        expect(result.evidence.closure).toMatchObject({ state: 'blocked' })
+    })
 })
+
+function createArtifact(manifest: Record<string, unknown>): string {
+    const root = mkdtempSync(path.join(tmpdir(), 'doctor-artifact-fixture-'))
+    temporaryRoots.push(root)
+    writeFileSync(
+        path.join(root, 'package.json'),
+        JSON.stringify({ name: '@fixture/app', version: '1.0.0', ...manifest }),
+    )
+    return root
+}
 
 function createSnapshot(
     list: ReadonlyArray<WorkspacePackage>,

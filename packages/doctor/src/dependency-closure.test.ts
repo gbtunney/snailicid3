@@ -95,6 +95,23 @@ describe('packed workspace dependency closure', () => {
         ).toEqual({ state: 'unknown' })
     })
 
+    it('does not treat a residual packed workspace range as a permissive registry range', () => {
+        const artifact = createArtifact({
+            dependencies: { '@fixture/lib': 'workspace:*' },
+        })
+        expect(
+            analyze(artifact, {
+                facts: [
+                    {
+                        name: '@fixture/lib',
+                        state: 'available_in_registry',
+                        version: '0.1.0',
+                    },
+                ],
+            }).evidence.closure,
+        ).toEqual({ state: 'unknown' })
+    })
+
     it('uses npm SemVer prerelease range behavior', () => {
         const artifact = createArtifact({
             dependencies: { '@fixture/lib': '^1.0.0' },
@@ -151,6 +168,29 @@ describe('packed workspace dependency closure', () => {
         expect(result.diagnostics.map(({ code }) => code)).toContain(
             'WORKSPACE_DEPENDENCY_UNAVAILABLE',
         )
+    })
+
+    it('preserves optional semantics when a dependency appears in both fields', () => {
+        const artifact = createArtifact({
+            dependencies: { '@fixture/lib': '^1.0.0' },
+            optionalDependencies: { '@fixture/lib': '^1.0.0' },
+        })
+        const result = analyze(artifact, {
+            facts: [{ name: '@fixture/lib', state: 'unavailable' }],
+        })
+        expect(result.edges.map(({ kind }) => kind)).toEqual([
+            'dependencies',
+            'optionalDependencies',
+        ])
+        expect(result.evidence.closure).toMatchObject({
+            edges: [
+                {
+                    name: '@fixture/lib',
+                    resolution: 'unavailable',
+                },
+            ],
+            state: 'blocked',
+        })
     })
 
     it('preserves unknown registry state', () => {

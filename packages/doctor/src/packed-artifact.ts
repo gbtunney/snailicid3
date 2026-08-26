@@ -1,3 +1,4 @@
+import { packageNameSchema } from '@snailicid3/node-utils'
 import type { WorkspaceSnapshot } from '@snailicid3/workspace'
 import { spawnSync } from 'node:child_process'
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
@@ -8,20 +9,24 @@ import {
     type WorkspaceDependencyClosureAnalysis,
     type WorkspaceDependencyFact,
 } from './dependency-closure.js'
+import {
+    createIsolatedPackageConsumerResult,
+    type IsolatedConsumerCheck,
+    type IsolatedPackageConsumerResult,
+} from './isolated-consumer-evidence.js'
 
 export type AnalyzePackedTarballInput = Readonly<{
+    consumer?: Omit<
+        IsolatedPackageConsumerOptions,
+        'absentPackages' | 'omitOptional' | 'tarball'
+    >
     facts?: ReadonlyArray<WorkspaceDependencyFact>
     snapshot: WorkspaceSnapshot
     tarball: string
 }>
 
-export type IsolatedConsumerCheck = Readonly<{
-    detail?: string
-    name: string
-    state: 'failed' | 'passed' | 'skipped'
-}>
-
 export type IsolatedPackageConsumerOptions = Readonly<{
+    absentPackages?: ReadonlyArray<string>
     bins?: ReadonlyArray<string>
     imports?: ReadonlyArray<string>
     omitOptional?: boolean
@@ -30,12 +35,6 @@ export type IsolatedPackageConsumerOptions = Readonly<{
         compiler: string
         source: string
     }>
-}>
-
-export type IsolatedPackageConsumerResult = Readonly<{
-    checks: ReadonlyArray<IsolatedConsumerCheck>
-    optionalAbsenceProven: boolean
-    state: 'failed' | 'passed'
 }>
 
 type CommandOutcome =
@@ -79,8 +78,29 @@ export function analyzePackedTarballWorkspaceDependencyClosure(
         }
 
         const artifactRoot = resolveNpmArtifactRoot(temporaryRoot)
+        const initialAnalysis = analyzeWorkspaceDependencyClosure({
+            artifactRoot,
+            facts: input.facts,
+            snapshot: input.snapshot,
+        })
+        if (input.consumer === undefined) return initialAnalysis
+
+        const absentPackages = [
+            ...new Set(
+                initialAnalysis.edges
+                    .filter((edge) => edge.kind === 'optionalDependencies')
+                    .map((edge) => edge.name),
+            ),
+        ].toSorted()
+        const consumerEvidence = runIsolatedPackageConsumer({
+            ...input.consumer,
+            absentPackages,
+            omitOptional: true,
+            tarball: input.tarball,
+        })
         return analyzeWorkspaceDependencyClosure({
             artifactRoot,
+            consumerEvidence,
             facts: input.facts,
             snapshot: input.snapshot,
         })
@@ -97,6 +117,13 @@ export function runIsolatedPackageConsumer(
         path.join(tmpdir(), 'snail-doctor-consumer-'),
     )
     const checks: Array<IsolatedConsumerCheck> = []
+    const absentPackages = [
+        ...new Set(
+            (options.absentPackages ?? []).map((name) =>
+                packageNameSchema.parse(name),
+            ),
+        ),
+    ].toSorted()
 
     try {
         const install = run(
@@ -114,6 +141,26 @@ export function runIsolatedPackageConsumer(
         checks.push(toCheck('install', install))
 
         if (install.success) {
+            for (const packageName of absentPackages) {
+                checks.push(
+                    existsSync(
+                        path.join(
+                            consumerRoot,
+                            'node_modules',
+                            ...packageName.split('/'),
+                        ),
+                    )
+                        ? {
+                              detail: 'optional package is installed',
+                              name: `absence:${packageName}`,
+                              state: 'failed',
+                          }
+                        : {
+                              name: `absence:${packageName}`,
+                              state: 'passed',
+                          },
+                )
+            }
             for (const specifier of [...(options.imports ?? [])].toSorted()) {
                 checks.push(
                     toCheck(
@@ -195,17 +242,21 @@ export function runIsolatedPackageConsumer(
         )
             ? 'passed'
             : 'failed'
-        return {
+        return createIsolatedPackageConsumerResult({
+            absentPackages,
             checks,
             optionalAbsenceProven:
                 options.omitOptional === true &&
+                absentPackages.length > 0 &&
                 state === 'passed' &&
                 checks.some(
                     (check) =>
-                        check.name !== 'install' && check.state === 'passed',
+                        check.name !== 'install' &&
+                        !check.name.startsWith('absence:') &&
+                        check.state === 'passed',
                 ),
             state,
-        }
+        })
     } finally {
         rmSync(consumerRoot, { force: true, recursive: true })
     }

@@ -1,8 +1,6 @@
 export {
     analyzeWorkspaceDependencyClosure,
     type AnalyzeWorkspaceDependencyClosureInput,
-    createWorkspaceDependencyEdges,
-    inspectPackedWorkspaceReferences,
     type PackedPackageManifest,
     packedPackageManifestSchema,
     type PackedWorkspaceReferences,
@@ -16,13 +14,15 @@ export * from './discovery.js'
 export * from './doctor.js'
 export * from './fixtures.js'
 export * from './format.js'
+export type {
+    IsolatedConsumerCheck,
+    IsolatedPackageConsumerResult,
+} from './isolated-consumer-evidence.js'
 export * from './manifest.js'
 export {
     type AnalyzePackedTarballInput,
     analyzePackedTarballWorkspaceDependencyClosure,
-    type IsolatedConsumerCheck,
     type IsolatedPackageConsumerOptions,
-    type IsolatedPackageConsumerResult,
     runIsolatedPackageConsumer,
 } from './packed-artifact.js'
 export * from './types.js'
