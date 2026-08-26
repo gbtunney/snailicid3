@@ -27,7 +27,7 @@ import {
  */
 
 /** One step's outcome, discriminated so a caller cannot read failure without reading which step failed. */
-export const releasePublishStepSchema = z.discriminatedUnion('outcome', [
+const releasePublishStepSchema = z.discriminatedUnion('outcome', [
     z.strictObject({
         channel: z.string().min(1),
         name: z.string().min(1),
@@ -116,19 +116,6 @@ export const releasePublishResultSchema = z.strictObject({
 export type ExecuteReleasePublishPlanOptions = {
     repoRoot?: string
 }
-/**
- * The mutation surface, injected so every failure path is reachable from a fake.
- *
- * Internal. This is a test seam and an implementation detail, not part of the supported external execution model:
- * exporting it would let a consumer substitute the thing that decides what "published" means, which is the one
- * substitution this whole contract exists to prevent.
- */
-/** What a registry reports about one channel, kept separate from what it reports about a version. */
-export type ReleaseDistTagObservation =
-    | { kind: 'assigned'; version: string }
-    | { kind: 'unassigned' }
-    | { kind: 'unknown' }
-
 export type ReleasePublishAdapter = {
     assignDistTag: (
         name: string,
@@ -150,6 +137,19 @@ export type ReleasePublishAdapter = {
     ) => { detail: string; ok: boolean }
     readIntegrity: (tarball: string) => null | string
 }
+
+/**
+ * The mutation surface, injected so every failure path is reachable from a fake.
+ *
+ * Internal. This is a test seam and an implementation detail, not part of the supported external execution model:
+ * exporting it would let a consumer substitute the thing that decides what "published" means, which is the one
+ * substitution this whole contract exists to prevent.
+ */
+/** What a registry reports about one channel, kept separate from what it reports about a version. */
+type ReleaseDistTagObservation =
+    | { kind: 'assigned'; version: string }
+    | { kind: 'unassigned' }
+    | { kind: 'unknown' }
 
 /** Npm's dist-tag map, read only to decide about the channel and never about version existence. */
 const npmDistTagsSchema = z.record(z.string(), z.string())
