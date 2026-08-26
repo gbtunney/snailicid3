@@ -192,6 +192,7 @@ describe('release publish execution', () => {
                 version: '0.2.0',
             })
             expect(result.summary).toEqual({
+                blocked: 0,
                 failed: 0,
                 published: 1,
                 resumed: 0,
@@ -537,6 +538,170 @@ describe('release publish execution', () => {
             expect(
                 calls.filter((call) => call.startsWith('publish:')),
             ).toHaveLength(2)
+        })
+
+        it('reports blocked_dependency_unavailable for all members of a mutual cycle', () => {
+            const plan = createReleasePublishPlan({
+                candidates: [
+                    {
+                        artifact: {
+                            integrity: INTEGRITY,
+                            name: '@snailicid3/app',
+                            tarball: 'releases/app-1.0.0.tgz',
+                            version: '1.0.0',
+                        },
+                        doctor: {
+                            artifact: 'valid',
+                            closure: {
+                                edges: [
+                                    {
+                                        name: '@snailicid3/lib',
+                                        range: '^1.0.0',
+                                        resolution: 'included_in_cohort',
+                                    },
+                                ],
+                                state: 'valid',
+                            },
+                        },
+                        name: '@snailicid3/app',
+                    },
+                    {
+                        artifact: {
+                            integrity: INTEGRITY,
+                            name: '@snailicid3/lib',
+                            tarball: 'releases/lib-1.0.0.tgz',
+                            version: '1.0.0',
+                        },
+                        doctor: {
+                            artifact: 'valid',
+                            closure: {
+                                edges: [
+                                    {
+                                        name: '@snailicid3/app',
+                                        range: '^1.0.0',
+                                        resolution: 'included_in_cohort',
+                                    },
+                                ],
+                                state: 'valid',
+                            },
+                        },
+                        name: '@snailicid3/lib',
+                    },
+                ],
+                channel: 'latest',
+                plan: createReleasePlan({
+                    packages: [
+                        packageInput({
+                            name: '@snailicid3/app',
+                            registry: {
+                                distTags: {},
+                                registryUrl: 'https://registry.npmjs.org/',
+                                state: 'missing',
+                            },
+                            version: '1.0.0',
+                        }),
+                        packageInput({
+                            name: '@snailicid3/lib',
+                            registry: {
+                                distTags: {},
+                                registryUrl: 'https://registry.npmjs.org/',
+                                state: 'missing',
+                            },
+                            version: '1.0.0',
+                        }),
+                    ],
+                }),
+                selection: ['@snailicid3/app', '@snailicid3/lib'],
+            })
+            const { adapter, calls } = fakeAdapter()
+            const result = executePublishWithAdapter(plan, adapter)
+
+            expect(result.steps).toHaveLength(2)
+            expect(
+                result.steps.every(
+                    (step) => step.outcome === 'blocked_dependency_unavailable',
+                ),
+            ).toBe(true)
+            expect(calls.some((call) => call.startsWith('publish:'))).toBe(
+                false,
+            )
+            expect(result.summary.blocked).toBe(2)
+        })
+
+        it('counts blocked dependency outcomes in summary.blocked, not summary.failed', () => {
+            const plan = createReleasePublishPlan({
+                candidates: [
+                    {
+                        artifact: {
+                            integrity: INTEGRITY,
+                            name: '@snailicid3/app',
+                            tarball: 'releases/app-1.0.0.tgz',
+                            version: '1.0.0',
+                        },
+                        doctor: {
+                            artifact: 'valid',
+                            closure: {
+                                edges: [
+                                    {
+                                        name: '@snailicid3/lib',
+                                        range: '^1.0.0',
+                                        resolution: 'included_in_cohort',
+                                    },
+                                ],
+                                state: 'valid',
+                            },
+                        },
+                        name: '@snailicid3/app',
+                    },
+                    {
+                        artifact: {
+                            integrity: INTEGRITY,
+                            name: '@snailicid3/lib',
+                            tarball: 'releases/lib-1.0.0.tgz',
+                            version: '1.0.0',
+                        },
+                        doctor: {
+                            artifact: 'valid',
+                            closure: { edges: [], state: 'valid' },
+                        },
+                        name: '@snailicid3/lib',
+                    },
+                ],
+                channel: 'latest',
+                plan: createReleasePlan({
+                    packages: [
+                        packageInput({
+                            name: '@snailicid3/app',
+                            registry: {
+                                distTags: {},
+                                registryUrl: 'https://registry.npmjs.org/',
+                                state: 'missing',
+                            },
+                            version: '1.0.0',
+                        }),
+                        packageInput({
+                            name: '@snailicid3/lib',
+                            registry: {
+                                distTags: {},
+                                registryUrl: 'https://registry.npmjs.org/',
+                                state: 'missing',
+                            },
+                            version: '1.0.0',
+                        }),
+                    ],
+                }),
+                selection: ['@snailicid3/app', '@snailicid3/lib'],
+            })
+            const { adapter } = fakeAdapter({ publishOk: false })
+            const result = executePublishWithAdapter(plan, adapter)
+
+            const appStep = result.steps.find(
+                (step) => step.name === '@snailicid3/app',
+            )
+
+            expect(appStep?.outcome).toBe('blocked_dependency_unavailable')
+            expect(result.summary.blocked).toBe(1)
+            expect(result.summary.failed).toBe(1)
         })
     })
 

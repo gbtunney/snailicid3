@@ -42,12 +42,6 @@ export const releasePublishStepSchema = z.discriminatedUnion('outcome', [
     }),
     z.strictObject({
         name: z.string().min(1),
-        outcome: z.literal('blocked_dependency_cycle'),
-        requires: z.array(z.string().min(1)).min(1),
-        version: z.string().min(1),
-    }),
-    z.strictObject({
-        name: z.string().min(1),
         outcome: z.literal('blocked_dependency_unavailable'),
         requires: z.array(z.string().min(1)).min(1),
         version: z.string().min(1),
@@ -111,6 +105,7 @@ export const releasePublishResultSchema = z.strictObject({
     started: z.boolean(),
     steps: z.array(releasePublishStepSchema),
     summary: z.strictObject({
+        blocked: z.number().int().nonnegative(),
         failed: z.number().int().nonnegative(),
         published: z.number().int().nonnegative(),
         resumed: z.number().int().nonnegative(),
@@ -184,25 +179,11 @@ export function executePublishWithAdapter(
             entry.decision === 'planned' ||
             entry.decision === 'already_published',
     )
-    const { cycleNames, order } = orderExecution(executable)
+    const { order } = orderExecution(executable)
     const steps: Array<ReleasePublishStep> = []
     const results = new Map<string, ReleasePublishStep>()
 
     for (const entry of order) {
-        if (cycleNames.has(entry.name)) {
-            const step: ReleasePublishStep = {
-                name: entry.name,
-                outcome: 'blocked_dependency_cycle',
-                requires: [...cycleNames].toSorted((left, right) =>
-                    left.localeCompare(right),
-                ),
-                version: entry.version,
-            }
-            results.set(entry.name, step)
-            steps.push(step)
-            continue
-        }
-
         const dependencyFailure = evaluateDependencyReadiness(entry, results)
 
         if (dependencyFailure !== undefined) {
@@ -252,6 +233,9 @@ function buildResult(
         started,
         steps: [...steps],
         summary: {
+            blocked: steps.filter(
+                (step) => step.outcome === 'blocked_dependency_unavailable',
+            ).length,
             failed: steps.filter((step) => step.outcome.startsWith('failed_'))
                 .length,
             published: steps.filter((step) => step.outcome === 'published')
@@ -387,7 +371,6 @@ function orderExecution(
         >
     >,
 ): {
-    cycleNames: Set<string>
     order: Array<
         Extract<
             ReleasePublishPlan['packages'][number],
@@ -445,22 +428,16 @@ function orderExecution(
         ready.sort((left, right) => left.name.localeCompare(right.name))
     }
 
-    const cycleNames = new Set(
-        [...remaining.keys()].filter(
-            (name) => !ordered.some((entry) => entry.name === name),
-        ),
-    )
-
-    if (ordered.length === entries.length) return { cycleNames, order: ordered }
-
-    for (const name of [...cycleNames].toSorted((left, right) =>
-        left.localeCompare(right),
-    )) {
+    // Entries that could not be sorted (cycles or their dependents) are appended last;
+    // evaluateDependencyReadiness will block them safely without publishing.
+    for (const name of [...remaining.keys()]
+        .filter((name) => !ordered.some((entry) => entry.name === name))
+        .toSorted((left, right) => left.localeCompare(right))) {
         const entry = remaining.get(name)
         if (entry !== undefined) ordered.push(entry)
     }
 
-    return { cycleNames, order: ordered }
+    return { order: ordered }
 }
 
 /** Parse a JSON document, returning null rather than throwing on anything unparseable. */
