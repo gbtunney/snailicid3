@@ -53,8 +53,13 @@ export {
  *
  * Every name here is one an external adapter needs: the composer, the inputs it accepts, the canonical plan it returns,
  * one package record, and the schema that lets a consumer reject an unsupported `schemaVersion` before reading a field.
- * The intermediate state schemas stay internal on purpose — this slice only observes, and publishing the whole
- * intermediate vocabulary would freeze shapes that later prepare/tag/publish slices still need to move.
+ * The intermediate state schemas stay internal — this slice only observes, and the intermediate vocabulary is an
+ * implementation detail rather than a contract boundary.
+ *
+ * schemaVersion contract: every externally consumable release document schema encodes `schemaVersion: z.literal(1)`. An
+ * adapter must call `.safeParse()` on any externally received document and treat a parse failure as an unsupported
+ * version rather than a field-reading opportunity. Do not infer schema compatibility from `@snailicid3/workspace`
+ * package SemVer.
  */
 export {
     createReleasePlan,
@@ -88,9 +93,9 @@ export {
 /**
  * Publishing exports the plan, the execution entry point, and the evidence a caller must assemble.
  *
- * The adapter behind `executeReleasePublishPlan` stays internal. It is a test seam, not part of the supported external
- * execution model, and a consumer able to supply its own would be able to substitute the thing that decides what
- * "published" means.
+ * The adapter (`ReleasePublishAdapter`) and test seam (`executePublishWithAdapter`) are intentionally absent: they are
+ * internal implementation details that must never be injectable from outside this package. `releasePublishStepSchema`
+ * is also internal — `releasePublishResultSchema` validates the complete result document, including its steps.
  */
 export {
     executeReleasePublishPlan,
