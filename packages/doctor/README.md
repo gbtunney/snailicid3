@@ -58,6 +58,16 @@ _Read-only package and artifact diagnostics for npm and pnpm workspaces._
 | `BIN_TARGET_MISSING`             | Declared executable target is absent                             |
 | `BIN_TARGET_NOT_EXECUTABLE`      | Declared executable lacks an executable mode on POSIX            |
 
+Packed-artifact analysis adds three more. These come from
+`analyzePackedTarballWorkspaceDependencyClosure()` rather than from `runDoctor()`, because they need
+a built tarball and caller-supplied registry/cohort facts:
+
+| Diagnostic code                    | Observation                                                            |
+| ---------------------------------- | ---------------------------------------------------------------------- |
+| `WORKSPACE_DEPENDENCY_UNAVAILABLE` | Packed workspace dependency no consumer of the artifact can resolve    |
+| `WORKSPACE_DEPENDENCY_UNKNOWN`     | Packed workspace dependency whose consumer resolution is unproven      |
+| `PRIVATE_WORKSPACE_CODE_EMBEDDED`  | Private workspace code embedded in a public artifact (disclosure item) |
+
 Workspace discovery first asks `@snailicid3/workspace` for npm/pnpm package facts. If that command
 is unavailable or incompatible, Doctor falls back to a bounded manifest scan while ignoring common
 dependency, build, documentation, and coverage directories. Nx is not required.
