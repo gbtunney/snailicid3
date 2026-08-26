@@ -277,17 +277,24 @@ function collectVendoredContent(
         evidence: string,
     ) => void,
 ): void {
-    const byDigest = new Map<string, Array<string>>()
+    const artifactTargetsByDigest = new Map<string, Array<string>>()
     for (const file of files) {
         if (file.relative.split('/').includes('node_modules')) continue
         if (!isCodeFile(file.relative)) continue
         const contents = readFileSync(file.absolute)
         if (contents.byteLength < MINIMUM_VENDORED_BYTES) continue
         const digest = createHash('sha256').update(contents).digest('hex')
-        byDigest.set(digest, [...(byDigest.get(digest) ?? []), file.relative])
+        artifactTargetsByDigest.set(digest, [
+            ...(artifactTargetsByDigest.get(digest) ?? []),
+            file.relative,
+        ])
     }
-    if (byDigest.size === 0) return
+    if (artifactTargetsByDigest.size === 0) return
 
+    const workspaceSourcesByDigest = new Map<
+        string,
+        Map<string, Set<string>>
+    >()
     for (const member of members) {
         const memberRoot = resolveMemberRoot(repoRoot, member)
         if (memberRoot === null) continue
@@ -295,15 +302,37 @@ function collectVendoredContent(
             const contents = readFileSync(source)
             if (contents.byteLength < MINIMUM_VENDORED_BYTES) continue
             const digest = createHash('sha256').update(contents).digest('hex')
+            if (!artifactTargetsByDigest.has(digest)) continue
+
+            const sourcesByMember =
+                workspaceSourcesByDigest.get(digest) ??
+                new Map<string, Set<string>>()
+            const memberSources =
+                sourcesByMember.get(member.name) ?? new Set<string>()
             const relative = path
                 .relative(memberRoot, source)
                 .replaceAll('\\', '/')
-            for (const target of byDigest.get(digest) ?? []) {
-                record(
-                    member.name,
-                    'vendored_content',
-                    `content:${target}=${member.path}/${relative}`,
-                )
+            memberSources.add(`${member.path}/${relative}`)
+            sourcesByMember.set(member.name, memberSources)
+            workspaceSourcesByDigest.set(digest, sourcesByMember)
+        }
+    }
+
+    /** A byte-identical file proves provenance only when exactly one workspace member owns that digest. */
+    for (const [digest, targets] of artifactTargetsByDigest) {
+        const sourcesByMember = workspaceSourcesByDigest.get(digest)
+        if (sourcesByMember === undefined || sourcesByMember.size !== 1)
+            continue
+
+        for (const [name, sources] of sourcesByMember) {
+            for (const target of targets) {
+                for (const source of sources) {
+                    record(
+                        name,
+                        'vendored_content',
+                        `content:${target}=${source}`,
+                    )
+                }
             }
         }
     }
