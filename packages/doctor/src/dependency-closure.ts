@@ -130,8 +130,6 @@ export function analyzeWorkspaceDependencyClosure(
     for (const edge of primaryEdges(edges)) {
         const refs = references[edge.name] ?? emptyReferences()
         const fact = facts.get(edge.name)
-        // A proven-absent optional dependency is waived, but only at the level the consumer run actually exercised:
-        // shipped declarations that still name it keep the dependency in the consumer-facing type contract.
         if (
             edge.kind === 'optionalDependencies' &&
             fact?.state === 'unavailable' &&
@@ -383,10 +381,10 @@ function isDeclarationFile(file: string): boolean {
 /**
  * Whether the packed artifact proves the dependency left the consumer-facing contract.
  *
- * All four conditions are load-bearing. Provenance without the reference check would call a half-inlined bundle
- * self-contained; the reference check without provenance would call an unused dependency embedded; a bundled
- * `node_modules` copy is a different mechanism that keeps the specifier resolvable, so it disqualifies rather than
- * proves; and the consumer run is what turns static reading into behavior observed with the module absent.
+ * Runtime embedding requires mapped sourcemap contribution or a vendored code copy. `sourcesContent` alone proves that
+ * source was distributed and remains valid disclosure evidence, but it does not prove any of that source contributes to
+ * the emitted runtime. The remaining gates still require no bundled module, no residual runtime/declaration references,
+ * and a consumer run that succeeds with the dependency absent.
  */
 function isEmbeddedNotExposed(input: {
     consumerEvidence: IsolatedPackageConsumerResult | undefined
@@ -398,7 +396,7 @@ function isEmbeddedNotExposed(input: {
         (entry) => entry.name === input.name,
     )
     if (entries.some((entry) => entry.kind === 'bundled_module')) return false
-    if (entries.length === 0) return false
+    if (!entries.some(provesRuntimeEmbedding)) return false
     if (
         input.references.runtime.length > 0 ||
         input.references.declaration.length > 0
@@ -406,6 +404,17 @@ function isEmbeddedNotExposed(input: {
         return false
     }
     return hasAbsenceProof(input.consumerEvidence, input.name)
+}
+
+/** Distinguish runtime embedding evidence from disclosure-only `sourcesContent`. */
+function provesRuntimeEmbedding(
+    entry: EmbeddedWorkspaceCodeProvenance,
+): boolean {
+    return (
+        entry.kind === 'vendored_content' ||
+        (entry.kind === 'sourcemap' &&
+            entry.evidence.some((evidence) => evidence.startsWith('sourcemap:')))
+    )
 }
 
 function manifestKindsForName(
