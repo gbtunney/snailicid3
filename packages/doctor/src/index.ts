@@ -27,9 +27,22 @@ export {
 } from './isolated-consumer-evidence.js'
 export * from './manifest.js'
 export {
+    createPackCandidate,
+    type PackCandidate,
+    type PackCandidateInput,
+    type PackedManifest,
+    withPackCandidate,
+} from './pack-candidate.js'
+export {
     type AnalyzePackedTarballInput,
     analyzePackedTarballWorkspaceDependencyClosure,
     type IsolatedPackageConsumerOptions,
     runIsolatedPackageConsumer,
 } from './packed-artifact.js'
+export {
+    type CollectorOutcome,
+    type PackedValidationOptions,
+    type PackedValidationResult,
+    validatePackedCandidate,
+} from './packed-validation.js'
 export * from './types.js'
