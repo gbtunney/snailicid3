@@ -1,3 +1,8 @@
+import {
+    jsonTextSchema,
+    packageIdentitySchema,
+    packageNameSchema,
+} from '@snailicid3/node-utils'
 import type {
     ReleasePublishClosureEdge,
     ReleasePublishDoctorEvidence,
@@ -7,9 +12,11 @@ import {
     releasePublishClosureEdgeSchema,
     releasePublishDoctorEvidenceSchema,
 } from '@snailicid3/workspace'
+import { satisfies } from 'semver'
 import { z } from 'zod'
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
+import type { DoctorDiagnostic } from './types.js'
 
 export const workspaceDependencyKindSchema = z.enum([
     'dependencies',
@@ -20,27 +27,42 @@ export const workspaceDependencyKindSchema = z.enum([
     'bundledDependencies',
 ])
 
-export type EmbeddedWorkspaceCodeEvidence = Readonly<{
-    files: ReadonlyArray<string>
-    name: string
+const dependencyRecordSchema = z.record(packageNameSchema, z.string())
+const bundledDependenciesSchema = z.union([
+    z.boolean(),
+    z.array(packageNameSchema),
+])
+
+/** Generic identity plus the packed dependency fields whose health Doctor owns. */
+export const packedPackageManifestSchema = packageIdentitySchema.extend({
+    bundledDependencies: bundledDependenciesSchema.optional(),
+    bundleDependencies: bundledDependenciesSchema.optional(),
+    dependencies: dependencyRecordSchema.optional(),
+    devDependencies: dependencyRecordSchema.optional(),
+    optionalDependencies: dependencyRecordSchema.optional(),
+    peerDependencies: dependencyRecordSchema.optional(),
+})
+
+export type AnalyzeWorkspaceDependencyClosureInput = Readonly<{
+    artifactRoot: string
+    facts?: ReadonlyArray<WorkspaceDependencyFact>
+    manifest?: PackedPackageManifest
+    snapshot: WorkspaceSnapshot
 }>
 
-export type PackedPackageManifest = Readonly<{
-    bundledDependencies?: boolean | ReadonlyArray<string>
-    bundleDependencies?: boolean | ReadonlyArray<string>
-    dependencies?: Readonly<Record<string, string>>
-    devDependencies?: Readonly<Record<string, string>>
-    name?: string
-    optionalDependencies?: Readonly<Record<string, string>>
-    peerDependencies?: Readonly<Record<string, string>>
-    private?: boolean
-    version?: string
-}>
+export type PackedPackageManifest = z.output<typeof packedPackageManifestSchema>
 
 export type PackedWorkspaceReferences = Readonly<{
     declaration: ReadonlyArray<string>
     manifest: ReadonlyArray<WorkspaceDependencyKind>
     runtime: ReadonlyArray<string>
+}>
+
+export type WorkspaceDependencyClosureAnalysis = Readonly<{
+    diagnostics: ReadonlyArray<DoctorDiagnostic>
+    edges: ReadonlyArray<WorkspaceDependencyEdge>
+    evidence: ReleasePublishDoctorEvidence
+    references: Readonly<Record<string, PackedWorkspaceReferences>>
 }>
 
 export type WorkspaceDependencyEdge = Readonly<{
@@ -65,44 +87,12 @@ export type WorkspaceDependencyKind = z.infer<
     typeof workspaceDependencyKindSchema
 >
 
-export const dependencyClosureFindingCodeSchema = z.enum([
-    'WORKSPACE_DEPENDENCY_UNAVAILABLE',
-    'WORKSPACE_DEPENDENCY_UNKNOWN',
-    'WORKSPACE_DEPENDENCY_RESIDUAL_REFERENCE',
-    'PRIVATE_WORKSPACE_CODE_DISCLOSURE_REVIEW',
-])
-
-export type AnalyzeWorkspaceDependencyClosureInput = Readonly<{
-    artifactRoot: string
-    artifactVerdict?: 'invalid' | 'unknown' | 'valid'
-    embeddedWorkspaceCode?: ReadonlyArray<EmbeddedWorkspaceCodeEvidence>
-    facts?: ReadonlyArray<WorkspaceDependencyFact>
-    manifest?: PackedPackageManifest
-    snapshot: WorkspaceSnapshot
-}>
-
-export type DependencyClosureFinding = Readonly<{
-    code: z.infer<typeof dependencyClosureFindingCodeSchema>
-    dependency: string
-    evidence: ReadonlyArray<string>
-    severity: 'error' | 'warning'
-}>
-
-export type WorkspaceDependencyClosureAnalysis = Readonly<{
-    edges: ReadonlyArray<WorkspaceDependencyEdge>
-    evidence: ReleasePublishDoctorEvidence
-    findings: ReadonlyArray<DependencyClosureFinding>
-    references: Readonly<Record<string, PackedWorkspaceReferences>>
-}>
-
 const MANIFEST_KINDS = [
     'dependencies',
     'peerDependencies',
     'optionalDependencies',
     'devDependencies',
 ] as const
-
-type ParsedSemver = Readonly<{ major: number; minor: number; patch: number }>
 
 /** Produce Workspace-compatible evidence from packed-artifact facts supplied by the release caller. */
 export function analyzeWorkspaceDependencyClosure(
@@ -116,69 +106,33 @@ export function analyzeWorkspaceDependencyClosure(
         edges.map((edge) => edge.name),
     )
     const facts = new Map((input.facts ?? []).map((fact) => [fact.name, fact]))
-    const embedded = new Map(
-        (input.embeddedWorkspaceCode ?? []).map((entry) => [entry.name, entry]),
-    )
     const closureEdges: Array<ReleasePublishClosureEdge> = []
-    const findings: Array<DependencyClosureFinding> = []
+    const diagnostics: Array<DoctorDiagnostic> = []
+    const packageName =
+        manifest.name ?? `(unnamed:${path.basename(input.artifactRoot)})`
 
     for (const edge of primaryEdges(edges)) {
         const refs = references[edge.name] ?? emptyReferences()
-        const exposed = refs.runtime.length > 0 || refs.declaration.length > 0
-        const embeddedEvidence = embedded.get(edge.name)
-
-        if (
-            !exposed &&
-            embeddedEvidence !== undefined &&
-            embeddedEvidence.files.length > 0
-        ) {
-            closureEdges.push({
-                name: edge.name,
-                resolution: 'embedded_not_exposed',
-            })
-            if (edge.workspacePrivate) {
-                findings.push({
-                    code: 'PRIVATE_WORKSPACE_CODE_DISCLOSURE_REVIEW',
-                    dependency: edge.name,
-                    evidence: [...embeddedEvidence.files].toSorted(),
-                    severity: 'warning',
-                })
-            }
-            continue
-        }
-
         const fact = facts.get(edge.name)
         const resolved = resolveEdge(edge, fact)
         closureEdges.push(resolved)
 
-        if (exposed && embeddedEvidence !== undefined) {
-            findings.push({
-                code: 'WORKSPACE_DEPENDENCY_RESIDUAL_REFERENCE',
-                dependency: edge.name,
-                evidence: [...refs.runtime, ...refs.declaration].toSorted(),
-                severity: 'error',
-            })
-        }
         if (resolved.resolution === 'unavailable') {
-            findings.push({
+            diagnostics.push({
                 code: 'WORKSPACE_DEPENDENCY_UNAVAILABLE',
-                dependency: edge.name,
-                evidence: [
-                    ...refs.manifest,
-                    ...refs.runtime,
-                    ...refs.declaration,
-                ],
+                evidence: formatReferenceEvidence(edge.name, refs),
+                message: `Workspace dependency ${edge.name} is unavailable to consumers of the packed package.`,
+                packageName,
+                packageRoot: path.resolve(input.artifactRoot),
                 severity: 'error',
             })
         } else if (resolved.resolution === 'unknown') {
-            findings.push({
+            diagnostics.push({
                 code: 'WORKSPACE_DEPENDENCY_UNKNOWN',
-                dependency: edge.name,
-                evidence: [
-                    ...refs.manifest,
-                    ...refs.runtime,
-                    ...refs.declaration,
-                ],
+                evidence: formatReferenceEvidence(edge.name, refs),
+                message: `Workspace dependency ${edge.name} has no proven consumer resolution.`,
+                packageName,
+                packageRoot: path.resolve(input.artifactRoot),
                 severity: 'warning',
             })
         }
@@ -193,15 +147,15 @@ export function analyzeWorkspaceDependencyClosure(
           ? 'unknown'
           : 'valid'
     const evidence = releasePublishDoctorEvidenceSchema.parse({
-        artifact: input.artifactVerdict ?? 'unknown',
+        artifact: 'unknown',
         closure:
             state === 'unknown' ? { state } : { edges: parsedEdges, state },
     })
 
     return {
+        diagnostics: diagnostics.toSorted(compareDiagnostics),
         edges,
         evidence,
-        findings: findings.toSorted(compareFindings),
         references,
     }
 }
@@ -287,12 +241,21 @@ function collectFiles(root: string): ReadonlyArray<string> {
         for (const entry of readdirSync(directory, { withFileTypes: true })) {
             const target = path.join(directory, entry.name)
             if (entry.isDirectory()) visit(target)
-            else if (entry.isFile() || statSync(target).isFile())
-                files.push(target)
+            else if (entry.isFile()) files.push(target)
         }
     }
     visit(root)
     return files.toSorted()
+}
+
+function compareDiagnostics(
+    left: DoctorDiagnostic,
+    right: DoctorDiagnostic,
+): number {
+    return (
+        left.packageName.localeCompare(right.packageName) ||
+        left.code.localeCompare(right.code)
+    )
 }
 
 function compareEdges(
@@ -305,37 +268,29 @@ function compareEdges(
     )
 }
 
-function compareFindings(
-    left: DependencyClosureFinding,
-    right: DependencyClosureFinding,
-): number {
-    return (
-        left.dependency.localeCompare(right.dependency) ||
-        left.code.localeCompare(right.code)
-    )
-}
-
-function compareSemver(left: ParsedSemver, right: ParsedSemver): number {
-    return (
-        left.major - right.major ||
-        left.minor - right.minor ||
-        left.patch - right.patch
-    )
-}
-
 function containsPackageSpecifier(
     contents: string,
     packageName: string,
 ): boolean {
     const escaped = packageName.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&')
-    return new RegExp(
-        `(?:from\\s*|import\\s*|import\\s*\\(|require\\s*\\(|reference\\s+types=)["']${escaped}(?:/[^"']*)?["']`,
-        'u',
-    ).test(contents)
+    return new RegExp(`["']${escaped}(?:/[^"']*)?["']`, 'u').test(contents)
 }
 
 function emptyReferences(): PackedWorkspaceReferences {
     return { declaration: [], manifest: [], runtime: [] }
+}
+
+function formatReferenceEvidence(
+    dependency: string,
+    references: PackedWorkspaceReferences,
+): ReadonlyArray<string> {
+    return [
+        ...references.manifest.map(
+            (kind) => `package.json#${kind}:${dependency}`,
+        ),
+        ...references.runtime.map((file) => `runtime:${file}`),
+        ...references.declaration.map((file) => `declaration:${file}`),
+    ].toSorted()
 }
 
 function isConsumerCodeFile(file: string): boolean {
@@ -363,18 +318,10 @@ function manifestKindsForName(
     return kinds
 }
 
-function parseSemver(value: string): null | ParsedSemver {
-    const match =
-        /^(\d+)\.(\d+)\.(\d+)(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/u.exec(
-            value,
-        )
-    return match === null
-        ? null
-        : {
-              major: Number(match[1]),
-              minor: Number(match[2]),
-              patch: Number(match[3]),
-          }
+function normalizeWorkspaceRange(range: string): string {
+    if (!range.startsWith('workspace:')) return range
+    const normalized = range.slice('workspace:'.length)
+    return normalized === '' ? '*' : normalized
 }
 
 function primaryEdges(
@@ -396,9 +343,9 @@ function primaryEdges(
 }
 
 function readPackedManifest(root: string): PackedPackageManifest {
-    return JSON.parse(
-        readFileSync(path.join(root, 'package.json'), 'utf8'),
-    ) as PackedPackageManifest
+    return jsonTextSchema
+        .pipe(packedPackageManifestSchema)
+        .parse(readFileSync(path.join(root, 'package.json'), 'utf8'))
 }
 
 function resolveEdge(
@@ -406,7 +353,8 @@ function resolveEdge(
     fact: undefined | WorkspaceDependencyFact,
 ): ReleasePublishClosureEdge {
     if (fact?.state === 'available_in_registry') {
-        if (!satisfiesSupportedRange(fact.version, edge.range ?? '*')) {
+        const range = normalizeWorkspaceRange(edge.range ?? '*')
+        if (!satisfies(fact.version, range, { includePrerelease: false })) {
             return { name: edge.name, resolution: 'unknown' }
         }
         return {
@@ -431,46 +379,4 @@ function resolveEdge(
         }
     }
     return { name: edge.name, resolution: 'unknown' }
-}
-
-/** Conservatively validate the common workspace ranges without becoming a registry resolver. */
-function satisfiesSupportedRange(version: string, rangeInput: string): boolean {
-    const range = rangeInput.startsWith('workspace:')
-        ? rangeInput.slice('workspace:'.length)
-        : rangeInput
-    if (range === '' || range === '*') return true
-
-    const parsedVersion = parseSemver(version)
-    if (parsedVersion === null) return false
-    const operator = range[0]
-    const targetText =
-        operator === '^' || operator === '~' ? range.slice(1) : range
-    const target = parseSemver(targetText)
-    if (target === null) return false
-    if (operator === '^') {
-        if (target.major > 0)
-            return (
-                parsedVersion.major === target.major &&
-                compareSemver(parsedVersion, target) >= 0
-            )
-        if (target.minor > 0)
-            return (
-                parsedVersion.major === 0 &&
-                parsedVersion.minor === target.minor &&
-                compareSemver(parsedVersion, target) >= 0
-            )
-        return (
-            parsedVersion.major === 0 &&
-            parsedVersion.minor === 0 &&
-            parsedVersion.patch === target.patch
-        )
-    }
-    if (operator === '~') {
-        return (
-            parsedVersion.major === target.major &&
-            parsedVersion.minor === target.minor &&
-            compareSemver(parsedVersion, target) >= 0
-        )
-    }
-    return compareSemver(parsedVersion, target) === 0
 }

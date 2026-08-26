@@ -95,6 +95,38 @@ describe('packed workspace dependency closure', () => {
         ).toEqual({ state: 'unknown' })
     })
 
+    it('uses npm SemVer prerelease range behavior', () => {
+        const artifact = createArtifact({
+            dependencies: { '@fixture/lib': '^1.0.0' },
+        })
+        expect(
+            analyze(artifact, {
+                facts: [
+                    {
+                        name: '@fixture/lib',
+                        state: 'available_in_registry',
+                        version: '1.1.0-beta.1',
+                    },
+                ],
+            }).evidence.closure,
+        ).toEqual({ state: 'unknown' })
+
+        const prereleaseArtifact = createArtifact({
+            dependencies: { '@fixture/lib': '^1.1.0-beta.1' },
+        })
+        expect(
+            analyze(prereleaseArtifact, {
+                facts: [
+                    {
+                        name: '@fixture/lib',
+                        state: 'available_in_registry',
+                        version: '1.1.0-beta.2',
+                    },
+                ],
+            }).evidence.closure,
+        ).toMatchObject({ state: 'valid' })
+    })
+
     it('accepts cohort membership supplied by Workspace', () => {
         const artifact = createArtifact({
             dependencies: { '@fixture/lib': '^1.0.0' },
@@ -102,8 +134,8 @@ describe('packed workspace dependency closure', () => {
         expect(
             analyze(artifact, {
                 facts: [{ name: '@fixture/lib', state: 'included_in_cohort' }],
-            }).evidence.closure,
-        ).toMatchObject({ state: 'valid' })
+            }).evidence,
+        ).toMatchObject({ artifact: 'unknown', closure: { state: 'valid' } })
     })
 
     it('blocks an unavailable externally referenced workspace dependency', () => {
@@ -116,7 +148,7 @@ describe('packed workspace dependency closure', () => {
             privateMember: true,
         })
         expect(result.evidence.closure).toMatchObject({ state: 'blocked' })
-        expect(result.findings.map(({ code }) => code)).toContain(
+        expect(result.diagnostics.map(({ code }) => code)).toContain(
             'WORKSPACE_DEPENDENCY_UNAVAILABLE',
         )
     })
@@ -132,29 +164,22 @@ describe('packed workspace dependency closure', () => {
         ).toEqual({ state: 'unknown' })
     })
 
-    it('allows proven embedded private code but emits disclosure review', () => {
+    it('cannot turn a fabricated embedded-code claim into embedded_not_exposed', () => {
         const artifact = createArtifact(
             { dependencies: { '@fixture/private': '*' } },
             { 'dist/index.js': 'export const embedded = true' },
         )
-        const result = analyze(artifact, {
+        const result = analyzeWorkspaceDependencyClosure({
+            artifactRoot: artifact,
             embeddedWorkspaceCode: [
                 { files: ['dist/index.js'], name: '@fixture/private' },
             ],
-            privateMember: true,
+            snapshot: createSnapshot([member('@fixture/private', true)]),
+        } as unknown as Parameters<typeof analyzeWorkspaceDependencyClosure>[0])
+        expect(result.evidence).toMatchObject({
+            artifact: 'unknown',
+            closure: { state: 'unknown' },
         })
-        expect(result.evidence.closure).toEqual({
-            edges: [
-                {
-                    name: '@fixture/private',
-                    resolution: 'embedded_not_exposed',
-                },
-            ],
-            state: 'valid',
-        })
-        expect(result.findings.map(({ code }) => code)).toEqual([
-            'PRIVATE_WORKSPACE_CODE_DISCLOSURE_REVIEW',
-        ])
     })
 
     it.each([
@@ -163,6 +188,21 @@ describe('packed workspace dependency closure', () => {
             'declarations',
             'dist/index.d.ts',
             "export type { X } from '@fixture/lib'",
+        ],
+        [
+            'require.resolve',
+            'dist/resolve.js',
+            "const resolved = require.resolve('@fixture/lib/subpath')",
+        ],
+        [
+            'commented dynamic import',
+            'dist/lazy.js',
+            "const lazy = import(/* webpackChunkName: 'lib' */ '@fixture/lib')",
+        ],
+        [
+            'triple-slash types',
+            'dist/reference.d.ts',
+            '/// <reference types="@fixture/lib" />',
         ],
     ])(
         'does not call configured bundling self-contained when %s still references the dependency',
@@ -175,15 +215,13 @@ describe('packed workspace dependency closure', () => {
                 { [file]: contents },
             )
             const result = analyze(artifact, {
-                embeddedWorkspaceCode: [
-                    { files: ['dist/bundle.js'], name: '@fixture/lib' },
-                ],
                 facts: [{ name: '@fixture/lib', state: 'unavailable' }],
             })
             expect(result.evidence.closure).toMatchObject({ state: 'blocked' })
-            expect(result.findings.map(({ code }) => code)).toContain(
-                'WORKSPACE_DEPENDENCY_RESIDUAL_REFERENCE',
-            )
+            expect([
+                ...result.references['@fixture/lib'].runtime,
+                ...result.references['@fixture/lib'].declaration,
+            ]).toContain(file)
         },
     )
 
@@ -193,6 +231,13 @@ describe('packed workspace dependency closure', () => {
             dependencies: { '@fixture/lib': '*' },
         })
         expect(analyze(artifact).evidence.closure).toEqual({ state: 'unknown' })
+    })
+
+    it('rejects invalid packed dependency-field shapes through the shared JSON pipeline', () => {
+        const artifact = createArtifact({
+            dependencies: [] as unknown as Record<string, string>,
+        })
+        expect(() => analyze(artifact)).toThrow()
     })
 
     it('does not let a dev-only private dependency block runtime closure', () => {
@@ -226,8 +271,8 @@ describe('packed workspace dependency closure', () => {
             '@fixture/a',
             '@fixture/z',
         ])
-        expect(result.findings.map(({ dependency }) => dependency)).toEqual([
-            '@fixture/a',
+        expect(result.diagnostics.map(({ code }) => code)).toEqual([
+            'WORKSPACE_DEPENDENCY_UNAVAILABLE',
         ])
     })
 })
@@ -235,17 +280,12 @@ describe('packed workspace dependency closure', () => {
 function analyze(
     artifactRoot: string,
     options: {
-        embeddedWorkspaceCode?: ReadonlyArray<{
-            files: ReadonlyArray<string>
-            name: string
-        }>
         facts?: Parameters<typeof analyzeWorkspaceDependencyClosure>[0]['facts']
         privateMember?: boolean
     } = {},
 ) {
     return analyzeWorkspaceDependencyClosure({
         artifactRoot,
-        embeddedWorkspaceCode: options.embeddedWorkspaceCode,
         facts: options.facts,
         snapshot: createSnapshot([
             member('@fixture/lib'),

@@ -423,6 +423,9 @@ importers:
             '@snailicid3/workspace':
                 specifier: workspace:*
                 version: link:../workspace
+            semver:
+                specifier: ^7.8.5
+                version: 7.8.5
             zod:
                 specifier: ^4.4.3
                 version: 4.4.3
@@ -433,6 +436,9 @@ importers:
             '@types/node':
                 specifier: ^26.2.0
                 version: 26.2.0
+            '@types/semver':
+                specifier: ^7.8.0
+                version: 7.8.0
             tsx:
                 specifier: ^4.23.12
                 version: 4.23.12

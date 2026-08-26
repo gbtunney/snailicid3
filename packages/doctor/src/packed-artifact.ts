@@ -5,14 +5,11 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import {
     analyzeWorkspaceDependencyClosure,
-    type EmbeddedWorkspaceCodeEvidence,
     type WorkspaceDependencyClosureAnalysis,
     type WorkspaceDependencyFact,
 } from './dependency-closure.js'
-import { analyzePackage } from './manifest.js'
 
 export type AnalyzePackedTarballInput = Readonly<{
-    embeddedWorkspaceCode?: ReadonlyArray<EmbeddedWorkspaceCodeEvidence>
     facts?: ReadonlyArray<WorkspaceDependencyFact>
     snapshot: WorkspaceSnapshot
     tarball: string
@@ -59,6 +56,16 @@ export function analyzePackedTarballWorkspaceDependencyClosure(
             throw new Error(`Unable to list packed artifact: ${entries.detail}`)
         }
         assertSafeTarEntries(entries.stdout.split('\n').filter(Boolean))
+        const verboseEntries = run('tar', [
+            '-tvzf',
+            path.resolve(input.tarball),
+        ])
+        if (!verboseEntries.success) {
+            throw new Error(
+                `Unable to inspect packed artifact entry types: ${verboseEntries.detail}`,
+            )
+        }
+        assertNoArchiveLinks(verboseEntries.stdout.split('\n').filter(Boolean))
         const extracted = run('tar', [
             '-xzf',
             path.resolve(input.tarball),
@@ -72,12 +79,8 @@ export function analyzePackedTarballWorkspaceDependencyClosure(
         }
 
         const artifactRoot = resolveNpmArtifactRoot(temporaryRoot)
-        const artifactReport = analyzePackage(artifactRoot)
         return analyzeWorkspaceDependencyClosure({
             artifactRoot,
-            artifactVerdict:
-                artifactReport.diagnostics.length === 0 ? 'valid' : 'invalid',
-            embeddedWorkspaceCode: input.embeddedWorkspaceCode,
             facts: input.facts,
             snapshot: input.snapshot,
         })
@@ -195,11 +198,25 @@ export function runIsolatedPackageConsumer(
         return {
             checks,
             optionalAbsenceProven:
-                options.omitOptional === true && state === 'passed',
+                options.omitOptional === true &&
+                state === 'passed' &&
+                checks.some(
+                    (check) =>
+                        check.name !== 'install' && check.state === 'passed',
+                ),
             state,
         }
     } finally {
         rmSync(consumerRoot, { force: true, recursive: true })
+    }
+}
+
+function assertNoArchiveLinks(entries: ReadonlyArray<string>): void {
+    for (const entry of entries) {
+        const type = entry.trimStart()[0]
+        if (type === 'l' || type === 'h') {
+            throw new Error('Packed artifact contains a symbolic or hard link')
+        }
     }
 }
 

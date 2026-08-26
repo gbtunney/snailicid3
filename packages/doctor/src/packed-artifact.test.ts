@@ -1,7 +1,13 @@
 import type { WorkspacePackage, WorkspaceSnapshot } from '@snailicid3/workspace'
 import { afterEach, describe, expect, it } from 'vitest'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+    mkdirSync,
+    mkdtempSync,
+    rmSync,
+    symlinkSync,
+    writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import {
@@ -29,10 +35,30 @@ describe('packed tarball analysis', () => {
             tarball,
         })
         expect(result.evidence.closure).toMatchObject({ state: 'blocked' })
-        expect(result.evidence.artifact).toBe('valid')
+        expect(result.evidence.artifact).toBe('unknown')
         expect(result.references['@fixture/lib'].runtime).toEqual([
             'dist/index.js',
         ])
+    })
+
+    it('rejects archive symlinks before reading the extracted package', () => {
+        const tarball = packLinkedFixture()
+        expect(() =>
+            analyzePackedTarballWorkspaceDependencyClosure({
+                snapshot: createSnapshot([]),
+                tarball,
+            }),
+        ).toThrow('symbolic or hard link')
+    })
+
+    it('rejects archive paths that escape the extraction root', () => {
+        const tarball = packEscapingFixture()
+        expect(() =>
+            analyzePackedTarballWorkspaceDependencyClosure({
+                snapshot: createSnapshot([]),
+                tarball,
+            }),
+        ).toThrow('unsafe path')
     })
 })
 
@@ -85,6 +111,23 @@ describe('isolated package consumer', () => {
             state: 'passed',
         })
     })
+
+    it('does not treat an install-only optional omission as behavioral proof', () => {
+        const tarball = packFixture({
+            files: { 'dist/index.js': 'export const answer = 42' },
+            optionalDependencies: {
+                '@fixture/not-installed': 'file:./missing',
+            },
+        })
+        const result = runIsolatedPackageConsumer({
+            omitOptional: true,
+            tarball,
+        })
+        expect(result).toMatchObject({
+            optionalAbsenceProven: false,
+            state: 'passed',
+        })
+    })
 })
 
 function createSnapshot(
@@ -99,6 +142,20 @@ function createSnapshot(
 
 function member(name: string): WorkspacePackage {
     return { name, path: 'packages/lib', version: '1.0.0' }
+}
+
+function packEscapingFixture(): string {
+    const root = mkdtempSync(path.join(tmpdir(), 'doctor-escape-fixture-'))
+    temporaryRoots.push(root)
+    writeFileSync(path.join(root, 'safe'), 'escape')
+    const tarball = path.join(root, 'escape.tgz')
+    const packed = spawnSync(
+        'tar',
+        ['-czf', tarball, '-s', ',^safe$,../escape,', 'safe'],
+        { cwd: root, encoding: 'utf8' },
+    )
+    if (packed.status !== 0) throw new Error(packed.stderr)
+    return tarball
 }
 
 function packFixture(options: {
@@ -146,4 +203,23 @@ function packFixture(options: {
     if (packed.status !== 0) throw new Error(packed.stderr)
     const output = JSON.parse(packed.stdout) as Array<{ filename: string }>
     return path.join(root, output[0]?.filename ?? 'missing.tgz')
+}
+
+function packLinkedFixture(): string {
+    const root = mkdtempSync(path.join(tmpdir(), 'doctor-linked-fixture-'))
+    temporaryRoots.push(root)
+    const packageRoot = path.join(root, 'package')
+    mkdirSync(packageRoot)
+    writeFileSync(
+        path.join(packageRoot, 'package.json'),
+        JSON.stringify({ name: '@fixture/linked', version: '1.0.0' }),
+    )
+    symlinkSync('/etc/passwd', path.join(packageRoot, 'escaped.js'))
+    const tarball = path.join(root, 'linked.tgz')
+    const packed = spawnSync('tar', ['-czf', tarball, 'package'], {
+        cwd: root,
+        encoding: 'utf8',
+    })
+    if (packed.status !== 0) throw new Error(packed.stderr)
+    return tarball
 }
