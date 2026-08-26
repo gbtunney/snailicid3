@@ -61,6 +61,13 @@ type Disposable = PackCandidate & { dispose: () => void }
 
 const packedManifestSchema = packageIdentitySchema
 
+/** Lockfiles that identify their manager unambiguously. */
+const LOCKFILE_OWNERS: ReadonlyArray<readonly [string, SourcePackageManager]> =
+    [
+        ['package-lock.json', 'npm'],
+        ['pnpm-lock.yaml', 'pnpm'],
+    ]
+
 /** Manifest fields naming a packed tarball, across npm's array form and pnpm's single-object form. */
 const packReportSchema = z.union([
     z.object({ filename: z.string() }).array().min(1),
@@ -118,32 +125,34 @@ export function createPackCandidate(input: PackCandidateInput): Disposable {
 }
 
 /**
- * The package manager that owns the workspace the package sits in.
+ * The package manager that owns the repository the package sits in, read from repository evidence.
  *
- * Read from the nearest `packageManager` field, because that is the field corepack and CI already agree on. A package
- * with no such field is treated as pnpm-managed: this workspace is pnpm, and packing with the wrong manager silently
- * produces an unpublishable manifest rather than failing loudly.
+ * Deliberately not guessed. Doctor inspects npm and pnpm workspaces alike, and the two disagree about the one thing
+ * this decision controls: pnpm replaces `workspace:` ranges at pack time and npm does not. Assuming a default would
+ * mean an npm repository that never declared `packageManager` gets packed by the wrong manager and validated as a
+ * manifest it will never publish — the silent wrong answer this function exists to prevent.
+ *
+ * Evidence is read nearest-first, and the first directory that answers wins: an explicit `packageManager` field, then a
+ * lockfile, then a pnpm workspace definition. When nothing answers, the caller is asked to say which manager owns the
+ * package rather than being handed a guess.
  */
 export function detectSourcePackageManager(
     packageRoot: string,
 ): SourcePackageManager {
-    let directory = path.resolve(packageRoot)
+    const resolved = path.resolve(packageRoot)
+    let directory = resolved
 
     for (;;) {
-        const manifestPath = path.join(directory, 'package.json')
-        if (existsSync(manifestPath)) {
-            const declared = jsonTextSchema
-                .pipe(z.object({ packageManager: z.string().optional() }))
-                .safeParse(readFileSync(manifestPath, 'utf8'))
-            const name = declared.success
-                ? declared.data.packageManager?.split('@')[0]
-                : undefined
-            if (name === 'npm' || name === 'pnpm') return name
-        }
+        const detected = detectFromDirectory(directory)
+        if (detected !== undefined) return detected
         const parent = path.dirname(directory)
-        if (parent === directory) return 'pnpm'
+        if (parent === directory) break
         directory = parent
     }
+
+    throw new Error(
+        `Unable to determine the package manager for ${resolved}: no packageManager field, pnpm-lock.yaml or package-lock.json was found in it or any ancestor. Pass packageManager explicitly.`,
+    )
 }
 
 /** Create the candidate and guarantee its temporary directories are removed once the collectors are done. */
@@ -167,6 +176,29 @@ export async function withPackCandidate<Result>(
  * turn that actionable message into "command exited 1". The refusal itself is correct behaviour worth surfacing rather
  * than working around: an unresolved workspace range must not reach a validator as if it were publishable.
  */
+/** Evidence in one directory, in the order a reader would trust it. */
+function detectFromDirectory(
+    directory: string,
+): SourcePackageManager | undefined {
+    const declared = readDeclaredPackageManager(directory)
+    if (declared !== undefined) return declared
+
+    const lockfiles = LOCKFILE_OWNERS.filter(([file]) =>
+        existsSync(path.join(directory, file)),
+    )
+    if (lockfiles.length > 1) {
+        throw new Error(
+            `Ambiguous package manager for ${directory}: it contains ${lockfiles.map(([file]) => file).join(' and ')}. Pass packageManager explicitly.`,
+        )
+    }
+    if (lockfiles.length === 1) return lockfiles[0]?.[1]
+
+    // A pnpm workspace definition identifies the manager even before an install has produced a lockfile.
+    return existsSync(path.join(directory, 'pnpm-workspace.yaml'))
+        ? 'pnpm'
+        : undefined
+}
+
 function packFailureDetail(
     outcome: Readonly<{ detail: string; stdout: string }>,
 ): string {
@@ -251,4 +283,20 @@ function packSourcePackage(
     return path.isAbsolute(filename)
         ? filename
         : path.join(destination, filename)
+}
+
+/** The `packageManager` field corepack and CI already agree on, when a directory declares one. */
+function readDeclaredPackageManager(
+    directory: string,
+): SourcePackageManager | undefined {
+    const manifestPath = path.join(directory, 'package.json')
+    if (!existsSync(manifestPath)) return undefined
+
+    const declared = jsonTextSchema
+        .pipe(z.object({ packageManager: z.string().optional() }))
+        .safeParse(readFileSync(manifestPath, 'utf8'))
+    const name = declared.success
+        ? declared.data.packageManager?.split('@')[0]
+        : undefined
+    return name === 'npm' || name === 'pnpm' ? name : undefined
 }

@@ -126,17 +126,78 @@ describe('pack candidate preparation', () => {
             adopted.dispose()
         }
     }, 120_000)
+})
 
-    it('reads the package manager from the nearest declaring manifest', () => {
+describe('package manager detection', () => {
+    it('reads an explicit packageManager declaration', () => {
         const workspace = createWorkspaceSource()
 
         expect(
             detectSourcePackageManager(path.join(workspace, 'pkgs', 'app')),
         ).toBe('pnpm')
-        // Nothing declares a manager above a bare temporary directory, and the workspace this serves is pnpm.
-        expect(detectSourcePackageManager(createStandalonePackage())).toBe(
-            'pnpm',
+    })
+
+    it('identifies an npm repository from its lockfile', () => {
+        const root = createRepository({ 'package-lock.json': '{}' })
+
+        // An npm repository that never declared `packageManager` must not be packed as though it were pnpm.
+        expect(detectSourcePackageManager(path.join(root, 'pkg'))).toBe('npm')
+    })
+
+    it('identifies a pnpm repository from its lockfile', () => {
+        const root = createRepository({
+            'pnpm-lock.yaml': "lockfileVersion: '9.0'\n",
+        })
+
+        expect(detectSourcePackageManager(path.join(root, 'pkg'))).toBe('pnpm')
+    })
+
+    it('identifies a pnpm workspace before an install has produced a lockfile', () => {
+        const root = createRepository({
+            'pnpm-workspace.yaml': "packages:\n  - 'pkg'\n",
+        })
+
+        expect(detectSourcePackageManager(path.join(root, 'pkg'))).toBe('pnpm')
+    })
+
+    it('prefers the nearest evidence to a more distant declaration', () => {
+        const root = createRepository({ 'package-lock.json': '{}' })
+        write(
+            root,
+            'package.json',
+            JSON.stringify({
+                name: '@fixture/repo',
+                packageManager: 'pnpm@10.30.2',
+                private: true,
+                version: '0.0.0',
+            }),
         )
+        write(root, 'pkg/package-lock.json', '{}')
+
+        // The package's own lockfile answers before the repository root is consulted.
+        expect(detectSourcePackageManager(path.join(root, 'pkg'))).toBe('npm')
+    })
+
+    it('refuses to guess when nothing names a manager', () => {
+        const bare = mkdtempSync(path.join(tmpdir(), 'doctor-pack-bare-'))
+        temporaryRoots.push(bare)
+        write(bare, 'package.json', JSON.stringify({ name: '@fixture/bare' }))
+
+        // Guessing here is the failure mode: it would validate a manifest the repository will never publish.
+        expect(() => detectSourcePackageManager(bare)).toThrow(
+            /Pass packageManager explicitly/u,
+        )
+    })
+
+    it('refuses to guess when two lockfiles disagree', () => {
+        const root = createRepository({
+            'package-lock.json': '{}',
+            'pnpm-lock.yaml': "lockfileVersion: '9.0'\n",
+        })
+
+        expect(() =>
+            detectSourcePackageManager(path.join(root, 'pkg')),
+        ).toThrow(/Ambiguous package manager/u)
     })
 })
 
@@ -153,6 +214,21 @@ function createInstalledWorkspace(): string {
     return workspace
 }
 
+/** A repository root carrying the given evidence files, with one package beneath it. */
+function createRepository(files: Record<string, string>): string {
+    const root = mkdtempSync(path.join(tmpdir(), 'doctor-pack-repo-'))
+    temporaryRoots.push(root)
+    for (const [file, contents] of Object.entries(files)) {
+        write(root, file, contents)
+    }
+    write(
+        root,
+        'pkg/package.json',
+        JSON.stringify({ name: '@fixture/pkg', version: '1.0.0' }),
+    )
+    return root
+}
+
 function createStandalonePackage(): string {
     const root = mkdtempSync(path.join(tmpdir(), 'doctor-pack-source-'))
     temporaryRoots.push(root)
@@ -164,6 +240,7 @@ function createStandalonePackage(): string {
             files: ['dist'],
             license: 'MIT',
             name: '@fixture/standalone',
+            packageManager: 'pnpm@10.30.2',
             type: 'module',
             version: '1.0.0',
         }),
