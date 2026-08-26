@@ -136,19 +136,18 @@ export type ReleaseDistTagObservation =
 
 export type ReleasePublishAdapter = {
     assignDistTag: (
-        artifact: ReleasePublishArtifact,
+        name: string,
+        version: string,
         channel: string,
         registryUrl: string,
     ) => { detail: string; ok: boolean }
     observeDistTag: (
-        artifact: ReleasePublishArtifact,
+        name: string,
+        version: string,
         channel: string,
         registryUrl: string,
     ) => ReleaseDistTagObservation
-    observeExact: (
-        artifact: ReleasePublishArtifact,
-        registryUrl: string,
-    ) => string
+    observeExact: (name: string, version: string, registryUrl: string) => string
     publishTarball: (
         artifact: ReleasePublishArtifact,
         channel: string,
@@ -212,7 +211,10 @@ export function executePublishWithAdapter(
             continue
         }
 
-        const step = publishOne(entry, adapter)
+        const step =
+            entry.decision === 'already_published'
+                ? reconcileChannel(entry, adapter)
+                : publishOne(entry, adapter)
         results.set(entry.name, step)
         steps.push(step)
     }
@@ -276,7 +278,8 @@ function createNpmPublishAdapter(
 ): ReleasePublishAdapter {
     return {
         assignDistTag: (
-            artifact,
+            name,
+            version,
             channel,
             registryUrl,
         ): {
@@ -286,7 +289,7 @@ function createNpmPublishAdapter(
             const result = runNpm([
                 'dist-tag',
                 'add',
-                `${artifact.name}@${artifact.version}`,
+                `${name}@${version}`,
                 channel,
                 `--registry=${registryUrl}`,
             ])
@@ -294,13 +297,14 @@ function createNpmPublishAdapter(
             return { detail: result.stderr.trim(), ok: result.success }
         },
         observeDistTag: (
-            artifact,
+            name,
+            version,
             channel,
             registryUrl,
         ): ReleaseDistTagObservation => {
             const result = runNpm([
                 'view',
-                artifact.name,
+                name,
                 'dist-tags',
                 '--json',
                 `--registry=${registryUrl}`,
@@ -318,13 +322,8 @@ function createNpmPublishAdapter(
                 ? { kind: 'assigned', version: parsed.data[channel] }
                 : { kind: 'unassigned' }
         },
-        observeExact: (artifact, registryUrl) =>
-            observeExactVersion(
-                artifact.name,
-                artifact.version,
-                registryUrl,
-                runNpm,
-            ),
+        observeExact: (name, version, registryUrl) =>
+            observeExactVersion(name, version, registryUrl, runNpm),
         publishTarball: (
             artifact,
             channel,
@@ -483,17 +482,13 @@ function parseJsonOrNull(value: string): unknown {
 function publishOne(
     entry: Extract<
         ReleasePublishPlan['packages'][number],
-        { decision: 'already_published' | 'planned' }
+        { decision: 'planned' }
     >,
     adapter: ReleasePublishAdapter,
 ): ReleasePublishStep {
-    const { artifact, channel, registryUrl } = entry
-    const shared = { name: entry.name, version: entry.version }
-    const before = adapter.observeExact(artifact, registryUrl)
-
-    if (entry.decision === 'already_published') {
-        return settleDistTag(entry, adapter, true)
-    }
+    const { artifact, channel, name, registryUrl, version } = entry
+    const shared = { name, version }
+    const before = adapter.observeExact(name, version, registryUrl)
 
     if (before !== 'exists' && before !== 'missing') {
         return {
@@ -525,7 +520,7 @@ function publishOne(
             }
         }
 
-        const after = adapter.observeExact(artifact, registryUrl)
+        const after = adapter.observeExact(name, version, registryUrl)
 
         if (after !== 'exists') {
             return {
@@ -536,7 +531,11 @@ function publishOne(
         }
     }
 
-    return settleDistTag(entry, adapter, before === 'exists')
+    return settleDistTag(
+        { channel, name, registryUrl, version },
+        adapter,
+        before === 'exists',
+    )
 }
 
 /**
@@ -559,6 +558,24 @@ function readTarballIntegrity(
     }
 }
 
+/** Fresh exact observation gates the channel mutation — stale plan state is never trusted. */
+function reconcileChannel(
+    entry: Extract<
+        ReleasePublishPlan['packages'][number],
+        { decision: 'already_published' }
+    >,
+    adapter: ReleasePublishAdapter,
+): ReleasePublishStep {
+    const { channel, name, registryUrl, version } = entry
+    const observed = adapter.observeExact(name, version, registryUrl)
+
+    if (observed !== 'exists') {
+        return { name, observed, outcome: 'failed_registry_precheck', version }
+    }
+
+    return settleDistTag({ channel, name, registryUrl, version }, adapter, true)
+}
+
 /**
  * Establish the requested channel, whether or not this run published the version.
  *
@@ -573,22 +590,24 @@ function readTarballIntegrity(
  * `name@version` alone.
  */
 function settleDistTag(
-    entry: Extract<
-        ReleasePublishPlan['packages'][number],
-        { decision: 'already_published' | 'planned' }
-    >,
+    context: {
+        channel: string
+        name: string
+        registryUrl: string
+        version: string
+    },
     adapter: ReleasePublishAdapter,
     alreadyPublished: boolean,
 ): ReleasePublishStep {
-    const { artifact, channel, registryUrl } = entry
-    const shared = { channel, name: entry.name, version: entry.version }
-    const current = adapter.observeDistTag(artifact, channel, registryUrl)
+    const { channel, name, registryUrl, version } = context
+    const shared = { channel, name, version }
+    const current = adapter.observeDistTag(name, version, channel, registryUrl)
 
     if (current.kind === 'unknown') {
         return { ...shared, outcome: 'failed_dist_tag_unknown' }
     }
 
-    if (current.kind === 'assigned' && current.version === entry.version) {
+    if (current.kind === 'assigned' && current.version === version) {
         return {
             ...shared,
             outcome: alreadyPublished
@@ -597,7 +616,7 @@ function settleDistTag(
         }
     }
 
-    const assigned = adapter.assignDistTag(artifact, channel, registryUrl)
+    const assigned = adapter.assignDistTag(name, version, channel, registryUrl)
 
     if (!assigned.ok) {
         return {
@@ -607,9 +626,9 @@ function settleDistTag(
         }
     }
 
-    const verified = adapter.observeDistTag(artifact, channel, registryUrl)
+    const verified = adapter.observeDistTag(name, version, channel, registryUrl)
 
-    if (verified.kind !== 'assigned' || verified.version !== entry.version) {
+    if (verified.kind !== 'assigned' || verified.version !== version) {
         return {
             ...shared,
             observed: verified.kind === 'assigned' ? verified.version : null,

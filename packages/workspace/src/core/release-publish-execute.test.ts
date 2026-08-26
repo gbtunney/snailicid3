@@ -95,21 +95,17 @@ const fakeAdapter = (
 
     return {
         adapter: {
-            assignDistTag: (artifact, channel) => {
-                calls.push(
-                    `dist-tag:${artifact.name}@${artifact.version}:${channel}`,
-                )
+            assignDistTag: (name, version, channel) => {
+                calls.push(`dist-tag:${name}@${version}:${channel}`)
 
                 return {
                     detail: behaviour.distTagOk === false ? 'tag refused' : '',
                     ok: behaviour.distTagOk !== false,
                 }
             },
-            observeDistTag: (artifact, channel) => {
+            observeDistTag: (name, version, channel) => {
                 const next: null | string =
-                    distTags.length > 0
-                        ? (distTags.shift() ?? null)
-                        : artifact.version
+                    distTags.length > 0 ? (distTags.shift() ?? null) : version
                 calls.push(`observe-tag:${channel}:${next ?? 'unassigned'}`)
 
                 if (next === null) return { kind: 'unassigned' }
@@ -117,11 +113,9 @@ const fakeAdapter = (
 
                 return { kind: 'assigned', version: next }
             },
-            observeExact: (artifact) => {
+            observeExact: (name, version) => {
                 const next = observations.shift() ?? 'exists'
-                calls.push(
-                    `observe:${artifact.name}@${artifact.version}:${next}`,
-                )
+                calls.push(`observe:${name}@${version}:${next}`)
 
                 return next
             },
@@ -255,7 +249,7 @@ describe('release publish execution', () => {
                                 edges: [
                                     {
                                         name: '@snailicid3/lib',
-                                        range: '^1.0.0',
+                                        range: '^2.0.0',
                                         resolution: 'included_in_cohort',
                                     },
                                 ],
@@ -332,7 +326,7 @@ describe('release publish execution', () => {
                                 edges: [
                                     {
                                         name: '@snailicid3/lib',
-                                        range: '^1.0.0',
+                                        range: '^2.0.0',
                                         resolution: 'included_in_cohort',
                                     },
                                 ],
@@ -421,7 +415,7 @@ describe('release publish execution', () => {
                                 edges: [
                                     {
                                         name: '@snailicid3/lib',
-                                        range: '^1.0.0',
+                                        range: '^2.0.0',
                                         resolution: 'included_in_cohort',
                                     },
                                 ],
@@ -869,6 +863,96 @@ describe('release publish execution', () => {
             authorizedPlan()
 
             expect(calls).toEqual([])
+        })
+    })
+
+    describe('fresh-plan channel reconciliation (already_published path)', () => {
+        /** A plan where the exact version is already in the registry — no tarball or integrity needed. */
+        const reconcilePlan = (
+            channel = 'latest',
+            candidateOverrides: Partial<ReleasePublishCandidate> = {},
+        ): ReleasePublishPlan =>
+            createReleasePublishPlan({
+                candidates: [candidate(candidateOverrides)],
+                channel,
+                plan: createReleasePlan({
+                    packages: [
+                        packageInput({
+                            registry: {
+                                distTags: {},
+                                registryUrl: 'https://registry.npmjs.org/',
+                                state: 'exists',
+                            },
+                        }),
+                    ],
+                }),
+                selection: ['@snailicid3/workspace'],
+            })
+
+        it('reconciles a channel without any artifact data in the plan entry', () => {
+            const plan = reconcilePlan('next')
+            const entry = plan.packages.find(
+                (p) => p.name === '@snailicid3/workspace',
+            )
+
+            expect(entry?.decision).toBe('already_published')
+            expect(Object.keys(entry ?? {})).not.toContain('artifact')
+        })
+
+        it('assigns the channel and reports assigned_dist_tag without publishing', () => {
+            const { adapter, calls } = fakeAdapter({
+                distTags: [null, '0.2.0'],
+                observations: ['exists'],
+            })
+            const result = executePublishWithAdapter(
+                reconcilePlan('next'),
+                adapter,
+            )
+
+            expect(result.steps[0]).toMatchObject({
+                channel: 'next',
+                outcome: 'assigned_dist_tag',
+            })
+            expect(calls.some((call) => call.startsWith('publish:'))).toBe(
+                false,
+            )
+            expect(calls).toContain('dist-tag:@snailicid3/workspace@0.2.0:next')
+        })
+
+        it.each([
+            'missing',
+            'unknown_auth',
+            'unknown_network',
+            'unknown_registry',
+        ])(
+            'refuses to mutate the channel when fresh exact observation reports %s',
+            (observed) => {
+                const { adapter, calls } = fakeAdapter({
+                    observations: [observed],
+                })
+                const result = executePublishWithAdapter(
+                    reconcilePlan(),
+                    adapter,
+                )
+
+                expect(result.steps[0]).toMatchObject({
+                    observed,
+                    outcome: 'failed_registry_precheck',
+                })
+                expect(calls.some((call) => call.startsWith('dist-tag:'))).toBe(
+                    false,
+                )
+            },
+        )
+
+        it('permits channel reconciliation when fresh exact observation reports exists', () => {
+            const { adapter } = fakeAdapter({
+                distTags: ['0.2.0'],
+                observations: ['exists'],
+            })
+            const result = executePublishWithAdapter(reconcilePlan(), adapter)
+
+            expect(result.steps[0]?.outcome).toBe('skipped_already_published')
         })
     })
 })

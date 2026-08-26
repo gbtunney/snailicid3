@@ -639,7 +639,18 @@ describe('release publish planning', () => {
             const planned = publish(
                 plan,
                 ['@snailicid3/workspace', '@snailicid3/config'],
-                [candidate()],
+                [
+                    candidate(),
+                    candidate({
+                        artifact: {
+                            integrity: INTEGRITY,
+                            name: '@snailicid3/config',
+                            tarball: 'releases/config-0.3.0.tgz',
+                            version: '0.3.0',
+                        },
+                        name: '@snailicid3/config',
+                    }),
+                ],
             )
 
             expect(planned.authorization).toEqual({ state: 'authorized' })
@@ -708,6 +719,84 @@ describe('release publish planning', () => {
                     ],
                 ),
             ).toThrow()
+        })
+    })
+
+    describe('already-published channel reconciliation authorization', () => {
+        const existingInput = (
+            overrides: Partial<ReleasePackagePlanInput> = {},
+        ): ReleasePackagePlanInput =>
+            packageInput({
+                registry: {
+                    distTags: { latest: '0.2.0' },
+                    registryUrl: 'https://registry.npmjs.org/',
+                    state: 'exists',
+                },
+                ...overrides,
+            })
+
+        it('carries no artifact field on an already-published entry', () => {
+            const planned = publish(planOf(existingInput()), [
+                '@snailicid3/workspace',
+            ])
+            const entry = entryFor(planned, '@snailicid3/workspace')
+
+            expect(entry?.decision).toBe('already_published')
+            expect(Object.keys(entry ?? {})).not.toContain('artifact')
+            expect(planned.authorization).toEqual({ state: 'authorized' })
+        })
+
+        it('blocks channel reconciliation when policy is held', () => {
+            const planned = publish(
+                planOf(
+                    existingInput({
+                        policy: {
+                            decision: 'held',
+                            reason: 'Awaiting sign-off',
+                        },
+                    }),
+                ),
+                ['@snailicid3/workspace'],
+            )
+
+            expect(entryFor(planned, '@snailicid3/workspace')).toMatchObject({
+                decision: 'blocked_policy_held',
+                reason: 'Awaiting sign-off',
+            })
+            expect(planned.authorization).toMatchObject({ state: 'withheld' })
+        })
+
+        it('blocks channel reconciliation when Doctor artifact evidence is invalid', () => {
+            const planned = publish(
+                planOf(existingInput()),
+                ['@snailicid3/workspace'],
+                [
+                    candidate({
+                        doctor: {
+                            artifact: 'invalid',
+                            closure: { edges: [], state: 'valid' },
+                        },
+                    }),
+                ],
+            )
+
+            expect(entryFor(planned, '@snailicid3/workspace')?.decision).toBe(
+                'blocked_artifact_invalid',
+            )
+            expect(planned.authorization).toMatchObject({ state: 'withheld' })
+        })
+
+        it('blocks channel reconciliation when no Doctor evidence is available', () => {
+            const planned = publish(
+                planOf(existingInput()),
+                ['@snailicid3/workspace'],
+                [],
+            )
+
+            expect(entryFor(planned, '@snailicid3/workspace')?.decision).toBe(
+                'blocked_artifact_unavailable',
+            )
+            expect(planned.authorization).toMatchObject({ state: 'withheld' })
         })
     })
 })

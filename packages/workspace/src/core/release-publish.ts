@@ -124,7 +124,6 @@ export const releasePublishPackageSchema = z.discriminatedUnion('decision', [
         version: packageVersionSchema,
     }),
     z.strictObject({
-        artifact: releasePublishArtifactSchema,
         channel: z.string().trim().min(1),
         decision: z.literal('already_published'),
         name: packageNameSchema,
@@ -355,31 +354,10 @@ function decidePackage(facts: {
     if (!selected) return { ...shared, decision: 'not_selected' }
     if (packagePlan.private) return { ...shared, decision: 'blocked_private' }
 
-    if (packagePlan.registry.state === 'exists') {
-        if (packagePlan.registry.registryUrl === null) {
-            return {
-                ...shared,
-                decision: 'blocked_registry_unknown',
-                registryState: 'unknown_registry',
-            }
-        }
-
-        return {
-            ...shared,
-            artifact: candidate?.artifact ?? {
-                integrity: `sha512-${'a'.repeat(86)}==`,
-                name: packagePlan.name,
-                tarball: `releases/${packagePlan.name.replace(/[@/]/gu, '-')}-${packagePlan.version}.tgz`,
-                version: packagePlan.version,
-            },
-            channel,
-            decision: 'already_published',
-            registryUrl: packagePlan.registry.registryUrl,
-            requires,
-        }
-    }
-
-    if (packagePlan.registry.state !== 'missing') {
+    if (
+        packagePlan.registry.state !== 'exists' &&
+        packagePlan.registry.state !== 'missing'
+    ) {
         return {
             ...shared,
             decision: 'blocked_registry_unknown',
@@ -387,6 +365,7 @@ function decidePackage(facts: {
         }
     }
 
+    // Policy, Doctor, and closure gate mutation on both the publish and channel-reconcile paths
     if (packagePlan.policy.decision === 'held') {
         return {
             ...shared,
@@ -395,11 +374,8 @@ function decidePackage(facts: {
         }
     }
 
-    if (candidate === undefined) {
-        return { ...shared, decision: 'blocked_artifact_unavailable' }
-    }
-
     if (
+        candidate === undefined ||
         candidate.artifact.version !== packagePlan.version ||
         candidate.artifact.name !== packagePlan.name
     ) {
@@ -459,6 +435,16 @@ function decidePackage(facts: {
             ...shared,
             decision: 'blocked_registry_unknown',
             registryState: 'unknown_registry',
+        }
+    }
+
+    if (packagePlan.registry.state === 'exists') {
+        return {
+            ...shared,
+            channel,
+            decision: 'already_published',
+            registryUrl: packagePlan.registry.registryUrl,
+            requires,
         }
     }
 
