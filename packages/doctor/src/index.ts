@@ -12,11 +12,18 @@ export {
 } from './dependency-closure.js'
 export * from './discovery.js'
 export * from './doctor.js'
+export {
+    collectEmbeddedWorkspaceCodeProvenance,
+    type CollectEmbeddedWorkspaceCodeProvenanceInput,
+    type EmbeddedProvenanceKind,
+    type EmbeddedWorkspaceCodeProvenance,
+} from './embedded-provenance.js'
 export * from './fixtures.js'
 export * from './format.js'
-export type {
-    IsolatedConsumerCheck,
-    IsolatedPackageConsumerResult,
+export {
+    hasAbsenceProof,
+    type IsolatedConsumerCheck,
+    type IsolatedPackageConsumerResult,
 } from './isolated-consumer-evidence.js'
 export * from './manifest.js'
 export {
