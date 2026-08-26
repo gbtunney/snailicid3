@@ -104,11 +104,13 @@
         "@snailicid3/logger": "workspace:*",
         "@snailicid3/node-utils": "workspace:*",
         "@snailicid3/workspace": "workspace:*",
+        "semver": "^7.8.5",
         "zod": "^4.4.3"
     },
     "devDependencies": {
         "@snailicid3/config": "workspace:*",
         "@types/node": "^26.2.0",
+        "@types/semver": "^7.8.0",
         "tsx": "^4.23.12",
         "typescript": "^6.0.3",
         "vitest": "^4.1.11"
