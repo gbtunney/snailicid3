@@ -2,9 +2,10 @@ import {
     checkPackage,
     createPackageFromTarballData,
 } from '@arethetypeswrong/core'
-import type { Analysis, Problem } from '@arethetypeswrong/core'
+import type { Analysis, Problem, ResolutionKind } from '@arethetypeswrong/core'
+import { problemAffectsResolutionKind } from '@arethetypeswrong/core/problems'
 import { publint } from 'publint'
-import { formatMessage } from 'publint/utils'
+import { formatMessage, formatMessagePath } from 'publint/utils'
 import type { PackCandidate } from './pack-candidate.js'
 import type { DoctorDiagnostic } from './types.js'
 
@@ -18,13 +19,31 @@ export type CollectorOutcome =
     | Readonly<{ detail: string; state: 'failed' }>
     | Readonly<{ state: 'completed' }>
 
+export type PackedValidationOptions = Readonly<{
+    /** Resolution modes the package is meant to support; a problem outside them is not this package's contract. */
+    resolutions?: ReadonlyArray<ResolutionKind>
+}>
+
 export type PackedValidationResult = Readonly<{
     attw: CollectorOutcome
     diagnostics: ReadonlyArray<DoctorDiagnostic>
     files: ReadonlyArray<string>
     packageName: string
     publint: CollectorOutcome
+    resolutions: ReadonlyArray<ResolutionKind>
 }>
+
+/**
+ * The Node profile Doctor judges against by default.
+ *
+ * `node10` is deliberately absent: legacy resolution cannot see `exports` at all, so every subpath of a modern package
+ * reports as unresolvable. Including it by default would bury real findings under noise the package never promised to
+ * avoid. A caller that does support legacy consumers asks for it explicitly.
+ */
+const DEFAULT_RESOLUTIONS: ReadonlyArray<ResolutionKind> = [
+    'node16-cjs',
+    'node16-esm',
+]
 
 const PUBLINT_SEVERITY = {
     error: 'error',
@@ -40,10 +59,12 @@ const PUBLINT_SEVERITY = {
  */
 export async function validatePackedCandidate(
     candidate: PackCandidate,
+    options: PackedValidationOptions = {},
 ): Promise<PackedValidationResult> {
+    const resolutions = options.resolutions ?? DEFAULT_RESOLUTIONS
     const [publintResult, attwResult] = await Promise.all([
         runPublint(candidate),
-        runAttw(candidate),
+        runAttw(candidate, resolutions),
     ])
 
     return {
@@ -59,6 +80,7 @@ export async function validatePackedCandidate(
         files: candidate.files,
         packageName: candidate.packageName,
         publint: publintResult.outcome,
+        resolutions,
     }
 }
 
@@ -119,6 +141,7 @@ function readField(problem: Problem, field: string): string | undefined {
 
 async function runAttw(
     candidate: PackCandidate,
+    resolutions: ReadonlyArray<ResolutionKind>,
 ): Promise<{
     diagnostics: ReadonlyArray<DoctorDiagnostic>
     outcome: CollectorOutcome
@@ -132,8 +155,14 @@ async function runAttw(
             return { diagnostics: [], outcome: { state: 'completed' } }
         }
 
+        const relevant = analysis.problems.filter((problem) =>
+            resolutions.some((resolution) =>
+                problemAffectsResolutionKind(problem, resolution, analysis),
+            ),
+        )
+
         return {
-            diagnostics: analysis.problems.map((problem) => ({
+            diagnostics: relevant.map((problem) => ({
                 code: 'ATTW_RESOLUTION_PROBLEM',
                 evidence: attwEvidence(problem),
                 message: `${problem.kind} for ${describeSubject(problem)}`,
@@ -153,9 +182,7 @@ async function runAttw(
     }
 }
 
-async function runPublint(
-    candidate: PackCandidate,
-): Promise<{
+async function runPublint(candidate: PackCandidate): Promise<{
     diagnostics: ReadonlyArray<DoctorDiagnostic>
     outcome: CollectorOutcome
 }> {
@@ -174,7 +201,7 @@ async function runPublint(
                 evidence: [
                     `publint:${message.code}`,
                     ...(message.path.length > 0
-                        ? [`package.json#${message.path.join('.')}`]
+                        ? [`package.json#${formatMessagePath(message.path)}`]
                         : []),
                 ],
                 message: formatMessage(message, result.pkg) ?? message.code,
