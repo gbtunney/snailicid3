@@ -37,18 +37,35 @@ describe('packed tarball analysis', () => {
 })
 
 describe('isolated package consumer', () => {
-    it('installs and imports a genuinely self-contained tarball in an empty project', () => {
+    it('installs, imports, typechecks, and runs a bin from a self-contained tarball', () => {
         const tarball = packFixture({
-            files: { 'dist/index.js': 'export const answer = 42' },
+            bin: { fixture: './dist/cli.js' },
+            files: {
+                'dist/cli.js':
+                    '#!/usr/bin/env node\nif (process.argv.includes("--help")) process.exit(0)',
+                'dist/index.d.ts': 'export declare const answer: number',
+                'dist/index.js': 'export const answer = 42',
+            },
+            types: './dist/index.d.ts',
         })
         const result = runIsolatedPackageConsumer({
+            bins: ['fixture'],
             imports: ['@fixture/self-contained'],
             tarball,
+            typecheck: {
+                compiler: path.resolve('node_modules/.bin/tsc'),
+                source: "import { answer } from '@fixture/self-contained'; answer satisfies number",
+            },
         })
         expect(result.state).toBe('passed')
         expect(
             result.checks.map(({ name, state }) => `${name}:${state}`),
-        ).toEqual(['install:passed', 'import:@fixture/self-contained:passed'])
+        ).toEqual([
+            'install:passed',
+            'import:@fixture/self-contained:passed',
+            'bin:fixture:passed',
+            'typecheck:passed',
+        ])
     })
 
     it('only proves optional absence after a successful omitted-optional consumer run', () => {
@@ -85,9 +102,11 @@ function member(name: string): WorkspacePackage {
 }
 
 function packFixture(options: {
+    bin?: Record<string, string>
     dependencies?: Record<string, string>
     files: Record<string, string>
     optionalDependencies?: Record<string, string>
+    types?: string
 }): string {
     const root = mkdtempSync(path.join(tmpdir(), 'doctor-pack-fixture-'))
     temporaryRoots.push(root)
@@ -96,12 +115,14 @@ function packFixture(options: {
     writeFileSync(
         path.join(packageRoot, 'package.json'),
         JSON.stringify({
+            bin: options.bin,
             dependencies: options.dependencies,
             exports: './dist/index.js',
             files: ['dist'],
             name: '@fixture/self-contained',
             optionalDependencies: options.optionalDependencies,
             type: 'module',
+            types: options.types,
             version: '1.0.0',
         }),
     )

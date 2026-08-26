@@ -1,6 +1,6 @@
 import type { WorkspaceSnapshot } from '@snailicid3/workspace'
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdtempSync, rmSync } from 'node:fs'
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import {
@@ -29,6 +29,10 @@ export type IsolatedPackageConsumerOptions = Readonly<{
     imports?: ReadonlyArray<string>
     omitOptional?: boolean
     tarball: string
+    typecheck?: Readonly<{
+        compiler: string
+        source: string
+    }>
 }>
 
 export type IsolatedPackageConsumerResult = Readonly<{
@@ -143,12 +147,43 @@ export function runIsolatedPackageConsumer(
                           },
                 )
             }
+            if (options.typecheck !== undefined) {
+                writeFileSync(
+                    path.join(consumerRoot, 'consumer.mts'),
+                    options.typecheck.source,
+                )
+                writeFileSync(
+                    path.join(consumerRoot, 'tsconfig.json'),
+                    JSON.stringify({
+                        compilerOptions: {
+                            module: 'NodeNext',
+                            moduleResolution: 'NodeNext',
+                            noEmit: true,
+                            strict: true,
+                        },
+                        files: ['consumer.mts'],
+                    }),
+                )
+                checks.push(
+                    toCheck(
+                        'typecheck',
+                        run(
+                            path.resolve(options.typecheck.compiler),
+                            ['--project', 'tsconfig.json'],
+                            consumerRoot,
+                        ),
+                    ),
+                )
+            }
         } else {
             for (const specifier of options.imports ?? []) {
                 checks.push({ name: `import:${specifier}`, state: 'skipped' })
             }
             for (const bin of options.bins ?? []) {
                 checks.push({ name: `bin:${bin}`, state: 'skipped' })
+            }
+            if (options.typecheck !== undefined) {
+                checks.push({ name: 'typecheck', state: 'skipped' })
             }
         }
 
