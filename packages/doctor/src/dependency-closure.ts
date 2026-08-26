@@ -406,17 +406,6 @@ function isEmbeddedNotExposed(input: {
     return hasAbsenceProof(input.consumerEvidence, input.name)
 }
 
-/** Distinguish runtime embedding evidence from disclosure-only `sourcesContent`. */
-function provesRuntimeEmbedding(
-    entry: EmbeddedWorkspaceCodeProvenance,
-): boolean {
-    return (
-        entry.kind === 'vendored_content' ||
-        (entry.kind === 'sourcemap' &&
-            entry.evidence.some((evidence) => evidence.startsWith('sourcemap:')))
-    )
-}
-
 function manifestKindsForName(
     manifest: PackedPackageManifest,
     name: string,
@@ -448,6 +437,19 @@ function primaryEdges(
         }
     }
     return [...selected.values()].toSorted(compareEdges)
+}
+
+/** Distinguish runtime embedding evidence from disclosure-only `sourcesContent`. */
+function provesRuntimeEmbedding(
+    entry: EmbeddedWorkspaceCodeProvenance,
+): boolean {
+    return (
+        entry.kind === 'vendored_content' ||
+        (entry.kind === 'sourcemap' &&
+            entry.evidence.some((evidence) =>
+                evidence.startsWith('sourcemap:'),
+            ))
+    )
 }
 
 function readPackedManifest(root: string): PackedPackageManifest {
