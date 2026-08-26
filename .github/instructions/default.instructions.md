@@ -37,18 +37,18 @@ type Wrapped<T extends string> = Promise<T> //BAD!!!!!!!
 type Wrapped<Type extends string> = Promise<Type> //GOOD!!!!!!!
 ```
 
-- Please, no // comments unless temporary OR nessecary or make sense at end of line . ALWAYS USE
-  JSDocCOMMENTS (single or multiline, no @return or @params) for documenting and breaking up
-  functions.
-- Local imports should always include applicable {js,cjs,mjs,tsx,jsx} extensions in esm imports
+- Please, no // comments unless temporary OR nessecary or make sense at end of line. ALWAYS USE
+  JSDocCOMMENTS (single or multiline, no @return or @params) for documenting and breaking
+  upfunctions.
 - IMPORTANT - i use pnpm workspace monorepo. All terminal commands MUST stay in root and use
-  `pnpm --filter=<package-name> <command>` OR `pnpm --filter=<package-name> exec<package-root-dir>`
+  `pnpm --filter=<package-name> <command>` OR `pnpm --filter=<package-name> exec<package-root-dir>`.
   Please try to avoid jumping around via cd to do things to directories besides the root. Do NOT
   change directories!
-- too many versions make me nervous, I will ask if I want you to make a version or script after I
-  have thought about it. I would prefer a single source of truth using canvas if possible, but
-  please make me aware of suggestions you can do
-- **IMPORTANT** - all local imports need to have JS extension {js,mjs,cjs}
+- Do not create, modify, consume, or apply Changesets unless I explicitly ask. Do not run Changesets
+  version/release commands or create release/version PRs. If a public API change would normally
+  require a changeset, report that fact to me instead of adding one.
+- **IMPORTANT** - all local imports need to be ESM have include applicable {js,cjs,mjs,tsx,jsx}
+  extensions in esm imports
 - please use the most up to date TypeScript/JS (ESM format, no CJS) and best practices.
 - try not to use or suggest libraries that use cjs or typescript decorators unless no valid
   alternatives.
