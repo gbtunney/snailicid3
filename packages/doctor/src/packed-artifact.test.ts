@@ -1,4 +1,12 @@
-import type { WorkspacePackage, WorkspaceSnapshot } from '@snailicid3/workspace'
+import type {
+    ReleasePublishDoctorEvidence,
+    WorkspacePackage,
+    WorkspaceSnapshot,
+} from '@snailicid3/workspace'
+import {
+    createReleasePlan,
+    createReleasePublishPlan,
+} from '@snailicid3/workspace'
 import { afterEach, describe, expect, it } from 'vitest'
 import { spawnSync } from 'node:child_process'
 import {
@@ -97,6 +105,98 @@ describe('packed tarball analysis', () => {
         expect(result.evidence.closure).toEqual({ edges: [], state: 'valid' })
     })
 
+    it('proves an inlined workspace dependency left the consumer-facing contract', () => {
+        const tarball = packFixture({
+            files: {
+                'dist/index.js': 'export const answer = 42',
+                'dist/index.js.map': sourceMap('packages/private'),
+            },
+            optionalDependencies: { '@fixture/private': 'file:./missing' },
+        })
+        const result = analyzePackedTarballWorkspaceDependencyClosure({
+            consumer: { imports: ['@fixture/self-contained'] },
+            snapshot: createSnapshot([privateMember('@fixture/private')]),
+            tarball,
+        })
+
+        expect(result.evidence.closure).toEqual({
+            edges: [
+                {
+                    name: '@fixture/private',
+                    resolution: 'embedded_not_exposed',
+                },
+            ],
+            state: 'valid',
+        })
+        expect(result.diagnostics.map(({ code }) => code)).toEqual([
+            'PRIVATE_WORKSPACE_CODE_EMBEDDED',
+        ])
+        // An embedded edge is a closure fact Workspace can act on: it adds no cohort requirement, while the disclosure
+        // finding above stays a separate review item rather than a publication permission.
+        expect(publishWith(result.evidence.closure).packages[0]).toMatchObject({
+            decision: 'planned',
+            requires: [],
+        })
+    })
+
+    it('does not call an inlined dependency self-contained while a declaration still references it', () => {
+        const tarball = packFixture({
+            files: {
+                'dist/index.d.ts':
+                    "export type { Secret } from '@fixture/private'",
+                'dist/index.js': 'export const answer = 42',
+                'dist/index.js.map': sourceMap('packages/private'),
+            },
+            optionalDependencies: { '@fixture/private': 'file:./missing' },
+            types: './dist/index.d.ts',
+        })
+        const result = analyzePackedTarballWorkspaceDependencyClosure({
+            consumer: { imports: ['@fixture/self-contained'] },
+            facts: [{ name: '@fixture/private', state: 'unavailable' }],
+            snapshot: createSnapshot([privateMember('@fixture/private')]),
+            tarball,
+        })
+
+        expect(result.references['@fixture/private'].declaration).toEqual([
+            'dist/index.d.ts',
+        ])
+        expect(result.evidence.closure).toMatchObject({ state: 'blocked' })
+    })
+
+    it('keeps a bundled npm module exposed instead of calling it embedded', () => {
+        const tarball = packFixture({
+            dependencies: { '@fixture/private': '*' },
+            files: {
+                'dist/index.js': 'export const answer = 42',
+                'node_modules/@fixture/private/dist/index.js':
+                    'export const secret = 1',
+                'node_modules/@fixture/private/package.json': JSON.stringify({
+                    main: './dist/index.js',
+                    name: '@fixture/private',
+                    type: 'module',
+                    version: '1.0.0',
+                }),
+            },
+            manifest: { bundleDependencies: ['@fixture/private'] },
+        })
+        const result = analyzePackedTarballWorkspaceDependencyClosure({
+            consumer: { imports: ['@fixture/self-contained'] },
+            facts: [{ name: '@fixture/private', state: 'unavailable' }],
+            snapshot: createSnapshot([privateMember('@fixture/private')]),
+            tarball,
+        })
+
+        // Shipping the package keeps its specifier resolvable, so this is distribution of the code, not removal of the
+        // dependency; the disclosure finding still fires because the private source now travels in a public artifact.
+        expect(result.provenance.map(({ kind }) => kind)).toEqual([
+            'bundled_module',
+        ])
+        expect(result.evidence.closure).toMatchObject({ state: 'blocked' })
+        expect(result.diagnostics.map(({ code }) => code)).toContain(
+            'PRIVATE_WORKSPACE_CODE_EMBEDDED',
+        )
+    })
+
     it('does not allow an unavailable optional dependency after an install-only run', () => {
         const tarball = packFixture({
             files: { 'dist/index.js': 'export const answer = 42' },
@@ -146,7 +246,7 @@ describe('isolated package consumer', () => {
         ])
     })
 
-    it('only proves optional absence after a successful omitted-optional consumer run', () => {
+    it('proves optional absence per package after a successful omitted-optional consumer run', () => {
         const tarball = packFixture({
             files: { 'dist/index.js': 'export const answer = 42' },
             optionalDependencies: {
@@ -160,7 +260,7 @@ describe('isolated package consumer', () => {
             tarball,
         })
         expect(result).toMatchObject({
-            optionalAbsenceProven: true,
+            absenceProven: ['@fixture/not-installed'],
             state: 'passed',
         })
     })
@@ -178,7 +278,7 @@ describe('isolated package consumer', () => {
             tarball,
         })
         expect(result).toMatchObject({
-            optionalAbsenceProven: false,
+            absenceProven: [],
             state: 'passed',
         })
     })
@@ -268,6 +368,7 @@ function packFixture(options: {
     bin?: Record<string, string>
     dependencies?: Record<string, string>
     files: Record<string, string>
+    manifest?: Record<string, unknown>
     optionalDependencies?: Record<string, string>
     types?: string
 }): string {
@@ -287,6 +388,7 @@ function packFixture(options: {
             type: 'module',
             types: options.types,
             version: '1.0.0',
+            ...options.manifest,
         }),
     )
     for (const [file, contents] of Object.entries(options.files)) {
@@ -328,6 +430,70 @@ function packLinkedFixture(): string {
     })
     if (packed.status !== 0) throw new Error(packed.stderr)
     return tarball
+}
+
+function privateMember(name: string): WorkspacePackage {
+    return {
+        name,
+        path: `packages/${name.split('/').at(-1) ?? 'package'}`,
+        private: true,
+        version: '1.0.0',
+    }
+}
+
+function publishWith(closure: ReleasePublishDoctorEvidence['closure']) {
+    const artifact = {
+        integrity: `sha512-${'a'.repeat(86)}==`,
+        name: '@fixture/self-contained',
+        tarball: 'releases/fixture-self-contained-1.0.0.tgz',
+        version: '1.0.0',
+    }
+    return createReleasePublishPlan({
+        candidates: [
+            {
+                artifact,
+                // Packed-artifact validity belongs to the later artifact collectors, so it is supplied here rather
+                // than claimed by #226; the closure below is Doctor's own output.
+                doctor: { artifact: 'valid', closure },
+                name: artifact.name,
+            },
+        ],
+        channel: 'latest',
+        plan: createReleasePlan({
+            packages: [
+                {
+                    doctor: { artifact: 'valid', dependencyClosure: 'valid' },
+                    gitTag: { selected: false },
+                    intent: { source: 'none' },
+                    name: artifact.name,
+                    policy: {
+                        channel: 'latest',
+                        decision: 'selected',
+                        reason: 'Explicit release operation',
+                    },
+                    private: false,
+                    registry: {
+                        distTags: {},
+                        registryUrl: 'https://registry.npmjs.org/',
+                        state: 'missing',
+                    },
+                    version: '1.0.0',
+                    versionState: { state: 'current' },
+                },
+            ],
+        }),
+        selection: [artifact.name],
+    })
+}
+
+function sourceMap(workspacePath: string): string {
+    return JSON.stringify({
+        // One segment resolving to source index 0: the source contributes to the emitted output.
+        mappings: 'AAAA',
+        names: [],
+        sources: [`../../${workspacePath}/src/index.ts`],
+        version: 3,
+    })
 }
 
 function writeTarOctal(

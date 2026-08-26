@@ -292,6 +292,119 @@ describe('packed workspace dependency closure', () => {
         expect(result.evidence.closure).toEqual({ edges: [], state: 'valid' })
     })
 
+    it('does not call a dependency embedded_not_exposed on artifact provenance alone', () => {
+        const artifact = createArtifact(
+            { dependencies: { '@fixture/private': '*' } },
+            { 'dist/index.js.map': sourceMap('packages/private') },
+        )
+        const result = analyze(artifact, {
+            facts: [{ name: '@fixture/private', state: 'unavailable' }],
+            privateMember: true,
+        })
+
+        expect(result.provenance.map(({ kind }) => kind)).toEqual(['sourcemap'])
+        expect(result.evidence.closure).toMatchObject({ state: 'blocked' })
+    })
+
+    it('blocks a public package peer-depending on an absent private workspace package', () => {
+        const artifact = createArtifact({
+            peerDependencies: { '@fixture/private': '^1.0.0' },
+        })
+        const result = analyze(artifact, {
+            facts: [{ name: '@fixture/private', state: 'unavailable' }],
+            privateMember: true,
+        })
+
+        expect(result.edges[0]?.kind).toBe('peerDependencies')
+        expect(result.evidence.closure).toEqual({
+            edges: [
+                {
+                    name: '@fixture/private',
+                    range: '^1.0.0',
+                    resolution: 'unavailable',
+                },
+            ],
+            state: 'blocked',
+        })
+    })
+
+    it('reports embedded private workspace code even when no dependency edge remains', () => {
+        const artifact = createArtifact(
+            {},
+            { 'dist/index.js.map': sourceMap('packages/private') },
+        )
+        const result = analyze(artifact, { privateMember: true })
+
+        expect(result.edges).toEqual([])
+        expect(result.evidence.closure).toEqual({ edges: [], state: 'valid' })
+        expect(result.diagnostics).toEqual([
+            {
+                code: 'PRIVATE_WORKSPACE_CODE_EMBEDDED',
+                evidence: [
+                    'sourcemap:dist/index.js.map:../../packages/private/src/index.ts',
+                ],
+                message:
+                    'Private workspace package @fixture/private is embedded in the packed artifact of @fixture/app; publishing distributes its code and needs disclosure and licensing review.',
+                packageName: '@fixture/app',
+                packageRoot: artifact,
+                severity: 'error',
+            },
+        ])
+    })
+
+    it('reports a bundled private workspace module as a disclosure finding', () => {
+        const artifact = createArtifact(
+            {
+                bundleDependencies: ['@fixture/private'],
+                dependencies: { '@fixture/private': '*' },
+            },
+            {
+                'node_modules/@fixture/private/package.json': JSON.stringify({
+                    name: '@fixture/private',
+                    version: '1.0.0',
+                }),
+            },
+        )
+        const result = analyze(artifact, { privateMember: true })
+
+        expect(result.diagnostics.map(({ code }) => code)).toContain(
+            'PRIVATE_WORKSPACE_CODE_EMBEDDED',
+        )
+    })
+
+    it('does not raise a disclosure finding for embedded public workspace code', () => {
+        const artifact = createArtifact(
+            {},
+            { 'dist/index.js.map': sourceMap('packages/private') },
+        )
+
+        expect(analyze(artifact).diagnostics).toEqual([])
+    })
+
+    it('does not raise a disclosure finding when the analyzed package is itself private', () => {
+        const artifact = createArtifact(
+            {},
+            { 'dist/index.js.map': sourceMap('packages/private') },
+        )
+        const result = analyzeWorkspaceDependencyClosure({
+            artifactRoot: artifact,
+            snapshot: createSnapshot([
+                {
+                    name: '@fixture/app',
+                    path: 'packages/app',
+                    private: true,
+                    version: '1.0.0',
+                },
+                member('@fixture/private', true),
+            ]),
+        })
+
+        expect(result.provenance.map(({ name }) => name)).toEqual([
+            '@fixture/private',
+        ])
+        expect(result.diagnostics).toEqual([])
+    })
+
     it('returns stable ordering independent of manifest and fact ordering', () => {
         const artifact = createArtifact({
             dependencies: { '@fixture/a': '*', '@fixture/z': '*' },
@@ -367,6 +480,16 @@ function member(name: string, privatePackage = false): WorkspacePackage {
         private: privatePackage,
         version: '1.0.0',
     }
+}
+
+function sourceMap(workspacePath: string): string {
+    return JSON.stringify({
+        // One segment resolving to source index 0: the source contributes to the emitted output.
+        mappings: 'AAAA',
+        names: [],
+        sources: [`../../${workspacePath}/src/index.ts`],
+        version: 3,
+    })
 }
 
 function write(root: string, file: string, contents: string): void {

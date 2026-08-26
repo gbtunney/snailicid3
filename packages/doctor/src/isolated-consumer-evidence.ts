@@ -7,10 +7,12 @@ export type IsolatedConsumerCheck = Readonly<{
 }>
 
 export type IsolatedPackageConsumerResult = Readonly<{
+    /** Names whose absence from the consumer tree was verified while a public surface still worked. */
+    absenceProven: ReadonlyArray<string>
     absentPackages: ReadonlyArray<string>
     checks: ReadonlyArray<IsolatedConsumerCheck>
     [doctorConsumerEvidence]: true
-    optionalAbsenceProven: boolean
+    removedPackages: ReadonlyArray<string>
     state: 'failed' | 'passed'
 }>
 
@@ -23,14 +25,19 @@ export function createIsolatedPackageConsumerResult(
     })
 }
 
-export function hasOptionalAbsenceProof(
+/**
+ * Whether a real consumer run proved this package works while one dependency is missing.
+ *
+ * The brand keeps a hand-written object shaped like consumer evidence from becoming proof, and the per-name list keeps
+ * one dependency's proven absence from waiving a different dependency.
+ */
+export function hasAbsenceProof(
     result: IsolatedPackageConsumerResult | undefined,
     dependency: string,
 ): boolean {
     return (
         result?.[doctorConsumerEvidence] === true &&
         result.state === 'passed' &&
-        result.optionalAbsenceProven &&
-        result.absentPackages.includes(dependency)
+        result.absenceProven.includes(dependency)
     )
 }

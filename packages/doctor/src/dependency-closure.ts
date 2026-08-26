@@ -17,7 +17,11 @@ import { z } from 'zod'
 import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import {
-    hasOptionalAbsenceProof,
+    collectEmbeddedWorkspaceCodeProvenance,
+    type EmbeddedWorkspaceCodeProvenance,
+} from './embedded-provenance.js'
+import {
+    hasAbsenceProof,
     type IsolatedPackageConsumerResult,
 } from './isolated-consumer-evidence.js'
 import type { DoctorDiagnostic } from './types.js'
@@ -67,6 +71,7 @@ export type WorkspaceDependencyClosureAnalysis = Readonly<{
     diagnostics: ReadonlyArray<DoctorDiagnostic>
     edges: ReadonlyArray<WorkspaceDependencyEdge>
     evidence: ReleasePublishDoctorEvidence
+    provenance: ReadonlyArray<EmbeddedWorkspaceCodeProvenance>
     references: Readonly<Record<string, PackedWorkspaceReferences>>
 }>
 
@@ -115,6 +120,12 @@ export function analyzeWorkspaceDependencyClosure(
     const diagnostics: Array<DoctorDiagnostic> = []
     const packageName =
         manifest.name ?? `(unnamed:${path.basename(input.artifactRoot)})`
+    const packageRoot = path.resolve(input.artifactRoot)
+    const provenance = collectEmbeddedWorkspaceCodeProvenance({
+        artifactRoot: input.artifactRoot,
+        packageName: manifest.name,
+        snapshot: input.snapshot,
+    })
 
     for (const edge of primaryEdges(edges)) {
         const refs = references[edge.name] ?? emptyReferences()
@@ -122,11 +133,19 @@ export function analyzeWorkspaceDependencyClosure(
         if (
             edge.kind === 'optionalDependencies' &&
             fact?.state === 'unavailable' &&
-            hasOptionalAbsenceProof(input.consumerEvidence, edge.name)
+            refs.declaration.length === 0 &&
+            hasAbsenceProof(input.consumerEvidence, edge.name)
         ) {
             continue
         }
-        const resolved = resolveEdge(edge, fact)
+        const resolved = isEmbeddedNotExposed({
+            consumerEvidence: input.consumerEvidence,
+            name: edge.name,
+            provenance,
+            references: refs,
+        })
+            ? { name: edge.name, resolution: 'embedded_not_exposed' as const }
+            : resolveEdge(edge, fact)
         closureEdges.push(resolved)
 
         if (resolved.resolution === 'unavailable') {
@@ -135,7 +154,7 @@ export function analyzeWorkspaceDependencyClosure(
                 evidence: formatReferenceEvidence(edge.name, refs),
                 message: `Workspace dependency ${edge.name} is unavailable to consumers of the packed package.`,
                 packageName,
-                packageRoot: path.resolve(input.artifactRoot),
+                packageRoot,
                 severity: 'error',
             })
         } else if (resolved.resolution === 'unknown') {
@@ -144,11 +163,21 @@ export function analyzeWorkspaceDependencyClosure(
                 evidence: formatReferenceEvidence(edge.name, refs),
                 message: `Workspace dependency ${edge.name} has no proven consumer resolution.`,
                 packageName,
-                packageRoot: path.resolve(input.artifactRoot),
+                packageRoot,
                 severity: 'warning',
             })
         }
     }
+
+    diagnostics.push(
+        ...disclosureDiagnostics({
+            packageName,
+            packageRoot,
+            provenance,
+            selfPrivate:
+                input.snapshot.lookup.get(packageName)?.private === true,
+        }),
+    )
 
     const parsedEdges = closureEdges
         .map((edge) => releasePublishClosureEdgeSchema.parse(edge))
@@ -168,6 +197,7 @@ export function analyzeWorkspaceDependencyClosure(
         diagnostics: diagnostics.toSorted(compareDiagnostics),
         edges,
         evidence,
+        provenance,
         references,
     }
 }
@@ -288,6 +318,39 @@ function containsPackageSpecifier(
     return new RegExp(`["']${escaped}(?:/[^"']*)?["']`, 'u').test(contents)
 }
 
+/**
+ * Report embedded private workspace code as a disclosure and licensing item.
+ *
+ * This is deliberately independent of the closure edges. A bundler that inlines a private package usually also removes
+ * it from the packed manifest, so the case with no dependency edge left is exactly the case where publishing would
+ * distribute the code silently. `private: true` keeps a package off the registry; it does not keep its source out of
+ * someone else's tarball.
+ */
+function disclosureDiagnostics(input: {
+    packageName: string
+    packageRoot: string
+    provenance: ReadonlyArray<EmbeddedWorkspaceCodeProvenance>
+    selfPrivate: boolean
+}): ReadonlyArray<DoctorDiagnostic> {
+    if (input.selfPrivate) return []
+    const byName = new Map<string, Array<EmbeddedWorkspaceCodeProvenance>>()
+    for (const entry of input.provenance) {
+        if (!entry.workspacePrivate) continue
+        byName.set(entry.name, [...(byName.get(entry.name) ?? []), entry])
+    }
+
+    return [...byName.entries()]
+        .map(([name, entries]) => ({
+            code: 'PRIVATE_WORKSPACE_CODE_EMBEDDED' as const,
+            evidence: entries.flatMap((entry) => entry.evidence).toSorted(),
+            message: `Private workspace package ${name} is embedded in the packed artifact of ${input.packageName}; publishing distributes its code and needs disclosure and licensing review.`,
+            packageName: input.packageName,
+            packageRoot: input.packageRoot,
+            severity: 'error' as const,
+        }))
+        .toSorted((left, right) => left.message.localeCompare(right.message))
+}
+
 function emptyReferences(): PackedWorkspaceReferences {
     return { declaration: [], manifest: [], runtime: [] }
 }
@@ -313,6 +376,34 @@ function isConsumerCodeFile(file: string): boolean {
 
 function isDeclarationFile(file: string): boolean {
     return /\.d\.[cm]?ts$/u.test(file)
+}
+
+/**
+ * Whether the packed artifact proves the dependency left the consumer-facing contract.
+ *
+ * Runtime embedding requires mapped sourcemap contribution or a vendored code copy. `sourcesContent` alone proves that
+ * source was distributed and remains valid disclosure evidence, but it does not prove any of that source contributes to
+ * the emitted runtime. The remaining gates still require no bundled module, no residual runtime/declaration references,
+ * and a consumer run that succeeds with the dependency absent.
+ */
+function isEmbeddedNotExposed(input: {
+    consumerEvidence: IsolatedPackageConsumerResult | undefined
+    name: string
+    provenance: ReadonlyArray<EmbeddedWorkspaceCodeProvenance>
+    references: PackedWorkspaceReferences
+}): boolean {
+    const entries = input.provenance.filter(
+        (entry) => entry.name === input.name,
+    )
+    if (entries.some((entry) => entry.kind === 'bundled_module')) return false
+    if (!entries.some(provesRuntimeEmbedding)) return false
+    if (
+        input.references.runtime.length > 0 ||
+        input.references.declaration.length > 0
+    ) {
+        return false
+    }
+    return hasAbsenceProof(input.consumerEvidence, input.name)
 }
 
 function manifestKindsForName(
@@ -346,6 +437,19 @@ function primaryEdges(
         }
     }
     return [...selected.values()].toSorted(compareEdges)
+}
+
+/** Distinguish runtime embedding evidence from disclosure-only `sourcesContent`. */
+function provesRuntimeEmbedding(
+    entry: EmbeddedWorkspaceCodeProvenance,
+): boolean {
+    return (
+        entry.kind === 'vendored_content' ||
+        (entry.kind === 'sourcemap' &&
+            entry.evidence.some((evidence) =>
+                evidence.startsWith('sourcemap:'),
+            ))
+    )
 }
 
 function readPackedManifest(root: string): PackedPackageManifest {

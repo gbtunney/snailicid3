@@ -1,7 +1,13 @@
 import { packageNameSchema } from '@snailicid3/node-utils'
 import type { WorkspaceSnapshot } from '@snailicid3/workspace'
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+    existsSync,
+    mkdtempSync,
+    readdirSync,
+    rmSync,
+    writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import {
@@ -18,7 +24,7 @@ import {
 export type AnalyzePackedTarballInput = Readonly<{
     consumer?: Omit<
         IsolatedPackageConsumerOptions,
-        'absentPackages' | 'omitOptional' | 'tarball'
+        'absentPackages' | 'omitOptional' | 'removedPackages' | 'tarball'
     >
     facts?: ReadonlyArray<WorkspaceDependencyFact>
     snapshot: WorkspaceSnapshot
@@ -30,6 +36,7 @@ export type IsolatedPackageConsumerOptions = Readonly<{
     bins?: ReadonlyArray<string>
     imports?: ReadonlyArray<string>
     omitOptional?: boolean
+    removedPackages?: ReadonlyArray<string>
     tarball: string
     typecheck?: Readonly<{
         compiler: string
@@ -96,6 +103,7 @@ export function analyzePackedTarballWorkspaceDependencyClosure(
             ...input.consumer,
             absentPackages,
             omitOptional: true,
+            removedPackages: embeddedCandidates(initialAnalysis),
             tarball: input.tarball,
         })
         return analyzeWorkspaceDependencyClosure({
@@ -117,13 +125,10 @@ export function runIsolatedPackageConsumer(
         path.join(tmpdir(), 'snail-doctor-consumer-'),
     )
     const checks: Array<IsolatedConsumerCheck> = []
-    const absentPackages = [
-        ...new Set(
-            (options.absentPackages ?? []).map((name) =>
-                packageNameSchema.parse(name),
-            ),
-        ),
-    ].toSorted()
+    const absentPackages = normalizePackageNames(options.absentPackages)
+    const removedPackages = normalizePackageNames(
+        options.removedPackages,
+    ).filter((name) => !absentPackages.includes(name))
 
     try {
         const install = run(
@@ -143,13 +148,7 @@ export function runIsolatedPackageConsumer(
         if (install.success) {
             for (const packageName of absentPackages) {
                 checks.push(
-                    existsSync(
-                        path.join(
-                            consumerRoot,
-                            'node_modules',
-                            ...packageName.split('/'),
-                        ),
-                    )
+                    findInstalledPackage(consumerRoot, packageName).length > 0
                         ? {
                               detail: 'optional package is installed',
                               name: `absence:${packageName}`,
@@ -159,6 +158,24 @@ export function runIsolatedPackageConsumer(
                               name: `absence:${packageName}`,
                               state: 'passed',
                           },
+                )
+            }
+            for (const packageName of removedPackages) {
+                // Behavioral proof needs the module genuinely gone, not merely declared bundled or unimported.
+                for (const installed of findInstalledPackage(
+                    consumerRoot,
+                    packageName,
+                )) {
+                    rmSync(installed, { force: true, recursive: true })
+                }
+                checks.push(
+                    findInstalledPackage(consumerRoot, packageName).length > 0
+                        ? {
+                              detail: 'package remained in the consumer tree',
+                              name: `removed:${packageName}`,
+                              state: 'failed',
+                          }
+                        : { name: `removed:${packageName}`, state: 'passed' },
                 )
             }
             for (const specifier of [...(options.imports ?? [])].toSorted()) {
@@ -226,6 +243,12 @@ export function runIsolatedPackageConsumer(
                 )
             }
         } else {
+            for (const packageName of removedPackages) {
+                checks.push({
+                    name: `removed:${packageName}`,
+                    state: 'skipped',
+                })
+            }
             for (const specifier of options.imports ?? []) {
                 checks.push({ name: `import:${specifier}`, state: 'skipped' })
             }
@@ -242,19 +265,18 @@ export function runIsolatedPackageConsumer(
         )
             ? 'passed'
             : 'failed'
+        // Installing and then omitting nothing proves nothing: absence only counts alongside an exercised surface.
+        const exercised =
+            state === 'passed' &&
+            checks.some(
+                (check) =>
+                    check.state === 'passed' && !isAbsenceScaffold(check.name),
+            )
         return createIsolatedPackageConsumerResult({
+            absenceProven: exercised ? provenAbsences(checks) : [],
             absentPackages,
             checks,
-            optionalAbsenceProven:
-                options.omitOptional === true &&
-                absentPackages.length > 0 &&
-                state === 'passed' &&
-                checks.some(
-                    (check) =>
-                        check.name !== 'install' &&
-                        !check.name.startsWith('absence:') &&
-                        check.state === 'passed',
-                ),
+            removedPackages,
             state,
         })
     } finally {
@@ -282,6 +304,97 @@ function assertSafeTarEntries(entries: ReadonlyArray<string>): void {
             throw new Error(`Packed artifact contains unsafe path: ${entry}`)
         }
     }
+}
+
+/** Names whose code the artifact carries itself, so a consumer run can be asked to work without them installed. */
+function embeddedCandidates(
+    analysis: WorkspaceDependencyClosureAnalysis,
+): ReadonlyArray<string> {
+    const bundled = new Set(
+        analysis.provenance
+            .filter((entry) => entry.kind === 'bundled_module')
+            .map((entry) => entry.name),
+    )
+    const declared = new Set(analysis.edges.map((edge) => edge.name))
+    return [
+        ...new Set(
+            analysis.provenance
+                .filter(
+                    (entry) =>
+                        entry.kind !== 'bundled_module' &&
+                        !bundled.has(entry.name) &&
+                        declared.has(entry.name),
+                )
+                .map((entry) => entry.name),
+        ),
+    ].toSorted()
+}
+
+/**
+ * Every copy of a package in the consumer tree, not only the hoisted one.
+ *
+ * npm keeps a tarball's bundled dependencies nested under the installed package, where they stay resolvable from its
+ * code. A top-level check alone would read that as absence and turn a still-resolvable module into proof.
+ */
+function findInstalledPackage(
+    consumerRoot: string,
+    packageName: string,
+): ReadonlyArray<string> {
+    const segments = packageName.split('/')
+    const found: Array<string> = []
+    const visit = (modulesRoot: string): void => {
+        if (!existsSync(modulesRoot)) return
+        const candidate = path.join(modulesRoot, ...segments)
+        if (existsSync(path.join(candidate, 'package.json')))
+            found.push(candidate)
+        for (const entry of readdirSync(modulesRoot, { withFileTypes: true })) {
+            if (!entry.isDirectory() || entry.name === '.bin') continue
+            const entryRoot = path.join(modulesRoot, entry.name)
+            if (entry.name.startsWith('@')) {
+                for (const scoped of readdirSync(entryRoot, {
+                    withFileTypes: true,
+                })) {
+                    if (scoped.isDirectory()) {
+                        visit(path.join(entryRoot, scoped.name, 'node_modules'))
+                    }
+                }
+                continue
+            }
+            visit(path.join(entryRoot, 'node_modules'))
+        }
+    }
+    visit(path.join(consumerRoot, 'node_modules'))
+    return found.toSorted()
+}
+
+function isAbsenceScaffold(name: string): boolean {
+    return (
+        name === 'install' ||
+        name.startsWith('absence:') ||
+        name.startsWith('removed:')
+    )
+}
+
+function normalizePackageNames(
+    names: ReadonlyArray<string> | undefined,
+): ReadonlyArray<string> {
+    return [
+        ...new Set((names ?? []).map((name) => packageNameSchema.parse(name))),
+    ].toSorted()
+}
+
+function provenAbsences(
+    checks: ReadonlyArray<IsolatedConsumerCheck>,
+): ReadonlyArray<string> {
+    return checks
+        .filter(
+            (check) =>
+                check.state === 'passed' &&
+                (check.name.startsWith('absence:') ||
+                    check.name.startsWith('removed:')),
+        )
+        .map((check) => check.name.slice(check.name.indexOf(':') + 1))
+        .toSorted()
 }
 
 function resolveNpmArtifactRoot(extractedRoot: string): string {
