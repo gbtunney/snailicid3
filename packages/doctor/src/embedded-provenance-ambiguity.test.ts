@@ -92,7 +92,12 @@ function snapshot(
 ): WorkspaceSnapshot {
     return {
         list: [...list],
-        lookup: new Map(list.map((workspacePackage) => [workspacePackage.name, workspacePackage])),
+        lookup: new Map(
+            list.map((workspacePackage) => [
+                workspacePackage.name,
+                workspacePackage,
+            ]),
+        ),
         repoRoot,
     }
 }

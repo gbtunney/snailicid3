@@ -291,10 +291,7 @@ function collectVendoredContent(
     }
     if (artifactTargetsByDigest.size === 0) return
 
-    const workspaceSourcesByDigest = new Map<
-        string,
-        Map<string, Set<string>>
-    >()
+    const workspaceSourcesByDigest = new Map<string, Map<string, Set<string>>>()
     for (const member of members) {
         const memberRoot = resolveMemberRoot(repoRoot, member)
         if (memberRoot === null) continue
