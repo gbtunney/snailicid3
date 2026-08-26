@@ -56,9 +56,10 @@ export {
  * The intermediate state schemas stay internal — this slice only observes, and the intermediate vocabulary is an
  * implementation detail rather than a contract boundary.
  *
- * schemaVersion contract: every exported `*Schema` object encodes `schemaVersion: z.literal(1)`. An adapter must call
- * `.safeParse()` on any externally received document and treat a parse failure as an unsupported version rather than a
- * field-reading opportunity. Do not infer schema compatibility from `@snailicid3/workspace` package SemVer.
+ * schemaVersion contract: every externally consumable release document schema encodes `schemaVersion: z.literal(1)`.
+ * An adapter must call `.safeParse()` on any externally received document and treat a parse failure as an unsupported
+ * version rather than a field-reading opportunity. Do not infer schema compatibility from `@snailicid3/workspace`
+ * package SemVer.
  */
 export {
     createReleasePlan,
