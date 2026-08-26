@@ -45,14 +45,6 @@ export {
     runIsolatedPackageConsumer,
 } from './packed-artifact.js'
 export {
-    type CommandOutcome,
-    extractPackedTarball,
-    type PackagingCommandOptions,
-    resolveArtifactRoot,
-    runPackagingCommand,
-    type TarballExtraction,
-} from './packed-tar.js'
-export {
     type CollectorOutcome,
     type PackedValidationOptions,
     type PackedValidationResult,
