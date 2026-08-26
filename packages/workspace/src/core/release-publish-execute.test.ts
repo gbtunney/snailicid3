@@ -76,6 +76,7 @@ type Calls = Array<string>
 const fakeAdapter = (
     behaviour: {
         distTagOk?: boolean
+        distTags?: Array<null | string>
         integrity?: null | string
         observations?: Array<string>
         publishOk?: boolean
@@ -83,6 +84,14 @@ const fakeAdapter = (
 ): { adapter: ReleasePublishAdapter; calls: Calls } => {
     const calls: Calls = []
     const observations = [...(behaviour.observations ?? ['missing', 'exists'])]
+    /**
+     * The channel as the registry would report it across successive reads.
+     *
+     * `null` is an unassigned channel, `'unknown'` an unreadable one, and any other value the version the channel
+     * points at. The default walks unassigned then correctly assigned, which is what a successful assignment looks like
+     * from outside.
+     */
+    const distTags = [...(behaviour.distTags ?? [null, '0.2.0'])]
 
     return {
         adapter: {
@@ -95,6 +104,18 @@ const fakeAdapter = (
                     detail: behaviour.distTagOk === false ? 'tag refused' : '',
                     ok: behaviour.distTagOk !== false,
                 }
+            },
+            observeDistTag: (artifact, channel) => {
+                const next: null | string =
+                    distTags.length > 0
+                        ? (distTags.shift() ?? null)
+                        : artifact.version
+                calls.push(`observe-tag:${channel}:${next ?? 'unassigned'}`)
+
+                if (next === null) return { kind: 'unassigned' }
+                if (next === 'unknown') return { kind: 'unknown' }
+
+                return { kind: 'assigned', version: next }
             },
             observeExact: (artifact) => {
                 const next = observations.shift() ?? 'exists'
@@ -166,7 +187,9 @@ describe('release publish execution', () => {
                 `integrity:${TARBALL}`,
                 `publish:${TARBALL}`,
                 'observe:@snailicid3/workspace@0.2.0:exists',
+                'observe-tag:latest:unassigned',
                 'dist-tag:@snailicid3/workspace@0.2.0:latest',
+                'observe-tag:latest:0.2.0',
             ])
             expect(result.steps[0]).toEqual({
                 channel: 'latest',
@@ -177,6 +200,7 @@ describe('release publish execution', () => {
             expect(result.summary).toEqual({
                 failed: 0,
                 published: 1,
+                resumed: 0,
                 skipped: 0,
             })
         })
@@ -204,6 +228,7 @@ describe('release publish execution', () => {
     describe('idempotency and resume', () => {
         it('skips a version the registry already has rather than republishing', () => {
             const { adapter, calls } = fakeAdapter({
+                distTags: ['0.2.0'],
                 observations: ['exists'],
             })
             const result = executePublishWithAdapter(authorizedPlan(), adapter)
@@ -221,7 +246,10 @@ describe('release publish execution', () => {
             const first = fakeAdapter()
             executePublishWithAdapter(plan, first.adapter)
 
-            const retry = fakeAdapter({ observations: ['exists'] })
+            const retry = fakeAdapter({
+                distTags: ['0.2.0'],
+                observations: ['exists'],
+            })
             const second = executePublishWithAdapter(plan, retry.adapter)
 
             expect(second.steps[0]?.outcome).toBe('skipped_already_published')
@@ -350,18 +378,94 @@ describe('release publish execution', () => {
             expect(result.summary.published).toBe(0)
         })
 
-        it('leaves a dist-tag failure resumable, with the version already published', () => {
+        /**
+         * The regression this step exists for.
+         *
+         * An interrupted run whose publication succeeded but whose channel assignment failed must be completable. While
+         * existence of the exact version ended the operation, a retry saw the version, skipped everything, and the
+         * requested channel could never be assigned — the failure was permanent rather than resumable.
+         */
+        it('completes the channel on a retry after a dist-tag failure, without republishing', () => {
             const plan = authorizedPlan()
-            const failed = fakeAdapter({ distTagOk: false })
-            executePublishWithAdapter(plan, failed.adapter)
+            const failed = fakeAdapter({ distTagOk: false, distTags: [null] })
+            const first = executePublishWithAdapter(plan, failed.adapter)
 
-            const resumed = fakeAdapter({ observations: ['exists'] })
-            const result = executePublishWithAdapter(plan, resumed.adapter)
+            expect(first.steps[0]?.outcome).toBe('failed_dist_tag')
+            expect(
+                failed.calls.some((call) => call.startsWith('publish:')),
+            ).toBe(true)
 
-            expect(result.steps[0]?.outcome).toBe('skipped_already_published')
+            const resumed = fakeAdapter({
+                distTags: [null, '0.2.0'],
+                observations: ['exists'],
+            })
+            const second = executePublishWithAdapter(plan, resumed.adapter)
+
+            expect(second.steps[0]).toEqual({
+                channel: 'latest',
+                name: '@snailicid3/workspace',
+                outcome: 'assigned_dist_tag',
+                version: '0.2.0',
+            })
             expect(
                 resumed.calls.some((call) => call.startsWith('publish:')),
             ).toBe(false)
+            expect(resumed.calls).toContain(
+                'dist-tag:@snailicid3/workspace@0.2.0:latest',
+            )
+            expect(second.summary.resumed).toBe(1)
+        })
+
+        it('reassigns a channel pointing at a different version without republishing', () => {
+            const { adapter, calls } = fakeAdapter({
+                distTags: ['0.1.0', '0.2.0'],
+                observations: ['exists'],
+            })
+            const result = executePublishWithAdapter(authorizedPlan(), adapter)
+
+            expect(result.steps[0]?.outcome).toBe('assigned_dist_tag')
+            expect(calls.some((call) => call.startsWith('publish:'))).toBe(
+                false,
+            )
+        })
+
+        it('does nothing when the version exists and the channel already points at it', () => {
+            const { adapter, calls } = fakeAdapter({
+                distTags: ['0.2.0'],
+                observations: ['exists'],
+            })
+            const result = executePublishWithAdapter(authorizedPlan(), adapter)
+
+            expect(result.steps[0]?.outcome).toBe('skipped_already_published')
+            expect(calls.some((call) => call.startsWith('dist-tag:'))).toBe(
+                false,
+            )
+        })
+
+        it('refuses to assign a channel it could not read', () => {
+            const { adapter, calls } = fakeAdapter({
+                distTags: ['unknown'],
+                observations: ['exists'],
+            })
+            const result = executePublishWithAdapter(authorizedPlan(), adapter)
+
+            expect(result.steps[0]?.outcome).toBe('failed_dist_tag_unknown')
+            expect(calls.some((call) => call.startsWith('dist-tag:'))).toBe(
+                false,
+            )
+        })
+
+        it('does not report a channel assigned that verification cannot confirm', () => {
+            const { adapter } = fakeAdapter({
+                distTags: [null, '0.1.0'],
+                observations: ['exists'],
+            })
+            const result = executePublishWithAdapter(authorizedPlan(), adapter)
+
+            expect(result.steps[0]).toMatchObject({
+                observed: '0.1.0',
+                outcome: 'failed_dist_tag_verification',
+            })
         })
 
         it('never lets a dist-tag decide whether the exact version exists', () => {

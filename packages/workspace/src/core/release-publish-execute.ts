@@ -35,8 +35,28 @@ export const releasePublishStepSchema = z.discriminatedUnion('outcome', [
         version: z.string().min(1),
     }),
     z.strictObject({
+        channel: z.string().min(1),
         name: z.string().min(1),
         outcome: z.literal('skipped_already_published'),
+        version: z.string().min(1),
+    }),
+    z.strictObject({
+        channel: z.string().min(1),
+        name: z.string().min(1),
+        outcome: z.literal('assigned_dist_tag'),
+        version: z.string().min(1),
+    }),
+    z.strictObject({
+        channel: z.string().min(1),
+        name: z.string().min(1),
+        outcome: z.literal('failed_dist_tag_unknown'),
+        version: z.string().min(1),
+    }),
+    z.strictObject({
+        channel: z.string().min(1),
+        name: z.string().min(1),
+        observed: z.string().nullable(),
+        outcome: z.literal('failed_dist_tag_verification'),
         version: z.string().min(1),
     }),
     z.strictObject({
@@ -81,6 +101,7 @@ export const releasePublishResultSchema = z.strictObject({
     summary: z.strictObject({
         failed: z.number().int().nonnegative(),
         published: z.number().int().nonnegative(),
+        resumed: z.number().int().nonnegative(),
         skipped: z.number().int().nonnegative(),
     }),
 })
@@ -95,12 +116,23 @@ export type ExecuteReleasePublishPlanOptions = {
  * exporting it would let a consumer substitute the thing that decides what "published" means, which is the one
  * substitution this whole contract exists to prevent.
  */
+/** What a registry reports about one channel, kept separate from what it reports about a version. */
+export type ReleaseDistTagObservation =
+    | { kind: 'assigned'; version: string }
+    | { kind: 'unassigned' }
+    | { kind: 'unknown' }
+
 export type ReleasePublishAdapter = {
     assignDistTag: (
         artifact: ReleasePublishArtifact,
         channel: string,
         registryUrl: string,
     ) => { detail: string; ok: boolean }
+    observeDistTag: (
+        artifact: ReleasePublishArtifact,
+        channel: string,
+        registryUrl: string,
+    ) => ReleaseDistTagObservation
     observeExact: (
         artifact: ReleasePublishArtifact,
         registryUrl: string,
@@ -111,6 +143,9 @@ export type ReleasePublishAdapter = {
     ) => { detail: string; ok: boolean }
     readIntegrity: (tarball: string) => null | string
 }
+
+/** Npm's dist-tag map, read only to decide about the channel and never about version existence. */
+const npmDistTagsSchema = z.record(z.string(), z.string())
 
 export type ReleasePublishResult = z.infer<typeof releasePublishResultSchema>
 
@@ -177,6 +212,9 @@ function buildResult(
                 .length,
             published: steps.filter((step) => step.outcome === 'published')
                 .length,
+            resumed: steps.filter(
+                (step) => step.outcome === 'assigned_dist_tag',
+            ).length,
             skipped: steps.filter(
                 (step) => step.outcome === 'skipped_already_published',
             ).length,
@@ -213,6 +251,31 @@ function createNpmPublishAdapter(
 
             return { detail: result.stderr.trim(), ok: result.success }
         },
+        observeDistTag: (
+            artifact,
+            channel,
+            registryUrl,
+        ): ReleaseDistTagObservation => {
+            const result = runNpm([
+                'view',
+                artifact.name,
+                'dist-tags',
+                '--json',
+                `--registry=${registryUrl}`,
+            ])
+
+            if (!result.success) return { kind: 'unknown' }
+
+            const parsed = npmDistTagsSchema.safeParse(
+                parseJsonOrNull(result.stdout),
+            )
+
+            if (!parsed.success) return { kind: 'unknown' }
+
+            return Object.hasOwn(parsed.data, channel)
+                ? { kind: 'assigned', version: parsed.data[channel] }
+                : { kind: 'unassigned' }
+        },
         observeExact: (artifact, registryUrl) =>
             observeExactVersion(
                 artifact.name,
@@ -239,12 +302,21 @@ function createNpmPublishAdapter(
     }
 }
 
+/** Parse a JSON document, returning null rather than throwing on anything unparseable. */
+function parseJsonOrNull(value: string): unknown {
+    try {
+        return JSON.parse(value)
+    } catch {
+        return null
+    }
+}
+
 /**
  * Publish one package, re-establishing registry truth on both sides of the mutation.
  *
- * The pre-check is what makes a retry safe: a version that already exists is skipped rather than republished, whether
- * this run put it there or a previous interrupted one did. The post-check is what makes success meaningful — an adapter
- * reporting success is a claim, and the registry confirming the exact version is the evidence.
+ * The pre-check is what makes a retry safe: a version that already exists is not republished, whether this run put it
+ * there or a previous interrupted one did. The post-check is what makes success meaningful — an adapter reporting
+ * success is a claim, and the registry confirming the exact version is the evidence.
  */
 function publishOne(
     entry: Extract<
@@ -253,15 +325,11 @@ function publishOne(
     >,
     adapter: ReleasePublishAdapter,
 ): ReleasePublishStep {
-    const { artifact, channel, registryUrl } = entry
+    const { artifact, registryUrl } = entry
     const shared = { name: entry.name, version: entry.version }
     const before = adapter.observeExact(artifact, registryUrl)
 
-    if (before === 'exists') {
-        return { ...shared, outcome: 'skipped_already_published' }
-    }
-
-    if (before !== 'missing') {
+    if (before !== 'exists' && before !== 'missing') {
         return {
             ...shared,
             observed: before,
@@ -269,45 +337,40 @@ function publishOne(
         }
     }
 
-    const observedIntegrity = adapter.readIntegrity(artifact.tarball)
+    if (before === 'missing') {
+        const observedIntegrity = adapter.readIntegrity(artifact.tarball)
 
-    if (observedIntegrity !== artifact.integrity) {
-        return {
-            ...shared,
-            expected: artifact.integrity,
-            observed: observedIntegrity,
-            outcome: 'failed_artifact_integrity',
+        if (observedIntegrity !== artifact.integrity) {
+            return {
+                ...shared,
+                expected: artifact.integrity,
+                observed: observedIntegrity,
+                outcome: 'failed_artifact_integrity',
+            }
+        }
+
+        const published = adapter.publishTarball(artifact, registryUrl)
+
+        if (!published.ok) {
+            return {
+                ...shared,
+                detail: published.detail,
+                outcome: 'failed_publish',
+            }
+        }
+
+        const after = adapter.observeExact(artifact, registryUrl)
+
+        if (after !== 'exists') {
+            return {
+                ...shared,
+                observed: after,
+                outcome: 'failed_verification',
+            }
         }
     }
 
-    const published = adapter.publishTarball(artifact, registryUrl)
-
-    if (!published.ok) {
-        return {
-            ...shared,
-            detail: published.detail,
-            outcome: 'failed_publish',
-        }
-    }
-
-    const after = adapter.observeExact(artifact, registryUrl)
-
-    if (after !== 'exists') {
-        return { ...shared, observed: after, outcome: 'failed_verification' }
-    }
-
-    const tagged = adapter.assignDistTag(artifact, channel, registryUrl)
-
-    if (!tagged.ok) {
-        return {
-            ...shared,
-            channel,
-            detail: tagged.detail,
-            outcome: 'failed_dist_tag',
-        }
-    }
-
-    return { ...shared, channel, outcome: 'published' }
+    return settleDistTag(entry, adapter, before === 'exists')
 }
 
 /**
@@ -327,5 +390,69 @@ function readTarballIntegrity(
         return `sha512-${createHash('sha512').update(bytes).digest('base64')}`
     } catch {
         return null
+    }
+}
+
+/**
+ * Establish the requested channel, whether or not this run published the version.
+ *
+ * Existence of the exact version settles one question only: whether to publish. It says nothing about the channel, and
+ * treating it as the end of the operation stranded a run whose publication succeeded but whose dist-tag assignment
+ * failed — the retry saw the version, skipped everything, and the channel could never be assigned. The channel is
+ * therefore its own resumable step, reached on both paths.
+ *
+ * The channel is observed before assignment so a run with nothing to do reports that rather than reassigning, and
+ * observed again afterwards because an adapter reporting success is a claim rather than evidence. That observation
+ * decides about the channel only: it never contributes to whether the version exists, which is read from the exact
+ * `name@version` alone.
+ */
+function settleDistTag(
+    entry: Extract<
+        ReleasePublishPlan['packages'][number],
+        { decision: 'planned' }
+    >,
+    adapter: ReleasePublishAdapter,
+    alreadyPublished: boolean,
+): ReleasePublishStep {
+    const { artifact, channel, registryUrl } = entry
+    const shared = { channel, name: entry.name, version: entry.version }
+    const current = adapter.observeDistTag(artifact, channel, registryUrl)
+
+    if (current.kind === 'unknown') {
+        return { ...shared, outcome: 'failed_dist_tag_unknown' }
+    }
+
+    if (current.kind === 'assigned' && current.version === entry.version) {
+        return {
+            ...shared,
+            outcome: alreadyPublished
+                ? 'skipped_already_published'
+                : 'published',
+        }
+    }
+
+    const assigned = adapter.assignDistTag(artifact, channel, registryUrl)
+
+    if (!assigned.ok) {
+        return {
+            ...shared,
+            detail: assigned.detail,
+            outcome: 'failed_dist_tag',
+        }
+    }
+
+    const verified = adapter.observeDistTag(artifact, channel, registryUrl)
+
+    if (verified.kind !== 'assigned' || verified.version !== entry.version) {
+        return {
+            ...shared,
+            observed: verified.kind === 'assigned' ? verified.version : null,
+            outcome: 'failed_dist_tag_verification',
+        }
+    }
+
+    return {
+        ...shared,
+        outcome: alreadyPublished ? 'assigned_dist_tag' : 'published',
     }
 }

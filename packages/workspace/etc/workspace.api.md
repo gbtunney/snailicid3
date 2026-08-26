@@ -1273,8 +1273,25 @@ export const releasePublishResultSchema: z.ZodObject<{
         outcome: z.ZodLiteral<"published">;
         version: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
+        channel: z.ZodString;
         name: z.ZodString;
         outcome: z.ZodLiteral<"skipped_already_published">;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        channel: z.ZodString;
+        name: z.ZodString;
+        outcome: z.ZodLiteral<"assigned_dist_tag">;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        channel: z.ZodString;
+        name: z.ZodString;
+        outcome: z.ZodLiteral<"failed_dist_tag_unknown">;
+        version: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        channel: z.ZodString;
+        name: z.ZodString;
+        observed: z.ZodNullable<z.ZodString>;
+        outcome: z.ZodLiteral<"failed_dist_tag_verification">;
         version: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         name: z.ZodString;
@@ -1307,6 +1324,7 @@ export const releasePublishResultSchema: z.ZodObject<{
     summary: z.ZodObject<{
         failed: z.ZodNumber;
         published: z.ZodNumber;
+        resumed: z.ZodNumber;
         skipped: z.ZodNumber;
     }, z.core.$strict>;
 }, z.core.$strict>;
