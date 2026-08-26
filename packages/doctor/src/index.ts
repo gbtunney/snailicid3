@@ -28,17 +28,30 @@ export {
 export * from './manifest.js'
 export {
     createPackCandidate,
+    detectSourcePackageManager,
     type PackCandidate,
     type PackCandidateInput,
+    type PackCandidateOrigin,
     type PackedManifest,
+    type SourcePackageManager,
     withPackCandidate,
 } from './pack-candidate.js'
 export {
+    type AnalyzePackedCandidateInput,
+    analyzePackedCandidateWorkspaceDependencyClosure,
     type AnalyzePackedTarballInput,
     analyzePackedTarballWorkspaceDependencyClosure,
     type IsolatedPackageConsumerOptions,
     runIsolatedPackageConsumer,
 } from './packed-artifact.js'
+export {
+    type CommandOutcome,
+    extractPackedTarball,
+    type PackagingCommandOptions,
+    resolveArtifactRoot,
+    runPackagingCommand,
+    type TarballExtraction,
+} from './packed-tar.js'
 export {
     type CollectorOutcome,
     type PackedValidationOptions,

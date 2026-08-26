@@ -20,10 +20,13 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { gzipSync } from 'node:zlib'
 import { analyzeWorkspaceDependencyClosure } from './dependency-closure.js'
+import { createPackCandidate } from './pack-candidate.js'
 import {
+    analyzePackedCandidateWorkspaceDependencyClosure,
     analyzePackedTarballWorkspaceDependencyClosure,
     runIsolatedPackageConsumer,
 } from './packed-artifact.js'
+import { validatePackedCandidate } from './packed-validation.js'
 
 const temporaryRoots: Array<string> = []
 
@@ -50,6 +53,36 @@ describe('packed tarball analysis', () => {
             'dist/index.js',
         ])
     })
+
+    it('analyzes the same prepared candidate the validators read', async () => {
+        const candidate = createPackCandidate({
+            tarball: packFixture({
+                dependencies: { '@fixture/lib': '*' },
+                files: { 'dist/index.js': "import '@fixture/lib'" },
+            }),
+        })
+
+        try {
+            // #228 asks for one prepared candidate reused across collectors. Both of these read `candidate`, so the
+            // dependency closure and the Publint/ATTW validation cannot be describing different bytes.
+            const closure = analyzePackedCandidateWorkspaceDependencyClosure(
+                candidate,
+                {
+                    facts: [{ name: '@fixture/lib', state: 'unavailable' }],
+                    snapshot: createSnapshot([member('@fixture/lib')]),
+                },
+            )
+            const validation = await validatePackedCandidate(candidate)
+
+            expect(closure.references['@fixture/lib'].runtime).toEqual([
+                'dist/index.js',
+            ])
+            expect(validation.packageName).toBe(candidate.packageName)
+            expect(validation.files).toEqual(candidate.files)
+        } finally {
+            candidate.dispose()
+        }
+    }, 120_000)
 
     it('rejects archive symlinks before reading the extracted package', () => {
         const tarball = packLinkedFixture()
