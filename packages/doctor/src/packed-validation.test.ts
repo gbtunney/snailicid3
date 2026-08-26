@@ -111,6 +111,29 @@ describe('packed candidate validation', () => {
         }
     }, 120_000)
 
+    it('distinguishes an unanalyzable type surface from a clean one', async () => {
+        const [untyped, typed] = await Promise.all([
+            withPackCandidate(
+                { packageRoot: createUntypedPackage() },
+                validatePackedCandidate,
+            ),
+            withPackCandidate(
+                { packageRoot: createSourcePackage() },
+                validatePackedCandidate,
+            ),
+        ])
+
+        // Both report zero ATTW findings, so the finding list alone cannot tell them apart. Only the outcome can say
+        // that one package had its types checked and the other never offered any to check.
+        expect(attwFindings(untyped)).toEqual([])
+        expect(attwFindings(typed)).toEqual([])
+        expect(untyped.attw).toEqual({
+            reason: 'the package publishes no type declarations',
+            state: 'not_applicable',
+        })
+        expect(typed.attw).toEqual({ state: 'completed' })
+    }, 120_000)
+
     it('removes its temporary directories once the collectors are done', () => {
         const candidate = createPackCandidate({
             packageRoot: createSourcePackage(),
@@ -189,6 +212,26 @@ function createSourcePackage(manifest: Record<string, unknown> = {}): string {
             `export declare const ${entry}: number\n`,
         )
     }
+    return root
+}
+
+/** A package with a runtime surface but no declarations, which gives ATTW nothing to judge. */
+function createUntypedPackage(): string {
+    const root = mkdtempSync(path.join(tmpdir(), 'doctor-pack-untyped-'))
+    temporaryRoots.push(root)
+    write(
+        root,
+        'package.json',
+        JSON.stringify({
+            exports: { '.': './dist/index.js' },
+            files: ['dist'],
+            license: 'MIT',
+            name: '@fixture/untyped',
+            type: 'module',
+            version: '1.0.0',
+        }),
+    )
+    write(root, 'dist/index.js', 'export const value = 42\n')
     return root
 }
 

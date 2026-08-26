@@ -14,9 +14,15 @@ import type { DoctorDiagnostic } from './types.js'
  *
  * A crashed validator, an unsupported package shape and a missing tool are not clean bills of health, so the outcome is
  * kept separate from the findings: an empty finding list under a `failed` outcome must never read as "valid".
+ *
+ * `not_applicable` is the third state, and it exists because "nothing to examine" and "examined and found nothing" are
+ * the same empty finding list. Only the outcome can tell a reader that a collector never had a subject — a package
+ * shipping no type declarations gives ATTW nothing to judge, and reporting that as `completed` would let an untyped
+ * package read as a package whose types were checked and cleared.
  */
 export type CollectorOutcome =
     | Readonly<{ detail: string; state: 'failed' }>
+    | Readonly<{ reason: string; state: 'not_applicable' }>
     | Readonly<{ state: 'completed' }>
 
 export type PackedValidationOptions = Readonly<{
@@ -151,8 +157,14 @@ async function runAttw(
             createPackageFromTarballData(candidate.tarballBytes),
         )
         if (!isTypedAnalysis(analysis)) {
-            // No types at all is a fact about the package, not an ATTW failure.
-            return { diagnostics: [], outcome: { state: 'completed' } }
+            // Not a failure — ATTW ran fine — but it had no type surface to judge, which must not read as a pass.
+            return {
+                diagnostics: [],
+                outcome: {
+                    reason: 'the package publishes no type declarations',
+                    state: 'not_applicable',
+                },
+            }
         }
 
         const relevant = analysis.problems.filter((problem) =>
