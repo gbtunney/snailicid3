@@ -109,7 +109,7 @@ importers:
                 version: 1.3.0
             tsdown:
                 specifier: ^0.22.2
-                version: 0.22.14(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(tsx@4.23.12)(typescript@6.0.3)
+                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.24)(tsx@4.23.12)(typescript@6.0.3)
             type-fest:
                 specifier: ^5.7.0
                 version: 5.8.0
@@ -183,7 +183,7 @@ importers:
                 version: 17.0.35
             tsdown:
                 specifier: ^0.22.2
-                version: 0.22.14(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(tsx@4.23.12)(typescript@6.0.3)
+                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.24)(tsx@4.23.12)(typescript@6.0.3)
             tsx:
                 specifier: ^4.23.12
                 version: 4.23.12
@@ -232,7 +232,7 @@ importers:
                 version: 26.2.0
             tsdown:
                 specifier: ^0.22.2
-                version: 0.22.14(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(tsx@4.23.12)(typescript@6.0.3)
+                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.24)(tsx@4.23.12)(typescript@6.0.3)
             typescript:
                 specifier: ^6.0.3
                 version: 6.0.3
@@ -414,6 +414,9 @@ importers:
 
     packages/doctor:
         dependencies:
+            '@arethetypeswrong/core':
+                specifier: ^0.18.5
+                version: 0.18.5
             '@snailicid3/logger':
                 specifier: workspace:*
                 version: link:../logger
@@ -423,6 +426,9 @@ importers:
             '@snailicid3/workspace':
                 specifier: workspace:*
                 version: link:../workspace
+            publint:
+                specifier: ^0.3.24
+                version: 0.3.24
             semver:
                 specifier: ^7.8.5
                 version: 7.8.5
@@ -462,7 +468,7 @@ importers:
                 version: 26.2.0
             tsdown:
                 specifier: ^0.22.2
-                version: 0.22.14(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(tsx@4.23.12)(typescript@6.0.3)
+                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.24)(tsx@4.23.12)(typescript@6.0.3)
             typescript:
                 specifier: ^6.0.3
                 version: 6.0.3
@@ -508,7 +514,7 @@ importers:
                 version: 26.2.0
             tsdown:
                 specifier: ^0.22.2
-                version: 0.22.14(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(tsx@4.23.12)(typescript@6.0.3)
+                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.24)(tsx@4.23.12)(typescript@6.0.3)
             tsx:
                 specifier: ^4.23.12
                 version: 4.23.12
@@ -569,7 +575,7 @@ importers:
                 version: 17.0.35
             tsdown:
                 specifier: ^0.22.2
-                version: 0.22.14(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(tsx@4.23.12)(typescript@6.0.3)
+                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.24)(tsx@4.23.12)(typescript@6.0.3)
             typescript:
                 specifier: ^6.0.3
                 version: 6.0.3
@@ -594,7 +600,7 @@ importers:
                 version: 26.2.0
             tsdown:
                 specifier: ^0.22.2
-                version: 0.22.14(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(tsx@4.23.12)(typescript@6.0.3)
+                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.24)(tsx@4.23.12)(typescript@6.0.3)
             typescript:
                 specifier: ^6.0.3
                 version: 6.0.3
@@ -628,7 +634,7 @@ importers:
                 version: 0.32.0
             tsdown:
                 specifier: ^0.22.2
-                version: 0.22.14(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(tsx@4.23.12)(typescript@6.0.3)
+                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.24)(tsx@4.23.12)(typescript@6.0.3)
             typescript:
                 specifier: ^6.0.3
                 version: 6.0.3
@@ -695,7 +701,7 @@ importers:
                 version: 1.1.4
             tsdown:
                 specifier: ^0.22.2
-                version: 0.22.14(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(tsx@4.23.12)(typescript@6.0.3)
+                version: 0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.24)(tsx@4.23.12)(typescript@6.0.3)
             typedoc:
                 specifier: ^0.28.19
                 version: 0.28.20(typescript@6.0.3)
@@ -777,12 +783,25 @@ importers:
                 version: 4.1.11(@types/node@26.2.0)(@vitest/coverage-v8@4.1.11)(@vitest/ui@4.1.11)(vite@8.2.2(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.12)(yaml@2.9.0))
 
 packages:
+    '@andrewbranch/untar.js@1.0.4':
+        resolution:
+            {
+                integrity: sha512-pVXSwPsLuw8IGLo2Di0EaOfsk+ntVvpkk942J/sHYIkwvtKUakEcPh7HBgZ6tuimgzKSEHgCvO4XgQ05DEbwDw==,
+            }
+
     '@apidevtools/json-schema-ref-parser@11.9.3':
         resolution:
             {
                 integrity: sha512-60vepv88RwcJtSHrD6MjIL6Ta3SOYbgfnkHb+ppAVK+o9mXprRtulx7VlRl3lN3bbvysAfCS7WMVfhUYemB0IQ==,
             }
         engines: { node: '>= 16' }
+
+    '@arethetypeswrong/core@0.18.5':
+        resolution:
+            {
+                integrity: sha512-9ytjzGwxjm9Uz7I9avfbt5vlQt6uk9uRRESzJjqrznl6WKvI6dwYTo+vJ3U02Wrq/mR3iql/PzhvHhKdJIAjDQ==,
+            }
+        engines: { node: '>=20' }
 
     '@babel/code-frame@7.29.7':
         resolution:
@@ -905,6 +924,12 @@ packages:
                 integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==,
             }
         engines: { node: '>=18' }
+
+    '@braidai/lang@1.1.2':
+        resolution:
+            {
+                integrity: sha512-qBcknbBufNHlui137Hft8xauQMTZDKdophmLFv05r2eNmdIv/MlPuP4TdUknHG68UdWLgVZwgxVe735HzJNIwA==,
+            }
 
     '@changesets/apply-release-plan@8.0.0':
         resolution:
@@ -1670,6 +1695,12 @@ packages:
                 integrity: sha512-dXn3FZhPv0US+7dtJsIi2R+c7qWYiReoEh5zUntWCf4oSpMNib8FDhSoed6m3QyZdx5hK7iLFkYk3rNxwt8vTA==,
             }
 
+    '@loaderkit/resolve@1.0.6':
+        resolution:
+            {
+                integrity: sha512-G8FdIoF5CypfwmD9rl8BXod5HDn8JqB0CCNBXDTaRZ+yRYhARrrSToX1zg1zy9jX3zLqigsELwhT4gNtkdQAUg==,
+            }
+
     '@manypkg/find-root@3.1.0':
         resolution:
             {
@@ -2051,6 +2082,13 @@ packages:
             }
         peerDependencies:
             prettier: ^3.0.0
+
+    '@publint/pack@0.1.7':
+        resolution:
+            {
+                integrity: sha512-4EDEmvxWtgsCnnVeBvtFIFZtUhPPt1+bA9JrSwU4Sa//6oKtzCSlGGXYJr44OD9aGISymbieJ4mCKHUygUDU+g==,
+            }
+        engines: { node: '>=18' }
 
     '@quansync/fs@1.0.0':
         resolution:
@@ -4115,6 +4153,12 @@ packages:
                 integrity: sha512-77PSwercCZU2Fc4sX94eF8k8Pxte6JAwL4/ICZLFjJLqegs7kCuAsqqj/70NQF6TvDpgFjkubQB2FW2ZZddvQg==,
             }
         engines: { node: '>=8' }
+
+    cjs-module-lexer@1.4.3:
+        resolution:
+            {
+                integrity: sha512-9z8TZaGM1pfswYeXrUpzPrkx8UnWYdhJclsiYMm6x/w5+nN+8Tf/LnAgfLGQCm59qAOxU8WwHEq2vNwF6i4j+Q==,
+            }
 
     cli-cursor@3.1.0:
         resolution:
@@ -7222,6 +7266,13 @@ packages:
                 integrity: sha512-d+ObxMQFmbt10sretNDytwt85VrbkhhUA/JBGm1MPaWJ65Cl4wOgLaB1NYvJSZ0Ef03MMEU/0xpPMXUIQ29UfA==,
             }
 
+    mri@1.2.0:
+        resolution:
+            {
+                integrity: sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA==,
+            }
+        engines: { node: '>=4' }
+
     mrmime@2.0.1:
         resolution:
             {
@@ -7807,6 +7858,14 @@ packages:
             }
         engines: { node: '>=10' }
 
+    publint@0.3.24:
+        resolution:
+            {
+                integrity: sha512-9zS56KrKBoqi5Qt8h92uMP8TTM9AYZSgnmCo4u2priMqkOZvQnTsziZ2p5LJ2ywbYkAjoCDp2jda9u4cgFefIw==,
+            }
+        engines: { node: '>=18' }
+        hasBin: true
+
     pump@2.0.1:
         resolution:
             {
@@ -8179,6 +8238,13 @@ packages:
             {
                 integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==,
             }
+
+    sade@1.8.1:
+        resolution:
+            {
+                integrity: sha512-xal3CZX1Xlo/k4ApwCFrHVACi9fBqJ7V+mwhBsuf/1IOKbBy098Fex+Wa/5QMubw09pSZ/u8EY8PWgevJsXp1A==,
+            }
+        engines: { node: '>=6' }
 
     safe-array-concat@1.1.4:
         resolution:
@@ -9107,6 +9173,14 @@ packages:
             eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
             typescript: '>=4.8.4 <6.1.0'
 
+    typescript@5.6.1-rc:
+        resolution:
+            {
+                integrity: sha512-E3b2+1zEFu84jB0YQi9BORDjz9+jGbwwy1Zi3G0LUNw7a7cePUrHMRNy8aPh53nXpkFGVHSxIZo5vKTfYaFiBQ==,
+            }
+        engines: { node: '>=14.17' }
+        hasBin: true
+
     typescript@5.9.3:
         resolution:
             {
@@ -9313,6 +9387,13 @@ packages:
                 integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==,
             }
         engines: { node: '>= 0.4.0' }
+
+    validate-npm-package-name@5.0.1:
+        resolution:
+            {
+                integrity: sha512-OljLrQ9SQdOUqTaQxqL5dEfZWrXExyyWsozYlAWFawPVNuD83igl7uJD2RTkNMbniIYgt8l81eCJGIdQF7avLQ==,
+            }
+        engines: { node: ^14.17.0 || ^16.13.0 || >=18.0.0 }
 
     validator@13.15.26:
         resolution:
@@ -9714,11 +9795,24 @@ packages:
             }
 
 snapshots:
+    '@andrewbranch/untar.js@1.0.4': {}
+
     '@apidevtools/json-schema-ref-parser@11.9.3':
         dependencies:
             '@jsdevtools/ono': 7.1.3
             '@types/json-schema': 7.0.15
             js-yaml: 4.3.1
+
+    '@arethetypeswrong/core@0.18.5':
+        dependencies:
+            '@andrewbranch/untar.js': 1.0.4
+            '@loaderkit/resolve': 1.0.6
+            cjs-module-lexer: 1.4.3
+            fflate: 0.8.3
+            lru-cache: 11.5.2
+            semver: 7.8.5
+            typescript: 5.6.1-rc
+            validate-npm-package-name: 5.0.1
 
     '@babel/code-frame@7.29.7':
         dependencies:
@@ -9821,6 +9915,8 @@ snapshots:
             '@babel/helper-validator-identifier': 7.29.7
 
     '@bcoe/v8-coverage@1.0.2': {}
+
+    '@braidai/lang@1.1.2': {}
 
     '@changesets/apply-release-plan@8.0.0':
         dependencies:
@@ -10322,6 +10418,10 @@ snapshots:
 
     '@keyv/serialize@1.1.1': {}
 
+    '@loaderkit/resolve@1.0.6':
+        dependencies:
+            '@braidai/lang': 1.1.2
+
     '@manypkg/find-root@3.1.0':
         dependencies:
             '@manypkg/tools': 2.1.2
@@ -10517,6 +10617,10 @@ snapshots:
         dependencies:
             '@xml-tools/parser': 1.0.11
             prettier: 3.9.6
+
+    '@publint/pack@0.1.7':
+        dependencies:
+            tinyexec: 1.3.0
 
     '@quansync/fs@1.0.0':
         dependencies:
@@ -11677,6 +11781,8 @@ snapshots:
     chunk-data@0.1.0: {}
 
     ci-info@4.4.0: {}
+
+    cjs-module-lexer@1.4.3: {}
 
     cli-cursor@3.1.0:
         dependencies:
@@ -13717,6 +13823,8 @@ snapshots:
             pkg-types: 1.3.1
             ufo: 1.6.4
 
+    mri@1.2.0: {}
+
     mrmime@2.0.1: {}
 
     ms@2.0.0: {}
@@ -14192,6 +14300,13 @@ snapshots:
 
     proxy-from-env@2.1.0: {}
 
+    publint@0.3.24:
+        dependencies:
+            '@publint/pack': 0.1.7
+            package-manager-detector: 1.8.0
+            picocolors: 1.1.1
+            sade: 1.8.1
+
     pump@2.0.1:
         dependencies:
             end-of-stream: 1.4.5
@@ -14453,6 +14568,10 @@ snapshots:
     run-parallel@1.2.0:
         dependencies:
             queue-microtask: 1.2.3
+
+    sade@1.8.1:
+        dependencies:
+            mri: 1.2.0
 
     safe-array-concat@1.1.4:
         dependencies:
@@ -14905,7 +15024,7 @@ snapshots:
             minimist: 1.2.8
             strip-bom: 3.0.0
 
-    tsdown@0.22.14(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(tsx@4.23.12)(typescript@6.0.3):
+    tsdown@0.22.14(@arethetypeswrong/core@0.18.5)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(publint@0.3.24)(tsx@4.23.12)(typescript@6.0.3):
         dependencies:
             ansis: 4.3.1
             cac: 7.0.0
@@ -14923,6 +15042,8 @@ snapshots:
             unconfig-core: 7.5.0
             verkit: 0.3.2
         optionalDependencies:
+            '@arethetypeswrong/core': 0.18.5
+            publint: 0.3.24
             tsx: 4.23.12
             typescript: 6.0.3
         transitivePeerDependencies:
@@ -15044,6 +15165,8 @@ snapshots:
             typescript: 6.0.3
         transitivePeerDependencies:
             - supports-color
+
+    typescript@5.6.1-rc: {}
 
     typescript@5.9.3: {}
 
@@ -15182,6 +15305,8 @@ snapshots:
     util-deprecate@1.0.2: {}
 
     utils-merge@1.0.1: {}
+
+    validate-npm-package-name@5.0.1: {}
 
     validator@13.15.26: {}
 
