@@ -129,35 +129,54 @@ describe('pack candidate preparation', () => {
 })
 
 describe('package manager detection', () => {
-    it('reads an explicit packageManager declaration', () => {
-        const workspace = createWorkspaceSource()
+    const repositoryCases: ReadonlyArray<{
+        evidence: Record<string, string>
+        expected: 'npm' | 'pnpm'
+        name: string
+    }> = [
+        {
+            evidence: {
+                'package.json': JSON.stringify({
+                    packageManager: 'pnpm@10.30.2',
+                }),
+            },
+            expected: 'pnpm',
+            name: 'declared pnpm',
+        },
+        {
+            evidence: {
+                'package.json': JSON.stringify({
+                    packageManager: 'npm@11.6.0',
+                }),
+            },
+            expected: 'npm',
+            name: 'declared npm',
+        },
+        {
+            evidence: { 'pnpm-lock.yaml': "lockfileVersion: '9.0'\n" },
+            expected: 'pnpm',
+            name: 'pnpm lockfile fallback',
+        },
+        {
+            evidence: { 'package-lock.json': '{}' },
+            expected: 'npm',
+            name: 'npm lockfile fallback',
+        },
+        {
+            evidence: {
+                'pnpm-workspace.yaml': "packages:\n  - 'pkg'\n",
+            },
+            expected: 'pnpm',
+            name: 'pnpm workspace definition fallback',
+        },
+    ]
 
-        expect(
-            detectSourcePackageManager(path.join(workspace, 'pkgs', 'app')),
-        ).toBe('pnpm')
-    })
+    it.each(repositoryCases)('$name', ({ evidence, expected }) => {
+        const root = createRepository(evidence)
 
-    it('identifies an npm repository from its lockfile', () => {
-        const root = createRepository({ 'package-lock.json': '{}' })
-
-        // An npm repository that never declared `packageManager` must not be packed as though it were pnpm.
-        expect(detectSourcePackageManager(path.join(root, 'pkg'))).toBe('npm')
-    })
-
-    it('identifies a pnpm repository from its lockfile', () => {
-        const root = createRepository({
-            'pnpm-lock.yaml': "lockfileVersion: '9.0'\n",
-        })
-
-        expect(detectSourcePackageManager(path.join(root, 'pkg'))).toBe('pnpm')
-    })
-
-    it('identifies a pnpm workspace before an install has produced a lockfile', () => {
-        const root = createRepository({
-            'pnpm-workspace.yaml': "packages:\n  - 'pkg'\n",
-        })
-
-        expect(detectSourcePackageManager(path.join(root, 'pkg'))).toBe('pnpm')
+        expect(detectSourcePackageManager(path.join(root, 'pkg'))).toBe(
+            expected,
+        )
     })
 
     it('prefers the nearest evidence to a more distant declaration', () => {
