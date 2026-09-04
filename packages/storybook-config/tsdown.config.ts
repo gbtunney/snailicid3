@@ -6,7 +6,6 @@ const plan = defineBuildPlan(pkg, {
     entries: [
         {
             key: '*',
-            lint: false,
             output_formats: ['esm', 'cjs', 'ts'],
         },
     ],

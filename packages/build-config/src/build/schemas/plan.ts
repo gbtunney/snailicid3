@@ -92,11 +92,6 @@ export const schemaBuildPlanEntrySpec = z.object({
     //binName: z.string().optional(), //if this entry is an executable, this will be the name of the binary.  it will be used in the package.json "bin" field and also as the name of the output file for this entry (e.g. dist/binName or dist/binName.js depending on the format).  if not provided, it will default to the key.
     /** OTHER MISC PROPS */
     /* other misc stuff*/
-    /**
-     * Enable the build tool's own build report. It does not run package validation: Publint, ATTW and unused-dependency
-     * scanning belong to Doctor and run explicitly, not as a side effect of building.
-     */
-    lint: z.boolean().default(true),
     logLevel: z.enum(LOG_LEVEL).default('warn'),
     output_formats: z.array(z.enum(OUTPUT_KINDS)).default(['esm', 'cjs', 'ts']),
     sourceFile: z.string().optional(), //Should be a path w extension .
