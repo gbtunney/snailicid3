@@ -101,9 +101,11 @@
         "directory": "packages/doctor"
     },
     "dependencies": {
+        "@arethetypeswrong/core": "^0.18.5",
         "@snailicid3/logger": "workspace:*",
         "@snailicid3/node-utils": "workspace:*",
         "@snailicid3/workspace": "workspace:*",
+        "publint": "^0.3.24",
         "semver": "^7.8.5",
         "zod": "^4.4.3"
     },

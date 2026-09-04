@@ -27,9 +27,27 @@ export {
 } from './isolated-consumer-evidence.js'
 export * from './manifest.js'
 export {
+    createPackCandidate,
+    detectSourcePackageManager,
+    type PackCandidate,
+    type PackCandidateInput,
+    type PackCandidateOrigin,
+    type PackedManifest,
+    type SourcePackageManager,
+    withPackCandidate,
+} from './pack-candidate.js'
+export {
+    type AnalyzePackedCandidateInput,
+    analyzePackedCandidateWorkspaceDependencyClosure,
     type AnalyzePackedTarballInput,
     analyzePackedTarballWorkspaceDependencyClosure,
     type IsolatedPackageConsumerOptions,
     runIsolatedPackageConsumer,
 } from './packed-artifact.js'
+export {
+    type CollectorOutcome,
+    type PackedValidationOptions,
+    type PackedValidationResult,
+    validatePackedCandidate,
+} from './packed-validation.js'
 export * from './types.js'
