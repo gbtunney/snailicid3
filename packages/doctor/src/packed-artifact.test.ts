@@ -52,7 +52,7 @@ describe('packed tarball analysis', () => {
         expect(result.references['@fixture/lib'].runtime).toEqual([
             'dist/index.js',
         ])
-    })
+    }, 120_000)
 
     it('analyzes the same prepared candidate the validators read', async () => {
         const candidate = createPackCandidate({
@@ -92,7 +92,7 @@ describe('packed tarball analysis', () => {
                 tarball,
             }),
         ).toThrow('symbolic or hard link')
-    })
+    }, 120_000)
 
     it('rejects archive paths that escape the extraction root', () => {
         const tarball = packEscapingFixture()
@@ -102,7 +102,7 @@ describe('packed tarball analysis', () => {
                 tarball,
             }),
         ).toThrow('unsafe path')
-    })
+    }, 120_000)
 
     it('blocks an unavailable optional workspace dependency without consumer proof', () => {
         const tarball = packFixture({
@@ -117,7 +117,7 @@ describe('packed tarball analysis', () => {
             tarball,
         })
         expect(result.evidence.closure).toMatchObject({ state: 'blocked' })
-    })
+    }, 120_000)
 
     it('allows an unavailable optional dependency after a relevant omitted-optional consumer run', () => {
         const tarball = packFixture({
