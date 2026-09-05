@@ -1,6 +1,15 @@
+import { jsonTextSchema, packageIdentitySchema } from '@snailicid3/node-utils'
+import type { z } from 'zod'
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { findFixtureId } from './fixtures.js'
+import {
+    collectManifestFacts,
+    derivePackageRole,
+    isMonorepoMember,
+    type ManifestFacts,
+    requiredMetadataFields,
+} from './manifest-facts.js'
 import type {
     DiagnosticCode,
     DoctorDiagnostic,
@@ -13,16 +22,6 @@ export type DeclaredExportTarget = Readonly<{
     target: string
 }>
 
-export type PackageManifest = JsonRecord & {
-    bin?: Record<string, string> | string
-    exports?: unknown
-    main?: string
-    module?: string
-    name?: string
-    types?: string
-    version?: string
-}
-
 type DiagnosticInput = Readonly<{
     code: DiagnosticCode
     evidence?: ReadonlyArray<string>
@@ -34,67 +33,72 @@ type DiagnosticInput = Readonly<{
 
 type JsonRecord = Record<string, unknown>
 
-/** Analyze one package manifest and its currently emitted filesystem targets. */
+/**
+ * Analyze one package manifest and its currently emitted filesystem targets.
+ *
+ * Reading is deliberately layered. The manifest is decoded as JSON first, then the canonical identity schema is applied
+ * separately, so a single malformed field costs one diagnostic rather than the whole report: an unparseable manifest
+ * hides every other finding about the package, which is the opposite of what a diagnostic tool should do.
+ */
 export function analyzePackage(packageRootInput: string): DoctorPackageReport {
     const packageRoot = path.resolve(packageRootInput)
     const manifestPath = path.join(packageRoot, 'package.json')
     const fallbackPackageName = `(unnamed:${path.basename(packageRoot)})`
 
-    let manifest: PackageManifest
+    const decoded = readManifestJson(manifestPath)
 
-    try {
-        const parsed: unknown = JSON.parse(readFileSync(manifestPath, 'utf8'))
-
-        if (!isJsonRecord(parsed)) {
-            throw new TypeError('package.json must contain a JSON object')
-        }
-
-        manifest = parsed
-    } catch (error) {
-        const diagnostic = createDiagnostic({
-            code: 'MANIFEST_READ_ERROR',
-            evidence: [error instanceof Error ? error.message : String(error)],
-            message: 'Unable to read a valid package manifest.',
-            packageName: fallbackPackageName,
-            packageRoot,
-            severity: 'error',
-        })
-
+    if (!decoded.success) {
         return {
-            diagnostics: [diagnostic],
+            diagnostics: [
+                createDiagnostic({
+                    code: 'MANIFEST_READ_ERROR',
+                    evidence: [decoded.error],
+                    message: 'Unable to read a valid package manifest.',
+                    packageName: fallbackPackageName,
+                    packageRoot,
+                    severity: 'error',
+                }),
+            ],
             manifestPath,
             packageName: fallbackPackageName,
             packageRoot,
         }
     }
 
-    const packageName =
-        typeof manifest.name === 'string' && manifest.name.trim()
-            ? manifest.name.trim()
-            : fallbackPackageName
-    const diagnostics: Array<DoctorDiagnostic> = []
-
-    if (packageName === fallbackPackageName) {
-        diagnostics.push(
-            createDiagnostic({
-                code: 'MANIFEST_NAME_MISSING',
-                message:
-                    'package.json does not declare a non-empty package name.',
-                packageName,
-                packageRoot,
-                severity: 'error',
-            }),
-        )
-    }
-
-    diagnostics.push(
-        ...analyzeExportTargets(manifest, packageName, packageRoot),
-        ...analyzeLegacyTargets(manifest, packageName, packageRoot),
-        ...analyzeBinTargets(manifest, packageName, packageRoot),
+    const rawManifest = decoded.manifest
+    const identity = packageIdentitySchema.safeParse(rawManifest)
+    const facts = collectManifestFacts(
+        identity.success ? identity.data : rawManifest,
+        rawManifest,
     )
+    const packageName = facts.name ?? fallbackPackageName
+    const role = derivePackageRole(packageRoot, facts, rawManifest)
+
+    const diagnostics: Array<DoctorDiagnostic> = [
+        ...(identity.success
+            ? []
+            : invalidFieldDiagnostics(
+                  identity.error,
+                  packageName,
+                  packageRoot,
+              )),
+        ...identityDiagnostics(facts, packageName, packageRoot),
+        ...metadataDiagnostics(
+            role,
+            rawManifest,
+            facts,
+            packageName,
+            packageRoot,
+        ),
+        ...publicationFieldDiagnostics(facts, packageName, packageRoot),
+        ...analyzeExportTargets(rawManifest, packageName, packageRoot),
+        ...analyzeLegacyTargets(rawManifest, packageName, packageRoot),
+        ...analyzeBinTargets(rawManifest, packageName, packageRoot),
+    ]
 
     return {
         diagnostics,
+        manifestFacts: facts,
         manifestPath,
         packageName,
         packageRoot,
@@ -124,7 +128,7 @@ export function collectDeclaredExportTargets(
 }
 
 function analyzeBinTargets(
-    manifest: PackageManifest,
+    manifest: Record<string, unknown>,
     packageName: string,
     packageRoot: string,
 ): ReadonlyArray<DoctorDiagnostic> {
@@ -179,7 +183,7 @@ function analyzeBinTargets(
 }
 
 function analyzeExportTargets(
-    manifest: PackageManifest,
+    manifest: Record<string, unknown>,
     packageName: string,
     packageRoot: string,
 ): ReadonlyArray<DoctorDiagnostic> {
@@ -264,7 +268,7 @@ function analyzeExportTargets(
 }
 
 function analyzeLegacyTargets(
-    manifest: PackageManifest,
+    manifest: Record<string, unknown>,
     packageName: string,
     packageRoot: string,
 ): ReadonlyArray<DoctorDiagnostic> {
@@ -320,7 +324,7 @@ function formatExportTarget(target: DeclaredExportTarget): string {
 }
 
 function getBinTargets(
-    bin: PackageManifest['bin'],
+    bin: unknown,
     packageName: string,
 ): ReadonlyArray<readonly [string, string]> {
     if (typeof bin === 'string') return [[packageName, bin]]
@@ -350,8 +354,163 @@ function hasCondition(value: unknown, condition: string): boolean {
     return Object.values(value).some((item) => hasCondition(item, condition))
 }
 
+/** Identity every package needs regardless of how it participates in the repository. */
+function identityDiagnostics(
+    facts: ManifestFacts,
+    packageName: string,
+    packageRoot: string,
+): ReadonlyArray<DoctorDiagnostic> {
+    return facts.name === undefined
+        ? [
+              createDiagnostic({
+                  code: 'MANIFEST_NAME_MISSING',
+                  message:
+                      'package.json does not declare a non-empty package name.',
+                  packageName,
+                  packageRoot,
+                  severity: 'error',
+              }),
+          ]
+        : []
+}
+
+/** One diagnostic per identity field whose declared value is not the shape the shared schema accepts. */
+function invalidFieldDiagnostics(
+    error: z.ZodError,
+    packageName: string,
+    packageRoot: string,
+): ReadonlyArray<DoctorDiagnostic> {
+    return error.issues.map((issue) => {
+        const field = issue.path.join('.') || '(root)'
+
+        return createDiagnostic({
+            code: 'MANIFEST_FIELD_INVALID',
+            evidence: [`package.json#${field}`, issue.message],
+            message: `package.json field "${field}" is not a valid value.`,
+            packageName,
+            packageRoot,
+            severity: 'error',
+        })
+    })
+}
+
+/** A declared field counts as present only when it carries something usable, not merely a key. */
+function isDeclared(value: unknown): boolean {
+    if (typeof value === 'string') return value.trim().length > 0
+    if (Array.isArray(value)) return value.length > 0
+    if (isJsonRecord(value)) return Object.keys(value).length > 0
+    return value !== undefined && value !== null
+}
+
 function isJsonRecord(value: unknown): value is JsonRecord {
     return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+/**
+ * Metadata a consumer of a published package needs, reported one field at a time.
+ *
+ * Independent diagnostics rather than one combined finding: a package missing only a license is a different repair from
+ * one missing everything, and a single collapsed finding cannot be waived or tracked per field.
+ */
+function metadataDiagnostics(
+    role: ReturnType<typeof derivePackageRole>,
+    rawManifest: Record<string, unknown>,
+    facts: ManifestFacts,
+    packageName: string,
+    packageRoot: string,
+): ReadonlyArray<DoctorDiagnostic> {
+    const diagnostics = requiredMetadataFields(role).flatMap((field) =>
+        isDeclared(rawManifest[field])
+            ? []
+            : [
+                  createDiagnostic({
+                      code: 'MANIFEST_METADATA_MISSING',
+                      evidence: [`package.json#${field}`],
+                      message: `package.json does not declare a usable "${field}".`,
+                      packageName,
+                      packageRoot,
+                  }),
+              ],
+    )
+
+    const needsDirectory =
+        requiredMetadataFields(role).length > 0 &&
+        facts.repository !== undefined &&
+        facts.repository.directory === undefined &&
+        isMonorepoMember(packageRoot)
+
+    return needsDirectory
+        ? [
+              ...diagnostics,
+              createDiagnostic({
+                  code: 'MANIFEST_METADATA_MISSING',
+                  evidence: ['package.json#repository.directory'],
+                  message:
+                      'A package inside a monorepo does not declare which repository directory it lives in.',
+                  packageName,
+                  packageRoot,
+              }),
+          ]
+        : diagnostics
+}
+
+/**
+ * Publication fields that contradict each other as declared.
+ *
+ * This reports the contradiction only. Whether the package may publish is a release decision that needs intent and
+ * registry state Doctor cannot see, so no status, eligibility or hold is derived here.
+ */
+function publicationFieldDiagnostics(
+    facts: ManifestFacts,
+    packageName: string,
+    packageRoot: string,
+): ReadonlyArray<DoctorDiagnostic> {
+    return facts.private && facts.access !== undefined
+        ? [
+              createDiagnostic({
+                  code: 'MANIFEST_PUBLICATION_FIELDS_CONFLICT',
+                  evidence: [
+                      'package.json#private -> true',
+                      `package.json#publishConfig.access -> ${facts.access}`,
+                  ],
+                  message:
+                      'The package is marked private but also declares npm publish access.',
+                  packageName,
+                  packageRoot,
+              }),
+          ]
+        : []
+}
+
+/** Decode the manifest as a JSON object, keeping "absent or unreadable" distinct from "not an object". */
+function readManifestJson(
+    manifestPath: string,
+):
+    | Readonly<{ error: string; success: false }>
+    | Readonly<{ manifest: Record<string, unknown>; success: true }> {
+    let contents: string
+
+    try {
+        contents = readFileSync(manifestPath, 'utf8')
+    } catch (error) {
+        return {
+            error: error instanceof Error ? error.message : String(error),
+            success: false,
+        }
+    }
+
+    const decoded = jsonTextSchema.safeParse(contents)
+
+    if (!decoded.success) {
+        return {
+            error: decoded.error.issues[0]?.message ?? 'Invalid JSON',
+            success: false,
+        }
+    }
+
+    return isJsonRecord(decoded.data)
+        ? { manifest: decoded.data, success: true }
+        : { error: 'package.json must contain a JSON object', success: false }
 }
 
 function visitExportValue(
