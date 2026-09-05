@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { parseArgv, runCliIfEntrypoint } from '@snailicid3/node-utils'
+import { parseArgv, runCliIfEntrypointAsync } from '@snailicid3/node-utils'
 import { z } from 'zod'
-import { runDoctor } from './doctor.js'
+import { runDoctorWithPackedValidation } from './doctor.js'
 import { formatDoctorJson, formatDoctorText } from './format.js'
 
 const optionSchema = z.object({
@@ -17,15 +17,16 @@ const HELP = `Usage: snail-doctor [path] [options]
 Read-only package and artifact diagnostics.
 
 Options:
-  --package <name>  Limit the report to one package; repeat to select more
+  --package <name>  Limit the report to one package; repeat to select more.
+                    Only the selected packages are packed and validated.
   --json            Emit the complete report as JSON
   -h, --help        Show this help
 
 Findings do not fail the process. Operational errors still exit non-zero.`
 
-export default function main(
+export default async function main(
     args: ReadonlyArray<string> = process.argv.slice(2),
-): void {
+): Promise<void> {
     if (args.includes('--help') || args.includes('-h')) {
         console.log(HELP)
         return
@@ -33,7 +34,8 @@ export default function main(
 
     const parsed = parseArgv(optionSchema, args, positionalSchema)
     const packageNames = normalizePackageNames(parsed.options.package)
-    const report = runDoctor({
+    // The same selection that has always scoped the report now also scopes packing: only these packages are packed.
+    const report = await runDoctorWithPackedValidation({
         packageNames,
         root: parsed.positionals[0] ?? process.cwd(),
     })
@@ -52,4 +54,4 @@ function normalizePackageNames(
     return typeof value === 'string' ? [value] : value
 }
 
-runCliIfEntrypoint(import.meta, main, process.argv.slice(2))
+await runCliIfEntrypointAsync(import.meta, main, process.argv.slice(2))
