@@ -6,9 +6,6 @@ const plan = defineBuildPlan(pkg, {
     entries: [
         {
             key: '*',
-            // Refs #82
-            // TODO lint=false is temporary fix for strange tsdown memory errors
-            lint: false,
             output_formats: ['esm', 'cjs', 'ts'],
             product: 'library',
             runtime: 'universal',
@@ -16,7 +13,6 @@ const plan = defineBuildPlan(pkg, {
         },
         {
             key: 'demo',
-            lint: false,
             output_formats: ['esm', 'ts'],
             product: 'cli',
             runtime: 'node',
@@ -25,7 +21,6 @@ const plan = defineBuildPlan(pkg, {
         },
         {
             key: './snail-sh',
-            lint: false,
             output_formats: ['esm', 'ts'],
             product: 'cli',
             runtime: 'node',

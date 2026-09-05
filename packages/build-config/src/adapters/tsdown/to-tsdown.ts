@@ -72,22 +72,34 @@ export function entryToTsdownConfig(
     const config: TsdownBuildConfig = {
         ...(entry.bannerContent ? { banner: entry.bannerContent } : {}),
         ...(hasGlobal ? { globalName: entry.moduleName } : {}),
+        // Package validation is forced off, and forced rather than defaulted: tsdown's own defaults for these are
+        // already false, but a default is something a future tsdown release or a merged user config can change,
+        // while an explicit false is a decision this adapter states. Publint, ATTW and unused-dependency scanning
+        // answer "is this package correct?" — Doctor's question, asked of a packed artifact. Running them from a
+        // build makes builds fail for reasons the build did not cause, and reports on a source tree that is not
+        // what gets published. Building emits artifacts; validating them is a separate, explicit step.
+        attw: false,
         clean: false,
         deps: externals,
         dts: hasDts,
         entry: { [entry.fileName]: entry.sourcePath },
-        //TODO ##195 i hate this
+        // Not a validation switch but a write switch: tsdown's `exports` feature edits the `exports` field of
+        // package.json to point at generated files. The manifest is hand-authored here and is an input to the
+        // build, never an output of it, so the build must not rewrite it. This is unrelated to the build plan's
+        // own `exports` flag, which only selects entries for the pure `toPackageExportsPlan` helper.
         exports: false,
         format: formats,
         logLevel: entry.logLevel,
         outDir: entry.outputDir,
         platform,
-        // `lint` controls tsdown's own build report and nothing else. Publint, ATTW and unused-dependency
-        // scanning are package validation: they answer "is this package correct?", which is Doctor's
-        // question, and running them from a build makes every build fail for reasons the build did not
-        // cause. Building emits artifacts; validating them is a separate, explicit step.
-        report: entry.lint,
+        publint: false,
+        // Tsdown's own size report, which is not validation but was the only thing the removed `lint` option
+        // controlled. Every build plan in this repository disabled it, so it is forced off here rather than left
+        // to tsdown's `true` default: dropping the option must not switch reporting back on for five packages
+        // that turned it off for the memory errors in #82.
+        report: false,
         unbundle: !entry.bundle,
+        unused: false,
         ...(target ? { target } : {}),
     }
 

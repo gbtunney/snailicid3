@@ -95,31 +95,18 @@ describe('@snailicid3/build-config', () => {
 
     test('building never implies package validation', () => {
         const plan = defineBuildPlan(pkg, {
-            entries: [
-                { key: '*', lint: true, output_formats: ['esm', 'cjs', 'ts'] },
-            ],
+            entries: [{ key: '*', output_formats: ['esm', 'cjs', 'ts'] }],
             root: { outputDir: './dist', sourceDir: './src' },
         })
 
         const [config] = toTsdownConfigs(plan)
 
-        // Publint, ATTW and unused-dependency scanning are Doctor's job. `lint` may only drive tsdown's
-        // own build report.
-        expect(config).not.toHaveProperty('publint')
-        expect(config).not.toHaveProperty('attw')
-        expect(config).not.toHaveProperty('unused')
-        expect(config.report).toBe(true)
-    })
-
-    test('lint:false turns off only the build report', () => {
-        const plan = defineBuildPlan(pkg, {
-            entries: [
-                { key: '*', lint: false, output_formats: ['esm', 'cjs', 'ts'] },
-            ],
-            root: { outputDir: './dist', sourceDir: './src' },
-        })
-
-        expect(toTsdownConfigs(plan)[0]?.report).toBe(false)
+        // Publint, ATTW and unused-dependency scanning are Doctor's job, asked of a packed artifact rather than
+        // of a source tree mid-build. Asserting `false` rather than absence is the point: absence would leave the
+        // answer to whatever tsdown happens to default to.
+        expect(config.publint).toBe(false)
+        expect(config.attw).toBe(false)
+        expect(config.unused).toBe(false)
     })
 
     test('config generation leaves the manifest alone', () => {

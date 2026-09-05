@@ -7,9 +7,6 @@ const plan = defineBuildPlan(pkg, {
         {
             exports: true,
             key: '*',
-            // Refs #82
-            // TODO lint=false is temporary fix for strange tsdown memory errors
-            lint: false,
             output_formats: ['esm', 'ts'],
             runtime: 'node',
             //   Transpile: ['es2020']

@@ -7,17 +7,11 @@ const plan = defineBuildPlan(pkg, {
         {
             banner: true,
             key: '*',
-            /** Refs #82 */
-            // TODO lint=false is temporary fix for strange tsdown memory errors
-            lint: false,
             output_formats: ['esm', 'cjs', 'iife', 'ts'],
         },
         {
             banner: true,
             key: './node',
-            /** Refs #82 */
-            // TODO lint=false is temporary fix for strange tsdown memory errors
-            lint: false,
             output_formats: ['esm', 'cjs', 'ts'],
             runtime: 'node',
             sourceFile: 'node2.ts',
