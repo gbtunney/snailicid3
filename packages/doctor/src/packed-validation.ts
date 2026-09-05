@@ -7,23 +7,7 @@ import { problemAffectsResolutionKind } from '@arethetypeswrong/core/problems'
 import { publint } from 'publint'
 import { formatMessage, formatMessagePath } from 'publint/utils'
 import type { PackCandidate } from './pack-candidate.js'
-import type { DoctorDiagnostic } from './types.js'
-
-/**
- * Whether a collector produced an answer at all.
- *
- * A crashed validator, an unsupported package shape and a missing tool are not clean bills of health, so the outcome is
- * kept separate from the findings: an empty finding list under a `failed` outcome must never read as "valid".
- *
- * `not_applicable` is the third state, and it exists because "nothing to examine" and "examined and found nothing" are
- * the same empty finding list. Only the outcome can tell a reader that a collector never had a subject — a package
- * shipping no type declarations gives ATTW nothing to judge, and reporting that as `completed` would let an untyped
- * package read as a package whose types were checked and cleared.
- */
-export type CollectorOutcome =
-    | Readonly<{ detail: string; state: 'failed' }>
-    | Readonly<{ reason: string; state: 'not_applicable' }>
-    | Readonly<{ state: 'completed' }>
+import type { CollectorOutcome, DoctorDiagnostic } from './types.js'
 
 export type PackedValidationOptions = Readonly<{
     /** Resolution modes the package is meant to support; a problem outside them is not this package's contract. */

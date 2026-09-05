@@ -45,7 +45,6 @@ export {
     runIsolatedPackageConsumer,
 } from './packed-artifact.js'
 export {
-    type CollectorOutcome,
     type PackedValidationOptions,
     type PackedValidationResult,
     validatePackedCandidate,

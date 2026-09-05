@@ -1,3 +1,5 @@
+import type { ResolutionKind } from '@arethetypeswrong/core'
+
 export const DIAGNOSTIC_CODES = [
     'MANIFEST_READ_ERROR',
     'MANIFEST_NAME_MISSING',
@@ -19,6 +21,7 @@ export const DIAGNOSTIC_CODES = [
     'PUBLINT_COLLECTOR_FAILED',
     'ATTW_RESOLUTION_PROBLEM',
     'ATTW_COLLECTOR_FAILED',
+    'PACK_CANDIDATE_FAILED',
 ] as const
 
 export type DiagnosticCode = (typeof DIAGNOSTIC_CODES)[number]
@@ -42,11 +45,36 @@ export const FIXTURE_IDS = [
     'RUNTIME-LOGGER-001',
 ] as const
 
+/**
+ * Whether a collector produced an answer at all.
+ *
+ * A crashed validator, an unsupported package shape and a missing tool are not clean bills of health, so the outcome is
+ * kept separate from the findings: an empty finding list under a `failed` outcome must never read as "valid".
+ *
+ * `not_applicable` is the third state, and it exists because "nothing to examine" and "examined and found nothing" are
+ * the same empty finding list. Only the outcome can tell a reader that a collector never had a subject — a package
+ * shipping no type declarations gives ATTW nothing to judge, and reporting that as `completed` would let an untyped
+ * package read as a package whose types were checked and cleared.
+ */
+export type CollectorOutcome =
+    | Readonly<{ detail: string; state: 'failed' }>
+    | Readonly<{ reason: string; state: 'not_applicable' }>
+    | Readonly<{ state: 'completed' }>
+
 export type DoctorPackageReport = Readonly<{
     diagnostics: ReadonlyArray<DoctorDiagnostic>
     manifestPath: string
     packageName: string
     packageRoot: string
+    /**
+     * What packing and validating this package's publication candidate found, when that ran.
+     *
+     * Absent rather than empty when the package was not selected for packed validation, so a reader can tell "not
+     * validated" from "validated and clean" — the same distinction the collector outcomes draw one level down. The
+     * findings themselves live in `diagnostics` with the rest, counted once; this field carries the evidence that would
+     * otherwise be lost, which is what `--json` consumers need.
+     */
+    packedValidation?: PackedValidationEvidence
 }>
 
 export type DoctorReport = Readonly<{
@@ -64,3 +92,13 @@ export type DoctorSummary = Readonly<{
 }>
 
 export type FixtureId = (typeof FIXTURE_IDS)[number]
+
+/** The packed-validation facts worth keeping in the report once the candidate itself is disposed. */
+export type PackedValidationEvidence = Readonly<{
+    attw: CollectorOutcome
+    /** Everything the candidate would publish, as consumers would see the paths. */
+    files: ReadonlyArray<string>
+    publint: CollectorOutcome
+    /** The resolution modes ATTW judged against, so a finding's absence is readable as a statement about scope. */
+    resolutions: ReadonlyArray<ResolutionKind>
+}>
