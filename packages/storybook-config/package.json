@@ -1,6 +1,6 @@
 {
     "name": "@snailicid3/storybook-config",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "private": false,
     "description": "Shared Storybook config wrapper — framework and addons pre-wired, thin consumer entries",
     "scripts": {
