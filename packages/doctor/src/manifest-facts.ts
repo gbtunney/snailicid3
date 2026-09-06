@@ -24,8 +24,15 @@ export const manifestFactsSchema = z.strictObject({
     /** The `type` field, which decides how Node interprets this package's `.js` files. */
     moduleType: z.enum(['commonjs', 'module']).optional(),
     name: packageNameSchema.optional(),
-    /** `true` only when declared `true`; npm treats an absent field as publishable, so absence records as `false`. */
-    private: z.boolean(),
+    /**
+     * Whether the package declares itself private.
+     *
+     * Absent from the manifest projects to `false`, because npm treats an undeclared package as publishable and that
+     * default is itself an observable fact. A _malformed_ declaration is different: it is reported as
+     * `MANIFEST_FIELD_INVALID` and left absent here rather than flattened to `false`, so a consumer is never handed
+     * "explicitly not private" for a value npm would reject. Absent therefore means unknown, not public.
+     */
+    private: z.boolean().optional(),
     repository: z
         .strictObject({
             /** `repository.directory`, which is how a consumer locates one package inside a monorepo. */
@@ -61,8 +68,8 @@ export function collectManifestFacts(
 ): ManifestFacts {
     return {
         binNames: readBinNames(rawManifest['bin']),
-        private: rawManifest['private'] === true,
         ...optionalField('access', readAccess(rawManifest['publishConfig'])),
+        ...optionalField('private', readPrivate(rawManifest['private'])),
         ...optionalField('moduleType', readModuleType(rawManifest['type'])),
         ...optionalField(
             'name',
@@ -82,6 +89,10 @@ export function collectManifestFacts(
  * A workspace root and a private package are both excused publication metadata, for different reasons: the root is not
  * a package anyone installs, and a private package is not published at all. Order matters — a private CLI is still
  * unpublished, so `internal` is decided before `cli`.
+ *
+ * Only an observed `false` establishes that a package is meant to be published. An unknown `private` — a malformed
+ * declaration — is not evidence of publishability, so it withholds the publication-metadata profile rather than
+ * inviting it: a manifest already reporting a malformed field should not also be told it is missing four others.
  */
 export function derivePackageRole(
     packageRoot: string,
@@ -89,7 +100,7 @@ export function derivePackageRole(
     rawManifest: Record<string, unknown>,
 ): PackageRole {
     if (isWorkspaceRoot(packageRoot, rawManifest)) return 'workspaceRoot'
-    if (facts.private) return 'internal'
+    if (facts.private !== false) return 'internal'
     return facts.binNames.length > 0 ? 'cli' : 'library'
 }
 
@@ -158,6 +169,12 @@ function readBinNames(bin: unknown): Array<string> {
 
 function readModuleType(type: unknown): 'commonjs' | 'module' | undefined {
     return type === 'commonjs' || type === 'module' ? type : undefined
+}
+
+/** `private` as npm would read it, leaving a value npm would reject unknown rather than calling it `false`. */
+function readPrivate(value: unknown): boolean | undefined {
+    if (value === undefined) return false
+    return typeof value === 'boolean' ? value : undefined
 }
 
 function readRepository(repository: unknown): ManifestFacts['repository'] {

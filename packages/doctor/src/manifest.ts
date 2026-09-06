@@ -465,7 +465,7 @@ function publicationFieldDiagnostics(
     packageName: string,
     packageRoot: string,
 ): ReadonlyArray<DoctorDiagnostic> {
-    return facts.private && facts.access !== undefined
+    return facts.private === true && facts.access !== undefined
         ? [
               createDiagnostic({
                   code: 'MANIFEST_PUBLICATION_FIELDS_CONFLICT',

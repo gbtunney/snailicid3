@@ -58,6 +58,69 @@ describe('canonical manifest facts', () => {
         expect(analyzePackage(root).manifestFacts?.private).toBe(false)
     })
 
+    it.each([
+        { declared: undefined, expected: false, name: 'absent' },
+        { declared: true, expected: true, name: 'declared true' },
+        { declared: false, expected: false, name: 'declared false' },
+    ])(
+        'projects a $name private field to $expected',
+        ({ declared, expected }) => {
+            const root = createPackage({
+                ...COMPLETE_METADATA,
+                name: '@fixture/private-state',
+                version: '1.0.0',
+                ...(declared === undefined ? {} : { private: declared }),
+            })
+
+            expect(analyzePackage(root).manifestFacts?.private).toBe(expected)
+        },
+    )
+
+    it('leaves a malformed private declaration unknown rather than false', () => {
+        const root = createPackage({
+            ...COMPLETE_METADATA,
+            name: '@fixture/private-malformed',
+            // A string npm would reject. Reporting it while also publishing `private: false` would hand a consumer
+            // "explicitly not private" for a value that never parsed.
+            private: 'true',
+            version: '1.0.0',
+        })
+
+        const report = analyzePackage(root)
+
+        expect(report.manifestFacts?.private).toBeUndefined()
+        expect('private' in (report.manifestFacts ?? {})).toBe(false)
+        expect(codes(report.diagnostics)).toContain('MANIFEST_FIELD_INVALID')
+    })
+
+    it('does not read an unknown private state as evidence a package is publishable', () => {
+        const root = createPackage({
+            name: '@fixture/private-unknown-role',
+            private: 'yes',
+            version: '1.0.0',
+        })
+
+        // The manifest already reports a malformed field; it must not also be told it is missing four others on the
+        // strength of a `private` value that never parsed.
+        expect(codes(analyzePackage(root).diagnostics)).not.toContain(
+            'MANIFEST_METADATA_MISSING',
+        )
+    })
+
+    it('does not claim a publication contradiction from an unknown private state', () => {
+        const root = createPackage({
+            ...COMPLETE_METADATA,
+            name: '@fixture/private-unknown-conflict',
+            private: 'true',
+            publishConfig: { access: 'public' },
+            version: '1.0.0',
+        })
+
+        expect(codes(analyzePackage(root).diagnostics)).not.toContain(
+            'MANIFEST_PUBLICATION_FIELDS_CONFLICT',
+        )
+    })
+
     it('treats a 0.0.0 version as a valid fact rather than a defect', () => {
         const root = createPackage({
             ...COMPLETE_METADATA,
