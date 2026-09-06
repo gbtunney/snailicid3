@@ -25,6 +25,11 @@ export {
     type IsolatedConsumerCheck,
     type IsolatedPackageConsumerResult,
 } from './isolated-consumer-evidence.js'
+export {
+    collectManifestFacts,
+    type ManifestFacts,
+    manifestFactsSchema,
+} from './manifest-facts.js'
 export * from './manifest.js'
 export {
     createPackCandidate,

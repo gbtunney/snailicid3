@@ -10,11 +10,10 @@ import {
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import {
-    analyzePackage,
-    collectDeclaredExportTargets,
-    type PackageManifest,
-} from './manifest.js'
+import { analyzePackage, collectDeclaredExportTargets } from './manifest.js'
+
+/** Repository manifests are read as plain JSON here; Doctor no longer keeps a local manifest shape of its own. */
+type RepositoryManifest = Record<string, unknown>
 
 const repositoryRoot = path.resolve(
     path.dirname(fileURLToPath(import.meta.url)),
@@ -196,7 +195,7 @@ describe('repository package export maps', () => {
 
         expect(manifest.bin).toBeUndefined()
         expect(
-            collectDeclaredExportTargets(manifest.exports).some(
+            collectDeclaredExportTargets(manifest['exports']).some(
                 ({ exportKey }) => exportKey === './example',
             ),
         ).toBe(false)
@@ -305,15 +304,15 @@ describe('analyzePackage', () => {
 
 /** Return only the root export targets so package-level routing assertions stay focused. */
 function collectRootExportTargets(
-    manifest: PackageManifest,
+    manifest: RepositoryManifest,
 ): ReturnType<typeof collectDeclaredExportTargets> {
-    return collectDeclaredExportTargets(manifest.exports).filter(
+    return collectDeclaredExportTargets(manifest['exports']).filter(
         ({ exportKey }) => exportKey === '.',
     )
 }
 
-function getOnlyBinTarget(manifest: PackageManifest): string {
-    const bin: unknown = manifest.bin
+function getOnlyBinTarget(manifest: RepositoryManifest): string {
+    const bin: unknown = manifest['bin']
 
     if (typeof bin !== 'object' || bin === null || Array.isArray(bin)) {
         throw new TypeError('Expected one bin map')
@@ -325,14 +324,27 @@ function getOnlyBinTarget(manifest: PackageManifest): string {
     return target
 }
 
-function readRepositoryManifest(relativePath: string): PackageManifest {
+function readRepositoryManifest(relativePath: string): RepositoryManifest {
     return JSON.parse(
         readFileSync(path.join(repositoryRoot, relativePath), 'utf8'),
-    ) as PackageManifest
+    ) as RepositoryManifest
+}
+
+/**
+ * Metadata a publishable package is expected to declare.
+ *
+ * Applied by default so these fixtures exercise export, declaration and bin routing rather than tripping the
+ * completeness collector; a test that cares about completeness overrides or omits these explicitly.
+ */
+const PUBLISHABLE_METADATA: RepositoryManifest = {
+    author: 'Fixture Author',
+    description: 'A fixture package used by Doctor tests.',
+    license: 'MIT',
+    repository: { type: 'git', url: 'https://example.test/repo' },
 }
 
 function withTempPackage(
-    manifest: PackageManifest,
+    manifest: RepositoryManifest,
     files: Readonly<Record<string, string>>,
     assertion: (packageRoot: string) => void,
 ): void {
@@ -341,7 +353,7 @@ function withTempPackage(
     try {
         writeFileSync(
             path.join(packageRoot, 'package.json'),
-            JSON.stringify(manifest),
+            JSON.stringify({ ...PUBLISHABLE_METADATA, ...manifest }),
         )
 
         for (const [relativePath, contents] of Object.entries(files)) {

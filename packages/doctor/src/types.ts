@@ -1,8 +1,12 @@
 import type { ResolutionKind } from '@arethetypeswrong/core'
+import type { ManifestFacts } from './manifest-facts.js'
 
 export const DIAGNOSTIC_CODES = [
     'MANIFEST_READ_ERROR',
     'MANIFEST_NAME_MISSING',
+    'MANIFEST_FIELD_INVALID',
+    'MANIFEST_METADATA_MISSING',
+    'MANIFEST_PUBLICATION_FIELDS_CONFLICT',
     'EXPORT_TARGET_INVALID',
     'EXPORT_TARGET_MISSING',
     'EXPORT_TYPES_CONDITION_MISSING',
@@ -63,6 +67,13 @@ export type CollectorOutcome =
 
 export type DoctorPackageReport = Readonly<{
     diagnostics: ReadonlyArray<DoctorDiagnostic>
+    /**
+     * Observable manifest state, absent only when the manifest could not be read as JSON at all.
+     *
+     * Present even when the manifest is incomplete or partly malformed, because a consumer usually still needs the
+     * fields that did parse. What the state means for a release is not decided here — see {@link ManifestFacts}.
+     */
+    manifestFacts?: ManifestFacts
     manifestPath: string
     packageName: string
     packageRoot: string

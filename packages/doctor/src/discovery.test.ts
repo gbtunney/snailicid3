@@ -81,6 +81,14 @@ function writeManifest(
     mkdirSync(directory, { recursive: true })
     writeFileSync(
         path.join(directory, 'package.json'),
-        JSON.stringify({ name, version: '1.0.0', ...extra }),
+        JSON.stringify({
+            author: 'Fixture Author',
+            description: 'A fixture package used by Doctor tests.',
+            license: 'MIT',
+            name,
+            repository: { type: 'git', url: 'https://example.test/repo' },
+            version: '1.0.0',
+            ...extra,
+        }),
     )
 }
