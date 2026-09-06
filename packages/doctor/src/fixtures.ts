@@ -16,6 +16,11 @@ export type DoctorFixtureMatch = Readonly<{
  *
  * A row labels matching observed evidence; it never authorizes mutation or suppresses a finding. Some reserved
  * diagnostic codes do not have collectors yet and therefore cannot match until their read-only collector lands.
+ *
+ * Export evidence is addressed by the manifest field path that declared the target, matching what the collector now
+ * emits. The rows were migrated to that form rather than being matched in both the old and new shapes: two accepted
+ * formats would let a row keep matching evidence the collector can no longer produce, which is how a registry stops
+ * describing the code it is supposed to pin.
  */
 export const DOCTOR_FIXTURES: ReadonlyArray<DoctorFixture> = [
     {
@@ -24,10 +29,10 @@ export const DOCTOR_FIXTURES: ReadonlyArray<DoctorFixture> = [
             {
                 diagnosticCode: 'EXPORT_TARGET_MISSING',
                 expectedEvidence: [
-                    '. (import) -> ./dist/index.js',
-                    '. (require) -> ./dist/index.cjs',
-                    './node (import) -> ./dist/node.mjs',
-                    './node (require) -> ./dist/node.cjs',
+                    'package.json#exports["."].import -> ./dist/index.js',
+                    'package.json#exports["."].require -> ./dist/index.cjs',
+                    'package.json#exports["./node"].import -> ./dist/node.mjs',
+                    'package.json#exports["./node"].require -> ./dist/node.cjs',
                 ],
             },
             {
