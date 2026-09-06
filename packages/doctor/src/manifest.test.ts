@@ -34,16 +34,19 @@ describe('collectDeclaredExportTargets', () => {
             {
                 conditions: ['import'],
                 exportKey: '.',
+                fieldPath: 'exports["."].import',
                 target: './dist/index.js',
             },
             {
                 conditions: ['require'],
                 exportKey: '.',
+                fieldPath: 'exports["."].require',
                 target: './dist/index.cjs',
             },
             {
                 conditions: [],
                 exportKey: './package.json',
+                fieldPath: 'exports["./package.json"]',
                 target: './package.json',
             },
         ])
@@ -60,21 +63,25 @@ describe('repository package export maps', () => {
             {
                 conditions: ['import', 'types'],
                 exportKey: '.',
+                fieldPath: 'exports["."].import.types',
                 target: './dist/index.d.mts',
             },
             {
                 conditions: ['import', 'default'],
                 exportKey: '.',
+                fieldPath: 'exports["."].import.default',
                 target: './dist/index.mjs',
             },
             {
                 conditions: ['require', 'types'],
                 exportKey: '.',
+                fieldPath: 'exports["."].require.types',
                 target: './dist/index.d.cts',
             },
             {
                 conditions: ['require', 'default'],
                 exportKey: '.',
+                fieldPath: 'exports["."].require.default',
                 target: './dist/index.cjs',
             },
         ])
@@ -91,21 +98,25 @@ describe('repository package export maps', () => {
             {
                 conditions: ['import', 'types'],
                 exportKey: '.',
+                fieldPath: 'exports["."].import.types',
                 target: './dist/index.d.ts',
             },
             {
                 conditions: ['import', 'default'],
                 exportKey: '.',
+                fieldPath: 'exports["."].import.default',
                 target: './dist/index.js',
             },
             {
                 conditions: ['require', 'types'],
                 exportKey: '.',
+                fieldPath: 'exports["."].require.types',
                 target: './dist/index.d.cts',
             },
             {
                 conditions: ['require', 'default'],
                 exportKey: '.',
+                fieldPath: 'exports["."].require.default',
                 target: './dist/index.cjs',
             },
         ])
@@ -162,11 +173,13 @@ describe('repository package export maps', () => {
                 {
                     conditions: ['types'],
                     exportKey: '.',
+                    fieldPath: 'exports["."].types',
                     target: './types/index.d.ts',
                 },
                 {
                     conditions: ['import'],
                     exportKey: '.',
+                    fieldPath: 'exports["."].import',
                     target: './dist/index.js',
                 },
             ])
@@ -180,11 +193,13 @@ describe('repository package export maps', () => {
             {
                 conditions: ['types'],
                 exportKey: '.',
+                fieldPath: 'exports["."].types',
                 target: './dist/index.d.mts',
             },
             {
                 conditions: ['import'],
                 exportKey: '.',
+                fieldPath: 'exports["."].import',
                 target: './dist/index.mjs',
             },
         ])
@@ -244,7 +259,7 @@ describe('analyzePackage', () => {
 
             expect(diagnostic?.fixtureId).toBe('EXP-EXAMPLE-001')
             expect(diagnostic?.evidence).toContain(
-                '. (import) -> ./dist/index.js',
+                'package.json#exports["."].import -> ./dist/index.js',
             )
         })
     })

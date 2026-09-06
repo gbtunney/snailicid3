@@ -41,8 +41,8 @@ describe('Doctor fixture registry', () => {
                 '@snailicid3/example-package',
                 'EXPORT_TARGET_MISSING',
                 [
-                    '. (import) -> ./dist/index.js',
-                    './new (import) -> ./dist/new.js',
+                    'package.json#exports["."].import -> ./dist/index.js',
+                    'package.json#exports["./new"].import -> ./dist/new.js',
                 ],
             ),
         ).toBeUndefined()

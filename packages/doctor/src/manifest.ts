@@ -1,6 +1,6 @@
 import { jsonTextSchema, packageIdentitySchema } from '@snailicid3/node-utils'
 import type { z } from 'zod'
-import { existsSync, readFileSync, statSync } from 'node:fs'
+import { readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { findFixtureId } from './fixtures.js'
 import {
@@ -10,17 +10,25 @@ import {
     type ManifestFacts,
     requiredMetadataFields,
 } from './manifest-facts.js'
+import {
+    collectDeclaredExportTargets,
+    collectMalformedExportLeaves,
+    type DeclaredExportTarget,
+    type DeclaredTarget,
+    formatTargetEvidence,
+    type TargetVerdict,
+    validateDeclaredTarget,
+} from './manifest-targets.js'
 import type {
     DiagnosticCode,
     DoctorDiagnostic,
     DoctorPackageReport,
 } from './types.js'
 
-export type DeclaredExportTarget = Readonly<{
-    conditions: ReadonlyArray<string>
-    exportKey: string
-    target: string
-}>
+export {
+    collectDeclaredExportTargets,
+    type DeclaredExportTarget,
+} from './manifest-targets.js'
 
 type DiagnosticInput = Readonly<{
     code: DiagnosticCode
@@ -32,6 +40,9 @@ type DiagnosticInput = Readonly<{
 }>
 
 type JsonRecord = Record<string, unknown>
+
+/** Entry fields that predate `exports` and are still consulted by older resolvers. */
+const LEGACY_ENTRY_FIELDS = ['main', 'module', 'types'] as const
 
 /**
  * Analyze one package manifest and its currently emitted filesystem targets.
@@ -105,51 +116,34 @@ export function analyzePackage(packageRootInput: string): DoctorPackageReport {
     }
 }
 
-/** Flatten string targets from a package exports value while preserving routing evidence. */
-export function collectDeclaredExportTargets(
-    exportsValue: unknown,
-): ReadonlyArray<DeclaredExportTarget> {
-    const targets: Array<DeclaredExportTarget> = []
-
-    if (isJsonRecord(exportsValue)) {
-        const entries = Object.entries(exportsValue)
-        const hasSubpathKeys = entries.some(([key]) => key.startsWith('.'))
-
-        if (hasSubpathKeys) {
-            for (const [exportKey, value] of entries) {
-                visitExportValue(value, exportKey, [], targets)
-            }
-            return targets
-        }
-    }
-
-    visitExportValue(exportsValue, '.', [], targets)
-    return targets
-}
-
+/**
+ * Validate every declared bin target, then ask the extra question a bin has to answer.
+ *
+ * Existence and path shape come from the shared schema like any other target; the executable bit is layered on top as a
+ * Doctor refinement, because it is not a fact about a path but about whether a consumer's shell could run it. It is
+ * asked only of targets that resolved, since "not executable" is not a useful thing to say about a file that is not
+ * there.
+ */
 function analyzeBinTargets(
     manifest: Record<string, unknown>,
     packageName: string,
     packageRoot: string,
 ): ReadonlyArray<DoctorDiagnostic> {
-    const binTargets = getBinTargets(manifest.bin, packageName)
     const missing: Array<string> = []
     const notExecutable: Array<string> = []
 
-    for (const [binName, target] of binTargets) {
-        const resolvedTarget = path.resolve(packageRoot, target)
-        const evidence = `${binName} -> ${target}`
+    for (const declared of collectBinTargets(manifest['bin'], packageName)) {
+        const verdict = validateDeclaredTarget(packageRoot, declared.target, {
+            requireRelativeSpecifier: false,
+        })
 
-        if (!existsSync(resolvedTarget)) {
-            missing.push(evidence)
+        if (verdict.kind !== 'valid') {
+            missing.push(describeUnusableTarget(declared, verdict))
             continue
         }
 
-        if (
-            process.platform !== 'win32' &&
-            (statSync(resolvedTarget).mode & 0o111) === 0
-        ) {
-            notExecutable.push(evidence)
+        if (isNotExecutable(verdict.resolvedPath)) {
+            notExecutable.push(formatTargetEvidence(declared))
         }
     }
 
@@ -182,39 +176,50 @@ function analyzeBinTargets(
     return diagnostics
 }
 
+/**
+ * Validate every string leaf of the `exports` map.
+ *
+ * Two findings rather than one, and the split is deliberate: a target that is malformed or reaches outside the package
+ * is wrong as declared and stays wrong however the package is built, while a target that is merely absent describes the
+ * tree as it stands right now and may only mean the package has not been built yet. Collapsing them would make an
+ * unbuilt package look broken and a broken one look unbuilt.
+ */
 function analyzeExportTargets(
     manifest: Record<string, unknown>,
     packageName: string,
     packageRoot: string,
 ): ReadonlyArray<DoctorDiagnostic> {
-    if (manifest.exports === undefined) return []
+    if (manifest['exports'] === undefined) return []
 
     const diagnostics: Array<DoctorDiagnostic> = []
     const missing: Array<string> = []
-    const invalid: Array<string> = []
+    const invalid: Array<string> = collectMalformedExportLeaves(
+        manifest['exports'],
+    ).map(
+        (leaf) =>
+            `package.json#${leaf.fieldPath} (target must be a string or null, not ${leaf.typeName})`,
+    )
 
-    for (const declared of collectDeclaredExportTargets(manifest.exports)) {
-        const evidence = formatExportTarget(declared)
+    for (const declared of collectDeclaredExportTargets(manifest['exports'])) {
+        const verdict = validateDeclaredTarget(packageRoot, declared.target, {
+            requireRelativeSpecifier: true,
+        })
 
-        if (declared.target.includes('*')) continue
-
-        if (!declared.target.startsWith('./')) {
-            invalid.push(`${evidence} (target must start with ./)`)
-            continue
+        switch (verdict.kind) {
+            case 'escapesPackageRoot':
+            case 'notRelativeSpecifier': {
+                invalid.push(describeUnusableTarget(declared, verdict))
+                break
+            }
+            case 'missing':
+            case 'unmatchedWildcard': {
+                missing.push(describeUnusableTarget(declared, verdict))
+                break
+            }
+            case 'valid': {
+                break
+            }
         }
-
-        const resolvedTarget = path.resolve(packageRoot, declared.target)
-        const relativeTarget = path.relative(packageRoot, resolvedTarget)
-
-        if (
-            relativeTarget.startsWith('..') ||
-            path.isAbsolute(relativeTarget)
-        ) {
-            invalid.push(`${evidence} (target leaves the package root)`)
-            continue
-        }
-
-        if (!existsSync(resolvedTarget)) missing.push(evidence)
     }
 
     if (invalid.length > 0) {
@@ -242,7 +247,7 @@ function analyzeExportTargets(
         )
     }
 
-    const rootExport = getRootExport(manifest.exports)
+    const rootExport = getRootExport(manifest['exports'])
 
     if (
         typeof manifest.types === 'string' &&
@@ -267,19 +272,30 @@ function analyzeExportTargets(
     return diagnostics
 }
 
+/**
+ * Validate the entry fields that predate `exports`, on the same shared schema.
+ *
+ * The `./` prefix is not required here: npm has always accepted a bare `dist/index.js` in these fields, and demanding
+ * the prefix would invent a rule and report packages that are correct. A wildcard is no longer skipped, so a pattern
+ * matching nothing is reported like any other target that is not there.
+ */
 function analyzeLegacyTargets(
     manifest: Record<string, unknown>,
     packageName: string,
     packageRoot: string,
 ): ReadonlyArray<DoctorDiagnostic> {
-    const missing = (['main', 'module', 'types'] as const).flatMap((field) => {
+    const missing = LEGACY_ENTRY_FIELDS.flatMap((field) => {
         const target = manifest[field]
+        if (typeof target !== 'string') return []
 
-        return typeof target === 'string' &&
-            !target.includes('*') &&
-            !existsSync(path.resolve(packageRoot, target))
-            ? [`package.json#${field} -> ${target}`]
-            : []
+        const declared: DeclaredTarget = { fieldPath: field, target }
+        const verdict = validateDeclaredTarget(packageRoot, target, {
+            requireRelativeSpecifier: false,
+        })
+
+        return verdict.kind === 'valid'
+            ? []
+            : [describeUnusableTarget(declared, verdict)]
     })
 
     return missing.length === 0
@@ -293,6 +309,29 @@ function analyzeLegacyTargets(
                   packageRoot,
               }),
           ]
+}
+
+/**
+ * Every declared bin target, across both shapes npm accepts.
+ *
+ * A string `bin` installs one command under the package's own name, so the manifest path is the field itself; a map
+ * names each command, and the path addresses the entry that declared it.
+ */
+function collectBinTargets(
+    bin: unknown,
+    packageName: string,
+): ReadonlyArray<DeclaredTarget> {
+    if (typeof bin === 'string') {
+        return [{ fieldPath: 'bin', target: bin }]
+    }
+
+    if (!isJsonRecord(bin)) return []
+
+    return Object.entries(bin).flatMap(([name, target]) =>
+        typeof target === 'string'
+            ? [{ fieldPath: `bin[${JSON.stringify(name)}]`, target }]
+            : [],
+    )
 }
 
 function createDiagnostic(input: DiagnosticInput): DoctorDiagnostic {
@@ -310,29 +349,36 @@ function createDiagnostic(input: DiagnosticInput): DoctorDiagnostic {
     }
 }
 
+/**
+ * Evidence for a target the package cannot use, leading with the exact manifest path that declared it.
+ *
+ * The reason is appended rather than folded into the diagnostic message because one diagnostic carries many targets,
+ * and they can be unusable for different reasons.
+ */
+function describeUnusableTarget(
+    declared: DeclaredExportTarget | DeclaredTarget,
+    verdict: Exclude<TargetVerdict, { kind: 'valid' }>,
+): string {
+    const evidence = formatTargetEvidence(declared)
+
+    switch (verdict.kind) {
+        case 'escapesPackageRoot': {
+            return `${evidence} (target leaves the package root)`
+        }
+        case 'missing': {
+            return evidence
+        }
+        case 'notRelativeSpecifier': {
+            return `${evidence} (target must start with ./)`
+        }
+        case 'unmatchedWildcard': {
+            return `${evidence} (wildcard matched no files)`
+        }
+    }
+}
+
 function formatCount(count: number, noun: string): string {
     return `${String(count)} ${noun}${count === 1 ? '' : 's'}`
-}
-
-function formatExportTarget(target: DeclaredExportTarget): string {
-    const conditions =
-        target.conditions.length === 0
-            ? 'default'
-            : target.conditions.join(' > ')
-
-    return `${target.exportKey} (${conditions}) -> ${target.target}`
-}
-
-function getBinTargets(
-    bin: unknown,
-    packageName: string,
-): ReadonlyArray<readonly [string, string]> {
-    if (typeof bin === 'string') return [[packageName, bin]]
-    if (!isJsonRecord(bin)) return []
-
-    return Object.entries(bin).flatMap(([name, target]) =>
-        typeof target === 'string' ? [[name, target] as const] : [],
-    )
 }
 
 function getRootExport(exportsValue: unknown): unknown {
@@ -404,6 +450,14 @@ function isDeclared(value: unknown): boolean {
 
 function isJsonRecord(value: unknown): value is JsonRecord {
     return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+/** Whether a resolved bin target lacks any executable bit, on platforms where that bit means anything. */
+function isNotExecutable(resolvedPath: string): boolean {
+    return (
+        process.platform !== 'win32' &&
+        (statSync(resolvedPath).mode & 0o111) === 0
+    )
 }
 
 /**
@@ -511,34 +565,4 @@ function readManifestJson(
     return isJsonRecord(decoded.data)
         ? { manifest: decoded.data, success: true }
         : { error: 'package.json must contain a JSON object', success: false }
-}
-
-function visitExportValue(
-    value: unknown,
-    exportKey: string,
-    conditions: ReadonlyArray<string>,
-    targets: Array<DeclaredExportTarget>,
-): void {
-    if (typeof value === 'string') {
-        targets.push({ conditions, exportKey, target: value })
-        return
-    }
-
-    if (Array.isArray(value)) {
-        value.forEach((item, index) => {
-            visitExportValue(
-                item,
-                exportKey,
-                [...conditions, `fallback[${String(index)}]`],
-                targets,
-            )
-        })
-        return
-    }
-
-    if (!isJsonRecord(value)) return
-
-    for (const [condition, target] of Object.entries(value)) {
-        visitExportValue(target, exportKey, [...conditions, condition], targets)
-    }
 }
