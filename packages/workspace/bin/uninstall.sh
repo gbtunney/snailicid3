@@ -34,11 +34,48 @@ unset BOOTSTRAP_CALLER_SOURCE
 # END SH BOOTSTRAP LOADER
 
 COMMAND_NAME="${COMMAND_NAME:-gbt-uninstall}"
-if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
-    log "Remove generated builds, dependency installs, caches, and lockfiles from a repository." "grey"
+REPO_DIR="${GBT_UNINSTALL_TEST_REPO_DIR:-$REPO_DIR}"
+REPAIR_LOCKFILE="false"
+RESET_LOCKFILE="false"
+
+usage() {
+    log "Remove generated builds, dependency installs, and caches from a repository." "grey"
     spacer 1
-    log "Usage: $COMMAND_NAME" "white"
-    exit 0
+    log "Usage: $COMMAND_NAME [--repair-lockfile | --reset-lockfile]" "white"
+    spacer 1
+    log "  (default)           remove node_modules and caches; keep pnpm-lock.yaml so the" "grey"
+    log "                      next install restores the locked dependency graph" "grey"
+    log "  --repair-lockfile   reconcile pnpm-lock.yaml with the current manifests without" "grey"
+    log "                      deleting it first" "grey"
+    log "  --reset-lockfile    delete pnpm-lock.yaml so the next install resolves a new" "grey"
+    log "                      dependency graph" "grey"
+}
+
+while [[ "$#" -gt 0 ]]; do
+    case "$1" in
+        -h | --help)
+            usage
+            exit 0
+            ;;
+        --repair-lockfile)
+            REPAIR_LOCKFILE="true"
+            ;;
+        --reset-lockfile)
+            RESET_LOCKFILE="true"
+            ;;
+        *)
+            err "unknown option: $1"
+            spacer 1
+            usage
+            exit 1
+            ;;
+    esac
+
+    shift
+done
+
+if [[ "$REPAIR_LOCKFILE" == "true" && "$RESET_LOCKFILE" == "true" ]]; then
+    die "--repair-lockfile and --reset-lockfile cannot be combined"
 fi
 
 remove_if_exists() {
@@ -133,10 +170,33 @@ fi
 section "remove node_modules"
 remove_node_modules
 
-section "remove lockfiles"
-remove_if_exists "$REPO_DIR/pnpm-lock.yaml"
+section "lockfile"
+
+if [[ "$RESET_LOCKFILE" == "true" ]]; then
+    warn "resetting pnpm-lock.yaml; the next install resolves a new dependency graph"
+    remove_if_exists "$REPO_DIR/pnpm-lock.yaml"
+elif [[ -f "$REPO_DIR/pnpm-lock.yaml" ]]; then
+    success "preserved: $REPO_DIR/pnpm-lock.yaml"
+else
+    info "no pnpm-lock.yaml found"
+fi
+
 remove_if_exists "$REPO_DIR/package-lock.json"
 remove_if_exists "$REPO_DIR/yarn.lock"
+
+if [[ "$REPAIR_LOCKFILE" == "true" ]]; then
+    section "repair lockfile"
+
+    if command -v pnpm > /dev/null 2>&1; then
+        step "reconciling pnpm-lock.yaml with current manifests"
+        (
+            cd "$REPO_DIR"
+            pnpm install --lockfile-only || warn "lockfile repair failed"
+        )
+    else
+        warn "pnpm not found; skipping lockfile repair"
+    fi
+fi
 
 section "done"
 success "uninstall cleanup complete"
