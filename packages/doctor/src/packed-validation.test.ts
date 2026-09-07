@@ -91,6 +91,16 @@ describe('packed candidate validation', () => {
         ).toContain('attw:NoResolution')
     }, 120_000)
 
+    it('does not send CommonJS consumers to the ESM file promised to import consumers', async () => {
+        const result = await withPackCandidate(
+            { packageRoot: createEsmFirstDualPackage() },
+            validatePackedCandidate,
+        )
+
+        expect(result.resolutions).toEqual(['node16-cjs', 'node16-esm'])
+        expect(attwFindings(result)).toEqual([])
+    }, 120_000)
+
     it('exposes the packed file inventory of the shared candidate', async () => {
         const candidate = createPackCandidate({
             packageRoot: createSourcePackage(),
@@ -168,6 +178,44 @@ function conditions(
         ['types', `./dist/${entry}.d.${format === 'cjs' ? 'cts' : 'ts'}`],
         ['default', `./dist/${entry}.${format === 'cjs' ? 'cjs' : 'js'}`],
     ])
+}
+
+function createEsmFirstDualPackage(): string {
+    const root = mkdtempSync(path.join(tmpdir(), 'doctor-pack-esm-first-'))
+    temporaryRoots.push(root)
+    write(
+        root,
+        'package.json',
+        JSON.stringify({
+            exports: {
+                '.': {
+                    import: {
+                        default: './dist/index.js',
+                        types: './types/index.d.ts',
+                    },
+                    require: {
+                        default: './dist/index.cjs',
+                        types: './types/index.d.cts',
+                    },
+                },
+                './package.json': './package.json',
+            },
+            files: ['dist', 'types'],
+            license: 'MIT',
+            main: './dist/index.cjs',
+            module: './dist/index.js',
+            name: '@fixture/esm-first',
+            packageManager: 'pnpm@10.30.2',
+            type: 'module',
+            types: './types/index.d.cts',
+            version: '1.0.0',
+        }),
+    )
+    write(root, 'dist/index.js', 'export const value = 42\n')
+    write(root, 'dist/index.cjs', 'exports.value = 42\n')
+    write(root, 'types/index.d.ts', 'export declare const value: number\n')
+    write(root, 'types/index.d.cts', 'export declare const value: number\n')
+    return root
 }
 
 function createSourcePackage(manifest: Record<string, unknown> = {}): string {

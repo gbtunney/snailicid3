@@ -1,2 +1,9 @@
 #!/usr/bin/env bash
-exec bash "$(dirname "$0")/../package-bin.sh" @snailicid3/logger snail-sh "$@"
+SOURCE="${BASH_SOURCE[0]}"
+while [[ -L "$SOURCE" ]]; do
+    SOURCE_DIR="$(CDPATH= cd -- "$(dirname -- "$SOURCE")" && pwd)"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ "$SOURCE" == /* ]] || SOURCE="$SOURCE_DIR/$SOURCE"
+done
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$SOURCE")" && pwd)"
+exec bash "$SCRIPT_DIR/../package-bin.sh" @snailicid3/logger snail-sh "$@"

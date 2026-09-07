@@ -162,28 +162,56 @@ describe('repository package export maps', () => {
         }
     })
 
-    it('B3 puts config and workspace declarations before imports', () => {
-        for (const relativePath of [
-            'packages/config/package.json',
-            'packages/workspace/package.json',
-        ]) {
-            const manifest = readRepositoryManifest(relativePath)
+    it('B3 puts config declarations before imports', () => {
+        const manifest = readRepositoryManifest('packages/config/package.json')
 
-            expect(collectRootExportTargets(manifest)).toEqual([
-                {
-                    conditions: ['types'],
-                    exportKey: '.',
-                    fieldPath: 'exports["."].types',
-                    target: './types/index.d.ts',
-                },
-                {
-                    conditions: ['import'],
-                    exportKey: '.',
-                    fieldPath: 'exports["."].import',
-                    target: './dist/index.js',
-                },
-            ])
-        }
+        expect(collectRootExportTargets(manifest)).toEqual([
+            {
+                conditions: ['types'],
+                exportKey: '.',
+                fieldPath: 'exports["."].types',
+                target: './types/index.d.ts',
+            },
+            {
+                conditions: ['import'],
+                exportKey: '.',
+                fieldPath: 'exports["."].import',
+                target: './dist/index.js',
+            },
+        ])
+    })
+
+    it('B3b routes workspace root declarations and runtime by resolution mode', () => {
+        const manifest = readRepositoryManifest(
+            'packages/workspace/package.json',
+        )
+
+        expect(collectRootExportTargets(manifest)).toEqual([
+            {
+                conditions: ['import', 'types'],
+                exportKey: '.',
+                fieldPath: 'exports["."].import.types',
+                target: './types/index.d.ts',
+            },
+            {
+                conditions: ['import', 'default'],
+                exportKey: '.',
+                fieldPath: 'exports["."].import.default',
+                target: './dist/index.js',
+            },
+            {
+                conditions: ['require', 'types'],
+                exportKey: '.',
+                fieldPath: 'exports["."].require.types',
+                target: './types/index.d.cts',
+            },
+            {
+                conditions: ['require', 'default'],
+                exportKey: '.',
+                fieldPath: 'exports["."].require.default',
+                target: './dist/index.cjs',
+            },
+        ])
     })
 
     it('B4 exposes cli-app declarations before its ESM entry', () => {
