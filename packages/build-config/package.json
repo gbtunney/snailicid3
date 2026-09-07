@@ -59,38 +59,43 @@
         "bundler"
     ],
     "type": "module",
-    "main": "./dist/index.js",
     "types": "./types/index.d.ts",
     "exports": {
         ".": {
-            "types": "./types/index.d.ts",
-            "import": "./dist/index.js",
-            "default": "./dist/index.js"
+            "import": {
+                "types": "./types/index.d.ts",
+                "default": "./dist/index.js"
+            }
         },
         "./tsdown": {
-            "types": "./types/adapters/tsdown/index.d.ts",
-            "import": "./dist/adapters/tsdown/index.js",
-            "default": "./dist/adapters/tsdown/index.js"
+            "import": {
+                "types": "./types/adapters/tsdown/index.d.ts",
+                "default": "./dist/adapters/tsdown/index.js"
+            }
         },
         "./vite": {
-            "types": "./types/adapters/vite/index.d.ts",
-            "import": "./dist/adapters/vite/index.js",
-            "default": "./dist/adapters/vite/index.js"
+            "import": {
+                "types": "./types/adapters/vite/index.d.ts",
+                "default": "./dist/adapters/vite/index.js"
+            }
         },
         "./vitest": {
-            "types": "./types/vitest/index.d.ts",
-            "import": "./dist/vitest/index.js",
-            "default": "./dist/vitest/index.js"
+            "import": {
+                "types": "./types/vitest/index.d.ts",
+                "default": "./dist/vitest/index.js"
+            }
         },
         "./plan": {
-            "types": "./types/build/plan.d.ts",
-            "import": "./dist/build/plan.js",
-            "default": "./dist/build/plan.js"
+            "import": {
+                "types": "./types/build/plan.d.ts",
+                "default": "./dist/build/plan.js"
+            }
         },
         "./banner": {
-            "types": "./types/build/banner.d.ts",
-            "import": "./dist/build/banner.js",
-            "default": "./dist/build/banner.js"
+            "import": {
+                "types": "./types/build/banner.d.ts",
+                "default": "./dist/build/banner.js"
+            }
         },
         "./package.json": "./package.json"
     },
@@ -106,7 +111,7 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/gbtunney/snailicid3",
+        "url": "git+https://github.com/gbtunney/snailicid3.git",
         "directory": "packages/build-config"
     },
     "dependencies": {

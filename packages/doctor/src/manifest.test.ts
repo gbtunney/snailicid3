@@ -162,47 +162,31 @@ describe('repository package export maps', () => {
         }
     })
 
-    it('B3 puts config declarations before imports', () => {
-        const manifest = readRepositoryManifest('packages/config/package.json')
-
-        expect(collectRootExportTargets(manifest)).toEqual([
-            {
-                conditions: ['types'],
-                exportKey: '.',
-                fieldPath: 'exports["."].types',
-                target: './types/index.d.ts',
-            },
-            {
-                conditions: ['import'],
-                exportKey: '.',
-                fieldPath: 'exports["."].import',
-                target: './dist/index.js',
-            },
-        ])
-    })
-
-    it('B3b routes workspace declarations through its ESM-only root', () => {
-        const manifest = readRepositoryManifest(
+    it('B3 routes config and workspace declarations through their ESM-only roots', () => {
+        for (const relativePath of [
+            'packages/config/package.json',
             'packages/workspace/package.json',
-        )
+        ]) {
+            const manifest = readRepositoryManifest(relativePath)
 
-        // Workspace publishes no CommonJS entry, so its root has one branch and the declaration sits inside it
-        // rather than beside it as a bare condition.
-        expect(collectRootExportTargets(manifest)).toEqual([
-            {
-                conditions: ['import', 'types'],
-                exportKey: '.',
-                fieldPath: 'exports["."].import.types',
-                target: './types/index.d.ts',
-            },
-            {
-                conditions: ['import', 'default'],
-                exportKey: '.',
-                fieldPath: 'exports["."].import.default',
-                target: './dist/index.js',
-            },
-        ])
-        expect(manifest['main']).toBeUndefined()
+            // Neither publishes a CommonJS entry, so the root has one branch and the declaration sits inside it
+            // rather than beside it as a bare condition a CommonJS consumer would match.
+            expect(collectRootExportTargets(manifest)).toEqual([
+                {
+                    conditions: ['import', 'types'],
+                    exportKey: '.',
+                    fieldPath: 'exports["."].import.types',
+                    target: './types/index.d.ts',
+                },
+                {
+                    conditions: ['import', 'default'],
+                    exportKey: '.',
+                    fieldPath: 'exports["."].import.default',
+                    target: './dist/index.js',
+                },
+            ])
+            expect(manifest['main']).toBeUndefined()
+        }
     })
     it('B4 exposes cli-app declarations before its ESM entry', () => {
         const manifest = readRepositoryManifest('packages/cli-app/package.json')
