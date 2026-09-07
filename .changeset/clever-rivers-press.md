@@ -9,6 +9,6 @@ Config compatibility-bin shims now resolve their physical package script before 
 owning package, so package-manager-created `.bin` symlinks work under both npm and pnpm installed
 layouts.
 
-Workspace no longer advertises legacy runtime fallback fields for its ESM-only root entry. The
+Workspace no longer advertises legacy runtime fallback fields for its dual ESM/CJS root entry. The
 public runtime contract is the package `exports` map, which prevents CommonJS resolution from being
 pointed at an ES module.
