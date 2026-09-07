@@ -1,5 +1,64 @@
 # @snailicid3/build-config
 
+## 0.2.0
+
+### Minor Changes
+
+- 7d2a2de: Make package validation impossible from a build.
+
+  The tsdown adapter now forces `publint`, `attw` and `unused` off, and forces `exports` off. The
+  first three are package validation — Doctor's question, asked of a packed artifact — and running
+  them from a build fails builds for reasons the build did not cause. They are forced rather than
+  left to tsdown's defaults, which already agree today: a default can change under a tsdown upgrade
+  or a merged user config, while an explicit `false` is a decision the adapter states.
+
+  `exports` is a write switch rather than a validation one. tsdown's exports feature rewrites the
+  `exports` field of `package.json` to point at generated files, and the manifest here is
+  hand-authored — an input to the build, never an output of it. This is unrelated to the build
+  plan's own `exports` flag, which only selects entries for `toPackageExportsPlan`.
+
+  **Breaking:** the historical `lint` entry option is removed, along with its mapping to tsdown's
+  `report`. It appeared in the `BuildPlanEntryBase` and `BuildPlanEntryInput` public types, so a
+  consumer still passing it will see a type error; the value was silently ignored at runtime by the
+  schema either way. Reporting is now the adapter's own decision and is forced off, because tsdown
+  defaults it on and every build plan here had turned it off for the memory errors in #82.
+
+  The canonical package identity to banner path is unchanged.
+
+### Patch Changes
+
+- e3106fc: Fix packed-consumer release blockers found by the isolated npm and pnpm rehearsal.
+
+  Config compatibility-bin shims now resolve their physical package script through the symlink a
+  package manager creates in `node_modules/.bin` before delegating to the owning package.
+  `dirname "$0"` resolved to `.bin` rather than to the Config script directory, so the delegating
+  helper beside it could not be found under an npm install.
+
+  Workspace, Config and Build Config declare ESM-only roots. Each was `type: module` with `main`
+  pointing at an ES module, and each root offered CommonJS a route to it. None has a CommonJS
+  consumer, so the routes are removed rather than reimplemented: `main` is dropped and every
+  JavaScript root and subpath is a single `import` condition carrying its own declarations. Config's
+  JSON asset subpaths are unchanged and stay reachable by every resolver.
+
+  **Breaking for Build Config.** Its root carried `default` beside `import`, and `default` is in the
+  condition set Node matches for `require()`. On Node >= 22.12 that route resolved and loaded, so
+  `require('@snailicid3/build-config')` did work — and it is being removed here in favour of an
+  explicit ESM-only contract. What is lost is worth naming precisely: this was `require(esm)`
+  compatibility, not an emitted CommonJS build. There is no `.cjs` output behind it. The route
+  resolved to the same ES module the `import` condition points at, threw `ERR_REQUIRE_ESM` on Node
+  below 22.12, would break on any top-level await entering the graph, and packed validation reported
+  it as `CJSResolvesToESM` for the root and all five adapter subpaths. Build Config is consumed from
+  ESM tsdown and vitest configuration, so nothing in this repository relied on it.
+
+  Workspace and Config lose nothing at runtime by comparison: their roots were `{ types, import }`,
+  which `require()` rejects outright with `ERR_PACKAGE_PATH_NOT_EXPORTED`. Only declaration
+  resolution reached them, which is what made them report `CJSResolvesToESM` — a CommonJS consumer
+  type-checked cleanly and then could not load the package at all.
+
+  Workspace also declares `sideEffects: false`, and all three now declare a full git repository URL.
+
+- @snailicid3/node-utils@0.2.0
+
 ## 0.1.0
 
 ### Minor Changes
