@@ -83,17 +83,25 @@ export async function validatePackedCandidate(
 }
 
 /**
- * Whether the packed manifest offers CommonJS consumers an entry point at all.
+ * Whether the packed manifest is reachable by a CommonJS-side resolver at all.
  *
- * Node's own precedence decides this, not the presence of build output. When `exports` is declared it is the whole
- * contract and `main` is never consulted, so reachability is decided inside it — see {@link reachesCommonJs}, which asks
- * what a CommonJS consumer can match rather than looking for `require`. With no `exports`, `main` is the entry and its
- * presence is the offer.
+ * The test is reachability by _any_ resolver a CommonJS consumer uses, which is broader than whether Node's `require()`
+ * can load the entry. Declaration resolution counts: TypeScript's CommonJS condition set includes `types`, so a root of
+ * `{ types, import }` type-checks from a `.cts` file even though `require()` of it fails outright with
+ * `ERR_PACKAGE_PATH_NOT_EXPORTED`. That asymmetry is the defect `CJSResolvesToESM` names — the type system tells a
+ * CommonJS consumer the package is fine and Node then refuses to load it — so such a package must be judged, not
+ * skipped. Deciding on `require()` alone would hide the most misleading shape of all.
  *
- * The distinction matters because ATTW judges the advertised contract. Asking `node16-cjs` of a package that offers no
- * CommonJS entry reports a resolution no consumer could ever perform — which is how a package ends up growing a
- * CommonJS surface purely to satisfy its own checker. Nothing is hidden by skipping it: a build output no `exports`
- * condition points at is unreachable, so there is no consumer contract to get wrong.
+ * Node's precedence still decides where to look. When `exports` is declared it is the whole contract and `main` is
+ * never consulted, so reachability is decided inside it — see {@link reachesCommonJs}, which asks what a CommonJS
+ * consumer can match rather than looking for `require`. With no `exports`, `main` is the entry and its presence is the
+ * offer.
+ *
+ * Skipping is therefore reserved for a package no CommonJS-side resolver can enter: neither its runtime nor its
+ * declarations resolve, which ATTW reports as `NoResolution` rather than as a defect. Judging that package anyway is
+ * how one ends up growing a CommonJS surface purely to satisfy its own checker. Nothing is hidden by skipping it —
+ * build output that no `exports` condition points at is unreachable to every resolver, so there is no consumer contract
+ * to get wrong.
  */
 function advertisesCommonJsEntry(manifest: unknown): boolean {
     if (typeof manifest !== 'object' || manifest === null) return false
