@@ -30,6 +30,7 @@
         "changeset:create": "pnpm changeset:prepare && pnpm exec gbt-changeset && pnpm api:report",
         "changeset:prepare": "pnpm run test && pnpm docs:build",
         "release:archive": "pnpm -r exec mkdir -p ./releases &&  pnpm -r --access public pack --pack-destination='./releases'",
+        "release:rehearse:packed-consumers": "pnpm exec tsx scripts/rehearse-pr270-packed-consumers.ts",
         "registry:start": "pnpm exec verdaccio",
         "\n========== INSPECT >> ==========": "",
         "inspect:nx": "pnpm nx:graph",

@@ -1,0 +1,39 @@
+name: Rehearse PR270 Packed Consumers
+
+on:
+    workflow_dispatch:
+    pull_request:
+        paths:
+            - '.github/workflows/rehearse-pr270-packed-consumers.yml'
+            - 'package.json'
+            - 'packages/**'
+            - 'pnpm-lock.yaml'
+            - 'scripts/rehearse-pr270-packed-consumers.ts'
+
+permissions:
+    contents: read
+
+env:
+    HUSKY: 0
+
+jobs:
+    rehearse:
+        name: packed npm and pnpm consumers
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
+              with:
+                  fetch-depth: 0
+
+            - name: Enable Corepack
+              shell: bash
+              run: corepack enable
+
+            - name: Install
+              shell: bash
+              run: pnpm install --frozen-lockfile
+
+            - name: Rehearse packed consumers
+              shell: bash
+              run: pnpm release:rehearse:packed-consumers
