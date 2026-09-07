@@ -29,8 +29,13 @@ export type PackedValidationResult = Readonly<{
  * `node10` is deliberately absent: legacy resolution cannot see `exports` at all, so every subpath of a modern package
  * reports as unresolvable. Including it by default would bury real findings under noise the package never promised to
  * avoid. A caller that does support legacy consumers asks for it explicitly.
+ *
+ * `node16-cjs` is included only for a package that actually offers a CommonJS entry — see
+ * {@link advertisesCommonJsEntry}.
  */
-const DEFAULT_RESOLUTIONS: ReadonlyArray<ResolutionKind> = [
+const ESM_RESOLUTIONS: ReadonlyArray<ResolutionKind> = ['node16-esm']
+
+const DUAL_RESOLUTIONS: ReadonlyArray<ResolutionKind> = [
     'node16-cjs',
     'node16-esm',
 ]
@@ -51,7 +56,7 @@ export async function validatePackedCandidate(
     candidate: PackCandidate,
     options: PackedValidationOptions = {},
 ): Promise<PackedValidationResult> {
-    const resolutions = options.resolutions ?? DEFAULT_RESOLUTIONS
+    const resolutions = options.resolutions ?? defaultResolutions(candidate)
     const [publintResult, attwResult] = await Promise.all([
         runPublint(candidate),
         runAttw(candidate, resolutions),
@@ -72,6 +77,29 @@ export async function validatePackedCandidate(
         publint: publintResult.outcome,
         resolutions,
     }
+}
+
+/**
+ * Whether the packed manifest offers CommonJS consumers an entry point at all.
+ *
+ * Node's own precedence decides this, not the presence of build output. When `exports` is declared it is the whole
+ * contract and `main` is never consulted, so a `require` condition is the only thing that can offer CommonJS; with no
+ * `exports`, `main` is the entry and its presence is the offer.
+ *
+ * The distinction matters because ATTW judges the advertised contract. Asking `node16-cjs` of a package that offers no
+ * CommonJS entry reports a resolution no consumer could ever perform — which is how a package ends up growing a
+ * CommonJS surface purely to satisfy its own checker. Nothing is hidden by skipping it: a build output no `exports`
+ * condition points at is unreachable, so there is no consumer contract to get wrong.
+ */
+function advertisesCommonJsEntry(manifest: unknown): boolean {
+    if (typeof manifest !== 'object' || manifest === null) return false
+
+    const fields = manifest as Record<string, unknown>
+    const exported = fields['exports']
+
+    return exported === undefined || exported === null
+        ? typeof fields['main'] === 'string'
+        : hasRequireCondition(exported)
 }
 
 function attwEvidence(problem: Problem): ReadonlyArray<string> {
@@ -105,6 +133,15 @@ function collectorFailure(
     }
 }
 
+/** The resolution kinds a candidate's own manifest says it supports. */
+function defaultResolutions(
+    candidate: PackCandidate,
+): ReadonlyArray<ResolutionKind> {
+    return advertisesCommonJsEntry(candidate.manifest)
+        ? DUAL_RESOLUTIONS
+        : ESM_RESOLUTIONS
+}
+
 function describe(error: unknown): string {
     return error instanceof Error ? error.message : String(error)
 }
@@ -115,6 +152,17 @@ function describeSubject(problem: Problem): string {
         readField(problem, 'typesFileName') ??
         readField(problem, 'fileName') ??
         'the package'
+    )
+}
+
+/** Whether any branch of an `exports` value routes CommonJS consumers somewhere. */
+function hasRequireCondition(value: unknown): boolean {
+    if (Array.isArray(value)) return value.some(hasRequireCondition)
+    if (typeof value !== 'object' || value === null) return false
+
+    return Object.entries(value).some(
+        ([condition, target]) =>
+            condition === 'require' || hasRequireCondition(target),
     )
 }
 

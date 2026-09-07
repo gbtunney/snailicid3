@@ -1,14 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { execFileSync } from 'node:child_process'
-import {
-    mkdirSync,
-    mkdtempSync,
-    readdirSync,
-    rmSync,
-    writeFileSync,
-} from 'node:fs'
-import { tmpdir } from 'node:os'
-import path from 'node:path'
 import {
     createReleasePlan,
     type CreateReleasePlanInput,
@@ -38,15 +28,6 @@ import {
 
 /** A dependency Doctor is expected to prove, kept valid so the artifact is never the reason a case fails. */
 const INTEGRITY = `sha512-${'a'.repeat(86)}==`
-const SUPPORTED_NODE_VERSION = { major: 22, minor: 12 }
-const PACKED_CONSUMER_PACKAGES = [
-    'types',
-    'utils',
-    'color',
-    'node-utils',
-    'logger',
-    'workspace',
-] as const
 
 /** One externally consumed document, paired with the schema an adapter validates it against. */
 type ContractDocument = Readonly<{
@@ -190,77 +171,6 @@ describe('release contract, through the public package API', () => {
         ])
     })
 
-    it('loads a public release-contract export through CommonJS after packed install', () => {
-        expect(isSupportedNodeVersion(process.versions.node)).toBe(true)
-
-        const root = mkdtempSync(
-            path.join(tmpdir(), 'workspace-packed-consumer-'),
-        )
-        const packDirectory = path.join(root, 'packs')
-        const consumerDirectory = path.join(root, 'consumer')
-
-        try {
-            mkdirSync(packDirectory)
-            mkdirSync(consumerDirectory)
-            writeFileSync(
-                path.join(consumerDirectory, 'package.json'),
-                JSON.stringify(
-                    {
-                        name: 'workspace-packed-consumer',
-                        private: true,
-                        type: 'commonjs',
-                    },
-                    null,
-                    2,
-                ),
-            )
-
-            const tarballs = PACKED_CONSUMER_PACKAGES.map((packageName) =>
-                packWorkspacePackage(packageName, packDirectory),
-            )
-
-            execFileSync(
-                process.execPath,
-                [
-                    resolvePackageManagerCli('npm'),
-                    'install',
-                    '--ignore-scripts',
-                    '--no-audit',
-                    '--no-fund',
-                    '--package-lock=false',
-                    '--cache',
-                    path.join(root, 'npm-cache'),
-                    ...tarballs,
-                ],
-                { cwd: consumerDirectory, stdio: 'pipe' },
-            )
-
-            const output = execFileSync(
-                process.execPath,
-                [
-                    '-e',
-                    [
-                        "const workspace = require('@snailicid3/workspace')",
-                        'const plan = workspace.createReleasePlan({ packages: [] })',
-                        'const valid = workspace.releasePlanSchema.safeParse(plan).success',
-                        'process.stdout.write(JSON.stringify({ schemaVersion: plan.schemaVersion, valid }))',
-                    ].join(';'),
-                ],
-                {
-                    cwd: consumerDirectory,
-                    encoding: 'utf8',
-                },
-            )
-
-            expect(JSON.parse(output)).toEqual({
-                schemaVersion: 1,
-                valid: true,
-            })
-        } finally {
-            rmSync(root, { force: true, recursive: true })
-        }
-    }, 180_000)
-
     describe.each(contractDocuments)('$name', ({ document, schema }) => {
         it('declares schemaVersion 1 and validates against its own schema', () => {
             expect(document['schemaVersion']).toBe(1)
@@ -335,57 +245,3 @@ describe('release contract, through the public package API', () => {
         })
     })
 })
-
-function isSupportedNodeVersion(version: string): boolean {
-    const [major = 0, minor = 0] = version.split('.').map(Number)
-
-    return (
-        major > SUPPORTED_NODE_VERSION.major ||
-        (major === SUPPORTED_NODE_VERSION.major &&
-            minor >= SUPPORTED_NODE_VERSION.minor)
-    )
-}
-
-function packWorkspacePackage(
-    packageName: (typeof PACKED_CONSUMER_PACKAGES)[number],
-    packDirectory: string,
-): string {
-    const packageRoot = path.resolve(
-        import.meta.dirname,
-        '..',
-        '..',
-        packageName,
-    )
-    const before = new Set(readdirSync(packDirectory))
-
-    execFileSync(
-        process.execPath,
-        [
-            resolvePackageManagerCli('pnpm'),
-            'pack',
-            '--pack-destination',
-            packDirectory,
-        ],
-        {
-            cwd: packageRoot,
-            stdio: 'pipe',
-        },
-    )
-
-    const [tarball] = readdirSync(packDirectory)
-        .filter((entry) => !before.has(entry))
-        .filter((entry) => entry.endsWith('.tgz'))
-
-    if (!tarball) {
-        throw new Error(`pnpm pack did not create a tarball for ${packageName}`)
-    }
-
-    return path.join(packDirectory, tarball)
-}
-
-function resolvePackageManagerCli(command: 'npm' | 'pnpm'): string {
-    const nodeRoot = path.resolve(path.dirname(process.execPath), '..')
-    const executable = command === 'npm' ? 'bin/npm-cli.js' : 'bin/pnpm.cjs'
-
-    return path.join(nodeRoot, 'lib', 'node_modules', command, executable)
-}

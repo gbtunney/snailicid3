@@ -181,11 +181,13 @@ describe('repository package export maps', () => {
         ])
     })
 
-    it('B3b routes workspace root declarations and runtime by resolution mode', () => {
+    it('B3b routes workspace declarations through its ESM-only root', () => {
         const manifest = readRepositoryManifest(
             'packages/workspace/package.json',
         )
 
+        // Workspace publishes no CommonJS entry, so its root has one branch and the declaration sits inside it
+        // rather than beside it as a bare condition.
         expect(collectRootExportTargets(manifest)).toEqual([
             {
                 conditions: ['import', 'types'],
@@ -199,21 +201,9 @@ describe('repository package export maps', () => {
                 fieldPath: 'exports["."].import.default',
                 target: './dist/index.js',
             },
-            {
-                conditions: ['require', 'types'],
-                exportKey: '.',
-                fieldPath: 'exports["."].require.types',
-                target: './types/index.d.cts',
-            },
-            {
-                conditions: ['require', 'default'],
-                exportKey: '.',
-                fieldPath: 'exports["."].require.default',
-                target: './dist/index.cjs',
-            },
         ])
+        expect(manifest['main']).toBeUndefined()
     })
-
     it('B4 exposes cli-app declarations before its ESM entry', () => {
         const manifest = readRepositoryManifest('packages/cli-app/package.json')
 
