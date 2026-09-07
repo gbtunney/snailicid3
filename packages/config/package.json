@@ -21,7 +21,7 @@
         "clean:nx": "nx run $npm_package_name:clean",
         "dev:nx": "nx run $npm_package_name:dev",
         "api:report:nx": "nx run $npm_package_name:api:report",
-        "demo:2": "pnpm exec snail-sh header '🐌 SNAIL BUILD' '50%'  '~'"
+        "demo:2": "pnpm exec snail-sh header '\ud83d\udc0c SNAIL BUILD' '50%'  '~'"
     },
     "bin": {
         "snail-sh": "./bin/workspace/snail-sh.sh",
@@ -88,12 +88,13 @@
         "access": "public"
     },
     "type": "module",
-    "main": "./dist/index.js",
     "types": "./types/index.d.ts",
     "exports": {
         ".": {
-            "types": "./types/index.d.ts",
-            "import": "./dist/index.js"
+            "import": {
+                "types": "./types/index.d.ts",
+                "default": "./dist/index.js"
+            }
         },
         "./prettier": "./dist/.prettierrc.json",
         "./markdownlint": "./dist/.markdownlint.json",
@@ -125,7 +126,7 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/gbtunney/snailicid3",
+        "url": "git+https://github.com/gbtunney/snailicid3.git",
         "directory": "packages/config"
     },
     "dependencies": {

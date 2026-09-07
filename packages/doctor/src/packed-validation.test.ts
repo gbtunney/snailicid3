@@ -91,6 +91,42 @@ describe('packed candidate validation', () => {
         ).toContain('attw:NoResolution')
     }, 120_000)
 
+    it('does not send CommonJS consumers to the ESM file promised to import consumers', async () => {
+        const result = await withPackCandidate(
+            { packageRoot: createEsmFirstDualPackage() },
+            validatePackedCandidate,
+        )
+
+        expect(result.resolutions).toEqual(['node16-cjs', 'node16-esm'])
+        expect(attwFindings(result)).toEqual([])
+    }, 120_000)
+
+    it('judges an ESM-only package only against the resolution it offers', async () => {
+        const packageRoot = createEsmOnlyPackage()
+        const [derived, forcedDual] = await Promise.all([
+            withPackCandidate({ packageRoot }, (candidate) =>
+                validatePackedCandidate(candidate),
+            ),
+            withPackCandidate({ packageRoot }, (candidate) =>
+                validatePackedCandidate(candidate, {
+                    resolutions: ['node16-cjs', 'node16-esm'],
+                }),
+            ),
+        ])
+
+        // The package offers no `require` condition and no `main`, so CommonJS resolution is not part of its
+        // contract and is not judged.
+        expect(derived.resolutions).toEqual(['node16-esm'])
+        expect(attwFindings(derived)).toEqual([])
+
+        // Asked for CommonJS anyway, ATTW reports what it must: there is nothing there to resolve. That is the
+        // finding a hardcoded dual profile produced, and the reason it pushed ESM-only packages to grow a
+        // CommonJS entry they had no consumer for.
+        expect(
+            attwFindings(forcedDual).flatMap((finding) => finding.evidence),
+        ).toContain('attw:NoResolution')
+    }, 120_000)
+
     it('exposes the packed file inventory of the shared candidate', async () => {
         const candidate = createPackCandidate({
             packageRoot: createSourcePackage(),
@@ -170,6 +206,63 @@ function conditions(
     ])
 }
 
+function createEsmFirstDualPackage(): string {
+    const root = mkdtempSync(path.join(tmpdir(), 'doctor-pack-esm-first-'))
+    temporaryRoots.push(root)
+    write(
+        root,
+        'package.json',
+        JSON.stringify({
+            exports: {
+                '.': {
+                    import: rootConditions('esm'),
+                    require: rootConditions('cjs'),
+                },
+                './package.json': './package.json',
+            },
+            files: ['dist', 'types'],
+            license: 'MIT',
+            main: './dist/index.cjs',
+            module: './dist/index.js',
+            name: '@fixture/esm-first',
+            packageManager: 'pnpm@10.30.2',
+            type: 'module',
+            types: './types/index.d.cts',
+            version: '1.0.0',
+        }),
+    )
+    write(root, 'dist/index.js', 'export const value = 42\n')
+    write(root, 'dist/index.cjs', 'exports.value = 42\n')
+    write(root, 'types/index.d.ts', 'export declare const value: number\n')
+    write(root, 'types/index.d.cts', 'export declare const value: number\n')
+    return root
+}
+
+function createEsmOnlyPackage(): string {
+    const root = mkdtempSync(path.join(tmpdir(), 'doctor-pack-esm-only-'))
+    temporaryRoots.push(root)
+    write(
+        root,
+        'package.json',
+        JSON.stringify({
+            exports: {
+                '.': { import: rootConditions('esm') },
+                './package.json': './package.json',
+            },
+            files: ['dist', 'types'],
+            license: 'MIT',
+            name: '@fixture/esm-only',
+            packageManager: 'pnpm@10.30.2',
+            type: 'module',
+            types: './types/index.d.ts',
+            version: '1.0.0',
+        }),
+    )
+    write(root, 'dist/index.js', 'export const value = 42\n')
+    write(root, 'types/index.d.ts', 'export declare const value: number\n')
+    return root
+}
+
 function createSourcePackage(manifest: Record<string, unknown> = {}): string {
     const root = mkdtempSync(path.join(tmpdir(), 'doctor-pack-source-'))
     temporaryRoots.push(root)
@@ -244,6 +337,20 @@ function existsPath(target: string): boolean {
     } catch {
         return false
     }
+}
+
+/**
+ * Root conditions in the order the resolver requires: `types` first, `default` last.
+ *
+ * Built with `Object.fromEntries` for the same reason {@link conditions} is — an object literal here would be sorted
+ * alphabetically by lint, and ATTW reports the resulting order as a fallback condition.
+ */
+function rootConditions(format: 'cjs' | 'esm'): Record<string, string> {
+    const extension = format === 'cjs' ? 'cts' : 'ts'
+    return Object.fromEntries([
+        ['types', `./types/index.d.${extension}`],
+        ['default', `./dist/index.${format === 'cjs' ? 'cjs' : 'js'}`],
+    ])
 }
 
 function write(root: string, file: string, contents: string): void {

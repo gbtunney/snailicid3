@@ -162,30 +162,32 @@ describe('repository package export maps', () => {
         }
     })
 
-    it('B3 puts config and workspace declarations before imports', () => {
+    it('B3 routes config and workspace declarations through their ESM-only roots', () => {
         for (const relativePath of [
             'packages/config/package.json',
             'packages/workspace/package.json',
         ]) {
             const manifest = readRepositoryManifest(relativePath)
 
+            // Neither publishes a CommonJS entry, so the root has one branch and the declaration sits inside it
+            // rather than beside it as a bare condition a CommonJS consumer would match.
             expect(collectRootExportTargets(manifest)).toEqual([
                 {
-                    conditions: ['types'],
+                    conditions: ['import', 'types'],
                     exportKey: '.',
-                    fieldPath: 'exports["."].types',
+                    fieldPath: 'exports["."].import.types',
                     target: './types/index.d.ts',
                 },
                 {
-                    conditions: ['import'],
+                    conditions: ['import', 'default'],
                     exportKey: '.',
-                    fieldPath: 'exports["."].import',
+                    fieldPath: 'exports["."].import.default',
                     target: './dist/index.js',
                 },
             ])
+            expect(manifest['main']).toBeUndefined()
         }
     })
-
     it('B4 exposes cli-app declarations before its ESM entry', () => {
         const manifest = readRepositoryManifest('packages/cli-app/package.json')
 
