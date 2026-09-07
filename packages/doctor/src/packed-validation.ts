@@ -33,6 +33,9 @@ export type PackedValidationResult = Readonly<{
  * `node16-cjs` is included only for a package that actually offers a CommonJS entry — see
  * {@link advertisesCommonJsEntry}.
  */
+/** Conditions a CommonJS consumer never matches, so a route behind one of them is closed to it. */
+const ESM_ONLY_CONDITIONS = new Set(['import', 'module'])
+
 const ESM_RESOLUTIONS: ReadonlyArray<ResolutionKind> = ['node16-esm']
 
 const DUAL_RESOLUTIONS: ReadonlyArray<ResolutionKind> = [
@@ -83,8 +86,9 @@ export async function validatePackedCandidate(
  * Whether the packed manifest offers CommonJS consumers an entry point at all.
  *
  * Node's own precedence decides this, not the presence of build output. When `exports` is declared it is the whole
- * contract and `main` is never consulted, so a `require` condition is the only thing that can offer CommonJS; with no
- * `exports`, `main` is the entry and its presence is the offer.
+ * contract and `main` is never consulted, so reachability is decided inside it — see {@link reachesCommonJs}, which asks
+ * what a CommonJS consumer can match rather than looking for `require`. With no `exports`, `main` is the entry and its
+ * presence is the offer.
  *
  * The distinction matters because ATTW judges the advertised contract. Asking `node16-cjs` of a package that offers no
  * CommonJS entry reports a resolution no consumer could ever perform — which is how a package ends up growing a
@@ -99,7 +103,7 @@ function advertisesCommonJsEntry(manifest: unknown): boolean {
 
     return exported === undefined || exported === null
         ? typeof fields['main'] === 'string'
-        : hasRequireCondition(exported)
+        : reachesCommonJs(rootEntry(exported))
 }
 
 function attwEvidence(problem: Problem): ReadonlyArray<string> {
@@ -155,26 +159,53 @@ function describeSubject(problem: Problem): string {
     )
 }
 
-/** Whether any branch of an `exports` value routes CommonJS consumers somewhere. */
-function hasRequireCondition(value: unknown): boolean {
-    if (Array.isArray(value)) return value.some(hasRequireCondition)
-    if (typeof value !== 'object' || value === null) return false
-
-    return Object.entries(value).some(
-        ([condition, target]) =>
-            condition === 'require' || hasRequireCondition(target),
-    )
-}
-
 function isTypedAnalysis(
     result: Awaited<ReturnType<typeof checkPackage>>,
 ): result is Analysis {
     return 'problems' in result
 }
 
+/**
+ * Whether any branch of an `exports` value is reachable by a CommonJS consumer.
+ *
+ * Reachability is decided by what a condition _excludes_, not by looking for `require`. CommonJS resolution matches
+ * every condition except the ESM-only ones, so `default`, `node`, a bare `types` and a plain string target all route
+ * CommonJS somewhere — a package can offer CommonJS without ever writing `require`. Only a route gated entirely behind
+ * `import` is closed to it.
+ */
+function reachesCommonJs(value: unknown): boolean {
+    if (typeof value === 'string') return true
+    if (Array.isArray(value)) return value.some(reachesCommonJs)
+    if (typeof value !== 'object' || value === null) return false
+
+    return Object.entries(value).some(
+        ([condition, target]) =>
+            !ESM_ONLY_CONDITIONS.has(condition) && reachesCommonJs(target),
+    )
+}
+
 function readField(problem: Problem, field: string): string | undefined {
     const value = (problem as unknown as Record<string, unknown>)[field]
     return typeof value === 'string' ? value : undefined
+}
+
+/**
+ * The `exports` branch describing the package's own entry point.
+ *
+ * A subpath map is addressed by its `"."` key; anything else is the root's condition set directly. Only the root
+ * decides whether CommonJS consumers are offered an entry, because a subpath cannot be one: every package exposes
+ * `"./package.json"` as a plain string, and reading that as a CommonJS offer would classify every ESM-only package as
+ * dual.
+ */
+function rootEntry(exported: unknown): unknown {
+    if (typeof exported !== 'object' || exported === null) return exported
+    if (Array.isArray(exported)) return exported
+
+    const entries = exported as Record<string, unknown>
+
+    return Object.keys(entries).some((key) => key.startsWith('.'))
+        ? entries['.']
+        : entries
 }
 
 async function runAttw(
