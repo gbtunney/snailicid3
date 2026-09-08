@@ -1,5 +1,20 @@
 # @snailicid3/workspace
 
+## 0.2.1
+
+### Patch Changes
+
+- 72b02dc: - Updated `uninstall.sh` script in `@snailicid3/workspace` to preserve `pnpm-lock.yaml`
+  by default during cleanup. Added two new flags:
+  - `--reset-lockfile`: Deletes `pnpm-lock.yaml` to force re-resolution of dependencies.
+  - `--repair-lockfile`: Reconciles the lockfile with current manifests via
+    `pnpm install --lockfile-only`.
+  - Improved help text to clarify the behavior of each mode.
+  - Added tests to ensure correct behavior for default and flag-based runs.
+- @snailicid3/logger@0.1.0
+  - @snailicid3/node-utils@0.2.0
+  - @snailicid3/utils@0.1.0
+
 ## 0.2.0
 
 ### Minor Changes
