@@ -12,7 +12,9 @@ on:
 
 concurrency:
     group: pr-${{ github.event.pull_request.number || github.ref_name }}
-    cancel-in-progress: true
+    # New PR runs may supersede stale validation. Reruns increment run_attempt,
+    # so they queue instead of cancelling the healthy run already in this group.
+    cancel-in-progress: ${{ github.event_name == 'pull_request' && github.run_attempt == '1' }}
 
 permissions:
     contents: read
@@ -40,33 +42,20 @@ jobs:
                   git status --short
                   git rev-parse --verify HEAD
 
-    detect:
-        name: detect release state
-        uses: gbtunney/snailicid3-actions/.github/workflows/call-detect-release-state.yml@v1
+    # A pull request does exactly one thing about releases: run the canonical
+    # release plan read-only and report it. call-release-observe.yml declares
+    # contents: read and no secrets, so a PR cannot publish even by accident,
+    # and there is no phase-dependent branching here to get wrong.
+    release_observe:
+        name: release plan (observe)
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-release-observe.yml@v2
         with:
             ref: ${{ github.event.pull_request.head.sha || github.sha }}
+            adapter_ref: v2
 
-    pending_changeset:
-        name: pending changeset
-        needs: detect
-        if: ${{ needs.detect.outputs.should_version == 'true' }}
-        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@v1
-        with:
-            checkout_ref: ${{ github.event_name == 'pull_request' && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.ref }}
-            mode: abort_on_error
-            check_mode: check
-            lockfile_mode: frozen
-            build_mode: abort_on_error
-            test_mode: abort_on_error
-            docs_mode: abort_on_error
-            api_report_mode: update
-            require_clean_repo: true
-
-    pending_release:
-        name: pending release
-        needs: detect
-        if: ${{ needs.detect.outputs.should_publish == 'true' }}
-        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@v1
+    validate:
+        name: validate
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@v2
         with:
             checkout_ref: ${{ github.event_name == 'pull_request' && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.ref }}
             mode: abort_on_error
@@ -78,28 +67,13 @@ jobs:
             api_report_mode: check
             require_clean_repo: true
 
-    main:
-        name: main
-        needs: detect
-        if: ${{ needs.detect.outputs.should_skip == 'true' }}
-        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@v1
-        with:
-            checkout_ref: ${{ github.event_name == 'pull_request' && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.ref }}
-            mode: abort_on_error
-            check_mode: check
-            lockfile_mode: frozen
-            build_mode: abort_on_error
-            test_mode: abort_on_error
-            docs_mode: skip
-            require_clean_repo: true
-
     required:
         name: required
         runs-on: ubuntu-latest
-        needs: [merge_main, detect, pending_changeset, pending_release, main]
+        needs: [merge_main, release_observe, validate]
         if: ${{ always() }}
         steps:
-            - name: Require selected PR check phase to pass
+            - name: Require PR checks to pass
               shell: bash
               run: |
                   set -euo pipefail
@@ -110,32 +84,22 @@ jobs:
                     exit 1
                   fi
 
-                  if [[ "${{ needs.detect.result }}" != "success" ]]; then
-                    echo "::error::Release-state detection failed with result: ${{ needs.detect.result }}"
+                  if [[ "${{ needs.release_observe.result }}" != "success" ]]; then
+                    echo "::error::Release plan observation failed with result: ${{ needs.release_observe.result }}"
                     exit 1
                   fi
 
-                  phase=""
-                  result=""
-
-                  if [[ "${{ needs.detect.outputs.should_version }}" == "true" ]]; then
-                    phase="pending changeset"
-                    result="${{ needs.pending_changeset.result }}"
-                  elif [[ "${{ needs.detect.outputs.should_publish }}" == "true" ]]; then
-                    phase="pending release"
-                    result="${{ needs.pending_release.result }}"
-                  elif [[ "${{ needs.detect.outputs.should_skip }}" == "true" ]]; then
-                    phase="main"
-                    result="${{ needs.main.result }}"
-                  else
-                    echo "::error::Release-state detection did not select a PR check phase."
+                  if [[ "${{ needs.validate.result }}" != "success" ]]; then
+                    echo "::error::Validation pipeline failed with result: ${{ needs.validate.result }}"
                     exit 1
                   fi
 
-                  echo "Selected PR check phase: $phase"
-                  echo "Selected PR check result: $result"
-
-                  if [[ "$result" != "success" ]]; then
-                    echo "::error::Required PR check phase failed: $phase ($result)"
+                  # An observation that claimed publish authorization would mean
+                  # the read-only guarantee had broken somewhere upstream.
+                  if [[ "${{ needs.release_observe.outputs.should_publish }}" != "false" ]]; then
+                    echo "::error::A pull request observation reported should_publish='${{ needs.release_observe.outputs.should_publish }}'. A PR must never authorize publication."
                     exit 1
                   fi
+
+                  echo "Release phase: ${{ needs.release_observe.outputs.release_phase }} (observed, nothing authorized)"
+                  echo "Pending inventory: ${{ needs.release_observe.outputs.release_inventory_count }}"

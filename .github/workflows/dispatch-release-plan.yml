@@ -13,28 +13,19 @@ on:
                 default: ''
                 type: string
 
-            dry_run:
-                description: Print what would happen without mutating or publishing.
+            mode:
+                description: observe reports the release plan and changes nothing; release executes it
                 required: true
-                default: true
-                type: boolean
+                default: observe
+                type: choice
+                options:
+                    - observe
+                    - release
 
             allow_non_main:
-                description: Allow non-dry-run actions away from main.
+                description: Advanced. Allow a release away from main.
                 required: true
                 default: false
-                type: boolean
-
-            run_pipeline:
-                description: Run the validation pipeline for publish candidates.
-                required: true
-                default: true
-                type: boolean
-
-            upload_workspace_artifact:
-                description: Upload a workspace snapshot artifact for inspection/handoff.
-                required: true
-                default: true
                 type: boolean
 
             lockfile_mode:
@@ -67,18 +58,20 @@ jobs:
             actions: write
             id-token: write
             pull-requests: write
-        uses: gbtunney/snailicid3-actions/.github/workflows/call-release-plan.yml@v1
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-release-plan.yml@v2
         secrets:
             GH_PAT: ${{ secrets.GH_PAT }}
             NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         with:
             ref: ${{ inputs.ref }}
-            dry_run: ${{ inputs.dry_run }}
+            # Manual dispatch is the explicit escape hatch, so it names the mode
+            # outright rather than inheriting a repository policy. It works
+            # under release_mode: manual and release_mode: main alike.
+            mode: ${{ inputs.mode }}
             allow_non_main: ${{ inputs.allow_non_main }}
-            run_pipeline: ${{ inputs.run_pipeline }}
-            upload_workspace_artifact: ${{ inputs.upload_workspace_artifact }}
             lockfile_mode: ${{ inputs.lockfile_mode }}
             node_version: ${{ inputs.node_version }}
+            adapter_ref: v2
 
     summary:
         name: summarize release plan
@@ -97,6 +90,7 @@ jobs:
                     echo "- checked ref: \`${{ needs.release_plan.outputs.checked_ref }}\`"
                     echo "- release phase: \`${{ needs.release_plan.outputs.release_phase }}\`"
                     echo "- should_version: \`${{ needs.release_plan.outputs.should_version }}\`"
+                    echo "- execution: \`${{ needs.release_plan.outputs.execution }}\`"
                     echo "- should_publish: \`${{ needs.release_plan.outputs.should_publish }}\`"
                     echo "- should_skip: \`${{ needs.release_plan.outputs.should_skip }}\`"
                     echo "- publish_candidates: \`${{ needs.release_plan.outputs.publish_candidates }}\`"
