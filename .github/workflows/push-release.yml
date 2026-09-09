@@ -28,15 +28,26 @@ env:
 jobs:
     release_plan:
         name: release plan
-        uses: gbtunney/snailicid3-actions/.github/workflows/call-release-plan.yml@v1
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-release-plan.yml@v2
         secrets:
             GH_PAT: ${{ secrets.GH_PAT }}
             NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         with:
             ref: ''
-            dry_run: true
-            allow_non_main: false
-            run_pipeline: true
-            upload_workspace_artifact: true
+            # Your repository's release policy, and the only line most repos
+            # need to touch:
+            #
+            #   manual  nothing releases automatically. Pushes to main observe
+            #           and report; releases happen through Dispatch Release
+            #           Plan. This is the default.
+            #   main    a push to main runs the release policy automatically.
+            #
+            # Switching to `main` does not weaken any guard: the real-release
+            # guard, the branch restriction and the secret contract are
+            # unchanged, and a package version missing from the registry is
+            # still inventory rather than authorization.
+            release_mode: manual
+            # Advanced. Leave these alone unless you know you need them.
             lockfile_mode: frozen
             node_version: lts/*
+            adapter_ref: v2
