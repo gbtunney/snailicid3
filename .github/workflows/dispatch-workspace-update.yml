@@ -27,10 +27,7 @@ on:
 
             repair_lockfile:
                 description: >
-                    Update pnpm-lock.yaml as needed to satisfy the manifests
-                    (pnpm install --no-frozen-lockfile) and commit the result. This is not a reset:
-                    the existing lockfile is updated, not deleted and re-resolved from scratch.
-                    Leave off and a stale lockfile fails the run instead of being rewritten silently.
+                    Update pnpm-lock.yaml as needed to satisfy the manifests (pnpm install --no-frozen-lockfile) and commit the result. This is not a reset: the existing lockfile is updated, not deleted and re-resolved from scratch. Leave off and a stale lockfile fails the run instead of being rewritten silently.
                 required: true
                 default: false
                 type: boolean
