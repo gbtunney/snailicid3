@@ -27,7 +27,10 @@ on:
 
             repair_lockfile:
                 description: >
-                    Update pnpm-lock.yaml as needed to satisfy the manifests (pnpm install --no-frozen-lockfile) and commit the result. This is not a reset: the existing lockfile is updated, not deleted and re-resolved from scratch. Leave off and a stale lockfile fails the run instead of being rewritten silently.
+                    Update pnpm-lock.yaml as needed to satisfy the manifests
+                    (pnpm install --no-frozen-lockfile) and commit the result. This is not a reset:
+                    the existing lockfile is updated, not deleted and re-resolved from scratch.
+                    Leave off and a stale lockfile fails the run instead of being rewritten silently.
                 required: true
                 default: false
                 type: boolean
@@ -87,7 +90,7 @@ jobs:
     pipeline_workspace_update:
         name: Run selected pipeline routines
         needs: guard
-        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@v1
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-pipeline.yml@v2
         with:
             mode: report
             check_mode: ${{ inputs.run_fix && 'fix' || 'skip' }}
@@ -108,7 +111,7 @@ jobs:
             contents: write
             actions: read
             id-token: write
-        uses: gbtunney/snailicid3-actions/.github/workflows/call-apply-workspace-artifact.yml@v1
+        uses: gbtunney/snailicid3-actions/.github/workflows/call-apply-workspace-artifact.yml@v2
         secrets:
             GH_PAT: ${{ secrets.GH_PAT }}
         with:
